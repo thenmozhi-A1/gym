@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { 
-  Users, 
-  CreditCard, 
-  Clock, 
-  LogOut, 
-  Search, 
+import {
+  Users,
+  CreditCard,
+  Clock,
+  LogOut,
+  Search,
   Filter,
   AlertCircle
 } from "lucide-react";
@@ -27,7 +27,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const role = localStorage.getItem("userRole");
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    
+
     if (!isLoggedIn || role !== "ADMIN") {
       alert("Access Denied: Admins Only!");
       navigate("/login");
@@ -68,17 +68,17 @@ const AdminDashboard = () => {
     navigate("/login");
   };
 
-  const filteredUsers = users.filter(u => 
-    u.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredUsers = users.filter(u =>
+    u.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredPayments = payments.filter(p => 
+  const filteredPayments = payments.filter(p =>
     p.transactionId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.paymentStatus?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredAttendance = attendance.filter(a => 
+  const filteredAttendance = attendance.filter(a =>
     a.user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     a.attendanceDate?.toString().includes(searchTerm)
   );
@@ -93,7 +93,7 @@ const AdminDashboard = () => {
       const h = Math.floor(diff / 60);
       const m = diff % 60;
       return `${h}h ${m}m`;
-    } catch(e) { return "---"; }
+    } catch (e) { return "---"; }
   };
 
   return (
@@ -103,7 +103,7 @@ const AdminDashboard = () => {
           <div className="icon">GD</div>
           <span>GymDash Admin</span>
         </Logo>
-        
+
         <NavMenu>
           <NavItem active={activeTab === "users"} onClick={() => setActiveTab("users")}>
             <Users size={20} /> Users Management
@@ -127,13 +127,13 @@ const AdminDashboard = () => {
             <h1>{activeTab === "users" ? "Users Details" : activeTab === "payments" ? "Payments History" : "In/Out Timings"}</h1>
             <p>Manage and monitor your gym's {activeTab} activity.</p>
           </TitleArea>
-          
+
           <SearchArea>
             <div className="search-box">
               <Search size={18} />
-              <input 
-                type="text" 
-                placeholder={`Search ${activeTab}...`} 
+              <input
+                type="text"
+                placeholder={`Search ${activeTab}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -496,7 +496,7 @@ const StatusBadge = styled.span`
   font-weight: 700;
   text-transform: uppercase;
   background: ${props => {
-    switch(props.status) {
+    switch (props.status) {
       case "ACTIVE": case "SUCCESS": return "#e2f9ef";
       case "PENDING": return "#fff9e7";
       case "INACTIVE": case "FAILED": return "#fff5f5";
@@ -504,7 +504,7 @@ const StatusBadge = styled.span`
     }
   }};
   color: ${props => {
-    switch(props.status) {
+    switch (props.status) {
       case "ACTIVE": case "SUCCESS": return "#05cd99";
       case "PENDING": return "#ffbc11";
       case "INACTIVE": case "FAILED": return "#ff5b5b";
