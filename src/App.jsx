@@ -55,6 +55,7 @@ function LayoutWrapper() {
         <Route path="/dashboard/stats" element={<StatsPage />} />
         <Route path="/myprofile" element={<Myprofile />} />
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
+
       </Routes>
 
       {!hideLayout && <Footer />}
