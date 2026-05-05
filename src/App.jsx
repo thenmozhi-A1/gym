@@ -65,7 +65,7 @@ function LayoutWrapper() {
 
 function App() {
   return (
-    <Router basename="/gymsite">
+    <Router>
       <LayoutWrapper />
     </Router>
   );
