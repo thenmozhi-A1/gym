@@ -1,0 +1,121 @@
+/* ============================================================
+   Navbar.css — Fixed: Do NOT set display:none on .dropdown-menu
+   Bootstrap controls visibility via the .show class.
+   We only add hover behavior on desktop.
+   ============================================================ */
+
+/* ── General Nav Link Styles ── */
+.nav-link {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600;
+  padding: 8px 16px !important;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin: 0 4px;
+}
+
+.nav-link:hover, .nav-item.dropdown:hover > .nav-link {
+  color: #000 !important;
+  background-color: #ffc107 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+/* ── Desktop: open dropdowns on hover ── */
+@media (min-width: 992px) {
+  .nav-item.dropdown:hover > .dropdown-menu {
+    display: block !important;
+  }
+
+  /* Style the dropdown menu on desktop */
+  .nav-item > .dropdown-menu {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    min-width: 190px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    border: none;
+    overflow: hidden;
+    animation: fadeInDown 0.18s ease forwards;
+  }
+
+  /* Nested submenu — open to the right on hover */
+  .dropdown-submenu:hover > .dropdown-menu {
+    display: block !important;
+  }
+
+  .dropdown-submenu > .dropdown-menu {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    margin-top: 0;
+    min-width: 180px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    border: none;
+  }
+}
+
+/* ── Fade-in animation (desktop only) ── */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Mobile (≤991px) — Bootstrap click-to-open handles everything ── */
+@media (max-width: 991px) {
+  /* Dropdown appears inline (static), no absolute box-shadow */
+  .nav-item > .dropdown-menu.show {
+    position: static !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    animation: none !important;
+    background-color: #1e1e1e !important;
+    margin-top: 4px !important;
+  }
+
+  /* Give collapsed menu a border at the top */
+  .navbar-collapse.show {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 8px 0;
+  }
+
+  /* Spacing between nav items */
+  .navbar-nav .nav-item {
+    margin-bottom: 2px;
+  }
+
+  /* nav-link buttons (Workouts, Nutrition etc.) full width */
+  .navbar-nav .nav-link {
+    padding: 10px 16px;
+    border-radius: 6px;
+  }
+
+  /* Profile / Home buttons readable on mobile */
+  .navbar-nav .btn {
+    width: 100%;
+    text-align: left;
+    border-radius: 8px !important;
+    margin-top: 4px;
+    padding: 10px 16px;
+  }
+
+  /* Ensure dropdown items are visible and tappable */
+  .dropdown-item {
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8) !important; /* Visible text */
+  }
+
+  .dropdown-item:hover, .dropdown-item:focus {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffc107 !important;
+  }
+
+  /* Ensure nav links are visible */
+  .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+}

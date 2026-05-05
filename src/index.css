@@ -1,0 +1,159 @@
+/* =============================================
+   GymDash — Global Responsive Stylesheet
+   ============================================= */
+
+/* 1. Box-sizing reset & viewport meta */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Welcome banner ── */
+.welcome-container {
+  background: url("https://source.unsplash.com/1600x900/?gym,fitness") center/cover no-repeat;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+}
+
+/* ── Admin dashboard layout ── */
+.admin-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.main-content {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  transition: margin-left 0.3s ease;
+}
+
+.dashboard-container {
+  padding: 20px 16px 40px;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ── User dashboard hero ── */
+.userdashboard-container {
+  background-image: url('https://cdn.pixabay.com/photo/2022/02/21/12/01/weight-7026559_1280.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+/* ── Feature cards ── */
+.custom-feature-card {
+  --border-radius: 1.25rem;
+  --border-width: 0.5rem;
+  position: relative;
+  width: 100%;
+  max-width: 290px;
+  border-radius: var(--border-radius);
+  padding: 20px;
+  background: rgb(56, 56, 66);
+  color: white;
+}
+
+.custom-feature-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
+  box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
+  margin: calc(-1 * var(--border-width));
+  border-radius: calc(var(--border-radius) + var(--border-width));
+}
+
+/* =============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================= */
+
+/* ── Tablet (≤992px) ── */
+@media (max-width: 992px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .admin-dashboard {
+    flex-direction: column;
+  }
+}
+
+/* ── Mobile (≤768px) ── */
+@media (max-width: 768px) {
+  /* Typography scale-down */
+  h1 { font-size: 1.8rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.2rem !important; }
+
+  /* Dashboard hero padding */
+  .userdashboard-container {
+    padding: 20px !important;
+  }
+
+  /* Feature cards full-width on mobile */
+  .custom-feature-card {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Stacked flex rows */
+  .d-flex.flex-row {
+    flex-direction: column !important;
+  }
+
+  /* Buttons full-width on mobile */
+  .btn-lg {
+    width: 100% !important;
+    margin-bottom: 10px;
+  }
+
+  /* Dashboard container padding */
+  .dashboard-container {
+    padding: 12px 10px 30px;
+  }
+}
+
+/* ── Small Mobile (≤480px) ── */
+@media (max-width: 480px) {
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.3rem !important; }
+
+  .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Profile card avatar on tiny screens */
+  .rounded-circle {
+    width: 70px !important;
+    height: 70px !important;
+  }
+}

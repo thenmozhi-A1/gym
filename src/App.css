@@ -1,0 +1,61 @@
+/* ── User Dashboard background ── */
+.userdashboard-container {
+  background-image: url('https://cdn.pixabay.com/photo/2022/02/21/12/01/weight-7026559_1280.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+/* ── Admin Dashboard layout ── */
+.admin-dashboard {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.main-content {
+  margin-left: 250px; /* Match Sidebar width */
+  width: calc(100% - 250px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.dashboard-container {
+  padding: 20px 24px 40px;
+}
+
+/* Optional sticky header */
+.header {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Tablet (≤992px): hide sidebar, full width content ── */
+@media (max-width: 992px) {
+  .admin-dashboard {
+    flex-direction: column;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .dashboard-container {
+    padding: 16px 16px 30px;
+  }
+}
+
+/* ── Mobile (≤768px) ── */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 12px 10px 24px;
+  }
+
+  /* Tables: allow horizontal scroll inside container only */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
