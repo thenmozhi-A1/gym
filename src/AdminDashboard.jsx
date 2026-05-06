@@ -8,7 +8,11 @@ import {
   LogOut,
   Search,
   Filter,
-  AlertCircle
+  AlertCircle,
+  Trash2,
+  Edit3,
+  CheckCircle,
+  XCircle
 } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api";
@@ -60,6 +64,35 @@ const AdminDashboard = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    try {
+      const res = await fetch(`${API_BASE}/users/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setUsers(users.filter(u => u.id !== id));
+        alert("User deleted successfully!");
+      }
+    } catch (err) {
+      alert("Failed to delete user.");
+    }
+  };
+
+  const handleUpdateStatus = async (user, newStatus) => {
+    try {
+      const res = await fetch(`${API_BASE}/users/${user.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...user, status: newStatus })
+      });
+      if (res.ok) {
+        setUsers(users.map(u => u.id === user.id ? { ...u, status: newStatus } : u));
+        alert(`User status updated to ${newStatus}`);
+      }
+    } catch (err) {
+      alert("Failed to update status.");
     }
   };
 
@@ -138,9 +171,6 @@ const AdminDashboard = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="filter-btn">
-              <Filter size={18} /> Filter
-            </button>
           </SearchArea>
         </Header>
 
@@ -186,9 +216,9 @@ const AdminDashboard = () => {
                       <th>ID</th>
                       <th>Name</th>
                       <th>Email</th>
-                      <th>Phone</th>
                       <th>Status</th>
                       <th>Joined Date</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -197,9 +227,33 @@ const AdminDashboard = () => {
                         <td>#{user.id}</td>
                         <td className="fw-bold">{user.fullName}</td>
                         <td>{user.email}</td>
-                        <td>{user.phone || "N/A"}</td>
                         <td><StatusBadge status={user.status}>{user.status}</StatusBadge></td>
                         <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}</td>
+                        <td>
+                          <ActionGroup>
+                            <ActionButton 
+                              title="Set Active" 
+                              onClick={() => handleUpdateStatus(user, "ACTIVE")}
+                              className="success"
+                            >
+                              <CheckCircle size={18} />
+                            </ActionButton>
+                            <ActionButton 
+                              title="Set Inactive" 
+                              onClick={() => handleUpdateStatus(user, "INACTIVE")}
+                              className="warning"
+                            >
+                              <XCircle size={18} />
+                            </ActionButton>
+                            <ActionButton 
+                              title="Delete User" 
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="danger"
+                            >
+                              <Trash2 size={18} />
+                            </ActionButton>
+                          </ActionGroup>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -403,19 +457,6 @@ const SearchArea = styled.div`
     }
     svg { color: #a3aed0; }
   }
-  .filter-btn {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    color: #1b2559;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  }
 `;
 
 const StatsRow = styled.div`
@@ -460,6 +501,7 @@ const TableContainer = styled.div`
   padding: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.03);
   min-height: 400px;
+  overflow-x: auto;
 `;
 
 const Table = styled.table`
@@ -511,6 +553,27 @@ const StatusBadge = styled.span`
       default: return "#a3aed0";
     }
   }};
+`;
+
+const ActionGroup = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const ActionButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.success { color: #05cd99; &:hover { background: #e2f9ef; } }
+  &.warning { color: #ffbc11; &:hover { background: #fff9e7; } }
+  &.danger { color: #ff5b5b; &:hover { background: #fff5f5; } }
 `;
 
 const LoadingState = styled.div`
