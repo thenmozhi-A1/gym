@@ -12,7 +12,9 @@ import {
   Trash2,
   Edit3,
   CheckCircle,
-  XCircle
+  XCircle,
+  Menu as MenuIcon,
+  X
 } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api";
@@ -26,6 +28,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Role Protection
   useEffect(() => {
@@ -131,20 +134,28 @@ const AdminDashboard = () => {
 
   return (
     <DashboardContainer>
-      <Sidebar>
-        <Logo>
-          <div className="icon">GD</div>
-          <span>GymDash Admin</span>
-        </Logo>
+      <MobileHeader>
+        <div className="logo">GD</div>
+        <button onClick={() => setIsSidebarOpen(true)}><MenuIcon /></button>
+      </MobileHeader>
+
+      <Sidebar isOpen={isSidebarOpen}>
+        <div className="sidebar-header">
+          <Logo>
+            <div className="icon">GD</div>
+            <span>GymDash Admin</span>
+          </Logo>
+          <CloseButton onClick={() => setIsSidebarOpen(false)}><X /></CloseButton>
+        </div>
 
         <NavMenu>
-          <NavItem active={activeTab === "users"} onClick={() => setActiveTab("users")}>
+          <NavItem active={activeTab === "users"} onClick={() => { setActiveTab("users"); setIsSidebarOpen(false); }}>
             <Users size={20} /> Users Management
           </NavItem>
-          <NavItem active={activeTab === "payments"} onClick={() => setActiveTab("payments")}>
+          <NavItem active={activeTab === "payments"} onClick={() => { setActiveTab("payments"); setIsSidebarOpen(false); }}>
             <CreditCard size={20} /> Payment Records
           </NavItem>
-          <NavItem active={activeTab === "attendance"} onClick={() => setActiveTab("attendance")}>
+          <NavItem active={activeTab === "attendance"} onClick={() => { setActiveTab("attendance"); setIsSidebarOpen(false); }}>
             <Clock size={20} /> Attendance Logs
           </NavItem>
         </NavMenu>
@@ -153,6 +164,8 @@ const AdminDashboard = () => {
           <LogOut size={20} /> Logout
         </LogoutBtn>
       </Sidebar>
+
+      {isSidebarOpen && <Overlay onClick={() => setIsSidebarOpen(false)} />}
 
       <MainContent>
         <Header>
@@ -208,108 +221,103 @@ const AdminDashboard = () => {
           {loading ? (
             <LoadingState>Fetching records...</LoadingState>
           ) : (
-            <Table>
-              {activeTab === "users" && (
-                <>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Status</th>
-                      <th>Joined Date</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredUsers.map(user => (
-                      <tr key={user.id}>
-                        <td>#{user.id}</td>
-                        <td className="fw-bold">{user.fullName}</td>
-                        <td>{user.email}</td>
-                        <td><StatusBadge status={user.status}>{user.status}</StatusBadge></td>
-                        <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}</td>
-                        <td>
-                          <ActionGroup>
-                            <ActionButton 
-                              title="Set Active" 
-                              onClick={() => handleUpdateStatus(user, "ACTIVE")}
-                              className="success"
-                            >
-                              <CheckCircle size={18} />
-                            </ActionButton>
-                            <ActionButton 
-                              title="Set Inactive" 
-                              onClick={() => handleUpdateStatus(user, "INACTIVE")}
-                              className="warning"
-                            >
-                              <XCircle size={18} />
-                            </ActionButton>
-                            <ActionButton 
-                              title="Delete User" 
-                              onClick={() => handleDeleteUser(user.id)}
-                              className="danger"
-                            >
-                              <Trash2 size={18} />
-                            </ActionButton>
-                          </ActionGroup>
-                        </td>
+            <div className="responsive-table">
+              <Table>
+                {activeTab === "users" && (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </>
-              )}
+                    </thead>
+                    <tbody>
+                      {filteredUsers.map(user => (
+                        <tr key={user.id}>
+                          <td className="fw-bold">
+                            <div>{user.fullName}</div>
+                            <div style={{fontSize: '0.8rem', color: '#a3aed0', fontWeight: '400'}}>{user.email}</div>
+                          </td>
+                          <td><StatusBadge status={user.status}>{user.status}</StatusBadge></td>
+                          <td>
+                            <ActionGroup>
+                              <ActionButton 
+                                title="Set Active" 
+                                onClick={() => handleUpdateStatus(user, "ACTIVE")}
+                                className="success"
+                              >
+                                <CheckCircle size={18} />
+                              </ActionButton>
+                              <ActionButton 
+                                title="Set Inactive" 
+                                onClick={() => handleUpdateStatus(user, "INACTIVE")}
+                                className="warning"
+                              >
+                                <XCircle size={18} />
+                              </ActionButton>
+                              <ActionButton 
+                                title="Delete User" 
+                                onClick={() => handleDeleteUser(user.id)}
+                                className="danger"
+                              >
+                                <Trash2 size={18} />
+                              </ActionButton>
+                            </ActionGroup>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                )}
 
-              {activeTab === "payments" && (
-                <>
-                  <thead>
-                    <tr>
-                      <th>TXN ID</th>
-                      <th>User</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredPayments.map(payment => (
-                      <tr key={payment.id}>
-                        <td>{payment.transactionId}</td>
-                        <td>{payment.user?.fullName || "N/A"}</td>
-                        <td className="fw-bold">₹{payment.amount}</td>
-                        <td><StatusBadge status={payment.paymentStatus}>{payment.paymentStatus}</StatusBadge></td>
-                        <td>{payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "N/A"}</td>
+                {activeTab === "payments" && (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </>
-              )}
+                    </thead>
+                    <tbody>
+                      {filteredPayments.map(payment => (
+                        <tr key={payment.id}>
+                          <td className="fw-bold">{payment.user?.fullName || "N/A"}</td>
+                          <td className="fw-bold">₹{payment.amount}</td>
+                          <td><StatusBadge status={payment.paymentStatus}>{payment.paymentStatus}</StatusBadge></td>
+                          <td>{payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "N/A"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                )}
 
-              {activeTab === "attendance" && (
-                <>
-                  <thead>
-                    <tr>
-                      <th>User</th>
-                      <th>Date</th>
-                      <th>Check In</th>
-                      <th>Check Out</th>
-                      <th>Duration</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAttendance.map(log => (
-                      <tr key={log.id}>
-                        <td className="fw-bold">{log.user?.fullName}</td>
-                        <td>{log.attendanceDate}</td>
-                        <td className="text-success fw-bold">{log.checkInTime}</td>
-                        <td className="text-danger fw-bold">{log.checkOutTime || "Pending"}</td>
-                        <td>{calculateDuration(log.checkInTime, log.checkOutTime)}</td>
+                {activeTab === "attendance" && (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>User</th>
+                        <th>Date</th>
+                        <th>Check In</th>
+                        <th>Duration</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </>
-              )}
-            </Table>
+                    </thead>
+                    <tbody>
+                      {filteredAttendance.map(log => (
+                        <tr key={log.id}>
+                          <td className="fw-bold">{log.user?.fullName}</td>
+                          <td>{log.attendanceDate}</td>
+                          <td className="text-success fw-bold">{log.checkInTime}</td>
+                          <td>{calculateDuration(log.checkInTime, log.checkOutTime)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                )}
+              </Table>
+            </div>
           )}
           {!loading && activeTab === "users" && filteredUsers.length === 0 && <EmptyState>No users found.</EmptyState>}
           {!loading && activeTab === "payments" && filteredPayments.length === 0 && <EmptyState>No payments found.</EmptyState>}
@@ -326,6 +334,24 @@ const DashboardContainer = styled.div`
   min-height: 100vh;
   background: #f4f7fe;
   font-family: 'Inter', sans-serif;
+  @media (max-width: 992px) { flex-direction: column; }
+`;
+
+const MobileHeader = styled.div`
+  display: none;
+  @media (max-width: 992px) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 150;
+    .logo { background: #ffc107; color: #000; padding: 5px 10px; border-radius: 8px; font-weight: 800; }
+    button { background: none; border: none; cursor: pointer; color: #1b2559; }
+  }
 `;
 
 const Sidebar = styled.div`
@@ -337,14 +363,47 @@ const Sidebar = styled.div`
   padding: 30px 20px;
   position: fixed;
   height: 100vh;
-  z-index: 100;
+  z-index: 200;
+  transition: transform 0.3s ease;
+
+  @media (max-width: 992px) {
+    transform: ${props => props.isOpen ? "translateX(0)" : "translateX(-100%)"};
+    width: 250px;
+  }
+
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 50px;
+  }
+`;
+
+const CloseButton = styled.button`
+  display: none;
+  @media (max-width: 992px) {
+    display: block;
+    background: none;
+    border: none;
+    color: #a3aed0;
+    cursor: pointer;
+  }
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 190;
 `;
 
 const Logo = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 50px;
   .icon {
     background: #ffc107;
     color: #000;
@@ -413,6 +472,7 @@ const MainContent = styled.div`
   margin-left: 280px;
   flex: 1;
   padding: 40px;
+  @media (max-width: 992px) { margin-left: 0; padding: 20px; }
 `;
 
 const Header = styled.div`
@@ -420,24 +480,20 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 40px;
+  @media (max-width: 768px) { flex-direction: column; align-items: flex-start; gap: 20px; }
 `;
 
 const TitleArea = styled.div`
-  h1 {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #1b2559;
-    margin-bottom: 5px;
-  }
-  p {
-    color: #a3aed0;
-    font-weight: 500;
-  }
+  h1 { font-size: 2.2rem; font-weight: 800; color: #1b2559; margin-bottom: 5px; }
+  p { color: #a3aed0; font-weight: 500; }
+  @media (max-width: 480px) { h1 { font-size: 1.8rem; } }
 `;
 
 const SearchArea = styled.div`
   display: flex;
   gap: 15px;
+  width: 100%;
+  max-width: 400px;
   .search-box {
     background: #fff;
     border-radius: 50px;
@@ -447,14 +503,8 @@ const SearchArea = styled.div`
     gap: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     border: 1px solid #e2e8f0;
-    width: 300px;
-    input {
-      border: none;
-      outline: none;
-      width: 100%;
-      font-weight: 500;
-      color: #1b2559;
-    }
+    width: 100%;
+    input { border: none; outline: none; width: 100%; font-weight: 500; color: #1b2559; }
     svg { color: #a3aed0; }
   }
 `;
@@ -464,6 +514,8 @@ const StatsRow = styled.div`
   grid-template-columns: repeat(3, 1fr);
   gap: 25px;
   margin-bottom: 40px;
+  @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 768px) { grid-template-columns: 1fr; gap: 15px; }
 `;
 
 const StatCard = styled.div`
@@ -474,21 +526,12 @@ const StatCard = styled.div`
   align-items: center;
   gap: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-  
   .icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    svg { size: 24px; }
-    
+    width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
     &.users { background: #e7e9fb; color: #4318ff; }
     &.payments { background: #e2f9ef; color: #05cd99; }
     &.attendance { background: #ffede8; color: #ff5b5b; }
   }
-  
   .info {
     .label { color: #a3aed0; font-size: 0.9rem; font-weight: 600; display: block; }
     .value { color: #1b2559; font-size: 1.5rem; font-weight: 800; }
@@ -501,42 +544,21 @@ const TableContainer = styled.div`
   padding: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.03);
   min-height: 400px;
-  overflow-x: auto;
+  .responsive-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  @media (max-width: 480px) { padding: 15px; }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  
-  thead th {
-    text-align: left;
-    padding: 15px;
-    color: #a3aed0;
-    font-size: 0.85rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 1px solid #f4f7fe;
-  }
-  
-  tbody td {
-    padding: 20px 15px;
-    color: #1b2559;
-    font-size: 0.95rem;
-    border-bottom: 1px solid #f4f7fe;
-  }
-  
-  tbody tr:last-child td { border-bottom: none; }
-  
+  min-width: 400px;
+  thead th { text-align: left; padding: 15px; color: #a3aed0; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #f4f7fe; }
+  tbody td { padding: 20px 15px; color: #1b2559; font-size: 0.95rem; border-bottom: 1px solid #f4f7fe; }
   .fw-bold { font-weight: 700; }
 `;
 
 const StatusBadge = styled.span`
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
   background: ${props => {
     switch (props.status) {
       case "ACTIVE": case "SUCCESS": return "#e2f9ef";
@@ -555,54 +577,17 @@ const StatusBadge = styled.span`
   }};
 `;
 
-const ActionGroup = styled.div`
-  display: flex;
-  gap: 8px;
-`;
+const ActionGroup = styled.div` display: flex; gap: 8px; `;
 
 const ActionButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
+  background: none; border: none; cursor: pointer; padding: 5px; border-radius: 6px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
   &.success { color: #05cd99; &:hover { background: #e2f9ef; } }
   &.warning { color: #ffbc11; &:hover { background: #fff9e7; } }
   &.danger { color: #ff5b5b; &:hover { background: #fff5f5; } }
 `;
 
-const LoadingState = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 300px;
-  color: #a3aed0;
-  font-weight: 600;
-  font-size: 1.1rem;
-`;
-
-const ErrorMessage = styled.div`
-  background: #fff5f5;
-  color: #ff5b5b;
-  padding: 15px 20px;
-  border-radius: 12px;
-  margin-bottom: 25px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 600;
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 50px;
-  color: #a3aed0;
-  font-weight: 500;
-`;
+const LoadingState = styled.div` display: flex; justify-content: center; align-items: center; height: 300px; color: #a3aed0; font-weight: 600; `;
+const ErrorMessage = styled.div` background: #fff5f5; color: #ff5b5b; padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; font-weight: 600; `;
+const EmptyState = styled.div` text-align: center; padding: 50px; color: #a3aed0; font-weight: 500; `;
 
 export default AdminDashboard;
