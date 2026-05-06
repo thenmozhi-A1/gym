@@ -21,10 +21,10 @@ const Home = () => {
           <Badge>SINCE 2024</Badge>
           <h1>Elevating Fitness at <span className="text-warning">GymDash</span></h1>
           <p>
-            GymDash was founded with a single mission: to provide an inclusive, 
-            high-performance environment where every individual can unlock their 
-            true physical potential. From elite athletes to fitness beginners, 
-            our state-of-the-art facility and expert coaches are here to guide 
+            GymDash was founded with a single mission: to provide an inclusive,
+            high-performance environment where every individual can unlock their
+            true physical potential. From elite athletes to fitness beginners,
+            our state-of-the-art facility and expert coaches are here to guide
             your journey.
           </p>
           <div className="cta-row">
@@ -133,7 +133,7 @@ const Badge = styled.span`
 `;
 
 const HeroSection = styled.div`
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://img.freepik.com/free-photo/gym-background-with-barbells_23-2148293913.jpg?t=st=1714467000~exp=1714470600~hmac=6e5c5c0c9e6c5c0c9e6c5c0c9e6c5c0c9e6c5c0c9e6c5c0c9e6c5c0c9e6c5c0');
+  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://png.pngtree.com/thumb_back/fh260/background/20240329/pngtree-rows-of-dumbbells-in-the-gym-image_15662386.jpg');
   background-size: cover;
   background-position: center;
   min-height: 80vh;

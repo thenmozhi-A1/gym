@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { User, Mail, Lock, UserPlus, LogIn } from "lucide-react";
 
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ const Login = () => {
         localStorage.setItem("userRole", data.role); // Store role
 
         alert("Account created successfully! Welcome to GymDash 🎉");
-        navigate(data.role === "ADMIN" ? "/Admindashboard" : "/subscription");
+        navigate(data.role === "ADMIN" ? "/AdminDashboard" : "/subscription");
         window.location.reload();
 
       } else {
@@ -99,7 +99,7 @@ const Login = () => {
         localStorage.setItem("userEmail", data.email);
         localStorage.setItem("userRole", data.role); // Store role
 
-        navigate(data.role === "ADMIN" ? "/Admindashboard" : "/userdashboard");
+        navigate(data.role === "ADMIN" ? "/AdminDashboard" : "/userdashboard");
         window.location.reload();
       }
     } catch (err) {
