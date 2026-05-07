@@ -90,7 +90,7 @@ const StyledWrapper = styled.div`
     gap: 20px;
     justify-content: center;
     padding: 20px;
-    margin-top: 00px; 
+    margin-top: 80px; 
 }
 
   .card {
