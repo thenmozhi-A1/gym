@@ -42,7 +42,7 @@ const workouts = [
   {
     name: "Bulking",
     description: "Focus on muscle growth and high-calorie intake.",
-    image: "https://images.unsplash.com/photo-1583454110551-21f2fa2ec617?q=80&w=2070&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=2069&auto=format&fit=crop"
   },
   {
     name: "Weight Loss",
