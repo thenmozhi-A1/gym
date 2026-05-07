@@ -110,13 +110,9 @@ const Nutrition = () => {
       <header
         className="text-white text-center d-flex flex-column justify-content-center align-items-center"
         style={{
-          backgroundImage: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=2070&auto=format&fit=crop')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          height: "50vh",
+          background: "transparent",
+          height: "40vh",
           width: "100%",
-          borderRadius: "0 0 50px 50px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
         }}
       >
         <h1 className="display-2 fw-bold mb-3">Fuel Your Fitness</h1>
@@ -529,12 +525,13 @@ const Nutrition = () => {
 };
 
 const PageWrapper = styled.div`
-  background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
+  background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), 
               url("https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=2070&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   min-height: 100vh;
+  padding-bottom: 50px;
   color: #1a1a1a;
 `;
 
