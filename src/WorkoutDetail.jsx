@@ -250,20 +250,20 @@ const WorkoutDetail = () => {
 };
 
 const PageContainer = styled.div`
-  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+  background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
               url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   min-height: 100vh;
   padding-top: 100px;
-  color: #fff;
+  color: #1a1a1a;
 `;
 
 const BackButton = styled.button`
   background: transparent;
   border: none;
-  color: #fff;
+  color: #1a1a1a;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -289,12 +289,12 @@ const HeroSection = styled.div`
     display: grid;
     grid-template-columns: 1fr 1.2fr;
     gap: 50px;
-    background: rgba(26, 26, 26, 0.85);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
     border-radius: 30px;
     overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     
     @media (max-width: 992px) {
       grid-template-columns: 1fr;
@@ -318,12 +318,12 @@ const HeroSection = styled.div`
       font-size: 3rem;
       font-weight: 800;
       margin-bottom: 20px;
-      color: #fff;
+      color: #1a1a1a;
     }
 
     .desc {
       font-size: 1.1rem;
-      color: rgba(255, 255, 255, 0.8);
+      color: #444;
       line-height: 1.7;
       margin-bottom: 40px;
     }
@@ -348,7 +348,7 @@ const HeroSection = styled.div`
       }
       
       small {
-        color: rgba(255, 255, 255, 0.5);
+        color: #888;
         display: block;
         text-transform: uppercase;
         font-weight: 700;
@@ -390,13 +390,13 @@ const ContentSection = styled.div`
   }
 
   .instruction-card {
-    background: rgba(26, 26, 26, 0.85);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
     padding: 50px;
     border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
     margin-bottom: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
 
     h3 {
       font-size: 1.8rem;
@@ -418,7 +418,7 @@ const ContentSection = styled.div`
       padding-left: 60px;
       margin-bottom: 30px;
       font-size: 1.1rem;
-      color: rgba(255, 255, 255, 0.9);
+      color: #222;
       line-height: 1.6;
 
       &::before {
@@ -440,21 +440,23 @@ const ContentSection = styled.div`
   }
 
   .pro-tip-box {
-    background: #1a1a1a;
+    background: #008bf8;
     color: #fff;
     padding: 40px;
     border-radius: 25px;
+    box-shadow: 0 10px 20px rgba(0, 139, 248, 0.2);
     
     h4 {
-      color: #ffcc00;
+      color: #fff;
       margin-bottom: 15px;
+      font-weight: 700;
     }
     
     p {
       margin: 0;
       font-size: 1.05rem;
       line-height: 1.6;
-      opacity: 0.9;
+      opacity: 0.95;
     }
   }
 `;
@@ -463,12 +465,12 @@ const Sidebar = styled.div`
   .sticky-box {
     position: sticky;
     top: 120px;
-    background: rgba(26, 26, 26, 0.85);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
     padding: 40px;
     border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     text-align: center;
 
     h3 {
@@ -478,7 +480,7 @@ const Sidebar = styled.div`
     }
 
     p {
-      color: rgba(255, 255, 255, 0.7);
+      color: #444;
       margin-bottom: 30px;
     }
 
