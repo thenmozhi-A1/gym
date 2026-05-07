@@ -86,11 +86,16 @@ const StyledWrapper = styled.div`
   .workout-container {
     display: flex;
     flex-wrap: wrap;
-    background: #f0f0f0;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                url("https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=2070&auto=format&fit=crop");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     gap: 20px;
     justify-content: center;
-    padding: 20px;
-    margin-top: 80px; 
+    padding: 60px 20px;
+    margin-top: 56px; 
+    min-height: 100vh;
 }
 
   .card {
