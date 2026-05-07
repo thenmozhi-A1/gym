@@ -121,7 +121,7 @@ const workoutData = {
     target: "Whole Body Mass Gain",
     difficulty: "Intermediate",
     time: "60-90 mins",
-    image: "https://d2v5dzhdg4zhx3.cloudfront.net/web-assets/images/storypages/short/aimuscularavatargenerator/aimuscularavatargenerator/aimuscularavatargenerator/wepb/003.webp",
+    image: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=2069&auto=format&fit=crop",
     description: "Our Bulking program focuses on heavy compound lifts and high-volume isolation work to maximize muscle fiber recruitment and growth.",
     instructions: [
       "Focus on 8-12 repetitions per set for hypertrophy.",
@@ -137,7 +137,7 @@ const workoutData = {
     target: "Full Body, Cardiovascular System",
     difficulty: "All Levels",
     time: "45-60 mins",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDwsWvdS9F-TkDgcXWjlui5PweA9IpL68ing&s",
+    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop",
     description: "This circuit-based training is designed to keep your heart rate elevated while challenging your muscles, leading to maximum caloric burn.",
     instructions: [
       "Move from one exercise to the next with minimal rest (15-30 sec).",
@@ -250,7 +250,11 @@ const WorkoutDetail = () => {
 };
 
 const PageContainer = styled.div`
-  background: #f8f9fa;
+  background: linear-gradient(rgba(248, 249, 250, 0.8), rgba(248, 249, 250, 0.8)), 
+              url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   min-height: 100vh;
   padding-top: 100px;
   color: #333;
