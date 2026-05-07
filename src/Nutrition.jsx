@@ -135,7 +135,7 @@ const Nutrition = () => {
               </div>
               <h3 className="fw-bold mb-3">Protein</h3>
               <p className="text-muted">Essential for muscle growth and recovery. Aim for 1.6g-2.2g per kg of body weight.</p>
-            </div>
+            </GlassCard>
           </div>
           <div className="col-md-4">
             <GlassCard className="card h-100 p-4 transition-hover">
@@ -144,7 +144,7 @@ const Nutrition = () => {
               </div>
               <h3 className="fw-bold mb-3">Carbohydrates</h3>
               <p className="text-muted">The primary source of energy for intense workouts. Focus on complex carbs like oats and quinoa.</p>
-            </div>
+            </GlassCard>
           </div>
           <div className="col-md-4">
             <GlassCard className="card h-100 p-4 transition-hover">
@@ -153,7 +153,7 @@ const Nutrition = () => {
               </div>
               <h3 className="fw-bold mb-3">Fats</h3>
               <p className="text-muted">Supports overall health, brain function, and hormone production. Choose healthy fats like avocado.</p>
-            </div>
+            </GlassCard>
           </div>
         </div>
       </section>
@@ -238,7 +238,7 @@ const Nutrition = () => {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </GlassCard>
             </div>
 
             {/* Details Column */}
@@ -283,7 +283,7 @@ const Nutrition = () => {
                       Close Details
                     </button>
                   </div>
-                </div>
+                </GlassCard>
               </div>
             )}
           </div>
@@ -358,7 +358,7 @@ const Nutrition = () => {
           <div className="row g-4">
             <div className="col-lg-4">
               <GlassCard className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
-                <img src="/gymsite/whey.png" className="card-img-top" alt="Whey Protein" style={{ height: "250px", objectFit: "cover" }} />
+                <img src="/whey.png" className="card-img-top" alt="Whey Protein" style={{ height: "250px", objectFit: "cover" }} />
                 <div className="card-body p-4">
                   <div className="d-flex align-items-center mb-3">
                     <div className="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
@@ -377,7 +377,7 @@ const Nutrition = () => {
             </div>
             <div className="col-lg-4">
               <GlassCard className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
-                <img src="/gymsite/creatine.png" className="card-img-top" alt="Creatine Monohydrate" style={{ height: "250px", objectFit: "cover" }} />
+                <img src="/creatine.png" className="card-img-top" alt="Creatine Monohydrate" style={{ height: "250px", objectFit: "cover" }} />
                 <div className="card-body p-4">
                   <div className="d-flex align-items-center mb-3">
                     <div className="bg-danger bg-opacity-10 text-danger rounded-circle p-2 me-3">
@@ -396,7 +396,7 @@ const Nutrition = () => {
             </div>
             <div className="col-lg-4">
               <GlassCard className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
-                <img src="/gymsite/vitamins.png" className="card-img-top" alt="Multivitamins" style={{ height: "250px", objectFit: "cover" }} />
+                <img src="/vitamins.png" className="card-img-top" alt="Multivitamins" style={{ height: "250px", objectFit: "cover" }} />
                 <div className="card-body p-4">
                   <div className="d-flex align-items-center mb-3">
                     <div className="bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
@@ -430,7 +430,7 @@ const Nutrition = () => {
             <div className="col-lg-3">
               <GlassCard className="card h-100 border-0 overflow-hidden rounded-4 transition-hover bg-white text-center">
                 <div className="position-absolute top-0 start-0 m-3 badge bg-success px-3 py-2 rounded-pill">BEST SELLER</div>
-                <img src="/gymsite/scale.png" className="card-img-top p-4" alt="Smart Scale" style={{ height: "250px", objectFit: "contain" }} />
+                <img src="/scale.png" className="card-img-top p-4" alt="Smart Scale" style={{ height: "250px", objectFit: "contain" }} />
                 <div className="card-body p-4 pt-0">
                   <h3 className="h5 fw-bold mb-2">Smart BMI Scale</h3>
                   <p className="text-muted small">Tracks weight, body fat %, muscle mass, and water weight. Syncs with our app.</p>
@@ -441,7 +441,7 @@ const Nutrition = () => {
             </div>
             <div className="col-lg-3">
               <GlassCard className="card h-100 border-0 overflow-hidden rounded-4 transition-hover bg-white text-center">
-                <img src="/gymsite/scale.png" className="card-img-top p-4" alt="Food Scale" style={{ height: "250px", objectFit: "contain" }} />
+                <img src="/scale.png" className="card-img-top p-4" alt="Food Scale" style={{ height: "250px", objectFit: "contain" }} />
                 <div className="card-body p-4 pt-0">
                   <h3 className="h5 fw-bold mb-2">Precision Food Scale</h3>
                   <p className="text-muted small">Ultra-accurate measurements down to 0.1g. Essential for strict macro tracking.</p>
@@ -452,7 +452,7 @@ const Nutrition = () => {
             </div>
             <div className="col-lg-3">
               <GlassCard className="card h-100 border-0 overflow-hidden rounded-4 transition-hover bg-white text-center">
-                <img src="/gymsite/app.png" className="card-img-top p-4" alt="Fitness Tracker" style={{ height: "250px", objectFit: "contain" }} />
+                <img src="/app.png" className="card-img-top p-4" alt="Fitness Tracker" style={{ height: "250px", objectFit: "contain" }} />
                 <div className="card-body p-4 pt-0">
                   <h3 className="h5 fw-bold mb-2">Elite Fitness Band</h3>
                   <p className="text-muted small">Monitor heart rate, sleep quality, and daily caloric burn in real-time.</p>
@@ -463,7 +463,7 @@ const Nutrition = () => {
             </div>
             <div className="col-lg-3">
               <GlassCard className="card h-100 border-0 overflow-hidden rounded-4 transition-hover bg-white text-center">
-                <img src="/gymsite/journal.png" className="card-img-top p-4" alt="Nutrition Journal" style={{ height: "250px", objectFit: "contain" }} />
+                <img src="/journal.png" className="card-img-top p-4" alt="Nutrition Journal" style={{ height: "250px", objectFit: "contain" }} />
                 <div className="card-body p-4 pt-0">
                   <h3 className="h5 fw-bold mb-2">90-Day Journal</h3>
                   <p className="text-muted small">Hardcover guided journal for meal planning, mood tracking, and results.</p>
