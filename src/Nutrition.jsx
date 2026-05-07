@@ -295,7 +295,7 @@ const Nutrition = () => {
       </section>
 
       {/* Sample Daily Menu */}
-      <section className="bg-dark text-white py-5">
+      <section className="text-white py-5">
         <div className="container">
           <div className="text-center mb-5">
             <div className="d-flex align-items-center justify-content-center mb-3">
@@ -351,7 +351,7 @@ const Nutrition = () => {
       </section>
 
       {/* Essential Supplements Guide */}
-      <section id="supplements" className="py-5 bg-white">
+      <section id="supplements" className="py-5">
         <div className="container">
           <div className="text-center mb-5">
             <h2 className="display-5 fw-bold text-dark">Essential Supplements Guide</h2>
@@ -422,7 +422,7 @@ const Nutrition = () => {
       </section>
 
       {/* Nutritional Tracking & Tools Shop */}
-      <section id="tracking" className="py-5 bg-light">
+      <section id="tracking" className="py-5">
         <div className="container">
           <div className="text-center mb-5">
             <h2 className="display-5 fw-bold text-dark">Shop Tracking Tools</h2>
