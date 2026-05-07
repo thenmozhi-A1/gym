@@ -524,8 +524,26 @@ const Nutrition = () => {
           </div>
         </div>
       </section>
-    </div>
+    </PageWrapper>
   );
 };
+
+const PageWrapper = styled.div`
+  background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
+              url("https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=2070&auto=format&fit=crop");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: #1a1a1a;
+`;
+
+const GlassCard = styled.div`
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important;
+  border-radius: 20px !important;
+`;
 
 export default Nutrition;
