@@ -73,7 +73,7 @@ const Home = () => {
 const HomeContainer = styled.div`
   background: #f8f9fa;
   min-height: 100vh;
-  padding-top: 80px;
+  padding-top: 56px;
   color: #333;
   position: relative;
 
@@ -133,7 +133,7 @@ const Badge = styled.span`
 `;
 
 const HeroSection = styled.div`
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://png.pngtree.com/thumb_back/fh260/background/20240329/pngtree-rows-of-dumbbells-in-the-gym-image_15662386.jpg');
+  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://png.pngtree.com/thumb_back/fh260/background/20241007/pngtree-modern-fitness-center-gym-with-topnotch-training-equipment-and-commercial-design-image_16319186.jpg');
   background-size: cover;
   background-position: center;
   min-height: 80vh;
@@ -172,7 +172,7 @@ const DetailsGrid = styled.div`
   grid-template-columns: repeat(3, 1fr);
   gap: 30px;
   max-width: 1200px;
-  margin: -50px auto 50px;
+  margin: 40px auto 50px;
   padding: 0 20px;
   position: relative;
   z-index: 10;
