@@ -57,17 +57,6 @@ const Home = () => {
         </DetailCard>
       </DetailsGrid>
 
-      <FacilitySection id="facilities">
-        <h2 className="text-center mb-4 fw-bold" style={{ color: "#ffc107", fontSize: "2.5rem" }}>
-          OUR CORE FACILITIES
-        </h2>
-        <div className="container py-3">
-          <div className="facility-item"><Award /> Premium Cardio Zone</div>
-          <div className="facility-item"><Shield /> Olympic Weightlifting Area</div>
-          <div className="facility-item"><Zap /> Specialized HIIT Studio</div>
-          <div className="facility-item"><Award /> Luxury Locker Rooms</div>
-        </div>
-      </FacilitySection>
     </HomeContainer>
   );
 };
@@ -199,41 +188,6 @@ const DetailCard = styled.div`
   p { color: #666; margin: 5px 0; line-height: 1.6; }
 `;
 
-const FacilitySection = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  text-align: center;
 
-  h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 20px; color: #ffc107; }
-
-  .facility-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-  }
-
-  .facility-item {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    svg { color: #ffc107; }
-  }
-
-  @media (max-width: 768px) {
-    padding: 0 12px 20px;
-    h2 { font-size: 1.8rem; margin-bottom: 24px; }
-    .facility-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-  }
-
-  @media (max-width: 480px) {
-    .facility-grid { grid-template-columns: 1fr; }
-  }
-`;
 
 export default Home;
