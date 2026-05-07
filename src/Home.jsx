@@ -133,7 +133,7 @@ const Badge = styled.span`
 `;
 
 const HeroSection = styled.div`
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://png.pngtree.com/thumb_back/fh260/background/20241007/pngtree-modern-fitness-center-gym-with-topnotch-training-equipment-and-commercial-design-image_16319186.jpg');
+  background: linear-gradient(url('https://png.pngtree.com/thumb_back/fh260/background/20241007/pngtree-modern-fitness-center-gym-with-topnotch-training-equipment-and-commercial-design-image_16319186.jpg'));
   background-size: cover;
   background-position: center;
   min-height: 80vh;
