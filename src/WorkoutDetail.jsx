@@ -250,20 +250,20 @@ const WorkoutDetail = () => {
 };
 
 const PageContainer = styled.div`
-  background: linear-gradient(rgba(248, 249, 250, 0.8), rgba(248, 249, 250, 0.8)), 
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
               url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   min-height: 100vh;
   padding-top: 100px;
-  color: #333;
+  color: #fff;
 `;
 
 const BackButton = styled.button`
   background: transparent;
   border: none;
-  color: #666;
+  color: #fff;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -289,10 +289,12 @@ const HeroSection = styled.div`
     display: grid;
     grid-template-columns: 1fr 1.2fr;
     gap: 50px;
-    background: #fff;
+    background: rgba(26, 26, 26, 0.85);
+    backdrop-filter: blur(10px);
     border-radius: 30px;
     overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     
     @media (max-width: 992px) {
       grid-template-columns: 1fr;
@@ -316,12 +318,12 @@ const HeroSection = styled.div`
       font-size: 3rem;
       font-weight: 800;
       margin-bottom: 20px;
-      color: #1a1a1a;
+      color: #fff;
     }
 
     .desc {
       font-size: 1.1rem;
-      color: #666;
+      color: rgba(255, 255, 255, 0.8);
       line-height: 1.7;
       margin-bottom: 40px;
     }
@@ -346,7 +348,7 @@ const HeroSection = styled.div`
       }
       
       small {
-        color: #999;
+        color: rgba(255, 255, 255, 0.5);
         display: block;
         text-transform: uppercase;
         font-weight: 700;
@@ -388,11 +390,13 @@ const ContentSection = styled.div`
   }
 
   .instruction-card {
-    background: #fff;
+    background: rgba(26, 26, 26, 0.85);
+    backdrop-filter: blur(10px);
     padding: 50px;
     border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 
     h3 {
       font-size: 1.8rem;
@@ -414,7 +418,7 @@ const ContentSection = styled.div`
       padding-left: 60px;
       margin-bottom: 30px;
       font-size: 1.1rem;
-      color: #444;
+      color: rgba(255, 255, 255, 0.9);
       line-height: 1.6;
 
       &::before {
@@ -459,10 +463,12 @@ const Sidebar = styled.div`
   .sticky-box {
     position: sticky;
     top: 120px;
-    background: #fff;
+    background: rgba(26, 26, 26, 0.85);
+    backdrop-filter: blur(10px);
     padding: 40px;
     border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
 
     h3 {
@@ -472,7 +478,7 @@ const Sidebar = styled.div`
     }
 
     p {
-      color: #666;
+      color: rgba(255, 255, 255, 0.7);
       margin-bottom: 30px;
     }
 
