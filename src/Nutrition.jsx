@@ -3,9 +3,13 @@ import { useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { TrendingDown, Zap, CheckCircle, Flame, Leaf, Apple, Activity, Droplets, Info } from "lucide-react";
 
+import styled from "styled-components";
+
 const Nutrition = () => {
   const { hash } = useLocation();
   const [activeGoal, setActiveGoal] = useState(null);
+
+  // ... (keeping goalDetails and useEffect logic the same)
 
   const goalDetails = {
     "Weight Loss": {
@@ -101,16 +105,18 @@ const Nutrition = () => {
   };
 
   return (
-    <div className="container-fluid bg-light text-dark px-0" style={{ minHeight: "100vh" }}>
+    <PageWrapper>
       {/* Hero Section */}
       <header
         className="text-white text-center d-flex flex-column justify-content-center align-items-center"
         style={{
-          backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://thumbs.dreamstime.com/b/sports-nutrition-fitness-equipment-sports-nutrition-supplements-healthy-food-dumbbells-black-background-fitness-112716854.jpg')",
+          backgroundImage: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=2070&auto=format&fit=crop')",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          height: "60vh",
-          width: "100%"
+          height: "50vh",
+          width: "100%",
+          borderRadius: "0 0 50px 50px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
         }}
       >
         <h1 className="display-2 fw-bold mb-3">Fuel Your Fitness</h1>
@@ -127,7 +133,7 @@ const Nutrition = () => {
 
         <div className="row g-4 text-center justify-content-center">
           <div className="col-md-4">
-            <div className="card h-100 shadow-lg border-0 p-4 transition-hover">
+            <GlassCard className="card h-100 p-4 transition-hover">
               <div className="bg-primary bg-opacity-10 rounded-circle p-4 mx-auto mb-4" style={{ width: "fit-content" }}>
                 <Activity size={40} className="text-primary" />
               </div>
@@ -136,7 +142,7 @@ const Nutrition = () => {
             </div>
           </div>
           <div className="col-md-4">
-            <div className="card h-100 shadow-lg border-0 p-4 transition-hover">
+            <GlassCard className="card h-100 p-4 transition-hover">
               <div className="bg-success bg-opacity-10 rounded-circle p-4 mx-auto mb-4" style={{ width: "fit-content" }}>
                 <Zap size={40} className="text-success" />
               </div>
@@ -145,7 +151,7 @@ const Nutrition = () => {
             </div>
           </div>
           <div className="col-md-4">
-            <div className="card h-100 shadow-lg border-0 p-4 transition-hover">
+            <GlassCard className="card h-100 p-4 transition-hover">
               <div className="bg-danger bg-opacity-10 rounded-circle p-4 mx-auto mb-4" style={{ width: "fit-content" }}>
                 <Droplets size={40} className="text-danger" />
               </div>
@@ -157,7 +163,7 @@ const Nutrition = () => {
       </section>
 
       {/* Meal Plans Section */}
-      <section id="meal-plans" className="py-5 bg-white">
+      <section id="meal-plans" className="py-5">
         <div className="container">
           <div className="text-center mb-5">
             <h2 className="display-5 fw-bold text-dark">Nutrition Meal Plans</h2>
@@ -168,7 +174,7 @@ const Nutrition = () => {
           <div className="row justify-content-center g-4">
             {/* Table Column */}
             <div className={activeGoal ? "col-lg-5 transition-all" : "col-lg-10 transition-all"}>
-              <div className="card border-0 shadow-lg overflow-hidden rounded-4">
+              <GlassCard className="card overflow-hidden rounded-4">
                 <style>
                   {`
                     .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -242,15 +248,15 @@ const Nutrition = () => {
             {/* Details Column */}
             {activeGoal && (
               <div className="col-lg-7 animate__animated animate__fadeInRight">
-                <div
-                  className={`card border-0 shadow-lg rounded-4 p-4 h-100 transition-all overflow-hidden position-relative`}
+                <GlassCard
+                  className={`card rounded-4 p-4 h-100 transition-all overflow-hidden position-relative`}
                   style={goalDetails[activeGoal].backgroundImage ? {
                     backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('${goalDetails[activeGoal].backgroundImage}')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     color: 'white'
                   } : {
-                    backgroundColor: `var(--bs-${goalDetails[activeGoal].color}-bg-subtle)`
+                    background: 'rgba(255, 255, 255, 0.8)'
                   }}
                 >
                   <div className="position-relative z-1">
@@ -301,7 +307,7 @@ const Nutrition = () => {
 
           <div className="row g-4 justify-content-center">
             <div className="col-md-4">
-              <div className="p-4 bg-secondary bg-opacity-10 rounded-4 border border-secondary border-opacity-25 h-100 shadow-sm position-relative overflow-hidden text-center transition-hover">
+              <GlassCard className="p-4 bg-secondary bg-opacity-10 rounded-4 border border-secondary border-opacity-25 h-100 shadow-sm position-relative overflow-hidden text-center transition-hover">
                 <div className="position-absolute top-0 end-0 bg-warning text-dark px-3 py-1 fw-bold rounded-bl-4">450 kcal</div>
                 <h4 className="text-warning fw-bold mb-3 mt-2">Breakfast</h4>
                 <p className="fs-5 mb-3 text-light">Oatmeal with fresh banana, walnuts & a scoop of whey protein.</p>
@@ -309,10 +315,10 @@ const Nutrition = () => {
                   <li><CheckCircle size={14} className="me-2 text-warning" /> High fiber for sustained energy</li>
                   <li><CheckCircle size={14} className="me-2 text-warning" /> 30g Protein for muscle repair</li>
                 </ul>
-              </div>
+              </GlassCard>
             </div>
             <div className="col-md-4">
-              <div className="p-4 bg-secondary bg-opacity-10 rounded-4 border border-secondary border-opacity-25 h-100 shadow-sm position-relative overflow-hidden text-center transition-hover">
+              <GlassCard className="p-4 bg-secondary bg-opacity-10 rounded-4 border border-secondary border-opacity-25 h-100 shadow-sm position-relative overflow-hidden text-center transition-hover">
                 <div className="position-absolute top-0 end-0 bg-warning text-dark px-3 py-1 fw-bold rounded-bl-4">650 kcal</div>
                 <h4 className="text-warning fw-bold mb-3 mt-2">Lunch</h4>
                 <p className="fs-5 mb-3 text-light">Grilled chicken, quinoa, and mixed steamed vegetables.</p>
@@ -320,10 +326,10 @@ const Nutrition = () => {
                   <li><CheckCircle size={14} className="me-2 text-warning" /> Lean protein & complex carbs</li>
                   <li><CheckCircle size={14} className="me-2 text-warning" /> Rich in vitamins A and K</li>
                 </ul>
-              </div>
+              </GlassCard>
             </div>
             <div className="col-md-4">
-              <div className="p-4 bg-secondary bg-opacity-10 rounded-4 border border-secondary border-opacity-25 h-100 shadow-sm position-relative overflow-hidden text-center transition-hover">
+              <GlassCard className="p-4 bg-secondary bg-opacity-10 rounded-4 border border-secondary border-opacity-25 h-100 shadow-sm position-relative overflow-hidden text-center transition-hover">
                 <div className="position-absolute top-0 end-0 bg-warning text-dark px-3 py-1 fw-bold rounded-bl-4">550 kcal</div>
                 <h4 className="text-warning fw-bold mb-3 mt-2">Dinner</h4>
                 <p className="fs-5 mb-3 text-light">Baked Atlantic salmon, roasted sweet potatoes, and spinach salad.</p>
@@ -331,7 +337,7 @@ const Nutrition = () => {
                   <li><CheckCircle size={14} className="me-2 text-warning" /> Omega-3 for joint health</li>
                   <li><CheckCircle size={14} className="me-2 text-warning" /> Low glycemic index carbs</li>
                 </ul>
-              </div>
+              </GlassCard>
             </div>
           </div>
 
@@ -355,7 +361,7 @@ const Nutrition = () => {
 
           <div className="row g-4">
             <div className="col-lg-4">
-              <div className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
+              <GlassCard className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
                 <img src="/gymsite/whey.png" className="card-img-top" alt="Whey Protein" style={{ height: "250px", objectFit: "cover" }} />
                 <div className="card-body p-4">
                   <div className="d-flex align-items-center mb-3">
@@ -371,10 +377,10 @@ const Nutrition = () => {
                     <li><CheckCircle size={14} className="me-2 text-primary" /> Ideal post-workout or between meals</li>
                   </ul>
                 </div>
-              </div>
+              </GlassCard>
             </div>
             <div className="col-lg-4">
-              <div className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
+              <GlassCard className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
                 <img src="/gymsite/creatine.png" className="card-img-top" alt="Creatine Monohydrate" style={{ height: "250px", objectFit: "cover" }} />
                 <div className="card-body p-4">
                   <div className="d-flex align-items-center mb-3">
@@ -390,10 +396,10 @@ const Nutrition = () => {
                     <li><CheckCircle size={14} className="me-2 text-danger" /> 3-5g daily maintenance dose</li>
                   </ul>
                 </div>
-              </div>
+              </GlassCard>
             </div>
             <div className="col-lg-4">
-              <div className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
+              <GlassCard className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
                 <img src="/gymsite/vitamins.png" className="card-img-top" alt="Multivitamins" style={{ height: "250px", objectFit: "cover" }} />
                 <div className="card-body p-4">
                   <div className="d-flex align-items-center mb-3">
@@ -409,7 +415,7 @@ const Nutrition = () => {
                     <li><CheckCircle size={14} className="me-2 text-success" /> Essential for hormone balance</li>
                   </ul>
                 </div>
-              </div>
+              </GlassCard>
             </div>
           </div>
         </div>
@@ -426,7 +432,7 @@ const Nutrition = () => {
 
           <div className="row g-4">
             <div className="col-lg-3">
-              <div className="card h-100 border-0 shadow-sm overflow-hidden rounded-4 transition-hover bg-white text-center">
+              <GlassCard className="card h-100 border-0 overflow-hidden rounded-4 transition-hover bg-white text-center">
                 <div className="position-absolute top-0 start-0 m-3 badge bg-success px-3 py-2 rounded-pill">BEST SELLER</div>
                 <img src="/gymsite/scale.png" className="card-img-top p-4" alt="Smart Scale" style={{ height: "250px", objectFit: "contain" }} />
                 <div className="card-body p-4 pt-0">
@@ -435,10 +441,10 @@ const Nutrition = () => {
                   <div className="fs-4 fw-bold text-dark mb-3">₹2,499</div>
                   <button onClick={() => handleProductPayment(2499, "Smart BMI Scale")} className="btn btn-warning w-100 fw-bold rounded-pill shadow-sm">Buy Now</button>
                 </div>
-              </div>
+              </GlassCard>
             </div>
             <div className="col-lg-3">
-              <div className="card h-100 border-0 shadow-sm overflow-hidden rounded-4 transition-hover bg-white text-center">
+              <GlassCard className="card h-100 border-0 overflow-hidden rounded-4 transition-hover bg-white text-center">
                 <img src="/gymsite/scale.png" className="card-img-top p-4" alt="Food Scale" style={{ height: "250px", objectFit: "contain" }} />
                 <div className="card-body p-4 pt-0">
                   <h3 className="h5 fw-bold mb-2">Precision Food Scale</h3>
@@ -446,10 +452,10 @@ const Nutrition = () => {
                   <div className="fs-4 fw-bold text-dark mb-3">₹999</div>
                   <button onClick={() => handleProductPayment(999, "Precision Food Scale")} className="btn btn-warning w-100 fw-bold rounded-pill shadow-sm">Buy Now</button>
                 </div>
-              </div>
+              </GlassCard>
             </div>
             <div className="col-lg-3">
-              <div className="card h-100 border-0 shadow-sm overflow-hidden rounded-4 transition-hover bg-white text-center">
+              <GlassCard className="card h-100 border-0 overflow-hidden rounded-4 transition-hover bg-white text-center">
                 <img src="/gymsite/app.png" className="card-img-top p-4" alt="Fitness Tracker" style={{ height: "250px", objectFit: "contain" }} />
                 <div className="card-body p-4 pt-0">
                   <h3 className="h5 fw-bold mb-2">Elite Fitness Band</h3>
@@ -457,10 +463,10 @@ const Nutrition = () => {
                   <div className="fs-4 fw-bold text-dark mb-3">₹3,999</div>
                   <button onClick={() => handleProductPayment(3999, "Elite Fitness Band")} className="btn btn-warning w-100 fw-bold rounded-pill shadow-sm">Buy Now</button>
                 </div>
-              </div>
+              </GlassCard>
             </div>
             <div className="col-lg-3">
-              <div className="card h-100 border-0 shadow-sm overflow-hidden rounded-4 transition-hover bg-white text-center">
+              <GlassCard className="card h-100 border-0 overflow-hidden rounded-4 transition-hover bg-white text-center">
                 <img src="/gymsite/journal.png" className="card-img-top p-4" alt="Nutrition Journal" style={{ height: "250px", objectFit: "contain" }} />
                 <div className="card-body p-4 pt-0">
                   <h3 className="h5 fw-bold mb-2">90-Day Journal</h3>
@@ -468,7 +474,7 @@ const Nutrition = () => {
                   <div className="fs-4 fw-bold text-dark mb-3">₹599</div>
                   <button onClick={() => handleProductPayment(599, "90-Day Journal")} className="btn btn-warning w-100 fw-bold rounded-pill shadow-sm">Buy Now</button>
                 </div>
-              </div>
+              </GlassCard>
             </div>
           </div>
         </div>
