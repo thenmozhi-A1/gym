@@ -140,7 +140,8 @@ const Navbar = () => {
                         localStorage.removeItem("userId");
                         localStorage.removeItem("userName");
                         localStorage.removeItem("userEmail");
-                        window.location.href = "/gymsite/"; 
+                        localStorage.removeItem("userRole");
+                        window.location.href = "/"; 
                       }
                     }}
                   >

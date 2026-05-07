@@ -57,9 +57,11 @@ const Home = () => {
         </DetailCard>
       </DetailsGrid>
 
-      <FacilitySection>
-        <h2>Our Core Facilities</h2>
-        <div className="facility-grid">
+      <FacilitySection id="facilities">
+        <h2 className="text-center mb-4 fw-bold" style={{ color: "#ffc107", fontSize: "2.5rem" }}>
+          OUR CORE FACILITIES
+        </h2>
+        <div className="container py-3">
           <div className="facility-item"><Award /> Premium Cardio Zone</div>
           <div className="facility-item"><Shield /> Olympic Weightlifting Area</div>
           <div className="facility-item"><Zap /> Specialized HIIT Studio</div>
@@ -71,11 +73,10 @@ const Home = () => {
 };
 
 const HomeContainer = styled.div`
-  background: #f8f9fa;
+  background-color: #000;
+  color: white;
   min-height: 100vh;
-  padding-top: 56px;
-  color: #333;
-  position: relative;
+  padding-top: 0;
 
   .login-corner {
     position: absolute;
@@ -105,7 +106,6 @@ const HomeContainer = styled.div`
     }
   }
 
-  /* Adjusted for mobile visibility */
   @media (max-width: 576px) {
     .login-corner {
       top: 90px;
@@ -132,17 +132,17 @@ const Badge = styled.span`
   border: 1px solid rgba(255, 193, 7, 0.2);
 `;
 
-const HeroSection = styled.div`
-  background: url('https://png.pngtree.com/thumb_back/fh260/background/20241007/pngtree-modern-fitness-center-gym-with-topnotch-training-equipment-and-commercial-design-image_16319186.jpg');
-  background-size: cover;
-  background-position: center;
-  min-height: 80vh;
+const HeroSection = styled.section`
+  height: 90vh;
+  background: url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop") center/cover no-repeat;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
   text-align: center;
-  color: #fff;
+  color: white;
   position: relative;
+  padding-top: 56px;
 
   .content {
     max-width: 800px;
@@ -169,18 +169,11 @@ const HeroSection = styled.div`
 
 const DetailsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
-  max-width: 1200px;
-  margin: 40px auto 50px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto 20px;
   padding: 0 20px;
-  position: relative;
-  z-index: 10;
-
-  @media (max-width: 992px) {
-    grid-template-columns: repeat(2, 1fr);
-    margin-top: 30px;
-  }
 
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
@@ -204,11 +197,11 @@ const DetailCard = styled.div`
 
 const FacilitySection = styled.div`
   max-width: 1200px;
-  margin: 50px auto;
-  padding: 0 20px 80px;
+  margin: 0 auto;
+  padding: 0 20px;
   text-align: center;
 
-  h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 40px; color: #1a1a1a; }
+  h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 20px; color: #ffc107; }
 
   .facility-grid {
     display: grid;
@@ -229,7 +222,7 @@ const FacilitySection = styled.div`
   }
 
   @media (max-width: 768px) {
-    padding: 0 12px 60px;
+    padding: 0 12px 20px;
     h2 { font-size: 1.8rem; margin-bottom: 24px; }
     .facility-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   }
