@@ -29,6 +29,7 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [expandedUserId, setExpandedUserId] = useState(null);
 
   // Role Protection
   useEffect(() => {
@@ -50,9 +51,17 @@ const AdminDashboard = () => {
     setError(null);
     try {
       if (activeTab === "users") {
-        const res = await fetch(`${API_BASE}/users`);
-        const data = await res.json();
-        setUsers(Array.isArray(data) ? data : []);
+        const [uRes, pRes, aRes] = await Promise.all([
+          fetch(`${API_BASE}/users`),
+          fetch(`${API_BASE}/payments`),
+          fetch(`${API_BASE}/attendance`)
+        ]);
+        const uData = await uRes.json();
+        const pData = await pRes.json();
+        const aData = await aRes.json();
+        setUsers(Array.isArray(uData) ? uData : []);
+        setPayments(Array.isArray(pData) ? pData : []);
+        setAttendance(Array.isArray(aData) ? aData : []);
       } else if (activeTab === "payments") {
         const res = await fetch(`${API_BASE}/payments`);
         const data = await res.json();
@@ -234,38 +243,79 @@ const AdminDashboard = () => {
                     </thead>
                     <tbody>
                       {filteredUsers.map(user => (
-                        <tr key={user.id}>
-                          <td className="fw-bold">
-                            <div>{user.fullName}</div>
-                            <div style={{fontSize: '0.8rem', color: '#a3aed0', fontWeight: '400'}}>{user.email}</div>
-                          </td>
-                          <td><StatusBadge status={user.status}>{user.status}</StatusBadge></td>
-                          <td>
-                            <ActionGroup>
-                              <ActionButton 
-                                title="Set Active" 
-                                onClick={() => handleUpdateStatus(user, "ACTIVE")}
-                                className="success"
-                              >
-                                <CheckCircle size={18} />
-                              </ActionButton>
-                              <ActionButton 
-                                title="Set Inactive" 
-                                onClick={() => handleUpdateStatus(user, "INACTIVE")}
-                                className="warning"
-                              >
-                                <XCircle size={18} />
-                              </ActionButton>
-                              <ActionButton 
-                                title="Delete User" 
-                                onClick={() => handleDeleteUser(user.id)}
-                                className="danger"
-                              >
-                                <Trash2 size={18} />
-                              </ActionButton>
-                            </ActionGroup>
-                          </td>
-                        </tr>
+                        <React.Fragment key={user.id}>
+                          <tr 
+                            onClick={() => setExpandedUserId(expandedUserId === user.id ? null : user.id)}
+                            style={{ cursor: 'pointer' }}
+                            className={expandedUserId === user.id ? "expanded-row" : ""}
+                          >
+                            <td className="fw-bold">
+                              <div>{user.fullName}</div>
+                              <div style={{fontSize: '0.8rem', color: '#a3aed0', fontWeight: '400'}}>{user.email}</div>
+                            </td>
+                            <td><StatusBadge status={user.status}>{user.status}</StatusBadge></td>
+                            <td>
+                              <ActionGroup onClick={(e) => e.stopPropagation()}>
+                                <ActionButton 
+                                  title="Set Active" 
+                                  onClick={() => handleUpdateStatus(user, "ACTIVE")}
+                                  className="success"
+                                >
+                                  <CheckCircle size={18} />
+                                </ActionButton>
+                                <ActionButton 
+                                  title="Set Inactive" 
+                                  onClick={() => handleUpdateStatus(user, "INACTIVE")}
+                                  className="warning"
+                                >
+                                  <XCircle size={18} />
+                                </ActionButton>
+                                <ActionButton 
+                                  title="Delete User" 
+                                  onClick={() => handleDeleteUser(user.id)}
+                                  className="danger"
+                                >
+                                  <Trash2 size={18} />
+                                </ActionButton>
+                              </ActionGroup>
+                            </td>
+                          </tr>
+                          {expandedUserId === user.id && (
+                            <tr>
+                              <td colSpan="3" style={{ padding: '0' }}>
+                                <ExpandedDetails>
+                                  <div className="details-section">
+                                    <h6><CreditCard size={16} /> Recent Payments</h6>
+                                    {payments.filter(p => p.user?.id === user.id).length > 0 ? (
+                                      <ul className="details-list">
+                                        {payments.filter(p => p.user?.id === user.id).slice(0, 5).map(p => (
+                                          <li key={p.id}>
+                                            <span>₹{p.amount} - {p.planName}</span>
+                                            <StatusBadge status={p.paymentStatus}>{p.paymentStatus}</StatusBadge>
+                                            <span className="date">{new Date(p.paymentDate).toLocaleDateString()}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    ) : <p className="empty-msg">No payment history found.</p>}
+                                  </div>
+                                  <div className="details-section">
+                                    <h6><Clock size={16} /> Recent Attendance</h6>
+                                    {attendance.filter(a => a.user?.id === user.id).length > 0 ? (
+                                      <ul className="details-list">
+                                        {attendance.filter(a => a.user?.id === user.id).slice(0, 5).map(a => (
+                                          <li key={a.id}>
+                                            <span>{a.attendanceDate}</span>
+                                            <span className="time">{a.checkInTime} - {a.checkOutTime || "Ongoing"}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    ) : <p className="empty-msg">No attendance logs found.</p>}
+                                  </div>
+                                </ExpandedDetails>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       ))}
                     </tbody>
                   </>
@@ -584,6 +634,52 @@ const ActionButton = styled.button`
   &.success { color: #05cd99; &:hover { background: #e2f9ef; } }
   &.warning { color: #ffbc11; &:hover { background: #fff9e7; } }
   &.danger { color: #ff5b5b; &:hover { background: #fff5f5; } }
+`;
+
+const ExpandedDetails = styled.div`
+  background: #fcfdfe;
+  padding: 20px 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  border-bottom: 2px solid #ffc107;
+  animation: fadeIn 0.3s ease;
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+
+  h6 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #1b2559;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    svg { color: #ffc107; }
+  }
+
+  .details-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f4f7fe;
+      font-size: 0.85rem;
+      &:last-child { border-bottom: none; }
+      .date, .time { color: #a3aed0; }
+    }
+  }
+
+  .empty-msg { color: #a3aed0; font-size: 0.85rem; font-style: italic; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 `;
 
 const LoadingState = styled.div` display: flex; justify-content: center; align-items: center; height: 300px; color: #a3aed0; font-weight: 600; `;

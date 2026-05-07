@@ -50,9 +50,17 @@ const Navbar = () => {
               </button>
               <ul className="dropdown-menu">
                 <li><Link className="dropdown-item" to="/workouts" onClick={handleNavClick}>Overview</Link></li>
-                <li><Link className="dropdown-item" to="/workout/cardio" onClick={handleNavClick}>Cardio Workouts</Link></li>
-                <li><Link className="dropdown-item" to="/workout/bench-press" onClick={handleNavClick}>Strength Training</Link></li>
-                <li><Link className="dropdown-item" to="/workout/yoga" onClick={handleNavClick}>Flexibility & Yoga</Link></li>
+                <li><hr className="dropdown-divider" /></li>
+                <li><Link className="dropdown-item" to="/workout/bench-press" onClick={handleNavClick}>Bench Press</Link></li>
+                <li><Link className="dropdown-item" to="/workout/squats" onClick={handleNavClick}>Squats</Link></li>
+                <li><Link className="dropdown-item" to="/workout/deadlifts" onClick={handleNavClick}>Deadlifts</Link></li>
+                <li><Link className="dropdown-item" to="/workout/pull-ups" onClick={handleNavClick}>Pull-Ups</Link></li>
+                <li><Link className="dropdown-item" to="/workout/dumbbell-rows" onClick={handleNavClick}>Dumbbell Rows</Link></li>
+                <li><Link className="dropdown-item" to="/workout/lunges" onClick={handleNavClick}>Lunges</Link></li>
+                <li><Link className="dropdown-item" to="/workout/cardio" onClick={handleNavClick}>Cardio</Link></li>
+                <li><Link className="dropdown-item" to="/workout/bulking" onClick={handleNavClick}>Bulking</Link></li>
+                <li><Link className="dropdown-item" to="/workout/weight-loss" onClick={handleNavClick}>Weight Loss</Link></li>
+                <li><Link className="dropdown-item" to="/workout/yoga" onClick={handleNavClick}>Yoga</Link></li>
               </ul>
             </li>
 
