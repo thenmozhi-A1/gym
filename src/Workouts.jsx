@@ -41,13 +41,13 @@ const workouts = [
   },
   {
     name: "Bulking",
-    description: "Strengthens legs and improves balance.",
-    image: "https://d2v5dzhdg4zhx3.cloudfront.net/web-assets/images/storypages/short/aimuscularavatargenerator/aimuscularavatargenerator/aimuscularavatargenerator/wepb/003.webp"
+    description: "Focus on muscle growth and high-calorie intake.",
+    image: "https://images.unsplash.com/photo-1583454110551-21f2fa2ec617?q=80&w=2070&auto=format&fit=crop"
   },
   {
     name: "Weight Loss",
-    description: "Strengthens legs and improves balance.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDwsWvdS9F-TkDgcXWjlui5PweA9IpL68ing&s"
+    description: "High-intensity training to burn calories effectively.",
+    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop"
   },
   {
     name: "Yoga",
