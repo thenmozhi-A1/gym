@@ -134,7 +134,11 @@ const Badge = styled.span`
 
 const HeroSection = styled.section`
   height: 90vh;
-  background: url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop") center/cover no-repeat;
+  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
   justify-content: center;
