@@ -64,7 +64,7 @@ const Footer = () => {
 const FooterContainer = styled.footer`
   background: #ffffff;
   color: #4a5568;
-  padding: 80px 0 30px;
+  padding: 40px 0 20px;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 
   .brand-title {
