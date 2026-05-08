@@ -66,6 +66,7 @@ const HomeContainer = styled.div`
   color: white;
   min-height: 100vh;
   padding-top: 0;
+  padding-bottom: 60px;
 
   .login-corner {
     position: absolute;
@@ -165,7 +166,7 @@ const DetailsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   max-width: 1100px;
-  margin: 0 auto 20px;
+  margin: 0 auto;
   padding: 0 20px;
 
   @media (max-width: 600px) {
