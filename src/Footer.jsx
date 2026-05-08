@@ -62,13 +62,14 @@ const Footer = () => {
 };
 
 const FooterContainer = styled.footer`
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  color: #4a5568;
   padding: 80px 0 30px;
-  border-top: 1px solid rgba(255, 193, 7, 0.2);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 
   .brand-title {
-    color: #ffc107;
+    color: #b8860b; /* Darker Gold for visibility on light */
     font-weight: 800;
     font-size: 1.8rem;
     margin-bottom: 20px;
@@ -78,11 +79,11 @@ const FooterContainer = styled.footer`
   .footer-desc {
     font-size: 0.95rem;
     line-height: 1.6;
-    color: #718096;
+    color: #4a5568;
   }
 
   .section-title {
-    color: #ffffff;
+    color: #1a202c;
     font-weight: 700;
     font-size: 1.1rem;
     margin-bottom: 25px;
@@ -97,7 +98,7 @@ const FooterContainer = styled.footer`
     font-size: 0.95rem;
 
     &:hover {
-      color: #ffc107;
+      color: #b8860b;
       padding-left: 5px;
     }
   }
@@ -108,10 +109,10 @@ const FooterContainer = styled.footer`
     gap: 12px;
     margin-bottom: 12px;
     font-size: 0.95rem;
-    color: #718096;
+    color: #4a5568;
     
     svg {
-      color: #ffc107;
+      color: #b8860b;
     }
   }
 
@@ -126,9 +127,9 @@ const FooterContainer = styled.footer`
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.05);
     border-radius: 50%;
-    color: white;
+    color: #1a202c;
     text-decoration: none;
     transition: all 0.3s ease;
 
@@ -140,14 +141,14 @@ const FooterContainer = styled.footer`
   }
 
   .footer-divider {
-    border-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(0, 0, 0, 0.05);
     margin: 40px 0 20px;
   }
 
   .footer-bottom {
     text-align: center;
     font-size: 0.85rem;
-    color: #4a5568;
+    color: #718096;
   }
 `;
 
