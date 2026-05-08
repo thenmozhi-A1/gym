@@ -496,11 +496,11 @@ const Nutrition = () => {
                   <div className="row g-4">
                     <div className="col-md-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Full Name</label>
-                      <input type="text" placeholder="John Doe" name="name" className="form-control form-control-lg border-2 shadow-none bg-light" required />
+                      <input type="text" placeholder="Your name" name="name" className="form-control form-control-lg border-2 shadow-none bg-light" required />
                     </div>
                     <div className="col-md-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Mobile Number</label>
-                      <input type="tel" placeholder="+1 (555) 000-0000" name="phone" className="form-control form-control-lg border-2 shadow-none bg-light" required />
+                      <input type="tel" placeholder="+91 00000 00000" name="phone" className="form-control form-control-lg border-2 shadow-none bg-light" required />
                     </div>
                     <div className="col-md-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Email Address</label>
