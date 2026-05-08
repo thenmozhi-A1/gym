@@ -14,7 +14,8 @@ import {
   CheckCircle,
   XCircle,
   Menu as MenuIcon,
-  X
+  X,
+  MessageSquare
 } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
@@ -25,6 +26,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [payments, setPayments] = useState([]);
   const [attendance, setAttendance] = useState([]);
+  const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,6 +72,10 @@ const AdminDashboard = () => {
         const res = await fetch(`${API_BASE}/attendance`);
         const data = await res.json();
         setAttendance(Array.isArray(data) ? data : []);
+      } else if (activeTab === "consultations") {
+        const res = await fetch(`${API_BASE}/consultations`);
+        const data = await res.json();
+        setConsultations(Array.isArray(data) ? data : []);
       }
     } catch (err) {
       setError("Failed to fetch data. Please check if the server is running.");
@@ -167,6 +173,9 @@ const AdminDashboard = () => {
           <NavItem active={activeTab === "attendance"} onClick={() => { setActiveTab("attendance"); setIsSidebarOpen(false); }}>
             <Clock size={20} /> Attendance Logs
           </NavItem>
+          <NavItem active={activeTab === "consultations"} onClick={() => { setActiveTab("consultations"); setIsSidebarOpen(false); }}>
+            <MessageSquare size={20} /> User Messages
+          </NavItem>
         </NavMenu>
 
         <LogoutBtn onClick={handleLogout}>
@@ -179,7 +188,7 @@ const AdminDashboard = () => {
       <MainContent>
         <Header>
           <TitleArea>
-            <h1>{activeTab === "users" ? "Users Details" : activeTab === "payments" ? "Payments History" : "In/Out Timings"}</h1>
+            <h1>{activeTab === "users" ? "Users Details" : activeTab === "payments" ? "Payments History" : activeTab === "consultations" ? "User Inquiries" : "In/Out Timings"}</h1>
             <p>Manage and monitor your gym's {activeTab} activity.</p>
           </TitleArea>
 
@@ -216,6 +225,13 @@ const AdminDashboard = () => {
             <div className="info">
               <span className="label">Total Records</span>
               <span className="value">{attendance.length}</span>
+            </div>
+          </StatCard>
+          <StatCard>
+            <div className="icon users"><MessageSquare /></div>
+            <div className="info">
+              <span className="label">New Messages</span>
+              <span className="value">{consultations.length}</span>
             </div>
           </StatCard>
         </StatsRow>
@@ -361,6 +377,37 @@ const AdminDashboard = () => {
                           <td>{log.attendanceDate}</td>
                           <td className="text-success fw-bold">{log.checkInTime}</td>
                           <td>{calculateDuration(log.checkInTime, log.checkOutTime)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </>
+                )}
+
+                {activeTab === "consultations" && (
+                  <>
+                    <thead>
+                      <tr>
+                        <th>User Info</th>
+                        <th>Message / Goals</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {consultations.map(msg => (
+                        <tr key={msg.id}>
+                          <td>
+                            <div className="fw-bold">{msg.fullName}</div>
+                            <div style={{fontSize: '0.8rem', color: '#a3aed0'}}>{msg.email}</div>
+                            <div style={{fontSize: '0.8rem', color: '#a3aed0'}}>{msg.phone}</div>
+                          </td>
+                          <td style={{ maxWidth: '300px' }}>
+                            <p className="mb-0 small text-secondary">{msg.goals}</p>
+                          </td>
+                          <td>
+                            <div className="small text-secondary">
+                              {msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "N/A"}
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

@@ -8,6 +8,46 @@ import styled from "styled-components";
 const Nutrition = () => {
   const { hash } = useLocation();
   const [activeGoal, setActiveGoal] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    goals: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const API_BASE = "https://gymj-9.onrender.com/api";
+      const res = await fetch(`${API_BASE}/consultations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          goals: formData.goals
+        })
+      });
+
+      if (res.ok) {
+        alert("Request submitted successfully! Our nutritionist will contact you soon.");
+        setFormData({ name: "", phone: "", email: "", goals: "" });
+      } else {
+        alert("Failed to submit request. Please try again.");
+      }
+    } catch (err) {
+      alert("Cannot connect to server. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // ... (keeping goalDetails and useEffect logic the same)
 
@@ -492,26 +532,64 @@ const Nutrition = () => {
                   </div>
                 </div>
 
-                <form method="post" action="feedback.php">
+                <form onSubmit={handleSubmit}>
                   <div className="row g-4">
                     <div className="col-md-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Full Name</label>
-                      <input type="text" placeholder="Your name" name="name" className="form-control form-control-lg border-2 shadow-none bg-light" required />
+                      <input 
+                        type="text" 
+                        placeholder="Your name" 
+                        name="name" 
+                        className="form-control form-control-lg border-2 shadow-none bg-light" 
+                        required 
+                        value={formData.name}
+                        onChange={handleInputChange}
+                      />
                     </div>
                     <div className="col-md-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Mobile Number</label>
-                      <input type="tel" placeholder="+91 00000 00000" name="phone" className="form-control form-control-lg border-2 shadow-none bg-light" required />
+                      <input 
+                        type="tel" 
+                        placeholder="+91 00000 00000" 
+                        name="phone" 
+                        className="form-control form-control-lg border-2 shadow-none bg-light" 
+                        required 
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                      />
                     </div>
                     <div className="col-md-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Email Address</label>
-                      <input type="email" placeholder="john@example.com" name="email" className="form-control form-control-lg border-2 shadow-none bg-light" required />
+                      <input 
+                        type="email" 
+                        placeholder="john@example.com" 
+                        name="email" 
+                        className="form-control form-control-lg border-2 shadow-none bg-light" 
+                        required 
+                        value={formData.email}
+                        onChange={handleInputChange}
+                      />
                     </div>
                     <div className="col-lg-9 mt-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Your Fitness Goals</label>
-                      <textarea placeholder="Tell us about your fitness journey..." name="goals" className="form-control form-control-lg border-2 shadow-none bg-light" rows="3" required></textarea>
+                      <textarea 
+                        placeholder="Tell us about your fitness journey..." 
+                        name="goals" 
+                        className="form-control form-control-lg border-2 shadow-none bg-light" 
+                        rows="3" 
+                        required
+                        value={formData.goals}
+                        onChange={handleInputChange}
+                      ></textarea>
                     </div>
                     <div className="col-lg-3 mt-lg-auto mb-1">
-                      <button className="btn btn-warning btn-lg w-100 fw-bold py-3 shadow-sm rounded-4 text-uppercase tracking-wider">Submit Request</button>
+                      <button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="btn btn-warning btn-lg w-100 fw-bold py-3 shadow-sm rounded-4 text-uppercase tracking-wider"
+                      >
+                        {isSubmitting ? "Submitting..." : "Submit Request"}
+                      </button>
                     </div>
                   </div>
                 </form>
