@@ -62,10 +62,10 @@ const Footer = () => {
 };
 
 const FooterContainer = styled.footer`
-  background: linear-gradient(to bottom, #111111, #000000);
-  color: #a3aed0;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #94a3b8;
   padding: 80px 0 30px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 193, 7, 0.2);
 
   .brand-title {
     color: #ffc107;
