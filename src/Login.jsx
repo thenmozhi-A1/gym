@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { User, Mail, Lock, UserPlus, LogIn } from "lucide-react";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api";
+const API_BASE = "https://gymj-9.onrender.com/api";
 
 const Login = () => {
   const navigate = useNavigate();
