@@ -176,16 +176,23 @@ const DetailsGrid = styled.div`
 `;
 
 const DetailCard = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 40px;
-  border-radius: 24px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 50px 40px;
+  border-radius: 30px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: default;
 
-  &:hover { transform: translateY(-5px); }
+  &:hover { 
+    transform: translateY(-10px) scale(1.02);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 193, 7, 0.4);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  }
   h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; color: #ffc107; }
   p { color: rgba(255, 255, 255, 0.8); margin: 5px 0; line-height: 1.6; }
 `;
