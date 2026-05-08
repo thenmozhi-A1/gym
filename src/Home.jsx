@@ -62,11 +62,15 @@ const Home = () => {
 };
 
 const HomeContainer = styled.div`
-  background-color: #000;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+              url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: white;
   min-height: 100vh;
   padding-top: 0;
-  padding-bottom: 60px;
+  padding-bottom: 80px;
 
   .login-corner {
     position: absolute;
@@ -124,11 +128,6 @@ const Badge = styled.span`
 
 const HeroSection = styled.section`
   height: 90vh;
-  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -177,16 +176,18 @@ const DetailsGrid = styled.div`
 `;
 
 const DetailCard = styled.div`
-  background: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  border-radius: 24px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
   text-align: center;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 
   &:hover { transform: translateY(-5px); }
-  h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; }
-  p { color: #666; margin: 5px 0; line-height: 1.6; }
+  h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; color: #ffc107; }
+  p { color: rgba(255, 255, 255, 0.8); margin: 5px 0; line-height: 1.6; }
 `;
 
 
