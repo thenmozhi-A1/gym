@@ -62,8 +62,8 @@ const Home = () => {
 };
 
 const HomeContainer = styled.div`
-  background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), 
-              url("https://images.unsplash.com/photo-1571902943202-507ec2618e8f?q=100&w=2560&auto=format&fit=crop");
+  background: linear-gradient(135deg, rgba(255, 126, 95, 0.3), rgba(254, 180, 123, 0.3), rgba(255, 255, 255, 0.4)), 
+              url("https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=100&w=2560&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
