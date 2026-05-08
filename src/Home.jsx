@@ -63,7 +63,7 @@ const Home = () => {
 
 const HomeContainer = styled.div`
   background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), 
-              url("https://images.unsplash.com/photo-1518611012118-696072aa579a?q=100&w=2560&auto=format&fit=crop");
+              url("https://images.unsplash.com/photo-1571902943202-507ec2618e8f?q=100&w=2560&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
