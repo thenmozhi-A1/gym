@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="row g-4">
 
           {/* GymDash Info */}
-          <div className="col-md-4 mb-2">
+          <div className="col-md-4 mb-1">
             <h5 className="brand-title">GymDash</h5>
             <p className="footer-desc">
               Your one-stop fitness companion for tracking workouts, nutrition, and progress. 
@@ -20,7 +20,7 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div className="col-md-4 mb-2">
+          <div className="col-md-4 mb-1">
             <h6 className="section-title">Quick Links</h6>
             <ul className="list-unstyled">
               <li className="mb-2"><Link to="/dashboard" className="footer-link">Dashboard</Link></li>
@@ -31,7 +31,7 @@ const Footer = () => {
           </div>
 
           {/* Contact Info */}
-          <div className="col-md-4 mb-2">
+          <div className="col-md-4 mb-1">
             <h6 className="section-title">Contact Us</h6>
             <div className="contact-item">
               <MapPin size={16} /> <span>No.624, Khivraj Building, Anna Salai</span>
@@ -64,14 +64,14 @@ const Footer = () => {
 const FooterContainer = styled.footer`
   background: #ffffff;
   color: #4a5568;
-  padding: 20px 0 10px;
+  padding: 10px 0 5px;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 
   .brand-title {
     color: #b8860b; /* Darker Gold for visibility on light */
     font-weight: 800;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
+    font-size: 1.4rem;
+    margin-bottom: 5px;
     letter-spacing: -0.5px;
   }
 
@@ -84,8 +84,8 @@ const FooterContainer = styled.footer`
   .section-title {
     color: #1a202c;
     font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 15px;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
     text-transform: uppercase;
     letter-spacing: 1px;
   }
@@ -141,7 +141,7 @@ const FooterContainer = styled.footer`
 
   .footer-divider {
     border-color: rgba(0, 0, 0, 0.05);
-    margin: 20px 0 10px;
+    margin: 10px 0 5px;
   }
 
   .footer-bottom {
