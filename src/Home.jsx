@@ -62,12 +62,12 @@ const Home = () => {
 };
 
 const HomeContainer = styled.div`
-  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
-              url("https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=100&w=2560&auto=format&fit=crop");
+  background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), 
+              url("https://images.unsplash.com/photo-1518611012118-696072aa579a?q=100&w=2560&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  color: white;
+  color: #1a1a1a;
   min-height: 100vh;
   padding-top: 0;
   padding-bottom: 80px;
@@ -142,8 +142,8 @@ const HeroSection = styled.section`
     padding: 0 20px;
     position: relative;
     z-index: 20;
-    h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; }
-    p { font-size: 1.2rem; opacity: 0.9; margin-bottom: 30px; }
+    h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; color: #1a1a1a; }
+    p { font-size: 1.2rem; color: #444; margin-bottom: 30px; }
   }
 
   @media (max-width: 768px) {
@@ -176,25 +176,25 @@ const DetailsGrid = styled.div`
 `;
 
 const DetailCard = styled.div`
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   padding: 50px 40px;
   border-radius: 30px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   text-align: center;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: default;
 
   &:hover { 
     transform: translateY(-10px) scale(1.02);
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 193, 7, 0.4);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 193, 7, 0.8);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   }
-  h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; color: #ffc107; }
-  p { color: rgba(255, 255, 255, 0.8); margin: 5px 0; line-height: 1.6; }
+  h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; color: #ffc107; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  p { color: #555; margin: 5px 0; line-height: 1.6; font-weight: 500; }
 `;
 
 
