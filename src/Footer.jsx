@@ -29,8 +29,8 @@ const Footer = () => {
           {/* Contact Info */}
           <div className="col-md-4 mb-3">
             <h6 className="text-light">Contact Us</h6>
-            <p><MapPin size={16} className="me-2" /> 123 Gym Street, FitCity</p>
-            <p><Phone size={16} className="me-2" /> +1 (555) 123-4567</p>
+            <p><MapPin size={16} className="me-2" /> No.624,Khivraj Building,Anna Salai</p>
+            <p><Phone size={16} className="me-2" /> +91 78248 58436</p>
             <p><Mail size={16} className="me-2" /> support@gymdash.com</p>
 
             {/* Social Icons */}
