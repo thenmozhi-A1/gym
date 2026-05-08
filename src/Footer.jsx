@@ -62,8 +62,7 @@ const Footer = () => {
 };
 
 const FooterContainer = styled.footer`
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
+  background: #ffffff;
   color: #4a5568;
   padding: 80px 0 30px;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
