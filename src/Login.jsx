@@ -12,7 +12,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [loginMethod, setLoginMethod] = useState("password"); // "password" or "biometric"
-  const [biometricState, setBiometricState] = useState("idle"); // "idle", "scanning", "success", "error"
+  const [biometricState, setBiometricState] = useState("idle"); // idle, scanning, success, error
+  const [isEnrolled, setIsEnrolled] = useState(false); // Track if finger scanned during signup
   const [attendanceLog, setAttendanceLog] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -26,8 +27,20 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleBiometricEnroll = () => {
+    setBiometricState("scanning");
+    setTimeout(() => {
+      setBiometricState("success");
+      setIsEnrolled(true);
+    }, 2000);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isNewUser && !isEnrolled) {
+      setError("Please scan your fingerprint to enroll before creating an account.");
+      return;
+    }
     setError("");
 
     // Forgot password flow (no API yet)
@@ -286,20 +299,39 @@ const Login = () => {
                       </InputGroup>
 
                       <InputGroup>
-                        <label><Fingerprint size={16} /> Biometric Enrollment</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: '#1a1a1a', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                          <Fingerprint size={32} color="#ffc107" />
-                          <p style={{ margin: 0, fontSize: '0.85rem', color: '#888' }}>Scan finger to complete registration</p>
+                      <label><Fingerprint size={16} /> Biometric Enrollment</label>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#1a1a1a', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                          <div className={`scanner-small ${isEnrolled ? 'success' : biometricState === 'scanning' ? 'scanning' : ''}`}>
+                            <Fingerprint size={24} color={isEnrolled ? "#4caf50" : "#ffc107"} />
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.85rem', color: isEnrolled ? '#4caf50' : '#888' }}>
+                            {isEnrolled ? 'Fingerprint Enrolled!' : 'Scan finger to complete registration'}
+                          </p>
                         </div>
-                      </InputGroup>
+                        {!isEnrolled && (
+                          <ScanButton 
+                            type="button" 
+                            onClick={handleBiometricEnroll}
+                            disabled={biometricState === "scanning"}
+                            style={{ padding: '8px', fontSize: '0.8rem' }}
+                          >
+                            {biometricState === "scanning" ? "Scanning..." : "Scan to Enroll"}
+                          </ScanButton>
+                        )}
+                      </div>
+                    </InputGroup>
                     </>
                   )}
 
-                  {error && (
+                  {error && loginMethod === "password" && (
                     <ErrorBox>{error}</ErrorBox>
                   )}
 
-                  <SubmitButton type="submit" disabled={loading}>
+                  <SubmitButton 
+                    type="submit" 
+                    disabled={loading || (isNewUser && !isEnrolled)}
+                  >
                     {loading
                       ? (isNewUser ? "Creating Account..." : "Logging in...")
                       : (isNewUser ? "Create Account" : "Login to GymDash")

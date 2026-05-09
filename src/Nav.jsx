@@ -20,7 +20,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top py-0" style={{ height: "70px" }}>
+    <nav className="navbar navbar-expand-lg navbar-dark shadow-sm fixed-top py-0" style={{ height: "70px" }}>
       <div className="container h-100">
         {/* Logo */}
         <Link className="navbar-brand d-flex align-items-center h-100" to="/" onClick={handleNavClick} style={{ overflow: "hidden" }}>

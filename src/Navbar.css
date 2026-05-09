@@ -4,6 +4,12 @@
    We only add hover behavior on desktop.
    ============================================================ */
 
+/* ── Navbar Container ── */
+.navbar {
+  background-color: #1a1a1a !important; /* Professional dark gray for desktop */
+  transition: background-color 0.3s ease;
+}
+
 /* ── General Nav Link Styles ── */
 .nav-link {
   color: rgba(255, 255, 255, 0.8) !important;
