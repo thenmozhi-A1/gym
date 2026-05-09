@@ -164,7 +164,7 @@ const HomeContainer = styled.div`
 
   @media (max-width: 768px) {
     background-attachment: scroll;
-    padding-top: 80px;
+    padding-top: 120px;
   }
 
   .login-corner {
@@ -238,8 +238,8 @@ const HeroSection = styled.section`
     padding: 0 20px;
     position: relative;
     z-index: 20;
-    h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; color:#ffc107; }
-    p { font-size: 1.2rem; color:white; margin-bottom: 30px; }
+    h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; color:#ffc107; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+    p { font-size: 1.2rem; color: #1a1a1a; margin-bottom: 30px; font-weight: 500; }
   }
 
   @media (max-width: 768px) {
