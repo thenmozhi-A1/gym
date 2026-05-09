@@ -68,7 +68,8 @@ const Login = () => {
             email: formData.email,
             password: formData.password,
             membershipType: "Monthly",
-            status: "ACTIVE"
+            status: "ACTIVE",
+            fingerprintEnrolled: true
           })
         });
 
@@ -153,6 +154,13 @@ const Login = () => {
           return;
         }
 
+        // Verify that the biometric sample exists in the database record
+        if (!user.fingerprintEnrolled && user.role !== "ADMIN") {
+          setBiometricState("error");
+          setError("No biometric sample found for this user in the database. Access Denied.");
+          return;
+        }
+
         // ── MEMBERSHIP CHECK ──
         if (user.status !== "ACTIVE") {
           setBiometricState("error");
@@ -202,14 +210,7 @@ const Login = () => {
   return (
     <Container>
       <AuthCard>
-        <div className="tabs">
-          <Tab active={loginMethod === "password"} onClick={() => setLoginMethod("password")}>
-            <LogIn size={18} /> Password
-          </Tab>
-          <Tab active={loginMethod === "biometric"} onClick={() => setLoginMethod("biometric")}>
-            <Fingerprint size={18} /> Biometric
-          </Tab>
-        </div>
+        {/* Tabs removed to mandate Biometric Access */}
         <FormContent>
           {isForgotPassword ? (
             <>
@@ -236,14 +237,60 @@ const Login = () => {
             </>
           ) : (
             <>
-              <h2>{isNewUser ? "Join the Elite" : "Welcome Back"}</h2>
+              <h2>{isNewUser ? "Join the Elite" : "Biometric Access Control"}</h2>
               <p className="subtitle">
                 {isNewUser 
                   ? "Start your fitness journey with GymDash today." 
-                  : "Login to access your personalized dashboard."}
+                  : "Please scan your fingerprint to enter the gym."}
               </p>
 
-              {loginMethod === "password" && (
+              {!isNewUser && (
+                <BiometricSection>
+                  <div className="fingerprint-container">
+                    <div className={`scanner ${biometricState}`}>
+                      <Fingerprint size={80} className="icon" />
+                      <div className="scan-line"></div>
+                    </div>
+                  </div>
+
+                  <div className="status-info">
+                    {biometricState === "idle" && <p>Place your finger on the scanner</p>}
+                    {biometricState === "scanning" && <p className="scanning-text">Searching Database...</p>}
+                    {biometricState === "success" && (
+                      <div className="success-msg">
+                        <ShieldCheck color="#4caf50" size={24} />
+                        <p>Access Granted! {attendanceLog}</p>
+                      </div>
+                    )}
+                    {biometricState === "error" && (
+                      <div className="error-msg">
+                        <ShieldAlert color="#ff5252" size={24} />
+                        <p>{error}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <InputGroup style={{ marginTop: '20px' }}>
+                    <label><Mail size={16} /> Identify Email (Optional)</label>
+                    <input 
+                      type="email" 
+                      name="email" 
+                      placeholder="Auto-recognition enabled" 
+                      onChange={handleInputChange}
+                    />
+                    <p style={{ fontSize: '0.75rem', color: '#555', marginTop: '8px' }}>If scan fails, enter email to identify</p>
+                  </InputGroup>
+
+                  <ScanButton 
+                    onClick={handleBiometricScan} 
+                    disabled={biometricState === "scanning"}
+                  >
+                    {biometricState === "scanning" ? "Verifying..." : "Scan Fingerprint to Login"}
+                  </ScanButton>
+                </BiometricSection>
+              )}
+
+              {isNewUser && (
                 <form onSubmit={handleSubmit}>
                   {isNewUser && (
                     <InputGroup>
@@ -340,51 +387,6 @@ const Login = () => {
                 </form>
               )}
 
-              {loginMethod === "biometric" && (
-                <BiometricSection>
-                  <div className="fingerprint-container">
-                    <div className={`scanner ${biometricState}`}>
-                      <Fingerprint size={80} className="icon" />
-                      <div className="scan-line"></div>
-                    </div>
-                  </div>
-
-                  <div className="status-info">
-                    {biometricState === "idle" && <p>Place your finger on the scanner</p>}
-                    {biometricState === "scanning" && <p className="scanning-text">Scanning Biometrics...</p>}
-                    {biometricState === "success" && (
-                      <div className="success-msg">
-                        <ShieldCheck color="#4caf50" size={24} />
-                        <p>Access Granted! {attendanceLog}</p>
-                      </div>
-                    )}
-                    {biometricState === "error" && (
-                      <div className="error-msg">
-                        <ShieldAlert color="#ff5252" size={24} />
-                        <p>{error}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <InputGroup style={{ marginTop: '20px' }}>
-                    <label><Mail size={16} /> Identify Email (Optional)</label>
-                    <input 
-                      type="email" 
-                      name="email" 
-                      placeholder="Auto-recognition enabled" 
-                      onChange={handleInputChange}
-                    />
-                    <p style={{ fontSize: '0.75rem', color: '#555', marginTop: '8px' }}>If scan fails, enter email to identify</p>
-                  </InputGroup>
-
-                  <ScanButton 
-                    onClick={handleBiometricScan} 
-                    disabled={biometricState === "scanning"}
-                  >
-                    {biometricState === "scanning" ? "Verifying..." : "Scan Fingerprint"}
-                  </ScanButton>
-                </BiometricSection>
-              )}
               
               <div className="auth-footer">
                 {!isNewUser ? (
