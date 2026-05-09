@@ -65,6 +65,10 @@
 
 /* ── Mobile (≤991px) — Bootstrap click-to-open handles everything ── */
 @media (max-width: 991px) {
+  .navbar {
+    background-color: #000000 !important;
+  }
+
   /* Dropdown appears inline (static), no absolute box-shadow */
   .nav-item > .dropdown-menu.show {
     position: static !important;
@@ -72,7 +76,7 @@
     border-radius: 6px !important;
     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
     animation: none !important;
-    background-color: #1e1e1e !important;
+    background-color: #000000 !important;
     margin-top: 4px !important;
   }
 
