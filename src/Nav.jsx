@@ -43,6 +43,7 @@ const Navbar = () => {
               </button>
             </li>
 
+
             {/* Workouts Dropdown */}
             <li className="nav-item dropdown">
               <button className="nav-link dropdown-toggle" id="workoutsDropdown" data-bs-toggle="dropdown">
@@ -90,8 +91,17 @@ const Navbar = () => {
               </ul>
             </li>
 
+            {/* Login Button — ONLY SHOWN IF NOT LOGGED IN */}
+            {!isLoggedIn && (
+              <li className="nav-item">
+                <button className="btn btn-warning fw-bold ms-lg-2" onClick={() => { navigate("/login"); handleNavClick(); }}>
+                  <UserCircle size={18} className="me-1" /> User Login
+                </button>
+              </li>
+            )}
+
             {/* Dashboard Dropdown - ONLY SHOWN IF LOGGED IN */}
-            {localStorage.getItem("isLoggedIn") === "true" && (
+            {isLoggedIn && (
               <li className="nav-item dropdown">
                 <button className="nav-link dropdown-toggle text-warning fw-bold" id="dashboardDropdown" data-bs-toggle="dropdown">
                   Dashboard
@@ -110,54 +120,42 @@ const Navbar = () => {
               </li>
             )}
 
-            {/* Profile Dropdown */}
-            <li className="nav-item dropdown">
-              <button className="btn btn-secondary dropdown-toggle ms-lg-2" id="profileDropdown" data-bs-toggle="dropdown">
-                <UserCircle size={20} className="me-1" />
-                {isLoggedIn ? displayName : "Profile"}
-              </button>
-              <ul className="dropdown-menu dropdown-menu-end">
-
-                {/* User info header — only when logged in */}
-                {isLoggedIn && (
-                  <>
-                    <li>
-                      <div className="px-3 py-2">
-                        <div style={{ fontWeight: 700, fontSize: "0.9rem", color: "#212529" }}>{userName}</div>
-                        <div style={{ fontSize: "0.78rem", color: "#6c757d" }}>{userEmail}</div>
-                      </div>
-                    </li>
-                    <li><hr className="dropdown-divider" /></li>
-                  </>
-                )}
-
-                <li><button className="dropdown-item" onClick={() => { navigate("/myprofile"); handleNavClick(); }}>My Profile</button></li>
-                <li><Link className="dropdown-item" to="/settings" onClick={handleNavClick}>Settings</Link></li>
-                <li><hr className="dropdown-divider" /></li>
-                <li>
-                  <button
-                    className="dropdown-item text-danger"
-                    disabled={!isLoggedIn}
-                    style={{
-                      opacity: !isLoggedIn ? 0.4 : 1,
-                      cursor: !isLoggedIn ? "not-allowed" : "pointer",
-                    }}
-                    onClick={() => {
-                      if (isLoggedIn) {
+            {/* Profile Dropdown - ONLY SHOWN IF LOGGED IN */}
+            {isLoggedIn && (
+              <li className="nav-item dropdown">
+                <button className="btn btn-secondary dropdown-toggle ms-lg-2" id="profileDropdown" data-bs-toggle="dropdown">
+                  <UserCircle size={20} className="me-1" />
+                  {displayName}
+                </button>
+                <ul className="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <div className="px-3 py-2">
+                      <div style={{ fontWeight: 700, fontSize: "0.9rem", color: "#212529" }}>{userName}</div>
+                      <div style={{ fontSize: "0.78rem", color: "#6c757d" }}>{userEmail}</div>
+                    </div>
+                  </li>
+                  <li><hr className="dropdown-divider" /></li>
+                  <li><button className="dropdown-item" onClick={() => { navigate("/myprofile"); handleNavClick(); }}>My Profile</button></li>
+                  <li><Link className="dropdown-item" to="/settings" onClick={handleNavClick}>Settings</Link></li>
+                  <li><hr className="dropdown-divider" /></li>
+                  <li>
+                    <button
+                      className="dropdown-item text-danger"
+                      onClick={() => {
                         localStorage.removeItem("isLoggedIn");
                         localStorage.removeItem("userId");
                         localStorage.removeItem("userName");
                         localStorage.removeItem("userEmail");
                         localStorage.removeItem("userRole");
                         window.location.href = "/";
-                      }
-                    }}
-                  >
-                    Logout
-                  </button>
-                </li>
-              </ul>
-            </li>
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </ul>
+              </li>
+            )}
 
           </ul>
         </div>

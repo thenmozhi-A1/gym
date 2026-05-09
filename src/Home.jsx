@@ -46,13 +46,6 @@ const Home = () => {
 
   return (
     <HomeContainer>
-      {localStorage.getItem("isLoggedIn") !== "true" && (
-        <div className="login-corner">
-          <button className="login-btn" onClick={() => navigate("/login")}>
-            <UserCircle size={18} /> User Login
-          </button>
-        </div>
-      )}
 
       <HeroSection>
         <div className="content">
@@ -107,43 +100,43 @@ const Home = () => {
 
       <EnquirySection>
         <div className="form-container">
-          <h2>Quick <span className="text-warning">Enquiry</span></h2>
-          <p>Have questions? Drop us a message and our experts will get back to you!</p>
+          <h2><span className="text-warning">Enquiry Now</span></h2>
+          <p>Join our Community!</p>
           <form onSubmit={handleSubmit}>
             <div className="input-group">
-              <input 
-                type="text" 
-                name="fullName" 
-                placeholder="Your Full Name" 
-                required 
+              <input
+                type="text"
+                name="fullName"
+                placeholder="Your Full Name"
+                required
                 value={formData.fullName}
                 onChange={handleInputChange}
               />
             </div>
             <div className="input-row">
-              <input 
-                type="email" 
-                name="email" 
-                placeholder="Email Address" 
-                required 
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                required
                 value={formData.email}
                 onChange={handleInputChange}
               />
-              <input 
-                type="tel" 
-                name="phone" 
-                placeholder="Phone Number" 
-                required 
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Phone Number"
+                required
                 value={formData.phone}
                 onChange={handleInputChange}
               />
             </div>
             <div className="input-group">
-              <textarea 
-                name="goals" 
-                placeholder="Your Message / Fitness Goals" 
-                rows="4" 
-                required 
+              <textarea
+                name="goals"
+                placeholder="Your Message / Fitness Goals"
+                rows="4"
+                required
                 value={formData.goals}
                 onChange={handleInputChange}
               ></textarea>
@@ -241,7 +234,7 @@ const HeroSection = styled.section`
     padding: 0 20px;
     position: relative;
     z-index: 20;
-    h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; color: #1a1a1a; }
+    h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; color:#ffc107; }
     p { font-size: 1.2rem; color:white; margin-bottom: 30px; }
   }
 
