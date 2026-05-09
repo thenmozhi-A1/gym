@@ -153,7 +153,7 @@ const HeroSection = styled.section`
     position: relative;
     z-index: 20;
     h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; color: #1a1a1a; }
-    p { font-size: 1.2rem; color: #444; margin-bottom: 30px; }
+    p { font-size: 1.2rem; color:white; margin-bottom: 30px; }
   }
 
   @media (max-width: 768px) {
