@@ -22,6 +22,14 @@ const Login = () => {
     confirmPassword: ""
   });
 
+  // Reset biometric states when switching views
+  React.useEffect(() => {
+    setBiometricState("idle");
+    setIsEnrolled(false);
+    setError("");
+    setAttendanceLog(null);
+  }, [isNewUser, isForgotPassword]);
+
   const handleInputChange = (e) => {
     setError("");
     setFormData({ ...formData, [e.target.name]: e.target.value });
