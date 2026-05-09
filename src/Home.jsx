@@ -19,7 +19,7 @@ const Home = () => {
       <HeroSection>
         <div className="content">
           <Badge>SINCE 2024</Badge>
-          <h1>Elevating Fitness at <span className="text-warning">GymDash</span></h1>
+          <h1>Elevating Fitness at <span className="text-warning">HoneyFit</span></h1>
           <p>
             Welcome to HoneyFit, where fitness becomes a lifestyle.
             “Sweet Energy. Serious Results.” is the motivation that drives us every day.
