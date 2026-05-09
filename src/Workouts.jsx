@@ -47,7 +47,7 @@ const workouts = [
   {
     name: "Weight Loss",
     description: "High-intensity training to burn calories effectively.",
-    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?q=80&w=2069&auto=format&fit=crop"
   },
   {
     name: "Yoga",
@@ -66,11 +66,11 @@ const Workouts = () => {
           <div key={index} className="card mb-4">
             <img src={workout.image} alt={workout.name} className="card-image" />
             <div className="card-details">
-              <p className="text-title">{workout.name}</p>
+              <p className="text-title text-warning">{workout.name}</p>
               <p className="text-body">{workout.description}</p>
             </div>
-            <button 
-              className="card-button" 
+            <button
+              className="card-button"
               onClick={() => navigate(`/workout/${workout.name.toLowerCase().replace(/ /g, "-")}`)}
             >
               More Info
@@ -86,8 +86,8 @@ const StyledWrapper = styled.div`
   .workout-container {
     display: flex;
     flex-wrap: wrap;
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                url("https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=2070&auto=format&fit=crop");
+    background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), 
+                url("https://images.unsplash.com/photo-1571902943202-507ec2618e8f?q=80&w=2075&auto=format&fit=crop");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -99,19 +99,20 @@ const StyledWrapper = styled.div`
 }
 
   .card {
-    width: 250px; /* Increased size for better spacing */
-    min-height: 350px; /* Allows dynamic height */
-    border-radius: 15px;
-    background: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    padding: 15px;
+    width: 280px;
+    min-height: 380px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 20px;
     position: relative;
-    border: 2px solid #c3c6ce;
-    transition: 0.5s ease-out;
+    transition: all 0.4s ease;
     overflow: hidden;
     text-align: center;
-     margin-top: 20px;
-
+    margin-top: 20px;
   }
 
   .card-image {
@@ -119,6 +120,11 @@ const StyledWrapper = styled.div`
     height: 190px;
     object-fit: cover;
     border-radius: 10px;
+    transition: transform 0.5s ease;
+  }
+
+  .card:hover .card-image {
+    transform: scale(1.1);
   }
 
   .card-details {
@@ -128,33 +134,45 @@ const StyledWrapper = styled.div`
 
   .card-button {
     width: 80%;
-    border-radius: 10px;
+    border-radius: 50px;
     border: none;
-    background-color: #008bf8;
-    color: #fff;
-    font-size: 1rem;
-    padding: 8px;
+    background-color: #ffc107;
+    color: #000;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 10px;
     position: absolute;
     left: 50%;
-    bottom: 15px;
-    transform: translateX(-50%);
+    bottom: 20px;
+    transform: translateX(-50%) translateY(20px);
     opacity: 0;
-    transition: 0.3s ease-out;
+    transition: all 0.3s ease;
+  }
+
+  .card:hover .card-button {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 
   .text-body {
-    color: rgb(134, 134, 134);
-    font-size: 0.9rem;
+    color: #444 !important;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    padding: 0 10px;
   }
 
   .text-title {
     font-size: 1.3em;
     font-weight: bold;
+    color: #1a1a1a;
+    margin-bottom: 10px;
   }
 
   .card:hover {
-    border-color: #008bf8;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+    transform: translateY(-10px);
+    border-color: #ffc107;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   }
 
   .card:hover .card-button {

@@ -210,7 +210,15 @@ const Nutrition = () => {
           <div className="row justify-content-center g-4">
             {/* Table Column */}
             <div className={activeGoal ? "col-lg-5 transition-all" : "col-lg-10 transition-all"}>
-              <GlassCard className="card overflow-hidden rounded-4">
+              <GlassCard 
+                className="card overflow-hidden rounded-4"
+                style={{
+                  background: `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
+                               url("https://images.unsplash.com/photo-1571902943202-507ec2618e8f?q=80&w=2075&auto=format&fit=crop")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
                 <style>
                   {`
                     .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -219,6 +227,8 @@ const Nutrition = () => {
                     .clickable-row:hover { background-color: rgba(255, 193, 7, 0.05) !important; }
                     .active-goal-row { background-color: rgba(255, 193, 7, 0.15) !important; border-left: 5px solid #ffc107; }
                     .transition-all { transition: all 0.5s ease; }
+                    .form-control { background: rgba(255, 255, 255, 0.4) !important; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3); }
+                    .form-control:focus { background: rgba(255, 255, 255, 0.6) !important; box-shadow: 0 0 10px rgba(255, 193, 7, 0.2); border-color: #ffc107; }
                   `}
                 </style>
                 <div className="hide-scrollbar">
@@ -521,7 +531,7 @@ const Nutrition = () => {
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-12">
-              <div className="card border-0 shadow-lg p-4 p-md-5 rounded-4 bg-white">
+              <GlassCard className="card border-0 shadow-lg p-4 p-md-5 rounded-4">
                 <div className="row align-items-center mb-5 text-center text-lg-start">
                   <div className="col-lg-8">
                     <h2 className="display-5 fw-bold mb-2">Get Personalized Advice</h2>
@@ -593,7 +603,7 @@ const Nutrition = () => {
                     </div>
                   </div>
                 </form>
-              </div>
+              </GlassCard>
             </div>
           </div>
         </div>
@@ -614,10 +624,10 @@ const PageWrapper = styled.div`
 `;
 
 const GlassCard = styled.div`
-  background: rgba(255, 255, 255, 0.7) !important;
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
   border-radius: 20px !important;
 `;
 

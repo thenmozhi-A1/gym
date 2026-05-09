@@ -9,6 +9,7 @@ import {
 import Login from "./Login";
 import Signup from "./Signup";
 import Home from "./Home";
+import About from "./About";
 import Nav from "./Nav";
 import Footer from "./Footer";
 import Dashboard from "./Dashboard";
@@ -41,6 +42,7 @@ function LayoutWrapper() {
 
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />

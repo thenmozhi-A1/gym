@@ -49,8 +49,7 @@ const Home = () => {
 
       <HeroSection>
         <div className="content">
-          <Badge>SINCE 2024</Badge>
-          <h1>Elevating Fitness at <span className="text-warning">HoneyFit</span></h1>
+          <h1>Elevating Fitness at <span className="text-warning">HoneyFit</span> <span style={{ fontSize: '1.2rem', color: '#ffc107', opacity: 0.8, verticalAlign: 'middle' }}>Since 2024</span></h1>
           <p>
             Welcome to HoneyFit, where fitness becomes a lifestyle.
             “Sweet Energy. Serious Results.” is the motivation that drives us every day.
@@ -160,7 +159,7 @@ const HomeContainer = styled.div`
   background-attachment: fixed;
   color: #1a1a1a;
   min-height: 100vh;
-  padding-top: 0;
+  padding-top: 75px;
   padding-bottom: 80px;
 
   .login-corner {
@@ -229,7 +228,7 @@ const HeroSection = styled.section`
   padding-top: 0;
   
   .content {
-    margin-top: -50px; /* Moves button/text slightly upside */
+    margin-top: 20px; 
     max-width: 800px;
     padding: 0 20px;
     position: relative;

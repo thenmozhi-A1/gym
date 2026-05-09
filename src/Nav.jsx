@@ -52,6 +52,13 @@ const Navbar = () => {
               </button>
             </li>
 
+            {/* About */}
+            <li className="nav-item">
+              <button className="btn btn-outline-warning me-2" onClick={() => { navigate("/about"); handleNavClick(); }}>
+                About
+              </button>
+            </li>
+
 
             {/* Workouts Dropdown */}
             <li className="nav-item dropdown">

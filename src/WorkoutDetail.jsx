@@ -190,7 +190,7 @@ const WorkoutDetail = () => {
             <Badge>WORKOUT GUIDE</Badge>
             <h1>{workout.name}</h1>
             <p className="desc">{workout.description}</p>
-            
+
             <div className="stat-grid">
               <div className="stat-item">
                 <Target className="icon" size={24} />
@@ -250,8 +250,8 @@ const WorkoutDetail = () => {
 };
 
 const PageContainer = styled.div`
-  background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
-              url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop");
+  background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), 
+              url("https://images.unsplash.com/photo-1571902943202-507ec2618e8f?q=80&w=2075&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -272,11 +272,12 @@ const BackButton = styled.button`
   margin-right: auto;
   max-width: 1200px;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: all 0.3s;
   padding: 0 20px 20px;
 
   &:hover {
-    color: #008bf8;
+    color: #ffc107;
+    transform: translateX(-5px);
   }
 `;
 
@@ -289,12 +290,13 @@ const HeroSection = styled.div`
     display: grid;
     grid-template-columns: 1fr 1.2fr;
     gap: 50px;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
+    background: transparent;
+    backdrop-filter: none;
     border-radius: 30px;
     overflow: hidden;
     box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: none;
+    background: white; /* Base background */
     
     @media (max-width: 992px) {
       grid-template-columns: 1fr;
@@ -303,27 +305,39 @@ const HeroSection = styled.div`
 
   .image-wrapper {
     height: 100%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain; /* Changed to contain to see the full illustration */
+      padding: 20px;
       min-height: 400px;
     }
   }
 
   .text-wrapper {
     padding: 60px;
+    background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
+                url("https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=2070&auto=format&fit=crop");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     
     h1 {
       font-size: 3rem;
       font-weight: 800;
       margin-bottom: 20px;
-      color: #1a1a1a;
+      color: #000000;
     }
 
     .desc {
       font-size: 1.1rem;
-      color: #444;
+      color: #000000;
       line-height: 1.7;
       margin-bottom: 40px;
     }
@@ -348,7 +362,7 @@ const HeroSection = styled.div`
       }
       
       small {
-        color: #888;
+        color: #000000;
         display: block;
         text-transform: uppercase;
         font-weight: 700;
@@ -390,8 +404,10 @@ const ContentSection = styled.div`
   }
 
   .instruction-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
+    background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), 
+                url("https://images.unsplash.com/photo-1518310383802-640c2de311b2?q=80&w=2070&auto=format&fit=crop");
+    background-size: cover;
+    background-position: center;
     padding: 50px;
     border-radius: 25px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.08);
@@ -404,6 +420,7 @@ const ContentSection = styled.div`
       margin-bottom: 30px;
       display: flex;
       align-items: center;
+      color: #1a1a1a;
     }
   }
 
@@ -418,7 +435,7 @@ const ContentSection = styled.div`
       padding-left: 60px;
       margin-bottom: 30px;
       font-size: 1.1rem;
-      color: #222;
+      color: #000000;
       line-height: 1.6;
 
       &::before {
@@ -465,13 +482,16 @@ const Sidebar = styled.div`
   .sticky-box {
     position: sticky;
     top: 120px;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
+    background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), 
+                url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop");
+    background-size: cover;
+    background-position: center;
     padding: 40px;
     border-radius: 25px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.08);
     border: 1px solid rgba(255, 255, 255, 0.5);
     text-align: center;
+    color: #1a1a1a;
 
     h3 {
       font-size: 1.5rem;
@@ -480,7 +500,7 @@ const Sidebar = styled.div`
     }
 
     p {
-      color: #444;
+  color: #000000;
       margin-bottom: 30px;
     }
 
