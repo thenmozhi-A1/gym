@@ -257,7 +257,7 @@ const DetailsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   max-width: 1100px;
-  margin: 60px auto 0; /* Added 60px top margin to move cards downside */
+  margin: 20px auto 0;
   padding: 0 20px;
 
   @media (max-width: 600px) {
@@ -291,7 +291,7 @@ const DetailCard = styled.div`
 
 const EnquirySection = styled.section`
   max-width: 900px;
-  margin: 80px auto 20px;
+  margin: 40px auto 20px;
   padding: 0 20px;
 
   .form-container {
