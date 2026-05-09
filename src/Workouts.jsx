@@ -99,8 +99,8 @@ const StyledWrapper = styled.div`
 }
 
   .card {
-    width: 280px;
-    min-height: 380px;
+    width: 320px;
+    min-height: 400px;
     border-radius: 24px;
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(12px) saturate(180%);
@@ -113,6 +113,13 @@ const StyledWrapper = styled.div`
     overflow: hidden;
     text-align: center;
     margin-top: 20px;
+
+    @media (max-width: 576px) {
+      width: 100%;
+      max-width: 350px;
+      min-height: auto;
+      padding: 15px;
+    }
   }
 
   .card-image {

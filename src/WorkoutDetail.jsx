@@ -328,11 +328,19 @@ const HeroSection = styled.div`
     flex-direction: column;
     justify-content: center;
     
+    @media (max-width: 768px) {
+      padding: 30px;
+    }
+
     h1 {
       font-size: 3rem;
       font-weight: 800;
       margin-bottom: 20px;
       color: #000000;
+      
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
     }
 
     .desc {
@@ -340,6 +348,11 @@ const HeroSection = styled.div`
       color: #000000;
       line-height: 1.7;
       margin-bottom: 40px;
+      
+      @media (max-width: 768px) {
+        font-size: 1rem;
+        margin-bottom: 20px;
+      }
     }
   }
 

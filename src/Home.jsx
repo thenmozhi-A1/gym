@@ -162,6 +162,11 @@ const HomeContainer = styled.div`
   padding-top: 75px;
   padding-bottom: 80px;
 
+  @media (max-width: 768px) {
+    background-attachment: scroll;
+    padding-top: 80px;
+  }
+
   .login-corner {
     position: absolute;
     top: 110px;
@@ -238,16 +243,17 @@ const HeroSection = styled.section`
   }
 
   @media (max-width: 768px) {
-    min-height: 70vh;
+    height: auto;
+    padding: 60px 0;
     .content {
       padding: 0 16px;
-      h1 { font-size: 2.2rem; }
+      h1 { font-size: 2rem; }
       p { font-size: 1rem; }
     }
   }
 
   @media (max-width: 480px) {
-    .content h1 { font-size: 1.7rem; }
+    .content h1 { font-size: 1.8rem; }
   }
 `;
 
@@ -278,6 +284,11 @@ const DetailCard = styled.div`
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: default;
 
+  @media (max-width: 600px) {
+    padding: 30px 20px;
+    border-radius: 20px;
+  }
+
   &:hover { 
     transform: translateY(-10px) scale(1.02);
     background: rgba(255, 255, 255, 0.6);
@@ -300,6 +311,11 @@ const EnquirySection = styled.section`
     padding: 60px;
     border-radius: 40px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+
+    @media (max-width: 768px) {
+      padding: 30px 20px;
+      border-radius: 25px;
+    }
     text-align: center;
 
     h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; color: #1a1a1a; }
