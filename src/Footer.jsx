@@ -12,10 +12,9 @@ const Footer = () => {
 
           {/* GymDash Info */}
           <div className="col-md-4 mb-1">
-            <h5 className="brand-title">GymDash</h5>
+            <h5 className="brand-title">HoneyFit</h5>
             <p className="footer-desc">
-              Your one-stop fitness companion for tracking workouts, nutrition, and progress. 
-              Join the elite community today.
+              HoneyFit is more than just a gym — it’s a community built to inspire strength, confidence, and healthy living. With modern equipment, expert trainers, and a motivating atmosphere, HoneyFit helps you push beyond limits and achieve your fitness goals every day.
             </p>
           </div>
 
@@ -37,10 +36,10 @@ const Footer = () => {
               <MapPin size={16} /> <span>No.624, Khivraj Building, Anna Salai</span>
             </div>
             <div className="contact-item">
-              <Phone size={16} /> <span>+91 78248 58436</span>
+              <Phone size={16} /> <span>+91 84891 02133</span>
             </div>
             <div className="contact-item">
-              <Mail size={16} /> <span>support@gymdash.com</span>
+              <Mail size={16} /> <span>honeyfit@gmail.com</span>
             </div>
 
             {/* Social Icons */}

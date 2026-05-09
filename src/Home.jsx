@@ -1,10 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { MapPin, Clock, Phone, Mail, Award, Shield, Zap, UserCircle } from "lucide-react";
+import { MapPin, Clock, Phone, Mail, Award, Shield, Zap, UserCircle, Send } from "lucide-react";
+
+const API_BASE = "https://gymj-9.onrender.com/api";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    goals: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${API_BASE}/consultations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        alert("Enquiry submitted successfully! We will contact you soon.");
+        setFormData({ fullName: "", email: "", phone: "", goals: "" });
+      } else {
+        alert("Failed to submit enquiry. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting enquiry:", error);
+      alert("Something went wrong. Please check your connection.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <HomeContainer>
@@ -66,6 +104,56 @@ const Home = () => {
           <p>Email: honeyfit@gmail.com</p>
         </DetailCard>
       </DetailsGrid>
+
+      <EnquirySection>
+        <div className="form-container">
+          <h2>Quick <span className="text-warning">Enquiry</span></h2>
+          <p>Have questions? Drop us a message and our experts will get back to you!</p>
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <input 
+                type="text" 
+                name="fullName" 
+                placeholder="Your Full Name" 
+                required 
+                value={formData.fullName}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="input-row">
+              <input 
+                type="email" 
+                name="email" 
+                placeholder="Email Address" 
+                required 
+                value={formData.email}
+                onChange={handleInputChange}
+              />
+              <input 
+                type="tel" 
+                name="phone" 
+                placeholder="Phone Number" 
+                required 
+                value={formData.phone}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="input-group">
+              <textarea 
+                name="goals" 
+                placeholder="Your Message / Fitness Goals" 
+                rows="4" 
+                required 
+                value={formData.goals}
+                onChange={handleInputChange}
+              ></textarea>
+            </div>
+            <button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Sending..." : <>Send Message <Send size={18} /></>}
+            </button>
+          </form>
+        </div>
+      </EnquirySection>
 
     </HomeContainer>
   );
@@ -145,9 +233,10 @@ const HeroSection = styled.section`
   text-align: center;
   color: white;
   position: relative;
-  padding-top: 56px;
-
+  padding-top: 0;
+  
   .content {
+    margin-top: -50px; /* Moves button/text slightly upside */
     max-width: 800px;
     padding: 0 20px;
     position: relative;
@@ -175,7 +264,7 @@ const DetailsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   max-width: 1100px;
-  margin: 0 auto;
+  margin: 60px auto 0; /* Added 60px top margin to move cards downside */
   padding: 0 20px;
 
   @media (max-width: 600px) {
@@ -205,6 +294,90 @@ const DetailCard = styled.div`
   }
   h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; color: #ffc107; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
   p { color: #555; margin: 5px 0; line-height: 1.6; font-weight: 500; }
+`;
+
+const EnquirySection = styled.section`
+  max-width: 900px;
+  margin: 80px auto 20px;
+  padding: 0 20px;
+
+  .form-container {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 60px;
+    border-radius: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    text-align: center;
+
+    h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; color: #1a1a1a; }
+    p { color: #555; margin-bottom: 40px; font-weight: 500; }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      .input-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        @media (max-width: 600px) { grid-template-columns: 1fr; }
+      }
+
+      input, textarea {
+        width: 100%;
+        padding: 15px 25px;
+        border-radius: 15px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.8);
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+
+        &:focus {
+          outline: none;
+          border-color: #ffc107;
+          box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.1);
+          background: #fff;
+        }
+      }
+
+      button {
+        background: #ffc107;
+        color: black;
+        border: none;
+        padding: 18px;
+        border-radius: 15px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+
+        &:hover {
+          background: #e5ac00;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 20px rgba(255, 193, 7, 0.3);
+        }
+
+        &:disabled {
+          background: #ccc;
+          cursor: not-allowed;
+          transform: none;
+        }
+      }
+    }
+
+    @media (max-width: 600px) {
+      padding: 30px 20px;
+      h2 { font-size: 1.8rem; }
+    }
+  }
 `;
 
 
