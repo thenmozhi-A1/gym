@@ -10,8 +10,8 @@ const Navbar = () => {
 
   // Read logged-in user from localStorage
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  const userName   = localStorage.getItem("userName") || "";
-  const userEmail  = localStorage.getItem("userEmail") || "";
+  const userName = localStorage.getItem("userName") || "";
+  const userEmail = localStorage.getItem("userEmail") || "";
   // Show first name only in the button label
   const displayName = userName ? userName.split(" ")[0] : "Profile";
 
@@ -24,7 +24,7 @@ const Navbar = () => {
       <div className="container">
         {/* Logo */}
         <Link className="navbar-brand fw-bold text-warning" to="/" onClick={handleNavClick}>
-          GymDash
+          HoneyFit
         </Link>
 
         {/* Toggle Button */}
@@ -135,21 +135,21 @@ const Navbar = () => {
                 <li><Link className="dropdown-item" to="/settings" onClick={handleNavClick}>Settings</Link></li>
                 <li><hr className="dropdown-divider" /></li>
                 <li>
-                  <button 
-                    className="dropdown-item text-danger" 
+                  <button
+                    className="dropdown-item text-danger"
                     disabled={!isLoggedIn}
                     style={{
                       opacity: !isLoggedIn ? 0.4 : 1,
                       cursor: !isLoggedIn ? "not-allowed" : "pointer",
                     }}
-                    onClick={() => { 
+                    onClick={() => {
                       if (isLoggedIn) {
                         localStorage.removeItem("isLoggedIn");
                         localStorage.removeItem("userId");
                         localStorage.removeItem("userName");
                         localStorage.removeItem("userEmail");
                         localStorage.removeItem("userRole");
-                        window.location.href = "/"; 
+                        window.location.href = "/";
                       }
                     }}
                   >

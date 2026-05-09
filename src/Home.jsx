@@ -21,11 +21,21 @@ const Home = () => {
           <Badge>SINCE 2024</Badge>
           <h1>Elevating Fitness at <span className="text-warning">GymDash</span></h1>
           <p>
-            GymDash was founded with a single mission: to provide an inclusive,
-            high-performance environment where every individual can unlock their
-            true physical potential. From elite athletes to fitness beginners,
-            our state-of-the-art facility and expert coaches are here to guide
-            your journey.
+            Welcome to HoneyFit, where fitness becomes a lifestyle.
+            “Sweet Energy. Serious Results.” is the motivation that drives us every day.
+            At HoneyFit, we help you build strength, confidence, and discipline.
+            Our gym is designed with modern equipment and a powerful training environment.
+            Whether you are a beginner or a fitness enthusiast, your journey starts here.
+            “Where Strength Meets Confidence.” — that’s the HoneyFit experience.
+            Train with certified coaches who guide you toward real transformation.
+            Push your limits with cardio, strength training, and personalized workouts.
+            Every drop of sweat brings you one step closer to your goals.
+            “Built by Discipline, Powered by HoneyFit.” inspires our community to stay focused.
+            We believe fitness is not only about the body but also about mindset.
+            Feel motivated, energized, and supported every single day.
+            “Transform Your Body, Empower Your Life.” is more than a quote — it’s our mission.
+            Join a positive fitness community that motivates you to become your best self.
+            HoneyFit — “Strong Looks Good on You.”
           </p>
           <div className="cta-row">
             <button className="btn btn-warning fw-bold px-5 py-3 rounded-pill shadow" onClick={() => navigate("/userdashboard")}>
@@ -39,7 +49,7 @@ const Home = () => {
         <DetailCard>
           <MapPin size={32} className="text-warning mb-3" />
           <h3>Our Location</h3>
-          <p>123 Gym Street, Elite Plaza, FitCity, 560001</p>
+          <p>No.624,Kivraj Building,Anna Salai,Chennai-600006.</p>
         </DetailCard>
 
         <DetailCard>
@@ -52,8 +62,8 @@ const Home = () => {
         <DetailCard>
           <Phone size={32} className="text-warning mb-3" />
           <h3>Contact Us</h3>
-          <p>Phone: +1 (555) 123-4567</p>
-          <p>Email: info@gymdash.com</p>
+          <p>Phone: +91 84891 02133</p>
+          <p>Email: honeyfit@gmail.com</p>
         </DetailCard>
       </DetailsGrid>
 
