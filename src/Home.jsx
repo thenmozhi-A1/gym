@@ -76,7 +76,13 @@ const Home = () => {
       </HeroSection>
 
       <DetailsGrid>
-        <DetailCard>
+        <DetailCard 
+          as="a" 
+          href="https://www.google.com/maps/dir//B%26Y+Technologies,+Fourth+Floor,+No+624,+Khivraj+Building,+Third+Floor,+Anna+Salai,+Thousand+Lights+West,+Chennai,+Tamil+Nadu+600006/@13.0482176,80.2586624,14z/data=!4m8!4m7!1m0!1m5!1m1!1s0x3a5267087fbfe2a9:0x844bddefe9759785!2m2!1d80.2527559!2d13.0538928?entry=ttu&g_ep=EgoyMDI2MDUwNi4wIKXMDSoASAFQAw%3D%3D" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          style={{ textDecoration: 'none' }}
+        >
           <MapPin size={32} className="text-warning mb-3" />
           <h3>Our Location</h3>
           <p>No.624,Kivraj Building,Anna Salai,Chennai-600006.</p>
@@ -282,7 +288,8 @@ const DetailCard = styled.div`
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   text-align: center;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  cursor: default;
+  cursor: ${props => props.as === 'a' ? 'pointer' : 'default'};
+  display: block;
 
   @media (max-width: 600px) {
     padding: 30px 20px;
