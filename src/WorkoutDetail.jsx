@@ -321,7 +321,7 @@ const HeroSection = styled.div`
   .text-wrapper {
     padding: 60px;
     background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
-                url("https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=2070&auto=format&fit=crop");
+               
     background-size: cover;
     background-position: center;
     display: flex;
