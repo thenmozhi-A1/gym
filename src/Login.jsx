@@ -49,11 +49,12 @@ const Login = () => {
   const [biometricState, setBiometricState] = useState("idle");
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [attendanceLog, setAttendanceLog] = useState(null);
-  const [scanProgress, setScanProgress] = useState(0); // 0-100 for mobile hold progress
+  const [scanProgress, setScanProgress] = useState(0);
   const touchSamples = React.useRef([]);
   const holdTimer    = React.useRef(null);
   const progressTimer = React.useRef(null);
   const IS_MOBILE = React.useMemo(() => isMobileDevice(), []);
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -67,6 +68,7 @@ const Login = () => {
     setIsEnrolled(false);
     setError("");
     setAttendanceLog(null);
+    setIsAdminLogin(false);
   }, [isNewUser, isForgotPassword]);
 
   const handleInputChange = (e) => {
@@ -199,6 +201,29 @@ const Login = () => {
       if (err.name === "InvalidStateError") { setBiometricState("success"); setIsEnrolled(true); }
       else setEnrollError(`Enrollment failed: ${err.message || err.name}`);
     }
+  };
+
+  // ── Admin password login (no fingerprint required) ──────────
+  const handleAdminLogin = async (e) => {
+    e.preventDefault();
+    setError(""); setLoading(true);
+    try {
+      const res  = await fetch(`${API_BASE}/users/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "Invalid credentials."); return; }
+      if (data.role !== "ADMIN") { setError("Access denied. This login is for admins only."); return; }
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userId",    data.id);
+      localStorage.setItem("userName",  data.fullName);
+      localStorage.setItem("userEmail", data.email);
+      localStorage.setItem("userRole",  data.role);
+      navigate("/AdminDashboard"); window.location.reload();
+    } catch { setError("Cannot connect to server."); }
+    finally   { setLoading(false); }
   };
 
   const handleSubmit = async (e) => {
@@ -608,14 +633,49 @@ const Login = () => {
               )}
 
               
+              {isAdminLogin && (
+                <AdminLoginBox>
+                  <div className="admin-badge">
+                    <span className="lock">🔒</span>
+                    <div>
+                      <span className="title">Admin Secure Access</span>
+                      <span className="sub">Enter your admin credentials below</span>
+                    </div>
+                  </div>
+                  <form onSubmit={handleAdminLogin}>
+                    <InputGroup>
+                      <label><Mail size={16} /> Admin Email</label>
+                      <input type="email" name="email" placeholder="admin@gymhoney.com" required onChange={handleInputChange} />
+                    </InputGroup>
+                    <InputGroup>
+                      <label><Lock size={16} /> Admin Password</label>
+                      <input type="password" name="password" placeholder="••••••••" required onChange={handleInputChange} />
+                    </InputGroup>
+                    {error && <ErrorBox>{error}</ErrorBox>}
+                    <SubmitButton type="submit" disabled={loading}>
+                      {loading ? 'Authenticating…' : '🔒 Login as Admin'}
+                    </SubmitButton>
+                  </form>
+                </AdminLoginBox>
+              )}
+
               <div className="auth-footer">
-                {!isNewUser ? (
+                {!isNewUser && !isAdminLogin ? (
                   <a href="#" onClick={(e) => { e.preventDefault(); setIsNewUser(true); }}>
                     New User? Create Account
+                  </a>
+                ) : isAdminLogin ? (
+                  <a href="#" onClick={(e) => { e.preventDefault(); setIsAdminLogin(false); }}>
+                    ← Back to Member Login
                   </a>
                 ) : (
                   <a href="#" onClick={(e) => { e.preventDefault(); setIsNewUser(false); }}>
                     Already have an account? Login
+                  </a>
+                )}
+                {!isAdminLogin && !isNewUser && (
+                  <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setIsAdminLogin(true); setIsNewUser(false); setError(""); }}>
+                    🔒 Admin Access
                   </a>
                 )}
               </div>
@@ -708,6 +768,7 @@ const FormContent = styled.div`
     justify-content: center;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
     
     a {
       color: #888;
@@ -715,6 +776,15 @@ const FormContent = styled.div`
       font-size: 0.85rem;
       transition: color 0.3s ease;
       &:hover { color: #ffc107; }
+    }
+
+    .admin-link {
+      color: #444;
+      font-size: 0.75rem;
+      border: 1px solid #2a2a2a;
+      padding: 3px 10px;
+      border-radius: 20px;
+      &:hover { color: #ffc107; border-color: #ffc107; }
     }
 
     .divider {
@@ -1146,6 +1216,47 @@ const MobileTouchPad = styled.div`
   @keyframes sweep {
     0%   { top: 0%; }
     100% { top: 100%; }
+  }
+`;
+
+const AdminLoginBox = styled.div`
+  background: #0d0d0d;
+  border: 1px solid rgba(255, 193, 7, 0.25);
+  border-top: 3px solid #ffc107;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 10px;
+
+  .admin-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+
+    .lock {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    div {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .title {
+      color: #ffc107;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+    }
+
+    .sub {
+      color: #555;
+      font-size: 0.75rem;
+    }
   }
 `;
 
