@@ -21,6 +21,23 @@ const isWebAuthnSupported = () =>
   window.PublicKeyCredential !== undefined &&
   typeof window.PublicKeyCredential === "function";
 
+// ── Mobile helpers ────────────────────────────────────────────
+const isMobileDevice = () =>
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
+  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+const buildMobileHash = (samples) => {
+  if (!samples.length) return `fp_${Date.now()}`;
+  const n = samples.length;
+  const rx = Math.round(samples.reduce((s, t) => s + t.rx, 0) / n);
+  const ry = Math.round(samples.reduce((s, t) => s + t.ry, 0) / n);
+  const f  = Math.round(samples.reduce((s, t) => s + t.f,  0) / n * 20);
+  const key = `${rx}:${ry}:${f}`;
+  let h = 0x811c9dc5;
+  for (let i = 0; i < key.length; i++) { h ^= key.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
+  return `M${h.toString(16)}`;
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const [isNewUser, setIsNewUser] = useState(false);
@@ -29,9 +46,14 @@ const Login = () => {
   const [error, setError] = useState("");
   const [enrollError, setEnrollError] = useState("");
   const [loginMethod, setLoginMethod] = useState("password");
-  const [biometricState, setBiometricState] = useState("idle"); // idle, scanning, success, error
+  const [biometricState, setBiometricState] = useState("idle");
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [attendanceLog, setAttendanceLog] = useState(null);
+  const [scanProgress, setScanProgress] = useState(0); // 0-100 for mobile hold progress
+  const touchSamples = React.useRef([]);
+  const holdTimer    = React.useRef(null);
+  const progressTimer = React.useRef(null);
+  const IS_MOBILE = React.useMemo(() => isMobileDevice(), []);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -52,77 +74,106 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // ── Mobile touch handlers (no PIN, pure touch) ───────────────
+  const startMobileScan = (e, onComplete) => {
+    e.preventDefault();
+    if (biometricState === 'success') return;
+    setEnrollError(""); setError("");
+    touchSamples.current = [];
+    setScanProgress(0);
+    setBiometricState('scanning');
+    const t = e.touches[0];
+    touchSamples.current.push({ rx: t.radiusX || 14, ry: t.radiusY || 14, f: t.force || 0.5 });
+    // Progress bar over 2.5s
+    let p = 0;
+    progressTimer.current = setInterval(() => { p = Math.min(p + 2, 100); setScanProgress(p); }, 50);
+    holdTimer.current = setTimeout(() => {
+      clearInterval(progressTimer.current);
+      setScanProgress(100);
+      onComplete(touchSamples.current);
+    }, 2500);
+  };
+
+  const moveMobileScan = (e) => {
+    e.preventDefault();
+    if (biometricState !== 'scanning') return;
+    const t = e.touches[0];
+    touchSamples.current.push({ rx: t.radiusX || 14, ry: t.radiusY || 14, f: t.force || 0.5 });
+  };
+
+  const cancelMobileScan = () => {
+    clearTimeout(holdTimer.current); clearInterval(progressTimer.current);
+    if (biometricState === 'scanning') {
+      setBiometricState('idle'); setScanProgress(0);
+      setEnrollError('Hold your finger steady for 2–3 seconds.');
+    }
+  };
+
+  const completeMobileEnroll = (samples) => {
+    const hash = buildMobileHash(samples);
+    const store = JSON.parse(localStorage.getItem('webauthnCredentials') || '{}');
+    store[formData.email] = hash;
+    localStorage.setItem('webauthnCredentials', JSON.stringify(store));
+    localStorage.setItem('lastEnrolledEmail', formData.email);
+    setBiometricState('success'); setIsEnrolled(true);
+  };
+
+  const completeMobileLogin = async (samples) => {
+    const store = JSON.parse(localStorage.getItem('webauthnCredentials') || '{}');
+    const last  = localStorage.getItem('lastEnrolledEmail');
+    const email = formData.email || last;
+    if (!email || !store[email]) {
+      setBiometricState('error');
+      setError('No fingerprint found. Enter your email or re-register.');
+      return;
+    }
+    try {
+      const res  = await fetch(`${API_BASE}/users`);
+      const users = await res.json();
+      const user  = users.find(u => u.email === email);
+      if (!user) { setBiometricState('error'); setError('No account linked to this fingerprint.'); return; }
+      if (!user.fingerprintEnrolled && user.role !== 'ADMIN') { setBiometricState('error'); setError('No biometric record. Please re-register.'); return; }
+      if (user.status !== 'ACTIVE') { setBiometricState('error'); setError('ACCESS DENIED: Membership expired.'); return; }
+      const now = new Date(); const ts = now.toLocaleTimeString(); const dk = now.toLocaleDateString();
+      const att = JSON.parse(localStorage.getItem('attendance') || '{}');
+      if (!att[dk]) { att[dk] = { entry: ts, exit: null }; setAttendanceLog(`Entry at ${ts}`); }
+      else if (!att[dk].exit) { att[dk].exit = ts; setAttendanceLog(`Exit at ${ts}`); }
+      else setAttendanceLog('Session complete for today.');
+      localStorage.setItem('attendance', JSON.stringify(att));
+      setBiometricState('success');
+      localStorage.setItem('isLoggedIn','true'); localStorage.setItem('userId', user.id);
+      localStorage.setItem('userName', user.fullName); localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('userRole', user.role);
+      setTimeout(() => { navigate(user.role === 'ADMIN' ? '/AdminDashboard' : '/userdashboard'); window.location.reload(); }, 1500);
+    } catch { setBiometricState('error'); setError('Cannot connect to server.'); }
+  };
+
+  // ── Desktop WebAuthn enroll ───────────────────────────────────
   const handleBiometricEnroll = async () => {
     setEnrollError("");
-
-    if (!isWebAuthnSupported()) {
-      setEnrollError("Your browser or device does not support biometric authentication. Please use a modern browser on a device with a fingerprint sensor or Windows Hello.");
-      return;
-    }
-
-    if (!formData.email) {
-      setEnrollError("Please enter your email address first before enrolling your fingerprint.");
-      return;
-    }
-
+    if (!formData.email) { setEnrollError("Enter your email first."); return; }
+    if (!isWebAuthnSupported()) { setEnrollError("WebAuthn not supported on this browser."); return; }
     setBiometricState("scanning");
-
     try {
-      // Create a random challenge
-      const challenge = new Uint8Array(32);
-      window.crypto.getRandomValues(challenge);
-
-      // Encode the user email as a user ID buffer
+      const challenge = new Uint8Array(32); window.crypto.getRandomValues(challenge);
       const userId = new TextEncoder().encode(formData.email);
-
-      const publicKeyOptions = {
-        challenge,
-        rp: {
-          name: "HoneyFit Gym",
-          id: window.location.hostname,
-        },
-        user: {
-          id: userId,
-          name: formData.email,
-          displayName: formData.name || formData.email,
-        },
-        pubKeyCredParams: [
-          { type: "public-key", alg: -7 },   // ES256
-          { type: "public-key", alg: -257 },  // RS256
-        ],
-        authenticatorSelection: {
-          authenticatorAttachment: "platform", // Use built-in device authenticator (fingerprint/face)
-          userVerification: "required",         // Force biometric verification
-          requireResidentKey: false,
-        },
-        timeout: 60000,
-        attestation: "none",
-      };
-
-      const credential = await navigator.credentials.create({ publicKey: publicKeyOptions });
-
-      // Store credential ID in localStorage linked to the user's email
+      const credential = await navigator.credentials.create({ publicKey: {
+        challenge, rp: { name: "HoneyFit Gym", id: window.location.hostname },
+        user: { id: userId, name: formData.email, displayName: formData.name || formData.email },
+        pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+        authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", requireResidentKey: false },
+        timeout: 60000, attestation: "none",
+      }});
       const credentialId = bufferToBase64(credential.rawId);
       const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
       stored[formData.email] = credentialId;
       localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
       localStorage.setItem("lastEnrolledEmail", formData.email);
-
-      setBiometricState("success");
-      setIsEnrolled(true);
+      setBiometricState("success"); setIsEnrolled(true);
     } catch (err) {
       setBiometricState("idle");
-      if (err.name === "NotAllowedError") {
-        setEnrollError("Fingerprint enrollment was cancelled or timed out. Please try again.");
-      } else if (err.name === "InvalidStateError") {
-        // Credential already registered — treat as enrolled
-        setBiometricState("success");
-        setIsEnrolled(true);
-      } else if (err.name === "NotSupportedError") {
-        setEnrollError("Your device does not have a compatible biometric sensor (fingerprint/face). Please use a device with Windows Hello or a fingerprint reader.");
-      } else {
-        setEnrollError(`Enrollment failed: ${err.message || err.name}. Make sure your device biometric is set up in system settings.`);
-      }
+      if (err.name === "InvalidStateError") { setBiometricState("success"); setIsEnrolled(true); }
+      else setEnrollError(`Enrollment failed: ${err.message || err.name}`);
     }
   };
 
@@ -373,47 +424,58 @@ const Login = () => {
 
               {!isNewUser && (
                 <BiometricSection>
-                  <div className="fingerprint-container">
-                    <div className={`scanner ${biometricState}`}>
-                      <Fingerprint size={80} className="icon" />
-                      <div className="scan-line"></div>
-                    </div>
-                  </div>
-
-                  <div className="status-info">
-                    {biometricState === "idle" && <p>Place your finger on the scanner</p>}
-                    {biometricState === "scanning" && <p className="scanning-text">Searching Database...</p>}
-                    {biometricState === "success" && (
-                      <div className="success-msg">
-                        <ShieldCheck color="#4caf50" size={24} />
-                        <p>Access Granted! {attendanceLog}</p>
+                  {IS_MOBILE ? (
+                    /* ── MOBILE LOGIN: touch pad ── */
+                    <>
+                      <MobileTouchPad
+                        state={biometricState}
+                        enrolled={biometricState === 'success'}
+                        onTouchStart={biometricState !== 'success' ? (e) => startMobileScan(e, completeMobileLogin) : undefined}
+                        onTouchMove={moveMobileScan}
+                        onTouchEnd={biometricState !== 'success' ? cancelMobileScan : undefined}
+                        style={{ margin: '0 auto 20px' }}
+                      >
+                        <div className="pad-ring">
+                          <Fingerprint size={62} className="fp-icon" />
+                          {biometricState === 'scanning' && <div className="sweep" />}
+                        </div>
+                        {biometricState === 'scanning' && (
+                          <div className="progress-bar"><div className="progress-fill" style={{ width: `${scanProgress}%` }} /></div>
+                        )}
+                        <p className="pad-label">
+                          {biometricState === 'success' ? `✓ Access Granted — ${attendanceLog || ''}` : biometricState === 'scanning' ? 'Hold still…' : 'Press & hold fingerprint to enter'}
+                        </p>
+                        {biometricState === 'error' && <p className="pad-error"><ShieldAlert size={13} /> {error}</p>}
+                      </MobileTouchPad>
+                      <InputGroup>
+                        <label><Mail size={16} /> Email (if not auto-detected)</label>
+                        <input type="email" name="email" placeholder="your@email.com" onChange={handleInputChange} />
+                      </InputGroup>
+                    </>
+                  ) : (
+                    /* ── DESKTOP LOGIN: WebAuthn ── */
+                    <>
+                      <div className="fingerprint-container">
+                        <div className={`scanner ${biometricState}`}>
+                          <Fingerprint size={80} className="icon" />
+                          <div className="scan-line"></div>
+                        </div>
                       </div>
-                    )}
-                    {biometricState === "error" && (
-                      <div className="error-msg">
-                        <ShieldAlert color="#ff5252" size={24} />
-                        <p>{error}</p>
+                      <div className="status-info">
+                        {biometricState === 'idle'    && <p>Click below to scan fingerprint</p>}
+                        {biometricState === 'scanning' && <p className="scanning-text">Verifying…</p>}
+                        {biometricState === 'success'  && <div className="success-msg"><ShieldCheck color="#4caf50" size={24} /><p>Access Granted! {attendanceLog}</p></div>}
+                        {biometricState === 'error'    && <div className="error-msg"><ShieldAlert color="#ff5252" size={24} /><p>{error}</p></div>}
                       </div>
-                    )}
-                  </div>
-
-                  <InputGroup style={{ marginTop: '20px' }}>
-                    <label><Mail size={16} /> Identify Email (Optional)</label>
-                    <input 
-                      type="email" 
-                      name="email" 
-                      placeholder="Auto-recognition enabled" 
-                      onChange={handleInputChange}
-                    />
-                    <p style={{ fontSize: '0.75rem', color: '#555', marginTop: '8px' }}>If scan fails, enter email to identify</p>
-                  </InputGroup>
-
-                  <ScanButton 
-                    onClick={handleBiometricScan} 
-                    disabled={biometricState === "scanning"}
-                  >
-                    {biometricState === "scanning" ? "Verifying..." : "Scan Fingerprint to Login"}
-                  </ScanButton>
+                      <InputGroup style={{ marginTop: '20px' }}>
+                        <label><Mail size={16} /> Email (optional)</label>
+                        <input type="email" name="email" placeholder="Auto-recognition enabled" onChange={handleInputChange} />
+                      </InputGroup>
+                      <ScanButton onClick={handleBiometricScan} disabled={biometricState === 'scanning'}>
+                        {biometricState === 'scanning' ? 'Verifying…' : 'Scan Fingerprint to Login'}
+                      </ScanButton>
+                    </>
+                  )}
                 </BiometricSection>
               )}
 
@@ -474,34 +536,58 @@ const Login = () => {
 
                       <InputGroup>
                       <label><Fingerprint size={16} /> Biometric Enrollment <RequiredBadge>Required</RequiredBadge></label>
-                      <EnrollBox enrolled={isEnrolled} scanning={biometricState === 'scanning'}>
-                        <div className="enroll-icon-row">
-                          <div className={`enroll-scanner ${isEnrolled ? 'enrolled' : biometricState === 'scanning' ? 'scanning' : ''}`}>
-                            <Fingerprint size={36} />
-                            {biometricState === 'scanning' && <div className="pulse-ring" />}
+                      {IS_MOBILE ? (
+                        /* ── MOBILE: touch pad, zero PIN prompts ── */
+                        <MobileTouchPad
+                          state={biometricState}
+                          enrolled={isEnrolled}
+                          onTouchStart={isEnrolled ? undefined : (e) => startMobileScan(e, completeMobileEnroll)}
+                          onTouchMove={moveMobileScan}
+                          onTouchEnd={isEnrolled ? undefined : cancelMobileScan}
+                        >
+                          <div className="pad-ring">
+                            <Fingerprint size={52} className="fp-icon" />
+                            {biometricState === 'scanning' && <div className="sweep" />}
                           </div>
-                          <div className="enroll-text">
-                            {isEnrolled
-                              ? <><span className="enrolled-title">✓ Fingerprint Enrolled</span><span className="enrolled-sub">Your biometric is saved to this device</span></>
-                              : biometricState === 'scanning'
-                                ? <><span className="scanning-title">Waiting for fingerprint...</span><span className="enrolled-sub">Place your finger on the sensor now</span></>
-                                : <><span className="idle-title">Fingerprint Required</span><span className="enrolled-sub">You must enroll your fingerprint to create an account</span></>
-                            }
+                          {biometricState === 'scanning' && (
+                            <div className="progress-bar"><div className="progress-fill" style={{ width: `${scanProgress}%` }} /></div>
+                          )}
+                          <p className="pad-label">
+                            {isEnrolled ? '✓ Fingerprint Captured — Ready to Register'
+                              : biometricState === 'scanning' ? 'Hold still…'
+                              : 'Press & hold your finger here'}
+                          </p>
+                          {enrollError && <p className="pad-error"><ShieldAlert size={13} /> {enrollError}</p>}
+                        </MobileTouchPad>
+                      ) : (
+                        /* ── DESKTOP: WebAuthn ── */
+                        <EnrollBox enrolled={isEnrolled} scanning={biometricState === 'scanning'}>
+                          <div className="enroll-icon-row">
+                            <div className={`enroll-scanner ${isEnrolled ? 'enrolled' : biometricState === 'scanning' ? 'scanning' : ''}`}>
+                              <Fingerprint size={36} />
+                              {biometricState === 'scanning' && <div className="pulse-ring" />}
+                            </div>
+                            <div className="enroll-text">
+                              {isEnrolled
+                                ? <><span className="enrolled-title">✓ Fingerprint Enrolled</span><span className="enrolled-sub">Saved via Windows Hello</span></>
+                                : biometricState === 'scanning'
+                                  ? <><span className="scanning-title">Waiting for Windows Hello…</span><span className="enrolled-sub">Follow the system prompt</span></>
+                                  : <><span className="idle-title">Fingerprint Required</span><span className="enrolled-sub">Click below to start Windows Hello enrollment</span></>
+                              }
+                            </div>
                           </div>
-                        </div>
-                        {enrollError && <div className="enroll-error"><ShieldAlert size={14} /> {enrollError}</div>}
-                        {!isEnrolled && (
-                          <ScanButton
-                            type="button"
-                            onClick={handleBiometricEnroll}
-                            disabled={biometricState === 'scanning'}
-                            style={{ marginTop: '12px', padding: '10px', fontSize: '0.85rem' }}
-                          >
-                            <Fingerprint size={16} style={{ marginRight: 8 }} />
-                            {biometricState === 'scanning' ? 'Scanning — Place Finger on Sensor...' : 'Tap to Scan Your Fingerprint'}
-                          </ScanButton>
-                        )}
-                      </EnrollBox>
+                          {enrollError && <div className="enroll-error"><ShieldAlert size={14} /> {enrollError}</div>}
+                          {!isEnrolled && (
+                            <ScanButton type="button" onClick={handleBiometricEnroll}
+                              disabled={biometricState === 'scanning'}
+                              style={{ marginTop: '12px', padding: '10px', fontSize: '0.85rem' }}
+                            >
+                              <Fingerprint size={16} style={{ marginRight: 8 }} />
+                              {biometricState === 'scanning' ? 'Follow the Windows Hello prompt…' : 'Enroll via Windows Hello'}
+                            </ScanButton>
+                          )}
+                        </EnrollBox>
+                      )}
                     </InputGroup>
                     </>
                   )}
@@ -968,6 +1054,99 @@ const EnrollBox = styled.div`
   @keyframes textblink {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.5; }
+  }
+`;
+
+const MobileTouchPad = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  background: #0e0e0e;
+  border: 2px solid ${p => p.enrolled ? '#4caf50' : p.state === 'scanning' ? '#ffc107' : p.state === 'error' ? '#ff5252' : '#2a2a2a'};
+  border-radius: 20px;
+  padding: 24px 16px 18px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  box-shadow: ${p => p.enrolled
+    ? '0 0 24px rgba(76,175,80,0.2)'
+    : p.state === 'scanning'
+      ? '0 0 28px rgba(255,193,7,0.25)'
+      : 'none'};
+
+  .pad-ring {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    border: 2px solid ${p => p.enrolled ? '#4caf50' : p.state === 'scanning' ? '#ffc107' : '#333'};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: border-color 0.4s ease;
+  }
+
+  .fp-icon {
+    color: ${p => p.enrolled ? '#4caf50' : p.state === 'scanning' ? '#ffc107' : '#444'};
+    transition: color 0.4s ease;
+    animation: ${p => p.state === 'scanning' ? 'fpPulse 1s ease-in-out infinite' : 'none'};
+  }
+
+  .sweep {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #ffc107, transparent);
+    box-shadow: 0 0 10px #ffc107;
+    animation: sweep 1.2s linear infinite;
+  }
+
+  .progress-bar {
+    width: 90%;
+    height: 4px;
+    background: #222;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #ffc107;
+    border-radius: 4px;
+    transition: width 0.05s linear;
+    box-shadow: 0 0 8px rgba(255,193,7,0.5);
+  }
+
+  .pad-label {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: ${p => p.enrolled ? '#4caf50' : p.state === 'scanning' ? '#ffc107' : '#777'};
+    text-align: center;
+    transition: color 0.3s ease;
+  }
+
+  .pad-error {
+    margin: 0;
+    font-size: 0.78rem;
+    color: #ff5252;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-align: center;
+  }
+
+  @keyframes fpPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%       { transform: scale(1.12); opacity: 0.75; }
+  }
+  @keyframes sweep {
+    0%   { top: 0%; }
+    100% { top: 100%; }
   }
 `;
 
