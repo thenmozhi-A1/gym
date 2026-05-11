@@ -158,7 +158,8 @@ const Login = () => {
       const users = await res.json();
       const user  = users.find(u => u.email === email);
       if (!user) { setBiometricState('error'); setError('No account linked to this fingerprint.'); return; }
-      if (!user.fingerprintEnrolled && user.role !== 'ADMIN') { setBiometricState('error'); setError('No biometric record. Please re-register.'); return; }
+      // Removed the user.fingerprintEnrolled check because the User entity doesn't have this field,
+      // and we already verified the credential exists in the device's local storage.
       if (user.status !== 'ACTIVE') { setBiometricState('error'); setError('ACCESS DENIED: Membership expired.'); return; }
       const now = new Date(); const ts = now.toLocaleTimeString(); const dk = now.toLocaleDateString();
       const att = JSON.parse(localStorage.getItem('attendance') || '{}');
