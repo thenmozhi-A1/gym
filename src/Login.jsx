@@ -1,9 +1,25 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { User, Mail, Lock, UserPlus, LogIn, Fingerprint, Clock, ShieldCheck, ShieldAlert } from "lucide-react";
+import { User, Mail, Lock, Fingerprint, ShieldCheck, ShieldAlert } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
+
+// ── WebAuthn helpers ──────────────────────────────────────────
+const bufferToBase64 = (buffer) => {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+};
+
+const base64ToBuffer = (base64) => {
+  const binary = atob(base64);
+  const buf = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) buf[i] = binary.charCodeAt(i);
+  return buf.buffer;
+};
+
+const isWebAuthnSupported = () =>
+  window.PublicKeyCredential !== undefined &&
+  typeof window.PublicKeyCredential === "function";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,9 +27,10 @@ const Login = () => {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [loginMethod, setLoginMethod] = useState("password"); // "password" or "biometric"
+  const [enrollError, setEnrollError] = useState("");
+  const [loginMethod, setLoginMethod] = useState("password");
   const [biometricState, setBiometricState] = useState("idle"); // idle, scanning, success, error
-  const [isEnrolled, setIsEnrolled] = useState(false); // Track if finger scanned during signup
+  const [isEnrolled, setIsEnrolled] = useState(false);
   const [attendanceLog, setAttendanceLog] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -35,12 +52,78 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleBiometricEnroll = () => {
+  const handleBiometricEnroll = async () => {
+    setEnrollError("");
+
+    if (!isWebAuthnSupported()) {
+      setEnrollError("Your browser or device does not support biometric authentication. Please use a modern browser on a device with a fingerprint sensor or Windows Hello.");
+      return;
+    }
+
+    if (!formData.email) {
+      setEnrollError("Please enter your email address first before enrolling your fingerprint.");
+      return;
+    }
+
     setBiometricState("scanning");
-    setTimeout(() => {
+
+    try {
+      // Create a random challenge
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+
+      // Encode the user email as a user ID buffer
+      const userId = new TextEncoder().encode(formData.email);
+
+      const publicKeyOptions = {
+        challenge,
+        rp: {
+          name: "HoneyFit Gym",
+          id: window.location.hostname,
+        },
+        user: {
+          id: userId,
+          name: formData.email,
+          displayName: formData.name || formData.email,
+        },
+        pubKeyCredParams: [
+          { type: "public-key", alg: -7 },   // ES256
+          { type: "public-key", alg: -257 },  // RS256
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: "platform", // Use built-in device authenticator (fingerprint/face)
+          userVerification: "required",         // Force biometric verification
+          requireResidentKey: false,
+        },
+        timeout: 60000,
+        attestation: "none",
+      };
+
+      const credential = await navigator.credentials.create({ publicKey: publicKeyOptions });
+
+      // Store credential ID in localStorage linked to the user's email
+      const credentialId = bufferToBase64(credential.rawId);
+      const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
+      stored[formData.email] = credentialId;
+      localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
+      localStorage.setItem("lastEnrolledEmail", formData.email);
+
       setBiometricState("success");
       setIsEnrolled(true);
-    }, 2000);
+    } catch (err) {
+      setBiometricState("idle");
+      if (err.name === "NotAllowedError") {
+        setEnrollError("Fingerprint enrollment was cancelled or timed out. Please try again.");
+      } else if (err.name === "InvalidStateError") {
+        // Credential already registered — treat as enrolled
+        setBiometricState("success");
+        setIsEnrolled(true);
+      } else if (err.name === "NotSupportedError") {
+        setEnrollError("Your device does not have a compatible biometric sensor (fingerprint/face). Please use a device with Windows Hello or a fingerprint reader.");
+      } else {
+        setEnrollError(`Enrollment failed: ${err.message || err.name}. Make sure your device biometric is set up in system settings.`);
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -137,82 +220,118 @@ const Login = () => {
   };
 
   const handleBiometricScan = async () => {
-    // If not identifying by email, simulate "Recognition" of a nearby enrolled finger
     setBiometricState("scanning");
     setError("");
 
-    // Simulate network delay for scan and recognition
-    setTimeout(async () => {
-      try {
-        const checkRes = await fetch(`${API_BASE}/users`);
-        const users = await checkRes.json();
-        
-        let user;
-        if (formData.email) {
-          user = users.find(u => u.email === formData.email);
-        } else {
-          // Simulate "Recognizing" the last enrolled user on this device
-          const lastEnrolled = localStorage.getItem("lastEnrolledEmail");
-          user = users.find(u => u.email === lastEnrolled);
-        }
+    if (!isWebAuthnSupported()) {
+      setBiometricState("error");
+      setError("Your browser or device does not support biometric authentication.");
+      return;
+    }
 
-        if (!user) {
-          setBiometricState("error");
-          setError(formData.email ? "Fingerprint profile not found." : "Fingerprint not recognized. Please identify by email first.");
-          return;
-        }
+    try {
+      // ── Step 1: Determine which credential to use ──────────────
+      const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
+      const lastEnrolled = localStorage.getItem("lastEnrolledEmail");
+      const targetEmail = formData.email || lastEnrolled;
 
-        // Verify that the biometric sample exists in the database record
-        if (!user.fingerprintEnrolled && user.role !== "ADMIN") {
-          setBiometricState("error");
-          setError("No biometric sample found for this user in the database. Access Denied.");
-          return;
-        }
-
-        // ── MEMBERSHIP CHECK ──
-        if (user.status !== "ACTIVE") {
-          setBiometricState("error");
-          setError("ACCESS DENIED: Membership expired or payment pending.");
-          return;
-        }
-
-        // ── ATTENDANCE LOGIC ──
-        const now = new Date();
-        const timestamp = now.toLocaleTimeString();
-        const dateKey = now.toLocaleDateString();
-        
-        // Record attendance in localStorage for this session
-        const currentAttendance = JSON.parse(localStorage.getItem("attendance") || "{}");
-        if (!currentAttendance[dateKey]) {
-          currentAttendance[dateKey] = { entry: timestamp, exit: null };
-          setAttendanceLog(`Entry recorded at ${timestamp}`);
-        } else if (!currentAttendance[dateKey].exit) {
-          currentAttendance[dateKey].exit = timestamp;
-          setAttendanceLog(`Exit recorded at ${timestamp}`);
-        } else {
-          setAttendanceLog("You have already completed your session for today.");
-        }
-        localStorage.setItem("attendance", JSON.stringify(currentAttendance));
-
-        setBiometricState("success");
-        
-        // Store user info
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userId", user.id);
-        localStorage.setItem("userName", user.fullName);
-        localStorage.setItem("userEmail", user.email);
-        localStorage.setItem("userRole", user.role);
-
-        setTimeout(() => {
-          navigate(user.role === "ADMIN" ? "/AdminDashboard" : "/userdashboard");
-          window.location.reload();
-        }, 1500);
-
-      } catch (err) {
-        setBiometricState("error");
-        setError("Biometric server timeout. Try again.");
+      let allowCredentials = [];
+      if (targetEmail && stored[targetEmail]) {
+        allowCredentials = [{
+          type: "public-key",
+          id: base64ToBuffer(stored[targetEmail]),
+          transports: ["internal"],
+        }];
       }
-    }, 2000);
+
+      // ── Step 2: Trigger real device biometric ──────────────────
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+
+      const assertion = await navigator.credentials.get({
+        publicKey: {
+          challenge,
+          rpId: window.location.hostname,
+          allowCredentials,
+          userVerification: "required",
+          timeout: 60000,
+        },
+      });
+
+      // ── Step 3: Match credential to a user in the backend ─────
+      const assertedCredId = bufferToBase64(assertion.rawId);
+      let matchedEmail = Object.keys(stored).find(email => stored[email] === assertedCredId);
+      if (!matchedEmail && targetEmail) matchedEmail = targetEmail;
+
+      if (!matchedEmail) {
+        setBiometricState("error");
+        setError("Fingerprint not recognized. Please enter your email to identify yourself.");
+        return;
+      }
+
+      const checkRes = await fetch(`${API_BASE}/users`);
+      const users = await checkRes.json();
+      const user = users.find(u => u.email === matchedEmail);
+
+      if (!user) {
+        setBiometricState("error");
+        setError("No account found linked to this fingerprint.");
+        return;
+      }
+
+      if (!user.fingerprintEnrolled && user.role !== "ADMIN") {
+        setBiometricState("error");
+        setError("No biometric record found for this account. Please re-register.");
+        return;
+      }
+
+      if (user.status !== "ACTIVE") {
+        setBiometricState("error");
+        setError("ACCESS DENIED: Membership expired or payment pending.");
+        return;
+      }
+
+      // ── Step 4: Record attendance ──────────────────────────────
+      const now = new Date();
+      const timestamp = now.toLocaleTimeString();
+      const dateKey = now.toLocaleDateString();
+      const currentAttendance = JSON.parse(localStorage.getItem("attendance") || "{}");
+      if (!currentAttendance[dateKey]) {
+        currentAttendance[dateKey] = { entry: timestamp, exit: null };
+        setAttendanceLog(`Entry recorded at ${timestamp}`);
+      } else if (!currentAttendance[dateKey].exit) {
+        currentAttendance[dateKey].exit = timestamp;
+        setAttendanceLog(`Exit recorded at ${timestamp}`);
+      } else {
+        setAttendanceLog("Session for today already completed.");
+      }
+      localStorage.setItem("attendance", JSON.stringify(currentAttendance));
+
+      // ── Step 5: Login ──────────────────────────────────────────
+      setBiometricState("success");
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userId", user.id);
+      localStorage.setItem("userName", user.fullName);
+      localStorage.setItem("userEmail", user.email);
+      localStorage.setItem("userRole", user.role);
+
+      setTimeout(() => {
+        navigate(user.role === "ADMIN" ? "/AdminDashboard" : "/userdashboard");
+        window.location.reload();
+      }, 1500);
+
+    } catch (err) {
+      if (err.name === "NotAllowedError") {
+        setBiometricState("error");
+        setError("Fingerprint scan was cancelled or timed out. Please try again.");
+      } else if (err.name === "SecurityError") {
+        setBiometricState("error");
+        setError("Security error: This feature requires HTTPS. Please access the site over a secure connection.");
+      } else {
+        setBiometricState("error");
+        setError(`Biometric authentication failed: ${err.message || err.name}`);
+      }
+    }
   };
 
   return (
@@ -354,27 +473,35 @@ const Login = () => {
                       </InputGroup>
 
                       <InputGroup>
-                      <label><Fingerprint size={16} /> Biometric Enrollment</label>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#1a1a1a', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                          <div className={`scanner-small ${isEnrolled ? 'success' : biometricState === 'scanning' ? 'scanning' : ''}`}>
-                            <Fingerprint size={24} color={isEnrolled ? "#4caf50" : "#ffc107"} />
+                      <label><Fingerprint size={16} /> Biometric Enrollment <RequiredBadge>Required</RequiredBadge></label>
+                      <EnrollBox enrolled={isEnrolled} scanning={biometricState === 'scanning'}>
+                        <div className="enroll-icon-row">
+                          <div className={`enroll-scanner ${isEnrolled ? 'enrolled' : biometricState === 'scanning' ? 'scanning' : ''}`}>
+                            <Fingerprint size={36} />
+                            {biometricState === 'scanning' && <div className="pulse-ring" />}
                           </div>
-                          <p style={{ margin: 0, fontSize: '0.85rem', color: isEnrolled ? '#4caf50' : '#888' }}>
-                            {isEnrolled ? 'Fingerprint Enrolled!' : 'Scan finger to complete registration'}
-                          </p>
+                          <div className="enroll-text">
+                            {isEnrolled
+                              ? <><span className="enrolled-title">✓ Fingerprint Enrolled</span><span className="enrolled-sub">Your biometric is saved to this device</span></>
+                              : biometricState === 'scanning'
+                                ? <><span className="scanning-title">Waiting for fingerprint...</span><span className="enrolled-sub">Place your finger on the sensor now</span></>
+                                : <><span className="idle-title">Fingerprint Required</span><span className="enrolled-sub">You must enroll your fingerprint to create an account</span></>
+                            }
+                          </div>
                         </div>
+                        {enrollError && <div className="enroll-error"><ShieldAlert size={14} /> {enrollError}</div>}
                         {!isEnrolled && (
-                          <ScanButton 
-                            type="button" 
+                          <ScanButton
+                            type="button"
                             onClick={handleBiometricEnroll}
-                            disabled={biometricState === "scanning"}
-                            style={{ padding: '8px', fontSize: '0.8rem' }}
+                            disabled={biometricState === 'scanning'}
+                            style={{ marginTop: '12px', padding: '10px', fontSize: '0.85rem' }}
                           >
-                            {biometricState === "scanning" ? "Scanning..." : "Scan to Enroll"}
+                            <Fingerprint size={16} style={{ marginRight: 8 }} />
+                            {biometricState === 'scanning' ? 'Scanning — Place Finger on Sensor...' : 'Tap to Scan Your Fingerprint'}
                           </ScanButton>
                         )}
-                      </div>
+                      </EnrollBox>
                     </InputGroup>
                     </>
                   )}
@@ -697,9 +824,150 @@ const ScanButton = styled(SubmitButton)`
   background: transparent;
   border: 2px solid #ffc107;
   color: #ffc107;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   &:hover {
     background: #ffc107;
     color: #000;
+  }
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const RequiredBadge = styled.span`
+  display: inline-block;
+  background: rgba(255, 82, 82, 0.2);
+  color: #ff5252;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 82, 82, 0.4);
+  margin-left: 8px;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+`;
+
+const EnrollBox = styled.div`
+  background: #141414;
+  border: 1px solid ${props => props.enrolled ? '#4caf50' : props.scanning ? '#ffc107' : 'rgba(255,255,255,0.1)'};
+  border-radius: 14px;
+  padding: 16px;
+  transition: all 0.4s ease;
+  box-shadow: ${props => props.enrolled
+    ? '0 0 16px rgba(76, 175, 80, 0.15)'
+    : props.scanning
+      ? '0 0 20px rgba(255, 193, 7, 0.2)'
+      : 'none'};
+
+  .enroll-icon-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .enroll-scanner {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #1e1e1e;
+    border: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.4s ease;
+
+    svg { color: #444; transition: color 0.4s ease; }
+
+    &.scanning {
+      border-color: #ffc107;
+      svg { color: #ffc107; animation: fingerpulse 1.2s ease-in-out infinite; }
+    }
+    &.enrolled {
+      border-color: #4caf50;
+      background: rgba(76, 175, 80, 0.1);
+      svg { color: #4caf50; }
+    }
+  }
+
+  .pulse-ring {
+    position: absolute;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    border: 2px solid #ffc107;
+    animation: ringpulse 1.2s ease-out infinite;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .enroll-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .idle-title {
+    color: #aaa;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .scanning-title {
+    color: #ffc107;
+    font-size: 0.9rem;
+    font-weight: 700;
+    animation: textblink 1s ease-in-out infinite;
+  }
+
+  .enrolled-title {
+    color: #4caf50;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .enrolled-sub {
+    color: #666;
+    font-size: 0.78rem;
+  }
+
+  .enroll-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+    background: rgba(255, 82, 82, 0.1);
+    border: 1px solid rgba(255, 82, 82, 0.3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    color: #ff5252;
+    line-height: 1.4;
+    svg { flex-shrink: 0; margin-top: 2px; }
+  }
+
+  @keyframes fingerpulse {
+    0%   { transform: scale(1); opacity: 1; }
+    50%  { transform: scale(1.15); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes ringpulse {
+    0%   { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+  }
+
+  @keyframes textblink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
   }
 `;
 

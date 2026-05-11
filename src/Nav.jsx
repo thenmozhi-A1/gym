@@ -47,14 +47,14 @@ const Navbar = () => {
 
             {/* Home */}
             <li className="nav-item">
-              <button className="btn btn-outline-warning me-2" onClick={() => { navigate("/"); handleNavClick(); }}>
+              <button className="nav-link border border-warning text-warning fw-bold me-2" onClick={() => { navigate("/"); handleNavClick(); }}>
                 Home
               </button>
             </li>
 
             {/* About */}
             <li className="nav-item">
-              <button className="btn btn-outline-warning me-2" onClick={() => { navigate("/about"); handleNavClick(); }}>
+              <button className="nav-link border border-warning text-warning fw-bold me-2" onClick={() => { navigate("/about"); handleNavClick(); }}>
                 About
               </button>
             </li>
@@ -62,7 +62,7 @@ const Navbar = () => {
 
             {/* Workouts Dropdown */}
             <li className="nav-item dropdown">
-              <button className="nav-link dropdown-toggle" id="workoutsDropdown" data-bs-toggle="dropdown">
+              <button className="nav-link dropdown-toggle border border-warning text-warning fw-bold me-2" id="workoutsDropdown" data-bs-toggle="dropdown">
                 Workouts
               </button>
               <ul className="dropdown-menu">
@@ -83,7 +83,7 @@ const Navbar = () => {
 
             {/* Nutrition Dropdown */}
             <li className="nav-item dropdown">
-              <button className="nav-link dropdown-toggle" id="nutritionDropdown" data-bs-toggle="dropdown">
+              <button className="nav-link dropdown-toggle border border-warning text-warning fw-bold me-2" id="nutritionDropdown" data-bs-toggle="dropdown">
                 Nutrition
               </button>
               <ul className="dropdown-menu">
@@ -96,7 +96,7 @@ const Navbar = () => {
 
             {/* Subscription Dropdown */}
             <li className="nav-item dropdown">
-              <button className="nav-link dropdown-toggle" id="subscriptionDropdown" data-bs-toggle="dropdown">
+              <button className="nav-link dropdown-toggle border border-warning text-warning fw-bold me-2" id="subscriptionDropdown" data-bs-toggle="dropdown">
                 Subscription
               </button>
               <ul className="dropdown-menu">
