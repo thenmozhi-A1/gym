@@ -109,6 +109,30 @@ const Login = () => {
     }
   };
 
+  // ── Desktop mouse handler (click & hold 2.5s) ──────────────
+  const startDesktopScan = (e, onComplete) => {
+    if (biometricState === 'success') return;
+    setEnrollError(""); setError("");
+    touchSamples.current = [{ rx: 14, ry: 14, f: 0.5 }];
+    setScanProgress(0);
+    setBiometricState('scanning');
+    let p = 0;
+    progressTimer.current = setInterval(() => { p = Math.min(p + 2, 100); setScanProgress(p); }, 50);
+    holdTimer.current = setTimeout(() => {
+      clearInterval(progressTimer.current);
+      setScanProgress(100);
+      onComplete(touchSamples.current);
+    }, 2500);
+  };
+
+  const cancelScan = () => {
+    clearTimeout(holdTimer.current); clearInterval(progressTimer.current);
+    if (biometricState === 'scanning') {
+      setBiometricState('idle'); setScanProgress(0);
+      setEnrollError('Hold your finger steady for the full 2–3 seconds.');
+    }
+  };
+
   const completeMobileEnroll = (samples) => {
     const hash = buildMobileHash(samples);
     const store = JSON.parse(localStorage.getItem('webauthnCredentials') || '{}');
@@ -536,58 +560,33 @@ const Login = () => {
 
                       <InputGroup>
                       <label><Fingerprint size={16} /> Biometric Enrollment <RequiredBadge>Required</RequiredBadge></label>
-                      {IS_MOBILE ? (
-                        /* ── MOBILE: touch pad, zero PIN prompts ── */
-                        <MobileTouchPad
-                          state={biometricState}
-                          enrolled={isEnrolled}
-                          onTouchStart={isEnrolled ? undefined : (e) => startMobileScan(e, completeMobileEnroll)}
-                          onTouchMove={moveMobileScan}
-                          onTouchEnd={isEnrolled ? undefined : cancelMobileScan}
-                        >
-                          <div className="pad-ring">
-                            <Fingerprint size={52} className="fp-icon" />
-                            {biometricState === 'scanning' && <div className="sweep" />}
-                          </div>
-                          {biometricState === 'scanning' && (
-                            <div className="progress-bar"><div className="progress-fill" style={{ width: `${scanProgress}%` }} /></div>
-                          )}
-                          <p className="pad-label">
-                            {isEnrolled ? '✓ Fingerprint Captured — Ready to Register'
-                              : biometricState === 'scanning' ? 'Hold still…'
-                              : 'Press & hold your finger here'}
-                          </p>
-                          {enrollError && <p className="pad-error"><ShieldAlert size={13} /> {enrollError}</p>}
-                        </MobileTouchPad>
-                      ) : (
-                        /* ── DESKTOP: WebAuthn ── */
-                        <EnrollBox enrolled={isEnrolled} scanning={biometricState === 'scanning'}>
-                          <div className="enroll-icon-row">
-                            <div className={`enroll-scanner ${isEnrolled ? 'enrolled' : biometricState === 'scanning' ? 'scanning' : ''}`}>
-                              <Fingerprint size={36} />
-                              {biometricState === 'scanning' && <div className="pulse-ring" />}
-                            </div>
-                            <div className="enroll-text">
-                              {isEnrolled
-                                ? <><span className="enrolled-title">✓ Fingerprint Enrolled</span><span className="enrolled-sub">Saved via Windows Hello</span></>
-                                : biometricState === 'scanning'
-                                  ? <><span className="scanning-title">Waiting for Windows Hello…</span><span className="enrolled-sub">Follow the system prompt</span></>
-                                  : <><span className="idle-title">Fingerprint Required</span><span className="enrolled-sub">Click below to start Windows Hello enrollment</span></>
-                              }
-                            </div>
-                          </div>
-                          {enrollError && <div className="enroll-error"><ShieldAlert size={14} /> {enrollError}</div>}
-                          {!isEnrolled && (
-                            <ScanButton type="button" onClick={handleBiometricEnroll}
-                              disabled={biometricState === 'scanning'}
-                              style={{ marginTop: '12px', padding: '10px', fontSize: '0.85rem' }}
-                            >
-                              <Fingerprint size={16} style={{ marginRight: 8 }} />
-                              {biometricState === 'scanning' ? 'Follow the Windows Hello prompt…' : 'Enroll via Windows Hello'}
-                            </ScanButton>
-                          )}
-                        </EnrollBox>
-                      )}
+                      {/* Universal fingerprint pad — works for ALL users (touch + mouse) */}
+                      <MobileTouchPad
+                        state={biometricState}
+                        enrolled={isEnrolled}
+                        onTouchStart={isEnrolled ? undefined : (e) => startMobileScan(e, completeMobileEnroll)}
+                        onTouchMove={moveMobileScan}
+                        onTouchEnd={isEnrolled ? undefined : cancelMobileScan}
+                        onMouseDown={isEnrolled ? undefined : (e) => startDesktopScan(e, completeMobileEnroll)}
+                        onMouseUp={isEnrolled ? undefined : cancelScan}
+                        onMouseLeave={isEnrolled ? undefined : cancelScan}
+                      >
+                        <div className="pad-ring">
+                          <Fingerprint size={52} className="fp-icon" />
+                          {biometricState === 'scanning' && <div className="sweep" />}
+                        </div>
+                        {biometricState === 'scanning' && (
+                          <div className="progress-bar"><div className="progress-fill" style={{ width: `${scanProgress}%` }} /></div>
+                        )}
+                        <p className="pad-label">
+                          {isEnrolled
+                            ? '✓ Fingerprint Captured — Ready to Register'
+                            : biometricState === 'scanning'
+                              ? `Scanning… ${scanProgress}%`
+                              : IS_MOBILE ? 'Press & hold finger here (2.5 sec)' : 'Click & hold here (2.5 sec)'}
+                        </p>
+                        {enrollError && <p className="pad-error"><ShieldAlert size={13} /> {enrollError}</p>}
+                      </MobileTouchPad>
                     </InputGroup>
                     </>
                   )}
