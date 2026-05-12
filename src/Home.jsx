@@ -49,23 +49,23 @@ const Home = () => {
 
       <HeroSection>
         <div className="content">
-          <h1>Elevating Fitness at <span className="text-warning">HoneyFit</span> <span style={{ fontSize: '1.2rem', color: '#ffc107', opacity: 0.8, verticalAlign: 'middle' }}>Since 2024</span></h1>
+          <h1>Elevating Fitness at <span className="text-warning">SlayFit</span> <span style={{ fontSize: '1.2rem', color: '#ffc107', opacity: 0.8, verticalAlign: 'middle' }}>Since 2024</span></h1>
           <p style={{ color: 'white' }}>
-            Welcome to HoneyFit, where fitness becomes a lifestyle.
+            Welcome to SlayFit, where fitness becomes a lifestyle.
             “Sweet Energy. Serious Results.” is the motivation that drives us every day.
-            At HoneyFit, we help you build strength, confidence, and discipline.
+            At SlayFit, we help you build strength, confidence, and discipline.
             Our gym is designed with modern equipment and a powerful training environment.
             Whether you are a beginner or a fitness enthusiast, your journey starts here.
-            “Where Strength Meets Confidence.” — that’s the HoneyFit experience.
+            “Where Strength Meets Confidence.” — that’s the SlayFit experience.
             Train with certified coaches who guide you toward real transformation.
             Push your limits with cardio, strength training, and personalized workouts.
             Every drop of sweat brings you one step closer to your goals.
-            “Built by Discipline, Powered by HoneyFit.” inspires our community to stay focused.
+            “Built by Discipline, Powered by SlayFit.” inspires our community to stay focused.
             We believe fitness is not only about the body but also about mindset.
             Feel motivated, energized, and supported every single day.
             “Transform Your Body, Empower Your Life.” is more than a quote — it’s our mission.
             Join a positive fitness community that motivates you to become your best self.
-            HoneyFit — “Strong Looks Good on You.”
+            SlayFit — “Strong Looks Good on You.”
           </p>
           <div className="cta-row">
             <button className="btn btn-warning fw-bold px-5 py-3 rounded-pill shadow" onClick={() => navigate("/userdashboard")}>
@@ -99,7 +99,7 @@ const Home = () => {
           <Phone size={32} className="text-warning mb-3" />
           <h3>Contact Us</h3>
           <p>Phone: +91 84891 02133</p>
-          <p>Email: honeyfit@gmail.com</p>
+          <p>Email: slayfit@gmail.com</p>
         </DetailCard>
       </DetailsGrid>
 

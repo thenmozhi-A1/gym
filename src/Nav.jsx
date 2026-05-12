@@ -24,15 +24,15 @@ const Navbar = () => {
       <div className="container h-100">
         {/* Logo */}
         <Link className="navbar-brand d-flex align-items-center h-100" to="/" onClick={handleNavClick} style={{ overflow: "hidden" }}>
-          <img 
-            src="/logo.png" 
-            alt="HoneyFit Logo" 
-            style={{ 
-              height: "100%", 
-              width: "200px", 
+          <img
+            src="/logo.png"
+            alt="HoneyFit Logo"
+            style={{
+              height: "100%",
+              width: "200px",
               objectFit: "cover",
               objectPosition: "center"
-            }} 
+            }}
           />
         </Link>
 

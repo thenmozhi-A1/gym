@@ -46,10 +46,10 @@ const About = () => {
     <AboutContainer>
       <HeroSection>
         <div className="content">
-          <h1>About <span className="text-warning">HoneyFit</span></h1>
+          <h1>About <span className="text-warning">SlayFit</span></h1>
           <p>
-            Founded in 2024, HoneyFit has quickly become the premier fitness destination 
-            for those seeking real transformation. Our mission is to provide a 
+            Founded in 2024, SlayFit has quickly become the premier fitness destination
+            for those seeking real transformation. Our mission is to provide a
             powerful, motivating environment where strength meets discipline.
           </p>
         </div>
@@ -61,15 +61,15 @@ const About = () => {
             <div className="col-lg-6 mb-5 mb-lg-0">
               <h2 className="section-title">Our <span className="text-warning">Story</span></h2>
               <p>
-                HoneyFit was born from a simple idea: that fitness should be 
-                empowering, not intimidating. We've built a community that 
-                celebrates every milestone, from the first push-up to the 
+                SlayFit was born from a simple idea: that fitness should be
+                empowering, not intimidating. We've built a community that
+                celebrates every milestone, from the first push-up to the
                 latest personal record.
               </p>
               <p>
-                Equipped with state-of-the-art machines and led by world-class 
-                trainers, we offer a comprehensive approach to health that 
-                combines physical training with nutritional guidance and 
+                Equipped with state-of-the-art machines and led by world-class
+                trainers, we offer a comprehensive approach to health that
+                combines physical training with nutritional guidance and
                 mental fortitude.
               </p>
               <div className="stats-row mt-4">
@@ -121,39 +121,39 @@ const About = () => {
           <p>Ready to start your journey? Our experts are here to help you take the first step.</p>
           <form onSubmit={handleSubmit}>
             <div className="input-group">
-              <input 
-                type="text" 
-                name="fullName" 
-                placeholder="Your Full Name" 
-                required 
+              <input
+                type="text"
+                name="fullName"
+                placeholder="Your Full Name"
+                required
                 value={formData.fullName}
                 onChange={handleInputChange}
               />
             </div>
             <div className="input-row">
-              <input 
-                type="email" 
-                name="email" 
-                placeholder="Email Address" 
-                required 
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                required
                 value={formData.email}
                 onChange={handleInputChange}
               />
-              <input 
-                type="tel" 
-                name="phone" 
-                placeholder="Phone Number" 
-                required 
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Phone Number"
+                required
                 value={formData.phone}
                 onChange={handleInputChange}
               />
             </div>
             <div className="input-group">
-              <textarea 
-                name="goals" 
-                placeholder="Your Message / Fitness Goals" 
-                rows="4" 
-                required 
+              <textarea
+                name="goals"
+                placeholder="Your Message / Fitness Goals"
+                rows="4"
+                required
                 value={formData.goals}
                 onChange={handleInputChange}
               ></textarea>

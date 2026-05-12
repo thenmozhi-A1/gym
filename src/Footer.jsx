@@ -12,9 +12,9 @@ const Footer = () => {
 
           {/* GymDash Info */}
           <div className="col-md-4 mb-1">
-            <h5 className="brand-title">HoneyFit</h5>
+            <h5 className="brand-title">SlayFit</h5>
             <p className="footer-desc">
-              HoneyFit is more than just a gym — it’s a community built to inspire strength, confidence, and healthy living. With modern equipment, expert trainers, and a motivating atmosphere, HoneyFit helps you push beyond limits and achieve your fitness goals every day.
+              SlayFit is more than just a gym — it’s a community built to inspire strength, confidence, and healthy living. With modern equipment, expert trainers, and a motivating atmosphere, HoneyFit helps you push beyond limits and achieve your fitness goals every day.
             </p>
           </div>
 
@@ -39,7 +39,7 @@ const Footer = () => {
               <Phone size={16} /> <span>+91 84891 02133</span>
             </div>
             <div className="contact-item">
-              <Mail size={16} /> <span>honeyfit@gmail.com</span>
+              <Mail size={16} /> <span>slayfit@gmail.com</span>
             </div>
 
             {/* Social Icons */}
