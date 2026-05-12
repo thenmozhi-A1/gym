@@ -151,7 +151,7 @@ const Nutrition = () => {
         className="text-white text-center d-flex flex-column justify-content-center align-items-center"
         style={{
           background: "transparent",
-          height: "40vh",
+          height: "45vh",
           width: "100%",
         }}
       >
