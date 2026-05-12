@@ -14,7 +14,7 @@ const Footer = () => {
           <div className="col-md-4 mb-1">
             <h5 className="brand-title">SlayFit</h5>
             <p className="footer-desc">
-              SlayFit is more than just a gym — it’s a community built to inspire strength, confidence, and healthy living. With modern equipment, expert trainers, and a motivating atmosphere, HoneyFit helps you push beyond limits and achieve your fitness goals every day.
+              SlayFit is more than just a gym — it’s a community built to inspire strength, confidence, and healthy living. With modern equipment, expert trainers, and a motivating atmosphere, SlayFit helps you push beyond limits and achieve your fitness goals every day.
             </p>
           </div>
 
@@ -53,7 +53,7 @@ const Footer = () => {
 
         <hr className="footer-divider" />
         <div className="footer-bottom">
-          &copy; {new Date().getFullYear()} <span className="text-warning">GymDash</span>. All rights reserved.
+          &copy; {new Date().getFullYear()} <span className="text-warning">SlayFit</span>. All rights reserved.
         </div>
       </div>
     </FooterContainer>

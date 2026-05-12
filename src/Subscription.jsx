@@ -185,8 +185,8 @@ const Subscription = () => {
                       <div className="title-overlay">
                         {plan.title}
                         <div className="card-stats">
-                          <span>⭐ {plan.rating}</span>
-                          <span>👥 {plan.userCount}</span>
+                          <span style={{ color: 'white' }}  >⭐ {plan.rating}</span>
+                          <span style={{ color: 'white' }} >👥 {plan.userCount}</span>
                         </div>
                       </div>
                     </div>

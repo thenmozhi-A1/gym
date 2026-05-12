@@ -23,15 +23,15 @@ const Navbar = () => {
     <nav className="navbar navbar-expand-lg navbar-dark shadow-sm fixed-top py-0" style={{ height: "70px" }}>
       <div className="container h-100">
         {/* Logo */}
-        <Link className="navbar-brand d-flex align-items-center h-100" to="/" onClick={handleNavClick} style={{ overflow: "hidden" }}>
+        <Link className="navbar-brand d-flex align-items-center h-100" to="/" onClick={handleNavClick} style={{ overflow: "hidden", padding: "5px 0" }}>
           <img
             src="/logo.png"
-            alt="HoneyFit Logo"
+            alt="SlayFit Logo"
             style={{
               height: "100%",
-              width: "200px",
-              objectFit: "cover",
-              objectPosition: "center"
+              width: "auto",
+              maxWidth: "220px",
+              objectFit: "contain"
             }}
           />
         </Link>

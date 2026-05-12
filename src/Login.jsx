@@ -185,7 +185,7 @@ const Login = () => {
       const challenge = new Uint8Array(32); window.crypto.getRandomValues(challenge);
       const userId = new TextEncoder().encode(formData.email);
       const credential = await navigator.credentials.create({ publicKey: {
-        challenge, rp: { name: "HoneyFit Gym", id: window.location.hostname },
+        challenge, rp: { name: "SlayFit Gym", id: window.location.hostname },
         user: { id: userId, name: formData.email, displayName: formData.name || formData.email },
         pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
         authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", requireResidentKey: false },
@@ -281,7 +281,7 @@ const Login = () => {
 
         // Store for biometric recognition simulation
         localStorage.setItem("lastEnrolledEmail", formData.email);
-        alert("Account created and Fingerprint Enrolled successfully! Welcome to GymDash 🎉");
+        alert("Account created and Fingerprint Enrolled successfully! Welcome to SlayFit 🎉");
         navigate(data.role === "ADMIN" ? "/AdminDashboard" : "/subscription");
         window.location.reload();
 
