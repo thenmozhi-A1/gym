@@ -49,7 +49,7 @@ const Home = () => {
 
       <HeroSection>
         <div className="content">
-          <h1>Elevating Fitness at <span className="text-warning">SlayFit</span> <span style={{ fontSize: '1.2rem', color: '#ffc107', opacity: 0.8, verticalAlign: 'middle' }}>Since 2024</span></h1>
+          <h1>Redefining Fitness at <span className="text-warning">SlayFit</span> <span style={{ fontSize: '1.2rem', color: '#ffc107', opacity: 0.8, verticalAlign: 'middle' }}>Since 2024</span></h1>
           <p style={{ color: 'white' }}>
             Welcome to SlayFit, where fitness becomes a lifestyle.
             “Sweet Energy. Serious Results.” is the motivation that drives us every day.
