@@ -210,7 +210,7 @@ const Nutrition = () => {
           <div className="row justify-content-center g-4">
             {/* Table Column */}
             <div className={activeGoal ? "col-lg-5 transition-all" : "col-lg-10 transition-all"}>
-              <GlassCard 
+              <GlassCard
                 className="card overflow-hidden rounded-4"
                 style={{
                   background: `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
@@ -527,10 +527,10 @@ const Nutrition = () => {
       </section>
 
       {/* Contact Form */}
-      <section className="py-5 bg-dark">
+      <section className="py-5 bg-dark"  >
         <div className="container">
           <div className="row justify-content-center">
-            <div className="col-12">
+            <div className="col-12" >
               <GlassCard className="card border-0 shadow-lg p-4 p-md-5 rounded-4">
                 <div className="row align-items-center mb-5 text-center text-lg-start">
                   <div className="col-lg-8">
@@ -546,55 +546,55 @@ const Nutrition = () => {
                   <div className="row g-4">
                     <div className="col-md-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Full Name</label>
-                      <input 
-                        type="text" 
-                        placeholder="Your name" 
-                        name="name" 
-                        className="form-control form-control-lg border-2 shadow-none bg-light" 
-                        required 
+                      <input
+                        type="text"
+                        placeholder="Your name"
+                        name="name"
+                        className="form-control form-control-lg border-2 shadow-none bg-light"
+                        required
                         value={formData.name}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div className="col-md-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Mobile Number</label>
-                      <input 
-                        type="tel" 
-                        placeholder="+91 00000 00000" 
-                        name="phone" 
-                        className="form-control form-control-lg border-2 shadow-none bg-light" 
-                        required 
+                      <input
+                        type="tel"
+                        placeholder="+91 00000 00000"
+                        name="phone"
+                        className="form-control form-control-lg border-2 shadow-none bg-light"
+                        required
                         value={formData.phone}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div className="col-md-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Email Address</label>
-                      <input 
-                        type="email" 
-                        placeholder="john@example.com" 
-                        name="email" 
-                        className="form-control form-control-lg border-2 shadow-none bg-light" 
-                        required 
+                      <input
+                        type="email"
+                        placeholder="john@example.com"
+                        name="email"
+                        className="form-control form-control-lg border-2 shadow-none bg-light"
+                        required
                         value={formData.email}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div className="col-lg-9 mt-4">
                       <label className="form-label fw-bold small text-uppercase text-secondary">Your Fitness Goals</label>
-                      <textarea 
-                        placeholder="Tell us about your fitness journey..." 
-                        name="goals" 
-                        className="form-control form-control-lg border-2 shadow-none bg-light" 
-                        rows="3" 
+                      <textarea
+                        placeholder="Tell us about your fitness journey..."
+                        name="goals"
+                        className="form-control form-control-lg border-2 shadow-none bg-light"
+                        rows="3"
                         required
                         value={formData.goals}
                         onChange={handleInputChange}
                       ></textarea>
                     </div>
                     <div className="col-lg-3 mt-lg-auto mb-1">
-                      <button 
-                        type="submit" 
+                      <button
+                        type="submit"
                         disabled={isSubmitting}
                         className="btn btn-warning btn-lg w-100 fw-bold py-3 shadow-sm rounded-4 text-uppercase tracking-wider"
                       >
