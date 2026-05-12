@@ -24,6 +24,7 @@ import ReportsPage from "./ReportsPage";
 import StatsPage from "./StatsPage";
 import Myprofile from "./Myprofile";
 import AdminDashboard from "./AdminDashboard";
+import Settings from "./Settings";
 
 import "./App.css"; // Import your CSS file here
 
@@ -56,6 +57,7 @@ function LayoutWrapper() {
         <Route path="/dashboard/reports" element={<ReportsPage />} />
         <Route path="/dashboard/stats" element={<StatsPage />} />
         <Route path="/myprofile" element={<Myprofile />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
 
       </Routes>
