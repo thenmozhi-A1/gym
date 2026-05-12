@@ -90,7 +90,8 @@
   /* Give collapsed menu a border at the top */
   .navbar-collapse.show {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 8px 0;
+    padding: 8px 16px;
+    background-color: #000000;
   }
 
   /* Spacing between nav items */
