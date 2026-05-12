@@ -605,6 +605,7 @@ const PlanCard = styled.div`
       width: 100%;
       font-size: 1.5rem;
       font-weight: 800;
+      color: #fff;
       text-transform: uppercase;
       letter-spacing: 1px;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
