@@ -1,133 +1,191 @@
 /* ============================================================
-   Navbar.css — Fixed: Do NOT set display:none on .dropdown-menu
-   Bootstrap controls visibility via the .show class.
-   We only add hover behavior on desktop.
+   Navbar.css — Tech-Industrial Model (Cyber-Gym)
    ============================================================ */
 
-/* ── Navbar Container ── */
+:root {
+  --nav-bg: rgba(10, 10, 10, 0.95);
+  --accent: #ffc107;
+  --accent-glow: rgba(255, 193, 7, 0.4);
+  --text: #ffffff;
+  --font-bold: 'Oswald', 'Impact', sans-serif;
+}
+
 .navbar {
-  background-color: #1a1a1a !important; /* Professional dark gray for desktop */
-  transition: background-color 0.3s ease;
-}
-
-/* ── General Nav Link Styles ── */
-.nav-link {
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 600;
-  padding: 8px 16px !important;
-  border-radius: 8px;
+  background: var(--nav-bg) !important;
+  height: 80px;
+  border-bottom: 2px solid #222;
+  padding: 0 !important;
   transition: all 0.3s ease;
-  margin: 0 4px;
-  border: 1px solid transparent; /* Default transparent border */
 }
 
-.nav-link:hover, .nav-item.dropdown:hover > .nav-link {
+.navbar.scrolled {
+  height: 65px;
+  background: #000 !important;
+  border-bottom-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1300px !important;
+}
+
+/* ── Logo ── */
+.navbar-brand {
+  padding: 0 !important;
+  background: transparent !important;
+  clip-path: none !important;
+  margin-right: 30px !important;
+}
+
+.navbar-brand img {
+  height: 40px;
+  width: auto;
+}
+
+.brand-text {
+  font-family: var(--font-bold);
+  font-size: 1.8rem;
+  letter-spacing: -1px;
+  color: #000;
+  background: var(--accent);
+  padding: 0 10px;
+  transform: skewX(-10deg);
+  display: inline-block;
+}
+
+.scrolled .brand-text {
+  font-size: 1.5rem;
+}
+
+.navbar-brand:hover {
+  transform: scale(1.05);
+}
+
+/* ── Nav Links ── */
+.navbar-nav {
+  display: flex;
+  gap: 5px;
+}
+
+.nav-link {
+  font-family: var(--font-bold);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  color: var(--text) !important;
+  padding: 15px 25px !important;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease !important;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  z-index: -1;
+  transition: all 0.4s cubic-bezier(0.7, 0, 0.3, 1);
+  transform: skewX(-20deg);
+}
+
+.nav-link:hover {
   color: #000 !important;
-  background-color: #ffc107 !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
 
-/* ── Desktop: open dropdowns on hover ── */
-@media (min-width: 992px) {
-  .nav-item.dropdown:hover > .dropdown-menu {
-    display: block !important;
-  }
-
-  /* Style the dropdown menu on desktop */
-  .nav-item > .dropdown-menu {
-    position: absolute;
-    left: 0;
-    top: 100%;
-    min-width: 190px;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-    border: none;
-    overflow: hidden;
-    animation: fadeInDown 0.18s ease forwards;
-  }
-
-  /* Nested submenu — open to the right on hover */
-  .dropdown-submenu:hover > .dropdown-menu {
-    display: block !important;
-  }
-
-  .dropdown-submenu > .dropdown-menu {
-    position: absolute;
-    left: 100%;
-    top: 0;
-    margin-top: 0;
-    min-width: 180px;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-    border: none;
-  }
+.nav-link:hover::before {
+  left: 0;
 }
 
-/* ── Fade-in animation (desktop only) ── */
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ── Dropdowns ── */
+.dropdown-menu {
+  background: #111 !important;
+  border: 2px solid var(--accent) !important;
+  border-top: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* ── Mobile (≤991px) — Bootstrap click-to-open handles everything ── */
+.dropdown-item {
+  color: #fff !important;
+  font-family: var(--font-bold);
+  text-transform: uppercase;
+  padding: 12px 25px !important;
+  border-bottom: 1px solid #222;
+  transition: all 0.2s ease !important;
+}
+
+.dropdown-item:hover {
+  background: var(--accent) !important;
+  color: #000 !important;
+  transform: scale(1.05);
+  padding-left: 35px !important;
+}
+
+/* ── Action Buttons ── */
+.btn-tech {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-bold);
+  text-transform: uppercase;
+  padding: 10px 30px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.btn-tech::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  background: var(--accent);
+  z-index: -1;
+  transition: all 0.3s ease;
+}
+
+.btn-tech:hover {
+  color: #000 !important;
+}
+
+.btn-tech:hover::after {
+  height: 100%;
+}
+
+/* ── Mobile ── */
 @media (max-width: 991px) {
   .navbar {
-    background-color: #000000 !important;
+    height: 70px;
   }
 
-  /* Dropdown appears inline (static), no absolute box-shadow */
-  .nav-item > .dropdown-menu.show {
-    position: static !important;
-    box-shadow: none !important;
-    border-radius: 6px !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-    animation: none !important;
-    background-color: #000000 !important;
-    margin-top: 4px !important;
+  .navbar-brand {
+    clip-path: none;
+    margin: 0 !important;
   }
 
-  /* Give collapsed menu a border at the top */
-  .navbar-collapse.show {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 8px 16px;
-    background-color: #000000;
-  }
-
-  /* Spacing between nav items */
-  .navbar-nav .nav-item {
-    margin-bottom: 2px;
-  }
-
-  /* nav-link buttons (Workouts, Nutrition etc.) full width */
-  .navbar-nav .nav-link {
-    padding: 10px 16px;
-    border-radius: 6px;
-  }
-
-  /* Profile / Home buttons readable on mobile */
-  .navbar-nav .btn {
+  .navbar-collapse {
+    background: #000;
+    position: absolute;
+    top: 70px;
+    left: 0;
     width: 100%;
-    text-align: left;
-    border-radius: 8px !important;
-    margin-top: 4px;
-    padding: 10px 16px;
+    padding: 20px;
+    border-bottom: 2px solid var(--accent);
   }
 
-  /* Ensure dropdown items are visible and tappable */
-  .dropdown-item {
-    padding: 12px 16px;
-    font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.8) !important; /* Visible text */
-  }
-
-  .dropdown-item:hover, .dropdown-item:focus {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: #ffc107 !important;
-  }
-
-  /* Ensure nav links are visible */
   .nav-link {
-    color: rgba(255, 255, 255, 0.9) !important;
+    border-bottom: 1px solid #222;
+    padding: 20px !important;
   }
 }

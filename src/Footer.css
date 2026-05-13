@@ -1,0 +1,158 @@
+/* ============================================================
+   Footer.css — Moody Gym Image Model
+   ============================================================ */
+
+.footer-moody {
+  position: relative;
+  background: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+  color: #fff;
+  padding: 40px 0 20px;
+}
+
+.footer-moody::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0.95));
+}
+
+.footer-moody .container {
+  position: relative;
+  z-index: 1;
+}
+
+.moody-brand h2 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffc107;
+  margin-bottom: 20px;
+}
+
+.moody-brand p {
+  color: #ccc;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  max-width: 400px;
+}
+
+.moody-title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.moody-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: #ffc107;
+}
+
+.moody-links {
+  list-style: none;
+  padding: 0;
+}
+
+.moody-links li {
+  margin-bottom: 15px;
+}
+
+.moody-links a {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.moody-links a:hover {
+  color: #fff;
+  padding-left: 10px;
+}
+
+.moody-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  color: #aaa;
+  font-size: 0.95rem;
+}
+
+.moody-icon {
+  color: #ffc107;
+}
+
+.moody-socials {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.social-icon-moody {
+  width: 45px;
+  height: 45px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.social-icon-moody:hover {
+  background: #ffc107;
+  color: #000;
+  border-color: #ffc107;
+  transform: translateY(-5px);
+}
+
+.moody-bottom {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 991px) {
+  .footer-moody {
+    padding: 60px 0 30px;
+    text-align: center;
+  }
+  
+  .moody-brand p {
+    margin: 0 auto;
+  }
+  
+  .moody-title::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .moody-contact-item {
+    justify-content: center;
+  }
+  
+  .moody-socials {
+    justify-content: center;
+  }
+  
+  .moody-bottom {
+    flex-direction: column;
+    gap: 20px;
+  }
+}

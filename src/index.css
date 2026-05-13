@@ -16,6 +16,7 @@ body {
   font-family: 'Inter', 'Segoe UI', sans-serif;
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
+  padding-top: 90px; /* Space for the bold industrial navbar */
 }
 
 img, video {
