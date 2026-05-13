@@ -1,158 +1,173 @@
 /* ============================================================
-   Footer.css — Moody Gym Image Model
+   Footer.css — Model 05 Replica (Industrial Trapezoid)
    ============================================================ */
 
-.footer-moody {
-  position: relative;
-  background: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+.footer-m5 {
+  background: #0a0a0a;
   color: #fff;
-  padding: 40px 0 20px;
+  padding: 0;
+  border-top: 1px solid #1a1a1a;
+  font-family: 'Inter', sans-serif;
 }
 
-.footer-moody::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0.95));
+.m5-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.footer-moody .container {
-  position: relative;
-  z-index: 1;
-}
-
-.moody-brand h2 {
-  font-family: 'Oswald', sans-serif;
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #ffc107;
-  margin-bottom: 20px;
-}
-
-.moody-brand p {
-  color: #ccc;
-  font-size: 0.95rem;
-  line-height: 1.8;
-  max-width: 400px;
-}
-
-.moody-title {
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 30px;
-  position: relative;
-  padding-bottom: 10px;
-}
-
-.moody-title::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 30px;
-  height: 2px;
+/* ── Brand Section (Trapezoid) ── */
+.m5-brand-section {
   background: #ffc107;
+  padding: 30px 40px;
+  min-width: 350px;
+  clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.moody-links {
+.m5-brand-section h2 {
+  font-family: 'Oswald', 'Impact', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #000;
+  margin: 0;
+  letter-spacing: -2px;
+}
+
+.m5-tagline {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-top: 5px;
+  opacity: 0.8;
+}
+
+/* ── Links Section ── */
+.m5-links-section {
+  flex: 1;
+  padding: 30px 40px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+
+.m5-col-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 15px;
+  letter-spacing: 1.5px;
+}
+
+.m5-links {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.moody-links li {
-  margin-bottom: 15px;
+.m5-links li {
+  margin-bottom: 8px;
 }
 
-.moody-links a {
-  color: #aaa;
+.m5-links a {
+  color: #888;
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 
-.moody-links a:hover {
-  color: #fff;
-  padding-left: 10px;
-}
-
-.moody-contact-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 20px;
-  color: #aaa;
-  font-size: 0.95rem;
-}
-
-.moody-icon {
+.m5-links a:hover {
   color: #ffc107;
 }
 
-.moody-socials {
+/* ── Contact Section ── */
+.m5-contact-col {
   display: flex;
+  flex-direction: column;
   gap: 15px;
-  margin-top: 30px;
 }
 
-.social-icon-moody {
-  width: 45px;
-  height: 45px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.m5-contact-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #fff;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-}
-
-.social-icon-moody:hover {
-  background: #ffc107;
-  color: #000;
-  border-color: #ffc107;
-  transform: translateY(-5px);
-}
-
-.moody-bottom {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #666;
+  gap: 12px;
+  color: #888;
   font-size: 0.85rem;
 }
 
+.m5-contact-item svg {
+  color: #ffc107;
+}
+
+/* ── Socials ── */
+.m5-socials {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.social-m5-btn {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  transition: all 0.3s ease;
+}
+
+.social-m5-btn:hover {
+  background: #ffc107;
+  color: #000;
+  border-color: #ffc107;
+  transform: translateY(-3px);
+}
+
+/* ── Bottom Bar ── */
+.m5-bottom-bar {
+  border-top: 1px solid #1a1a1a;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #444;
+}
+
+.m5-slogan {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 800;
+  color: #333;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1200px) {
+  .m5-links-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 991px) {
-  .footer-moody {
-    padding: 60px 0 30px;
+  .m5-brand-section {
+    width: 100%;
+    clip-path: none;
     text-align: center;
+    padding: 40px 20px;
   }
   
-  .moody-brand p {
-    margin: 0 auto;
-  }
-  
-  .moody-title::after {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  
-  .moody-contact-item {
-    justify-content: center;
-  }
-  
-  .moody-socials {
-    justify-content: center;
-  }
-  
-  .moody-bottom {
+  .m5-bottom-bar {
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
+    text-align: center;
   }
 }

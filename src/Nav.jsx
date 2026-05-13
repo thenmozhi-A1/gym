@@ -30,7 +30,7 @@ const Navbar = () => {
   return (
     <nav className={`navbar navbar-expand-lg fixed-top ${scrolled ? "scrolled" : ""}`}>
       <div className="container">
-        
+
         <Link className="navbar-brand d-flex align-items-center" to="/" onClick={handleNavClick}>
           <img src="/logo.png" alt="Logo" />
           <span className="ms-2 brand-text">SLAYFIT</span>

@@ -1,69 +1,86 @@
 import React from "react";
-import { Facebook, Instagram, Twitter, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import "./Footer.css";
 
 const Footer = () => {
   return (
-    <footer className="footer-moody">
-      <div className="container">
-        <div className="row">
-          
-          {/* Brand Column */}
-          <div className="col-lg-5 col-md-12 mb-5 mb-lg-0">
-            <div className="moody-brand">
-              <h2>SLAYFIT</h2>
-              <p>
-                SlayFit is more than just a gym — it’s a community built to inspire strength, confidence, and healthy living. Join us and push beyond your limits.
-              </p>
-              <div className="moody-socials">
-                <a href="#" className="social-icon-moody"><Facebook size={20} /></a>
-                <a href="#" className="social-icon-moody"><Instagram size={20} /></a>
-                <a href="#" className="social-icon-moody"><Twitter size={20} /></a>
-              </div>
-            </div>
-          </div>
+    <footer className="footer-m5">
+      <div className="m5-container">
+        
+        {/* Brand Section with Trapezoid */}
+        <div className="m5-brand-section">
+          <h2>SLAYFIT</h2>
+          <div className="m5-tagline">— TRAIN. FUEL. CONQUER. —</div>
+        </div>
 
-          {/* Quick Links */}
-          <div className="col-lg-3 col-md-6 mb-5 mb-md-0">
-            <h4 className="moody-title">Training</h4>
-            <ul className="moody-links">
-              <li><Link to="/workouts">Workout Plans</Link></li>
-              <li><Link to="/nutrition">Nutrition Guide</Link></li>
-              <li><Link to="/subscription">Membership</Link></li>
-              <li><Link to="/about">Our Philosophy</Link></li>
+        {/* Links Grid */}
+        <div className="m5-links-section">
+          
+          <div className="m5-col">
+            <h5 className="m5-col-title">Quick Links</h5>
+            <ul className="m5-links">
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/about">About Us</Link></li>
+              <li><Link to="/workouts">Workouts</Link></li>
+              <li><Link to="/subscription">Pricing</Link></li>
+              <li><Link to="/contact">Contact</Link></li>
             </ul>
           </div>
 
-          {/* Contact Info */}
-          <div className="col-lg-4 col-md-6">
-            <h4 className="moody-title">Visit Us</h4>
-            <div className="moody-contact-item">
-              <MapPin className="moody-icon" size={20} />
-              <span>Anna Salai, Chennai, India</span>
+          <div className="m5-col">
+            <h5 className="m5-col-title">Programs</h5>
+            <ul className="m5-links">
+              <li><Link to="/workout/bench-press">Strength Training</Link></li>
+              <li><Link to="/workout/weight-loss">Weight Loss</Link></li>
+              <li><Link to="/workout/cardio">Cardio Focus</Link></li>
+              <li><Link to="/workout/yoga">Yoga & Mobility</Link></li>
+            </ul>
+          </div>
+
+          <div className="m5-col">
+            <h5 className="m5-col-title">Membership</h5>
+            <ul className="m5-links">
+              <li><Link to="/subscription">Plans & Pricing</Link></li>
+              <li><Link to="/login">Join Now</Link></li>
+              <li><Link to="/userdashboard">Member Benefits</Link></li>
+              <li><Link to="/about">Our Story</Link></li>
+            </ul>
+          </div>
+
+          <div className="m5-col m5-contact-col">
+            <h5 className="m5-col-title">Contact Us</h5>
+            <div className="m5-contact-item">
+              <MapPin size={16} />
+              <span>123 Fitness Street, Mumbai, India</span>
             </div>
-            <div className="moody-contact-item">
-              <Phone className="moody-icon" size={20} />
-              <span>+91 84891 02133</span>
+            <div className="m5-contact-item">
+              <Mail size={16} />
+              <span>info@slayfit.com</span>
             </div>
-            <div className="moody-contact-item">
-              <Mail className="moody-icon" size={20} />
-              <span>support@slayfit.com</span>
+            <div className="m5-contact-item">
+              <Phone size={16} />
+              <span>+91 98765 43210</span>
+            </div>
+            
+            <div className="m5-socials">
+              <a href="#" className="social-m5-btn"><Facebook size={18} /></a>
+              <a href="#" className="social-m5-btn"><Instagram size={18} /></a>
+              <a href="#" className="social-m5-btn"><Twitter size={18} /></a>
+              <a href="#" className="social-m5-btn"><Youtube size={18} /></a>
             </div>
           </div>
 
         </div>
 
-        <div className="moody-bottom">
-          <div className="copyright-moody">
-            &copy; {new Date().getFullYear()} SLAYFIT. ALL RIGHTS RESERVED.
-          </div>
-          <div className="footer-legal-links d-flex gap-4">
-            <a href="#" className="text-decoration-none text-muted">PRIVACY</a>
-            <a href="#" className="text-decoration-none text-muted">TERMS</a>
-          </div>
-        </div>
       </div>
+
+      {/* Bottom Status Bar */}
+      <div className="m5-bottom-bar">
+        <div>&copy; {new Date().getFullYear()} SlayFit. All rights reserved.</div>
+        <div className="m5-slogan">TRAIN TODAY. TRANSFORM TOMORROW.</div>
+      </div>
+
     </footer>
   );
 };
