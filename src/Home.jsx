@@ -5,6 +5,8 @@ import { MapPin, Clock, Phone, Mail, Award, Shield, Zap, UserCircle, Send } from
 
 const API_BASE = "https://gymj-9.onrender.com/api";
 
+import BMICalculator from "./BMICalculator";
+
 const Home = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -49,43 +51,24 @@ const Home = () => {
 
       <HeroSection>
         <div className="content">
-          <h1>Redefining Fitness at <span className="text-warning">SlayFit</span> <span style={{ fontSize: '1.2rem', color: '#ffc107', opacity: 0.8, verticalAlign: 'middle' }}>Since 2024</span></h1>
+          <h1>Redefining Fitness at <span className="text-warning">SlayFit</span></h1>
           <p style={{ color: 'white' }}>
-            Welcome to SlayFit, where fitness becomes a lifestyle.
-            “Sweet Energy. Serious Results.” is the motivation that drives us every day.
-            At SlayFit, we help you build strength, confidence, and discipline.
-            Our gym is designed with modern equipment and a powerful training environment.
-            Whether you are a beginner or a fitness enthusiast, your journey starts here.
-            “Where Strength Meets Confidence.” — that’s the SlayFit experience.
-            Train with certified coaches who guide you toward real transformation.
-            Push your limits with cardio, strength training, and personalized workouts.
-            Every drop of sweat brings you one step closer to your goals.
-            “Built by Discipline, Powered by SlayFit.” inspires our community to stay focused.
-            We believe fitness is not only about the body but also about mindset.
-            Feel motivated, energized, and supported every single day.
-            “Transform Your Body, Empower Your Life.” is more than a quote — it’s our mission.
-            Join a positive fitness community that motivates you to become your best self.
-            SlayFit — “Strong Looks Good on You.”
+            Welcome to SlayFit, where fitness becomes a lifestyle. “Sweet Energy. Serious Results.” is the motivation that drives us every day. At SlayFit, we help you build strength, confidence, and discipline. Our gym is designed with modern equipment and a powerful training environment. Whether you are a beginner or a fitness enthusiast, your journey starts here. “Where Strength Meets Confidence.” — that’s the SlayFit experience. Train with certified coaches who guide you toward real transformation. Push your limits with cardio, strength training, and personalized workouts. Every drop of sweat brings you one step closer to your goals. “Built by Discipline, Powered by SlayFit.” inspires our community to stay focused. We believe fitness is not only about the body but also about mindset. Feel motivated, energized, and supported every single day. “Transform Your Body, Empower Your Life.” is more than a quote — it’s our mission. Join a positive fitness community that motivates you to become your best self. SlayFit — “Strong Looks Good on You.”
           </p>
-          <div className="cta-row">
-            <button className="btn btn-warning fw-bold px-5 py-3 rounded-pill shadow" onClick={() => navigate("/userdashboard")}>
-              Go to Dashboard
-            </button>
-          </div>
+
         </div>
       </HeroSection>
 
       <DetailsGrid>
         <DetailCard
           as="a"
-          href="https://www.google.com/maps/dir//B%26Y+Technologies,+Fourth+Floor,+No+624,+Khivraj+Building,+Third+Floor,+Anna+Salai,+Thousand+Lights+West,+Chennai,+Tamil+Nadu+600006/@13.0482176,80.2586624,14z/data=!4m8!4m7!1m0!1m5!1m1!1s0x3a5267087fbfe2a9:0x844bddefe9759785!2m2!1d80.2527559!2d13.0538928?entry=ttu&g_ep=EgoyMDI2MDUwNi4wIKXMDSoASAFQAw%3D%3D"
+          href="https://www.google.com/maps"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ textDecoration: 'none' }}
         >
           <MapPin size={32} className="text-warning mb-3" />
           <h3>Our Location</h3>
-          <p>No.624,Kivraj Building,Anna Salai,Chennai-600006.</p>
+          <p>No.624, Khivraj Building, Anna Salai, Chennai.</p>
         </DetailCard>
 
         <DetailCard>
@@ -102,6 +85,70 @@ const Home = () => {
           <p>Email: slayfit@gmail.com</p>
         </DetailCard>
       </DetailsGrid>
+
+      {/* ── WHY CHOOSE SLAYFIT ── */}
+      <WhyChooseSection>
+        <div className="container">
+          <SectionTitle>
+            WHY CHOOSE <span className="text-warning">SLAYFIT</span>?
+          </SectionTitle>
+          <div className="features-grid">
+            <FeatureCard>
+              <Award className="feature-icon" />
+              <h4>ELITE COACHING</h4>
+              <p>Train with national-level athletes and certified masters of discipline.</p>
+            </FeatureCard>
+            <FeatureCard>
+              <Zap className="feature-icon" />
+              <h4>TECH-DRIVEN GEAR</h4>
+              <p>Biometric access, advanced tracking, and premium industrial equipment.</p>
+            </FeatureCard>
+            <FeatureCard>
+              <Shield className="feature-icon" />
+              <h4>PREMIUM ENVIRONMENT</h4>
+              <p>A high-octane, sanitized facility designed for maximum focus and safety.</p>
+            </FeatureCard>
+            <FeatureCard>
+              <UserCircle className="feature-icon" />
+              <h4>ELITE COMMUNITY</h4>
+              <p>Join a tribe of high-achievers who push you to your absolute limits.</p>
+            </FeatureCard>
+          </div>
+        </div>
+      </WhyChooseSection>
+
+      {/* ── FITNESS TOOLS (BMI) ── */}
+      <ToolsSection>
+        <div className="container">
+          <div className="tools-flex">
+            <div className="tools-content">
+              <SectionTitle style={{ textAlign: 'left' }}>
+                FITNESS <span className="text-warning">TOOLS</span>
+              </SectionTitle>
+              <p className="tools-desc">
+                Knowledge is power. Use our integrated biometric tools to understand your body metrics and track your progress toward the ultimate physique.
+              </p>
+              <ul className="tools-list">
+                <li><Zap size={18} className="text-warning" /> Precision BMI Tracking</li>
+                <li><Zap size={18} className="text-warning" /> Caloric Intake Estimates</li>
+                <li><Zap size={18} className="text-warning" /> Macro-Nutrient Optimization</li>
+              </ul>
+            </div>
+            <div className="tools-calc">
+              <BMICalculator />
+            </div>
+          </div>
+        </div>
+      </ToolsSection>
+
+      {/* ── FINAL CALL TO ACTION ── */}
+      <CTASection>
+        <div className="cta-overlay">
+          <h2>READY TO <span className="text-warning">SLAY</span>?</h2>
+          <p>Your elite transformation starts the moment you enter the arena. Don't wait for tomorrow.</p>
+          <button onClick={() => navigate("/login")}>CLAIM YOUR ACCESS</button>
+        </div>
+      </CTASection>
 
       <EnquirySection>
         <div className="form-container">
@@ -165,8 +212,8 @@ const HomeContainer = styled.div`
   background-attachment: fixed;
   color: #1a1a1a;
   min-height: 100vh;
-  padding-top: 75px;
-  padding-bottom: 80px;
+  padding-top: 60px;
+  padding-bottom: 40px;
 
   @media (max-width: 768px) {
     background-attachment: scroll;
@@ -228,7 +275,7 @@ const Badge = styled.span`
 `;
 
 const HeroSection = styled.section`
-  height: 90vh;
+  height: 80vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -268,7 +315,7 @@ const DetailsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   max-width: 1100px;
-  margin: 20px auto 0;
+  margin: 0 auto;
   padding: 0 20px;
 
   @media (max-width: 600px) {
@@ -308,7 +355,7 @@ const DetailCard = styled.div`
 
 const EnquirySection = styled.section`
   max-width: 900px;
-  margin: 40px auto 20px;
+  margin: 20px auto;
   padding: 0 20px;
 
   .form-container {
@@ -396,5 +443,151 @@ const EnquirySection = styled.section`
 `;
 
 
+
+const SectionTitle = styled.h2`
+  font-size: 3rem;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 40px;
+  color: #1a1a1a;
+  letter-spacing: -1px;
+  @media (max-width: 768px) { font-size: 2rem; }
+`;
+
+const WhyChooseSection = styled.section`
+  padding: 60px 20px;
+  background: rgba(255, 255, 255, 0.2);
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+`;
+
+const FeatureCard = styled.div`
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.6);
+    border-color: #ffc107;
+  }
+
+  .feature-icon {
+    width: 50px;
+    height: 50px;
+    color: #ffc107;
+    margin-bottom: 20px;
+  }
+
+  h4 { font-weight: 800; margin-bottom: 15px; letter-spacing: 1px; }
+  p { color: #555; font-size: 0.95rem; line-height: 1.6; font-weight: 500; }
+`;
+
+const ToolsSection = styled.section`
+  padding: 60px 20px;
+  background: rgba(0, 0, 0, 0.03);
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .tools-flex {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+    flex-wrap: wrap;
+
+    .tools-content {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .tools-calc {
+      flex: 1;
+      min-width: 300px;
+      display: flex;
+      justify-content: center;
+    }
+  }
+
+  .tools-desc { font-size: 1.1rem; color: #444; margin-bottom: 30px; line-height: 1.7; font-weight: 500; }
+  
+  .tools-list {
+    list-style: none;
+    padding: 0;
+    li {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      font-weight: 700;
+      color: #1a1a1a;
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 991px) {
+    .tools-flex { gap: 40px; flex-direction: column; text-align: center; }
+    .tools-list li { justify-content: center; }
+  }
+`;
+
+const CTASection = styled.section`
+  height: 400px;
+  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+              url("https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=2000&auto=format&fit=crop");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+
+  .cta-overlay {
+    max-width: 700px;
+    padding: 20px;
+    
+    h2 { font-size: 3.5rem; font-weight: 900; margin-bottom: 20px; letter-spacing: -2px; }
+    p { font-size: 1.2rem; opacity: 0.9; margin-bottom: 40px; font-weight: 500; }
+    
+    button {
+      background: #ffc107;
+      color: black;
+      border: none;
+      padding: 15px 50px;
+      border-radius: 50px;
+      font-weight: 900;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: #fff;
+        transform: scale(1.05);
+        box-shadow: 0 15px 30px rgba(255, 193, 7, 0.4);
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    height: 350px;
+    background-attachment: scroll;
+    h2 { font-size: 2.5rem; }
+    p { font-size: 1rem; }
+  }
+`;
 
 export default Home;
