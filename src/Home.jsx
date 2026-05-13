@@ -54,7 +54,7 @@ const Home = () => {
           <h1>Redefining Fitness at <span className="text-warning">SlayFit</span> <span className="since">Since 2024</span></h1>
           <p className="tagline">Train Hard. Stay Consistent. Slay Every Goal.</p>
           <div className="cta-row">
-            <button className="btn btn-warning fw-bold px-5 py-3 rounded-pill shadow" onClick={() => navigate("/userdashboard")}>
+            <button className="btn btn-warning fw-bold px-5 py-3 rounded-pill shadow" onClick={() => navigate("/login")}>
               ENTER ARENA
             </button>
           </div>
