@@ -51,11 +51,13 @@ const Home = () => {
 
       <HeroSection>
         <div className="content">
-          <h1>Redefining Fitness at <span className="text-warning">SlayFit</span></h1>
-          <p style={{ color: 'white' }}>
-            Welcome to SlayFit, where fitness becomes a lifestyle. “Sweet Energy. Serious Results.” is the motivation that drives us every day. At SlayFit, we help you build strength, confidence, and discipline. Our gym is designed with modern equipment and a powerful training environment. Whether you are a beginner or a fitness enthusiast, your journey starts here. “Where Strength Meets Confidence.” — that’s the SlayFit experience. Train with certified coaches who guide you toward real transformation. Push your limits with cardio, strength training, and personalized workouts. Every drop of sweat brings you one step closer to your goals. “Built by Discipline, Powered by SlayFit.” inspires our community to stay focused. We believe fitness is not only about the body but also about mindset. Feel motivated, energized, and supported every single day. “Transform Your Body, Empower Your Life.” is more than a quote — it’s our mission. Join a positive fitness community that motivates you to become your best self. SlayFit — “Strong Looks Good on You.”
-          </p>
-
+          <h1>Redefining Fitness at <span className="text-warning">SlayFit</span> <span className="since">Since 2024</span></h1>
+          <p className="tagline">Train Hard. Stay Consistent. Slay Every Goal.</p>
+          <div className="cta-row">
+            <button className="btn btn-warning fw-bold px-5 py-3 rounded-pill shadow" onClick={() => navigate("/userdashboard")}>
+              ENTER ARENA
+            </button>
+          </div>
         </div>
       </HeroSection>
 
@@ -85,6 +87,59 @@ const Home = () => {
           <p>Email: slayfit@gmail.com</p>
         </DetailCard>
       </DetailsGrid>
+
+      {/* ── ABOUT SLAYFIT ── */}
+      <AboutSection>
+        <div className="container">
+          <div className="about-content">
+            <SectionTitle style={{ textAlign: 'left' }}>
+              <span className="text-warning">SLAYFIT</span> STUDIO
+            </SectionTitle>
+            <p style={{ color: "black" }}>
+              SlayFit Fitness Studio is a modern training space built to help individuals improve strength, endurance, body composition, and overall fitness performance. Designed for beginners, working professionals, fitness enthusiasts, and athletes, SlayFit provides a motivating environment focused on discipline, consistency, and transformation.
+            </p>
+            <p style={{ color: "black" }}>
+              Our studio combines expert guidance, advanced workout methods, and modern equipment to create personalized fitness experiences for every member. Whether your goal is weight loss, muscle gain, improved stamina, or a healthier lifestyle, SlayFit offers structured programs tailored to your fitness level and goals.
+            </p>
+          </div>
+        </div>
+      </AboutSection>
+
+      {/* ── SERVICES & JOINERS ── */}
+      <ServicesSection>
+        <div className="container">
+          <div className="services-flex">
+            <div className="services-list">
+              <h4 className="text-warning">ELITE SERVICES</h4>
+              <ul>
+                <li>Strength and conditioning programs</li>
+                <li>Weight loss and fat reduction training</li>
+                <li>Muscle building workouts</li>
+                <li>Functional fitness sessions</li>
+                <li>Personal training programs</li>
+                <li>Group workout classes</li>
+                <li>Cardio and endurance training</li>
+                <li>Transformation programs</li>
+                <li>Beginner-friendly fitness plans</li>
+                <li>Nutrition and lifestyle guidance</li>
+              </ul>
+              <p className="note">All training sessions are supervised by professionals to ensure safe, effective progress.</p>
+            </div>
+            <div className="join-list">
+              <h4 className="text-warning">WHO CAN JOIN?</h4>
+              <ul>
+                <li>Beginners starting their fitness journey</li>
+                <li>Individuals focused on weight management</li>
+                <li>Students and working professionals</li>
+                <li>Fitness enthusiasts and athletes</li>
+                <li>Men and women of all fitness levels</li>
+                <li>Anyone looking to improve health & confidence</li>
+              </ul>
+              <p className="note">Each program is customized based on individual goals and assessments.</p>
+            </div>
+          </div>
+        </div>
+      </ServicesSection>
 
       {/* ── WHY CHOOSE SLAYFIT ── */}
       <WhyChooseSection>
@@ -125,10 +180,10 @@ const Home = () => {
               <SectionTitle style={{ textAlign: 'left' }}>
                 FITNESS <span className="text-warning">TOOLS</span>
               </SectionTitle>
-              <p className="tools-desc">
+              <p className="tools-desc" style={{ color: "white" }}>
                 Knowledge is power. Use our integrated biometric tools to understand your body metrics and track your progress toward the ultimate physique.
               </p>
-              <ul className="tools-list">
+              <ul className="tools-list" style={{ color: "white" }}>
                 <li><Zap size={18} className="text-warning" /> Precision BMI Tracking</li>
                 <li><Zap size={18} className="text-warning" /> Caloric Intake Estimates</li>
                 <li><Zap size={18} className="text-warning" /> Macro-Nutrient Optimization</li>
@@ -205,15 +260,16 @@ const Home = () => {
 };
 
 const HomeContainer = styled.div`
-  background: linear-gradient(135deg, rgba(255, 126, 95, 0.3), rgba(254, 180, 123, 0.3), rgba(255, 255, 255, 0.4)), 
-              url("https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=100&w=2560&auto=format&fit=crop");
+  background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+              linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), 
+              url("https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=100&w=2560&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   color: #1a1a1a;
   min-height: 100vh;
-  padding-top: 60px;
-  padding-bottom: 40px;
+  padding-top: 0;
+  padding-bottom: 20px;
 
   @media (max-width: 768px) {
     background-attachment: scroll;
@@ -275,7 +331,7 @@ const Badge = styled.span`
 `;
 
 const HeroSection = styled.section`
-  height: 80vh;
+  height: 50vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -286,12 +342,14 @@ const HeroSection = styled.section`
   padding-top: 0;
   
   .content {
-    margin-top: 20px; 
+    margin-top: 0; 
     max-width: 800px;
     padding: 0 20px;
     position: relative;
     z-index: 20;
-    h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; color:#ffc107; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+    h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; color:#ffc107; text-shadow: 0 2px 10px rgba(0,0,0,0.2); 
+      .since { font-size: 1.2rem; opacity: 0.7; color: white; vertical-align: middle; margin-left: 10px; font-weight: 500; }
+    }
     p { font-size: 1.2rem; color: #1a1a1a; margin-bottom: 30px; font-weight: 500; }
   }
 
@@ -359,8 +417,8 @@ const EnquirySection = styled.section`
   padding: 0 20px;
 
   .form-container {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(16px) saturate(180%);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.4);
     padding: 60px;
     border-radius: 40px;
@@ -456,7 +514,7 @@ const SectionTitle = styled.h2`
 
 const WhyChooseSection = styled.section`
   padding: 60px 20px;
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
 
   .features-grid {
     display: grid;
@@ -495,7 +553,7 @@ const FeatureCard = styled.div`
 
 const ToolsSection = styled.section`
   padding: 60px 20px;
-  background: rgba(0, 0, 0, 0.03);
+  background: transparent;
 
   .container {
     max-width: 1200px;
@@ -587,6 +645,61 @@ const CTASection = styled.section`
     background-attachment: scroll;
     h2 { font-size: 2.5rem; }
     p { font-size: 1rem; }
+  }
+`;
+
+const AboutSection = styled.section`
+  padding: 60px 20px;
+  background: transparent;
+  .container { max-width: 1200px; margin: 0 auto; }
+  .about-content {
+    max-width: 900px;
+    p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 20px; font-weight: 500; }
+  }
+`;
+
+const ServicesSection = styled.section`
+  padding: 60px 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  .container { max-width: 1200px; margin: 0 auto; }
+  .services-flex {
+    display: flex;
+    gap: 60px;
+    flex-wrap: wrap;
+    
+    div { flex: 1; min-width: 300px; }
+    h4 { font-family: 'Oswald', sans-serif; font-weight: 800; margin-bottom: 30px; letter-spacing: 2px; }
+    
+    ul {
+      list-style: none;
+      padding: 0;
+      li {
+        margin-bottom: 12px;
+        padding-left: 25px;
+        position: relative;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #aaa;
+        
+        &::before {
+          content: '→';
+          position: absolute;
+          left: 0;
+          color: #ffc107;
+          font-weight: 900;
+        }
+      }
+    }
+    
+    .note {
+      margin-top: 30px;
+      font-size: 0.85rem;
+      color: #555;
+      font-style: italic;
+      border-top: 1px solid #222;
+      padding-top: 20px;
+    }
   }
 `;
 
