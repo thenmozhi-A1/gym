@@ -1,5 +1,5 @@
 /* ============================================================
-   Footer.css — Model 05 Replica (Industrial Trapezoid)
+   Footer.css — Model 05 (Symmetrical Trapezoid)
    ============================================================ */
 
 .footer-m5 {
@@ -11,16 +11,16 @@
 }
 
 .m5-container {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
 }
 
-/* ── Brand Section (Trapezoid) ── */
+/* ── Brand Section (Left Trapezoid) ── */
 .m5-brand-section {
   background: #ffc107;
-  padding: 30px 40px;
+  padding: 30px 60px 30px 40px;
   min-width: 350px;
   clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
   display: flex;
@@ -48,12 +48,12 @@
   opacity: 0.8;
 }
 
-/* ── Links Section ── */
+/* ── Links Section (Center) ── */
 .m5-links-section {
   flex: 1;
   padding: 30px 40px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 30px;
 }
 
@@ -87,48 +87,58 @@
   color: #ffc107;
 }
 
-/* ── Contact Section ── */
-.m5-contact-col {
+/* ── Contact Section (Right Trapezoid) ── */
+.m5-right-section {
+  background: #ffc107;
+  padding: 30px 40px 30px 60px;
+  min-width: 350px;
+  clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  justify-content: center;
+}
+
+.m5-right-section .m5-col-title {
+  color: #000;
 }
 
 .m5-contact-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #888;
+  color: #000;
   font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 10px;
 }
 
 .m5-contact-item svg {
-  color: #ffc107;
+  color: #000;
+  opacity: 0.7;
 }
 
-/* ── Socials ── */
 .m5-socials {
   display: flex;
   gap: 15px;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .social-m5-btn {
   width: 35px;
   height: 35px;
   border-radius: 50%;
-  border: 1px solid #333;
+  border: 1px solid rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #888;
+  color: #000;
   transition: all 0.3s ease;
 }
 
 .social-m5-btn:hover {
-  background: #ffc107;
-  color: #000;
-  border-color: #ffc107;
+  background: #000;
+  color: #ffc107;
+  border-color: #000;
   transform: translateY(-3px);
 }
 
@@ -151,23 +161,36 @@
   text-transform: uppercase;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
   .m5-links-section {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 991px) {
-  .m5-brand-section {
+@media (max-width: 1100px) {
+  .m5-brand-section, .m5-right-section {
     width: 100%;
     clip-path: none;
+    padding: 30px 20px;
     text-align: center;
-    padding: 40px 20px;
+  }
+  
+  .m5-socials {
+    justify-content: center;
+  }
+  
+  .m5-contact-item {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .m5-links-section {
+    grid-template-columns: 1fr;
   }
   
   .m5-bottom-bar {
     flex-direction: column;
     gap: 10px;
-    text-align: center;
   }
 }
