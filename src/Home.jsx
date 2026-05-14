@@ -119,6 +119,7 @@ const Home = () => {
         {/* ── LOCATION CARD ── */}
         <FlipCard
           as="a"
+          $color="#3b82f6"
           href="https://www.google.com/maps/search/?api=1&query=No.624+Khivraj+Building+Anna+Salai+Chennai"
           target="_blank"
           rel="noopener noreferrer"
@@ -140,7 +141,7 @@ const Home = () => {
         </FlipCard>
 
         {/* ── HOURS CARD ── */}
-        <FlipCard>
+        <FlipCard $color="#f97316">
           <div className="flip-inner">
             <div className="flip-front">
               <div className="icon-ring"><Clock size={36} /></div>
@@ -157,7 +158,7 @@ const Home = () => {
         </FlipCard>
 
         {/* ── CONTACT CARD ── */}
-        <FlipCard>
+        <FlipCard $color="#a855f7">
           <div className="flip-inner">
             <div className="flip-front">
               <div className="icon-ring"><Phone size={36} /></div>
@@ -175,18 +176,23 @@ const Home = () => {
       </InfoCardsRow>
 
       {/* ── ABOUT SLAYFIT ── */}
-      <AboutSection>
+      <AboutSection className="reveal">
         <div className="container">
-          <div className="about-content">
-            <SectionTitle style={{ textAlign: 'left' }}>
-              <span className="text-warning">SLAYFIT</span> STUDIO
-            </SectionTitle>
-            <p style={{ color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
-              SlayFit Fitness Studio is a modern training space built to help individuals improve strength, endurance, body composition, and overall fitness performance. Designed for beginners, working professionals, fitness enthusiasts, and athletes, SlayFit provides a motivating environment focused on discipline, consistency, and transformation.
-            </p>
-            <p style={{ color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
-              Our studio combines expert guidance, advanced workout methods, and modern equipment to create personalized fitness experiences for every member. Whether your goal is weight loss, muscle gain, improved stamina, or a healthier lifestyle, SlayFit offers structured programs tailored to your fitness level and goals.
-            </p>
+          <div className="about-grid">
+            <div className="about-content">
+              <SectionTitle style={{ textAlign: 'left' }}>
+                <span className="text-warning">SLAYFIT</span> STUDIO
+              </SectionTitle>
+              <p style={{ color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
+                SlayFit Fitness Studio is a modern training space built to help individuals improve strength, endurance, body composition, and overall fitness performance. Designed for beginners, working professionals, fitness enthusiasts, and athletes, SlayFit provides a motivating environment focused on discipline, consistency, and transformation.
+              </p>
+              <p style={{ color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
+                Our studio combines expert guidance, advanced workout methods, and modern equipment to create personalized fitness experiences for every member. Whether your goal is weight loss, muscle gain, improved stamina, or a healthier lifestyle, SlayFit offers structured programs tailored to your fitness level and goals.
+              </p>
+            </div>
+            <div className="about-image-wrapper">
+              <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000&auto=format&fit=crop" alt="SlayFit Studio" />
+            </div>
           </div>
         </div>
       </AboutSection>
@@ -607,17 +613,34 @@ const StatsSection = styled.section`
     display: flex;
     flex-wrap: nowrap;
     @media (max-width: 900px) { flex-wrap: wrap; }
+
+    /* Group Hover Effect: When hovering the container, all cards turn Black */
+    &:hover > div {
+      background: #0a0a0a;
+      .stat-icon { color: #ffc107; opacity: 0.7; }
+      h3 { color: #fff; }
+      .stat-label { color: #ffc107; }
+    }
+
+    /* Target Hover Effect: The specific card being hovered turns Yellow */
+    &:hover > div:hover {
+      background: #ffc107;
+      z-index: 10;
+      .stat-icon { color: #000; opacity: 0.6; }
+      h3 { color: #000; }
+      .stat-label { color: #000; }
+    }
   }
 `;
 
 const StatBox = styled.div`
   flex: 1;
-  background: #0a0a0a;
+  background: #ffc107;
   padding: 40px 20px;
   position: relative;
   transform: skewX(-12deg);
   margin-left: -15px;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.15);
   transition: all 0.4s ease;
   display: flex;
   justify-content: center;
@@ -632,16 +655,16 @@ const StatBox = styled.div`
   }
 
   .stat-icon {
-    color: #ffc107;
+    color: #000;
     margin-bottom: 8px;
-    opacity: 0.5;
+    opacity: 0.6;
   }
 
   h3 { 
     font-size: 3rem; 
     font-weight: 950; 
     margin: 0; 
-    color: white;
+    color: #000;
     line-height: 1;
     letter-spacing: -2px;
     font-style: italic;
@@ -651,15 +674,19 @@ const StatBox = styled.div`
     font-size: 0.65rem; 
     font-weight: 900; 
     letter-spacing: 4px; 
-    color: #ffc107;
+    color: #000;
     margin-top: 8px;
     text-transform: uppercase;
   }
 
-  &:hover {
-    background: #ffc107;
-    z-index: 10;
-    .stat-icon, h3, .stat-label { color: #000; opacity: 1; }
+  /* Alternate Pattern for 30+ Coaches & 24/7 Access */
+  &:nth-child(even) {
+    background: #0a0a0a;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    
+    .stat-icon { color: #ffc107; opacity: 0.7; }
+    h3 { color: #fff; }
+    .stat-label { color: #ffc107; }
   }
 
   @media (max-width: 900px) {
@@ -721,61 +748,61 @@ const FlipCard = styled.div`
   }
 
   .flip-front {
-    background: rgba(255, 255, 255, 0.07);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    background: #ffffff;
+    border: 1px solid ${({ $color }) => $color || '#ffc107'}44;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15), inset 0 0 60px ${({ $color }) => $color || '#ffc107'}08;
     gap: 18px;
 
     .icon-ring {
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      background: rgba(255, 193, 7, 0.1);
-      border: 2px solid rgba(255, 193, 7, 0.3);
+      background: ${({ $color }) => $color || '#ffc107'}18;
+      border: 2px solid ${({ $color }) => $color || '#ffc107'}55;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #ffc107;
+      color: ${({ $color }) => $color || '#ffc107'};
       transition: all 0.3s ease;
     }
 
     h3 {
       font-size: 1.4rem;
       font-weight: 900;
-      color: #fff;
+      color: #111;
       margin: 0;
       letter-spacing: -0.5px;
     }
 
     .tap-hint {
       font-size: 0.7rem;
-      color: rgba(255,255,255,0.3);
+      color: rgba(0,0,0,0.35);
       font-weight: 700;
       letter-spacing: 1px;
     }
   }
 
   .flip-back {
-    background: #ffc107;
-    color: #000;
+    background: ${({ $color }) => $color || '#ffc107'};
+    color: #fff;
     transform: rotateY(180deg);
     gap: 12px;
 
-    .back-icon { color: rgba(0,0,0,0.5); }
+    .back-icon { color: rgba(255,255,255,0.5); }
 
     h4 {
       font-size: 1.2rem;
       font-weight: 900;
       margin: 0;
       letter-spacing: -0.5px;
+      color: #fff;
     }
 
     p {
       margin: 0;
       font-size: 0.95rem;
       font-weight: 700;
-      color: rgba(0,0,0,0.8);
+      color: rgba(255,255,255,0.9);
     }
 
     .hours-row {
@@ -785,8 +812,9 @@ const FlipCard = styled.div`
       font-size: 0.9rem;
       font-weight: 800;
       padding: 5px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-      span:last-child { color: rgba(0,0,0,0.6); }
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      span:last-child { opacity: 0.7; }
     }
 
     .cta-link {
@@ -794,7 +822,8 @@ const FlipCard = styled.div`
       font-size: 0.8rem;
       font-weight: 900;
       text-decoration: underline;
-      opacity: 0.7;
+      opacity: 0.8;
+      color: #fff;
     }
   }
 
@@ -1159,10 +1188,58 @@ const Badge = styled.span`
 const AboutSection = styled.section`
   padding: 100px 20px;
   background: transparent;
+
   .container { max-width: 1200px; margin: 0 auto; }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+
   .about-content {
-    max-width: 900px;
-    p { font-size: 1.1rem; line-height: 1.8; color: white; margin-bottom: 20px; font-weight: 500; }
+    p { 
+      font-size: 1.1rem; 
+      line-height: 1.8; 
+      color: white; 
+      margin-bottom: 20px; 
+      font-weight: 500; 
+    }
+  }
+
+  .about-image-wrapper {
+    width: 100%;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    position: relative;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    &:hover img {
+      transform: scale(1.05);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+      pointer-events: none;
+    }
   }
 `;
 
@@ -1176,8 +1253,8 @@ const EliteServicesSection = styled.section`
 
 const ServiceGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
   margin-top: 50px;
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
@@ -1186,21 +1263,21 @@ const ServiceGrid = styled.div`
 `;
 
 const ServiceCard = styled.div`
-  height: 450px;
-  border-radius: 25px;
+  height: 360px;
+  border-radius: 20px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   &:hover {
-    transform: translateY(-15px) scale(1.02);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
     border-color: #ffc107;
 
     .card-image { transform: scale(1.1); }
-    .card-overlay { background: rgba(0, 0, 0, 0.8); }
+    .card-overlay { background: rgba(0, 0, 0, 0.85); }
     ul { opacity: 1; transform: translateY(0); }
   }
 
@@ -1215,26 +1292,26 @@ const ServiceCard = styled.div`
   .card-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(transparent 30%, rgba(0, 0, 0, 0.9));
+    background: linear-gradient(transparent 20%, rgba(0, 0, 0, 0.9));
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 40px;
+    padding: 30px 25px;
     color: white;
     transition: all 0.4s ease;
 
     h4 { 
-      font-size: 1.5rem; 
+      font-size: 1.3rem; 
       font-weight: 900; 
-      margin-bottom: 15px; 
+      margin-bottom: 10px; 
       color: #ffc107;
       letter-spacing: 1px;
     }
 
     p { 
-      font-size: 1rem; 
+      font-size: 0.9rem; 
       opacity: 0.9; 
-      margin-bottom: 20px; 
+      margin-bottom: 15px; 
       line-height: 1.5;
       font-weight: 500;
     }
@@ -1248,17 +1325,18 @@ const ServiceCard = styled.div`
       transition: all 0.4s ease 0.1s;
       
       li {
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #ffc107;
+        font-size: 0.85rem;
+        margin-bottom: 6px;
         display: flex;
         align-items: center;
         gap: 10px;
-
+        color: rgba(255,255,255,0.8);
+        font-weight: 600;
+        
         &::before {
-          content: '✔';
-          font-size: 0.8rem;
+          content: '•';
+          color: #ffc107;
+          font-size: 1.2rem;
         }
       }
     }
