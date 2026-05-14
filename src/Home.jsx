@@ -105,41 +105,112 @@ const Home = () => {
         </div>
       </AboutSection>
 
-      {/* ── SERVICES & JOINERS ── */}
-      <ServicesSection>
+      {/* ── ELITE SERVICES ── */}
+      <EliteServicesSection>
         <div className="container">
-          <div className="services-flex">
-            <div className="services-list">
-              <h4 className="text-warning">ELITE SERVICES</h4>
-              <ul>
-                <li>Strength and conditioning programs</li>
-                <li>Weight loss and fat reduction training</li>
-                <li>Muscle building workouts</li>
-                <li>Functional fitness sessions</li>
-                <li>Personal training programs</li>
-                <li>Group workout classes</li>
-                <li>Cardio and endurance training</li>
-                <li>Transformation programs</li>
-                <li>Beginner-friendly fitness plans</li>
-                <li>Nutrition and lifestyle guidance</li>
-              </ul>
-              <p className="note">All training sessions are supervised by professionals to ensure safe, effective progress.</p>
-            </div>
-            <div className="join-list">
-              <h4 className="text-warning">WHO CAN JOIN?</h4>
-              <ul>
-                <li>Beginners starting their fitness journey</li>
-                <li>Individuals focused on weight management</li>
-                <li>Students and working professionals</li>
-                <li>Fitness enthusiasts and athletes</li>
-                <li>Men and women of all fitness levels</li>
-                <li>Anyone looking to improve health & confidence</li>
-              </ul>
-              <p className="note">Each program is customized based on individual goals and assessments.</p>
-            </div>
-          </div>
+          <SectionTitle>
+            ELITE <span className="text-warning">SERVICES</span>
+          </SectionTitle>
+          <ServiceGrid>
+            <ServiceCard>
+              <div className="card-image" style={{ backgroundImage: 'url("/assets/service-pt.png")' }}></div>
+              <div className="card-overlay">
+                <h4>PERSONAL TRAINING</h4>
+                <p>1-on-1 coaching tailored to your specific physiology and goals.</p>
+                <ul>
+                  <li>Custom workout plans</li>
+                  <li>Nutrition monitoring</li>
+                  <li>Posture correction</li>
+                </ul>
+              </div>
+            </ServiceCard>
+            <ServiceCard>
+              <div className="card-image" style={{ backgroundImage: 'url("/assets/service-group.png")' }}></div>
+              <div className="card-overlay">
+                <h4>GROUP FITNESS</h4>
+                <p>High-octane community sessions that push your limits.</p>
+                <ul>
+                  <li>HIIT and Tabata</li>
+                  <li>Functional training</li>
+                  <li>Team motivation</li>
+                </ul>
+              </div>
+            </ServiceCard>
+            <ServiceCard>
+              <div className="card-image" style={{ backgroundImage: 'url("/assets/service-strength.png")' }}></div>
+              <div className="card-overlay">
+                <h4>STRENGTH & CONDITIONING</h4>
+                <p>Build explosive power and raw strength with expert guidance.</p>
+                <ul>
+                  <li>Olympic lifting</li>
+                  <li>Powerlifting basics</li>
+                  <li>Athletic performance</li>
+                </ul>
+              </div>
+            </ServiceCard>
+            <ServiceCard>
+              <div className="card-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=1000&auto=format&fit=crop")' }}></div>
+              <div className="card-overlay">
+                <h4>NUTRITION COACHING</h4>
+                <p>Fuel your body correctly to see maximum results from your hard work.</p>
+                <ul>
+                  <li>Macro counting</li>
+                  <li>Meal planning</li>
+                  <li>Supplements advice</li>
+                </ul>
+              </div>
+            </ServiceCard>
+            <ServiceCard>
+              <div className="card-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000&auto=format&fit=crop")' }}></div>
+              <div className="card-overlay">
+                <h4>CARDIO & ENDURANCE</h4>
+                <p>Improve heart health and burn fat with high-intensity cardio.</p>
+                <ul>
+                  <li>Advanced treadmills</li>
+                  <li>Spin classes</li>
+                  <li>VO2 max training</li>
+                </ul>
+              </div>
+            </ServiceCard>
+            <ServiceCard>
+              <div className="card-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1000&auto=format&fit=crop")' }}></div>
+              <div className="card-overlay">
+                <h4>YOGA & RECOVERY</h4>
+                <p>Focus on flexibility, mental clarity, and deep muscle recovery.</p>
+                <ul>
+                  <li>Vinyasa flows</li>
+                  <li>Deep tissue foam rolling</li>
+                  <li>Mindfulness sessions</li>
+                </ul>
+              </div>
+            </ServiceCard>
+            <ServiceCard>
+              <div className="card-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1517438322351-1e74be76006c?q=80&w=1000&auto=format&fit=crop")' }}></div>
+              <div className="card-overlay">
+                <h4>COMBAT SPORTS</h4>
+                <p>Master boxing and kickboxing techniques for fitness and defense.</p>
+                <ul>
+                  <li>Heavy bag work</li>
+                  <li>Partner drills</li>
+                  <li>Agility and speed</li>
+                </ul>
+              </div>
+            </ServiceCard>
+            <ServiceCard>
+              <div className="card-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=1000&auto=format&fit=crop")' }}></div>
+              <div className="card-overlay">
+                <h4>CORPORATE WELLNESS</h4>
+                <p>Tailored programs for teams to improve productivity and health.</p>
+                <ul>
+                  <li>Team building events</li>
+                  <li>Postural seminars</li>
+                  <li>Stress management</li>
+                </ul>
+              </div>
+            </ServiceCard>
+          </ServiceGrid>
         </div>
-      </ServicesSection>
+      </EliteServicesSection>
 
       {/* ── WHY CHOOSE SLAYFIT ── */}
       <WhyChooseSection>
@@ -660,48 +731,103 @@ const AboutSection = styled.section`
   }
 `;
 
-const ServicesSection = styled.section`
-  padding: 60px 20px;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  .container { max-width: 1200px; margin: 0 auto; }
-  .services-flex {
+const EliteServicesSection = styled.section`
+  padding: 100px 20px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  .container { max-width: 1400px; margin: 0 auto; }
+`;
+
+const ServiceGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 50px;
+`;
+
+const ServiceCard = styled.div`
+  height: 450px;
+  border-radius: 25px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  &:hover {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    border-color: #ffc107;
+
+    .card-image { transform: scale(1.1); }
+    .card-overlay { background: rgba(0, 0, 0, 0.8); }
+    ul { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-image {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.8s ease;
+  }
+
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 30%, rgba(0, 0, 0, 0.9));
     display: flex;
-    gap: 60px;
-    flex-wrap: wrap;
-    
-    div { flex: 1; min-width: 300px; }
-    h4 { font-family: 'Oswald', sans-serif; font-weight: 800; margin-bottom: 30px; letter-spacing: 2px; }
-    
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 40px;
+    color: white;
+    transition: all 0.4s ease;
+
+    h4 { 
+      font-size: 1.5rem; 
+      font-weight: 900; 
+      margin-bottom: 15px; 
+      color: #ffc107;
+      letter-spacing: 1px;
+    }
+
+    p { 
+      font-size: 1rem; 
+      opacity: 0.9; 
+      margin-bottom: 20px; 
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
     ul {
       list-style: none;
       padding: 0;
+      margin: 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s ease 0.1s;
+      
       li {
-        margin-bottom: 12px;
-        padding-left: 25px;
-        position: relative;
+        font-size: 0.9rem;
         font-weight: 600;
-        font-size: 0.95rem;
-        color: #aaa;
-        
+        margin-bottom: 8px;
+        color: #ffc107;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
         &::before {
-          content: '→';
-          position: absolute;
-          left: 0;
-          color: #ffc107;
-          font-weight: 900;
+          content: '✔';
+          font-size: 0.8rem;
         }
       }
     }
-    
-    .note {
-      margin-top: 30px;
-      font-size: 0.85rem;
-      color: #555;
-      font-style: italic;
-      border-top: 1px solid #222;
-      padding-top: 20px;
-    }
+  }
+
+  @media (max-width: 768px) {
+    height: 400px;
+    .card-overlay { padding: 30px; }
+    ul { opacity: 1; transform: translateY(0); }
   }
 `;
 
