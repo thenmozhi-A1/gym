@@ -154,6 +154,16 @@ const StyledWrapper = styled.div`
     transform: translateX(-50%) translateY(20px);
     opacity: 0;
     transition: all 0.3s ease;
+
+    @media (max-width: 768px) {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      position: relative;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      margin-top: 15px;
+    }
   }
 
   .card:hover .card-button {

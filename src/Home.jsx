@@ -627,7 +627,6 @@ const StatBox = styled.div`
   &:hover {
     background: #ffc107;
     z-index: 10;
-    
     .stat-icon, h3, .stat-label { color: #000; opacity: 1; }
   }
 
@@ -635,14 +634,15 @@ const StatBox = styled.div`
     flex: none;
     width: 50%;
     transform: none;
-    margin: 0;
+    margin: 0 !important;
     padding: 30px 10px;
     border: 1px solid rgba(255,255,255,0.05);
-    .stat-content { transform: none; }
+    .stat-content { transform: none !important; }
   }
 
   @media (max-width: 480px) {
     width: 100%;
+    padding: 25px 10px;
   }
 `;
 
@@ -929,16 +929,23 @@ const CTASection = styled.section`
 `;
 
 const CoachesSection = styled.section`
-  padding: 100px 20px;
+  padding: 80px 20px;
   background: transparent;
   .container { max-width: 1200px; margin: 0 auto; text-align: center; }
   .section-desc { color: white; opacity: 0.8; margin-bottom: 50px; font-size: 1.2rem; }
+  @media (max-width: 768px) {
+    padding: 60px 15px;
+    .section-desc { font-size: 1rem; margin-bottom: 30px; }
+  }
 `;
 
 const CoachesGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 40px;
+  @media (max-width: 480px) {
+    gap: 20px;
+  }
 `;
 
 const CoachCard = styled.div`
@@ -976,9 +983,10 @@ const CoachCard = styled.div`
 `;
 
 const TransformationsSection = styled.section`
-  padding: 100px 20px;
+  padding: 80px 20px;
   background: rgba(255, 193, 7, 0.05);
   .container { max-width: 1200px; margin: 0 auto; }
+  @media (max-width: 768px) { padding: 60px 15px; }
 `;
 
 const TransformationsGrid = styled.div`
@@ -1047,17 +1055,22 @@ const AboutSection = styled.section`
 `;
 
 const EliteServicesSection = styled.section`
-  padding: 100px 20px;
+  padding: 80px 20px;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(10px);
   .container { max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 768px) { padding: 60px 15px; }
 `;
 
 const ServiceGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 30px;
   margin-top: 50px;
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 `;
 
 const ServiceCard = styled.div`

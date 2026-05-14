@@ -795,9 +795,10 @@ const FormContent = styled.div`
   }
 
   @media (max-width: 480px) {
-    padding: 28px 20px;
-    h2 { font-size: 1.5rem; }
-    .subtitle { margin-bottom: 24px; font-size: 0.88rem; }
+    padding: 30px 15px;
+    h2 { font-size: 1.5rem; text-align: center; }
+    .subtitle { margin-bottom: 25px; font-size: 0.88rem; text-align: center; }
+    .auth-footer { flex-direction: column; gap: 15px; }
   }
 `;
 

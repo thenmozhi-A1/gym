@@ -196,7 +196,8 @@ const HeroSection = styled.section`
   }
 
   @media (max-width: 768px) {
-    height: 50vh;
+    height: 45vh;
+    padding-top: 60px;
     .content h1 { font-size: 2.5rem; }
     .content p { font-size: 1.1rem; }
   }

@@ -621,6 +621,14 @@ const PageWrapper = styled.div`
   min-height: 100vh;
   padding-bottom: 50px;
   color: #1a1a1a;
+
+  @media (max-width: 768px) {
+    background-attachment: scroll;
+    h1.display-2 { font-size: 2.5rem; }
+    p.lead { font-size: 1.1rem !important; }
+    header { height: 35vh !important; }
+    .display-5 { font-size: 1.8rem; }
+  }
 `;
 
 const GlassCard = styled.div`
@@ -632,6 +640,8 @@ const GlassCard = styled.div`
   
   @media (max-width: 768px) {
     padding: 20px !important;
+    h3 { font-size: 1.25rem; }
+    .fs-4 { font-size: 1.25rem !important; }
   }
 `;
 
