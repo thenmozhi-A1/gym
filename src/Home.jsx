@@ -95,10 +95,10 @@ const Home = () => {
             <SectionTitle style={{ textAlign: 'left' }}>
               <span className="text-warning">SLAYFIT</span> STUDIO
             </SectionTitle>
-            <p style={{ color: "black" }}>
+            <p style={{ color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
               SlayFit Fitness Studio is a modern training space built to help individuals improve strength, endurance, body composition, and overall fitness performance. Designed for beginners, working professionals, fitness enthusiasts, and athletes, SlayFit provides a motivating environment focused on discipline, consistency, and transformation.
             </p>
-            <p style={{ color: "black" }}>
+            <p style={{ color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
               Our studio combines expert guidance, advanced workout methods, and modern equipment to create personalized fitness experiences for every member. Whether your goal is weight loss, muscle gain, improved stamina, or a healthier lifestyle, SlayFit offers structured programs tailored to your fitness level and goals.
             </p>
           </div>
@@ -184,9 +184,9 @@ const Home = () => {
                 Knowledge is power. Use our integrated biometric tools to understand your body metrics and track your progress toward the ultimate physique.
               </p>
               <ul className="tools-list" style={{ color: "white" }}>
-                <li><Zap size={18} className="text-warning" /> Precision BMI Tracking</li>
-                <li><Zap size={18} className="text-warning" /> Caloric Intake Estimates</li>
-                <li><Zap size={18} className="text-warning" /> Macro-Nutrient Optimization</li>
+                <li style={{ color: "white" }}><Zap size={18} className="text-warning" /> Precision BMI Tracking</li>
+                <li style={{ color: "white" }}><Zap size={18} className="text-warning" /> Caloric Intake Estimates</li>
+                <li style={{ color: "white" }}><Zap size={18} className="text-warning" /> Macro-Nutrient Optimization</li>
               </ul>
             </div>
             <div className="tools-calc">
@@ -261,15 +261,15 @@ const Home = () => {
 
 const HomeContainer = styled.div`
   background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-              linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), 
-              url("https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=100&w=2560&auto=format&fit=crop");
+              linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+              url("/assets/gym-hero-bg.png");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   color: #1a1a1a;
   min-height: 100vh;
   padding-top: 0;
-  padding-bottom: 20px;
+  padding-bottom: 40px;
 
   @media (max-width: 768px) {
     background-attachment: scroll;
@@ -347,10 +347,10 @@ const HeroSection = styled.section`
     padding: 0 20px;
     position: relative;
     z-index: 20;
-    h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; color:#ffc107; text-shadow: 0 2px 10px rgba(0,0,0,0.2); 
-      .since { font-size: 1.2rem; opacity: 0.7; color: white; vertical-align: middle; margin-left: 10px; font-weight: 500; }
+    h1 { font-size: 3.5rem; font-weight: 900; margin-bottom: 20px; color:#ffc107; text-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+      .since { font-size: 1.2rem; opacity: 0.8; color: white; vertical-align: middle; margin-left: 10px; font-weight: 500; }
     }
-    p { font-size: 1.2rem; color: #1a1a1a; margin-bottom: 30px; font-weight: 500; }
+    p { font-size: 1.4rem; color: white; margin-bottom: 30px; font-weight: 500; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
   }
 
   @media (max-width: 768px) {
@@ -384,13 +384,13 @@ const DetailsGrid = styled.div`
 `;
 
 const DetailCard = styled.div`
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 50px 40px;
   border-radius: 30px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   text-align: center;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: ${props => props.as === 'a' ? 'pointer' : 'default'};
@@ -407,13 +407,13 @@ const DetailCard = styled.div`
     border-color: rgba(255, 193, 7, 0.8);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   }
-  h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; color: #ffc107; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-  p { color: #555; margin: 5px 0; line-height: 1.6; font-weight: 500; }
+  h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 15px; color: #ffc107; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  p { color: rgba(255, 255, 255, 0.9); margin: 5px 0; line-height: 1.6; font-weight: 500; }
 `;
 
 const EnquirySection = styled.section`
   max-width: 900px;
-  margin: 20px auto;
+  margin: 40px auto 80px;
   padding: 0 20px;
 
   .form-container {
@@ -430,8 +430,8 @@ const EnquirySection = styled.section`
     }
     text-align: center;
 
-    h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; color: #1a1a1a; }
-    p { color: #555; margin-bottom: 40px; font-weight: 500; }
+    h2 { font-size: 2.5rem; font-weight: 900; margin-bottom: 10px; color: #ffc107; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+    p { color: rgba(255, 255, 255, 0.8); margin-bottom: 40px; font-weight: 500; }
 
     form {
       display: flex;
@@ -507,7 +507,8 @@ const SectionTitle = styled.h2`
   font-weight: 900;
   text-align: center;
   margin-bottom: 40px;
-  color: #1a1a1a;
+  color: #ffc107;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
   letter-spacing: -1px;
   @media (max-width: 768px) { font-size: 2rem; }
 `;
@@ -526,18 +527,19 @@ const WhyChooseSection = styled.section`
 `;
 
 const FeatureCard = styled.div`
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
   padding: 40px;
   border-radius: 20px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-10px);
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.2);
     border-color: #ffc107;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
   }
 
   .feature-icon {
@@ -547,8 +549,8 @@ const FeatureCard = styled.div`
     margin-bottom: 20px;
   }
 
-  h4 { font-weight: 800; margin-bottom: 15px; letter-spacing: 1px; }
-  p { color: #555; font-size: 0.95rem; line-height: 1.6; font-weight: 500; }
+  h4 { font-weight: 800; margin-bottom: 15px; letter-spacing: 1px; color: white; }
+  p { color: rgba(255, 255, 255, 0.8); font-size: 0.95rem; line-height: 1.6; font-weight: 500; }
 `;
 
 const ToolsSection = styled.section`
@@ -604,7 +606,7 @@ const ToolsSection = styled.section`
 const CTASection = styled.section`
   height: 400px;
   background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
-              url("https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=2000&auto=format&fit=crop");
+              url("/assets/gym-cta-bg.png");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
