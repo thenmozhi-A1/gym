@@ -115,32 +115,64 @@ const Home = () => {
         </div>
       </StatsSection>
 
-      <DetailsGrid className="reveal">
-        <DetailCard
+      <InfoCardsRow className="reveal">
+        {/* ── LOCATION CARD ── */}
+        <FlipCard
           as="a"
-          href="https://www.google.com/maps"
+          href="https://www.google.com/maps/search/?api=1&query=No.624+Khivraj+Building+Anna+Salai+Chennai"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <MapPin size={32} className="text-warning mb-3" />
-          <h3>Our Location</h3>
-          <p>No.624, Khivraj Building, Anna Salai, Chennai.</p>
-        </DetailCard>
+          <div className="flip-inner">
+            <div className="flip-front">
+              <div className="icon-ring"><MapPin size={36} /></div>
+              <h3>Our Location</h3>
+              <span className="tap-hint">Hover to explore →</span>
+            </div>
+            <div className="flip-back">
+              <MapPin size={28} className="back-icon" />
+              <h4>Find Us Here</h4>
+              <p>No.624, Khivraj Building,</p>
+              <p>Anna Salai, Chennai.</p>
+              <div className="cta-link">Open in Maps ↗</div>
+            </div>
+          </div>
+        </FlipCard>
 
-        <DetailCard>
-          <Clock size={32} className="text-warning mb-3" />
-          <h3>Opening Hours</h3>
-          <p>Mon - Fri: 5:00 AM - 11:00 PM</p>
-          <p>Sat - Sun: 6:00 AM - 9:00 PM</p>
-        </DetailCard>
+        {/* ── HOURS CARD ── */}
+        <FlipCard>
+          <div className="flip-inner">
+            <div className="flip-front">
+              <div className="icon-ring"><Clock size={36} /></div>
+              <h3>Opening Hours</h3>
+              <span className="tap-hint">Hover to explore →</span>
+            </div>
+            <div className="flip-back">
+              <Clock size={28} className="back-icon" />
+              <h4>We're Open</h4>
+              <div className="hours-row"><span>Mon – Fri</span><span>5 AM – 11 PM</span></div>
+              <div className="hours-row"><span>Sat – Sun</span><span>6 AM – 9 PM</span></div>
+            </div>
+          </div>
+        </FlipCard>
 
-        <DetailCard>
-          <Phone size={32} className="text-warning mb-3" />
-          <h3>Contact Us</h3>
-          <p>Phone: +91 84891 02133</p>
-          <p>Email: slayfit@gmail.com</p>
-        </DetailCard>
-      </DetailsGrid>
+        {/* ── CONTACT CARD ── */}
+        <FlipCard>
+          <div className="flip-inner">
+            <div className="flip-front">
+              <div className="icon-ring"><Phone size={36} /></div>
+              <h3>Contact Us</h3>
+              <span className="tap-hint">Hover to explore →</span>
+            </div>
+            <div className="flip-back">
+              <Phone size={28} className="back-icon" />
+              <h4>Get In Touch</h4>
+              <p>📞 +91 84891 02133</p>
+              <p>✉️ slayfit@gmail.com</p>
+            </div>
+          </div>
+        </FlipCard>
+      </InfoCardsRow>
 
       {/* ── ABOUT SLAYFIT ── */}
       <AboutSection>
@@ -646,47 +678,127 @@ const StatBox = styled.div`
   }
 `;
 
-const DetailsGrid = styled.div`
+const InfoCardsRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 20px;
 
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 0 12px;
-  }
+  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 600px) { grid-template-columns: 1fr; padding: 0 12px; }
 `;
 
-const DetailCard = styled.div`
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 50px 40px;
-  border-radius: 30px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  cursor: ${props => props.as === 'a' ? 'pointer' : 'default'};
+const FlipCard = styled.div`
+  height: 260px;
+  perspective: 1000px;
+  cursor: pointer;
+  text-decoration: none;
   display: block;
 
-  @media (max-width: 600px) {
-    padding: 30px 20px;
-    border-radius: 20px;
+  &:hover .flip-inner { transform: rotateY(180deg); }
+
+  .flip-inner {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    position: relative;
   }
 
-  &:hover { 
-    transform: translateY(-10px) scale(1.02);
-    background: rgba(255, 255, 255, 0.6);
-    border-color: rgba(255, 193, 7, 0.8);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  .flip-front, .flip-back {
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 35px;
+    text-align: center;
   }
-  h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 15px; color: #ffc107; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-  p { color: rgba(255, 255, 255, 0.9); margin: 5px 0; line-height: 1.6; font-weight: 500; }
+
+  .flip-front {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    gap: 18px;
+
+    .icon-ring {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255, 193, 7, 0.1);
+      border: 2px solid rgba(255, 193, 7, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffc107;
+      transition: all 0.3s ease;
+    }
+
+    h3 {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .tap-hint {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.3);
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+  }
+
+  .flip-back {
+    background: #ffc107;
+    color: #000;
+    transform: rotateY(180deg);
+    gap: 12px;
+
+    .back-icon { color: rgba(0,0,0,0.5); }
+
+    h4 {
+      font-size: 1.2rem;
+      font-weight: 900;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: rgba(0,0,0,0.8);
+    }
+
+    .hours-row {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 0.9rem;
+      font-weight: 800;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      span:last-child { color: rgba(0,0,0,0.6); }
+    }
+
+    .cta-link {
+      margin-top: 5px;
+      font-size: 0.8rem;
+      font-weight: 900;
+      text-decoration: underline;
+      opacity: 0.7;
+    }
+  }
+
+  @media (max-width: 600px) { height: 220px; }
 `;
 
 const EnquirySection = styled.section`
