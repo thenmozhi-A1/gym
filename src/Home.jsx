@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { MapPin, Clock, Phone, Mail, Award, Shield, Zap, UserCircle, Send } from "lucide-react";
+import { MapPin, Clock, Phone, Mail, Award, Shield, Zap, UserCircle, Send, Users, Target, Trophy, Dumbbell } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
 
@@ -16,6 +16,25 @@ const Home = () => {
     goals: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const observerRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("reveal-visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const revealElements = document.querySelectorAll(".reveal");
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -49,19 +68,54 @@ const Home = () => {
   return (
     <HomeContainer>
 
-      <HeroSection>
+      <HeroSection className="reveal">
         <div className="content">
-          <h1>Redefining Fitness at <span className="text-warning">SlayFit</span> <span className="since">Since 2024</span></h1>
+          <Badge>ESTABLISHED 2024</Badge>
+          <h1>Redefining Fitness at <span className="text-warning">SlayFit</span></h1>
           <p className="tagline">Train Hard. Stay Consistent. Slay Every Goal.</p>
           <div className="cta-row">
-            <button className="btn btn-warning fw-bold px-5 py-3 rounded-pill shadow" onClick={() => navigate("/login")}>
-              ENTER ARENA
+            <button className="btn-arena" onClick={() => navigate("/login")}>
+              ENTER ARENA <Zap size={20} />
             </button>
           </div>
         </div>
+
       </HeroSection>
 
-      <DetailsGrid>
+      <StatsSection className="reveal">
+        <div className="container">
+          <StatBox>
+            <div className="stat-content">
+              <Users size={24} className="stat-icon" />
+              <h3>500+</h3>
+              <p className="stat-label">MEMBERS</p>
+            </div>
+          </StatBox>
+          <StatBox>
+            <div className="stat-content">
+              <Dumbbell size={24} className="stat-icon" />
+              <h3>30+</h3>
+              <p className="stat-label">COACHES</p>
+            </div>
+          </StatBox>
+          <StatBox>
+            <div className="stat-content">
+              <Target size={24} className="stat-icon" />
+              <h3>10K</h3>
+              <p className="stat-label">SQ. FT.</p>
+            </div>
+          </StatBox>
+          <StatBox>
+            <div className="stat-content">
+              <Trophy size={24} className="stat-icon" />
+              <h3>24/7</h3>
+              <p className="stat-label">ACCESS</p>
+            </div>
+          </StatBox>
+        </div>
+      </StatsSection>
+
+      <DetailsGrid className="reveal">
         <DetailCard
           as="a"
           href="https://www.google.com/maps"
@@ -105,8 +159,7 @@ const Home = () => {
         </div>
       </AboutSection>
 
-      {/* ── ELITE SERVICES ── */}
-      <EliteServicesSection>
+      <EliteServicesSection className="reveal">
         <div className="container">
           <SectionTitle>
             ELITE <span className="text-warning">SERVICES</span>
@@ -211,6 +264,64 @@ const Home = () => {
           </ServiceGrid>
         </div>
       </EliteServicesSection>
+
+      {/* ── MEET THE COACHES ── */}
+      <CoachesSection className="reveal">
+        <div className="container">
+          <SectionTitle>
+            MEET THE <span className="text-warning">MASTERS</span>
+          </SectionTitle>
+          <p className="section-desc">Train with the best. Our certified experts are here to push you beyond your limits.</p>
+          <CoachesGrid>
+            <CoachCard>
+              <div className="coach-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1567013127542-490d757e51fc?q=80&w=400&auto=format&fit=crop")' }}></div>
+              <div className="coach-info">
+                <h4>ALEX "IRON" ROSS</h4>
+                <span>STRENGTH & HYPERTROPHY</span>
+              </div>
+            </CoachCard>
+            <CoachCard>
+              <div className="coach-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=400&auto=format&fit=crop")' }}></div>
+              <div className="coach-info">
+                <h4>SARAH BLAZE</h4>
+                <span>HIIT & FUNCTIONAL FITNESS</span>
+              </div>
+            </CoachCard>
+            <CoachCard>
+              <div className="coach-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1552196564-972b49917d61?q=80&w=400&auto=format&fit=crop")' }}></div>
+              <div className="coach-info">
+                <h4>MARK VOID</h4>
+                <span>MMA & COMBAT DRILLS</span>
+              </div>
+            </CoachCard>
+          </CoachesGrid>
+        </div>
+      </CoachesSection>
+
+      {/* ── TRANSFORMATIONS ── */}
+      <TransformationsSection className="reveal">
+        <div className="container">
+          <SectionTitle>
+            REAL <span className="text-warning">RESULTS</span>
+          </SectionTitle>
+          <TransformationsGrid>
+            <TransformationCard>
+              <div className="trans-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop")' }}></div>
+              <div className="trans-content">
+                <p>"SlayFit changed my life. I've never felt more confident and strong."</p>
+                <h5>- JAMES K. (Lost 20kg)</h5>
+              </div>
+            </TransformationCard>
+            <TransformationCard>
+              <div className="trans-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=600&auto=format&fit=crop")' }}></div>
+              <div className="trans-content">
+                <p>"The community here is unmatched. Every session is a new peak."</p>
+                <h5>- LINDA M. (Pro Athlete)</h5>
+              </div>
+            </TransformationCard>
+          </TransformationsGrid>
+        </div>
+      </TransformationsSection>
 
       {/* ── WHY CHOOSE SLAYFIT ── */}
       <WhyChooseSection>
@@ -332,7 +443,7 @@ const Home = () => {
 
 const HomeContainer = styled.div`
   background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-              linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+              linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
               url("/assets/gym-hero-bg.png");
   background-size: cover;
   background-position: center;
@@ -341,68 +452,26 @@ const HomeContainer = styled.div`
   min-height: 100vh;
   padding-top: 0;
   padding-bottom: 40px;
+  overflow-x: hidden;
+
+  /* ── Reveal Animations ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    &.reveal-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   @media (max-width: 768px) {
     background-attachment: scroll;
-    padding-top: 120px;
   }
-
-  .login-corner {
-    position: absolute;
-    top: 110px;
-    right: 40px;
-    z-index: 1000;
-  }
-
-  .login-btn {
-    background: #ffc107;
-    border: none;
-    color: black;
-    padding: 12px 30px;
-    border-radius: 50px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    box-shadow: 0 10px 20px rgba(255, 193, 7, 0.3);
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: #e5ac00;
-      transform: translateY(-3px);
-      box-shadow: 0 15px 30px rgba(255, 193, 7, 0.4);
-    }
-  }
-
-  @media (max-width: 576px) {
-    .login-corner {
-      top: 90px;
-      right: 20px;
-    }
-    .login-btn {
-      padding: 8px 20px;
-      font-size: 0.85rem;
-    }
-  }
-`;
-
-const Badge = styled.span`
-  background: rgba(255, 193, 7, 0.1);
-  color: #ffc107;
-  padding: 6px 15px;
-  border-radius: 50px;
-  font-weight: 800;
-  font-size: 0.75rem;
-  letter-spacing: 2px;
-  margin-top: 30px;
-  margin-bottom: 20px;
-  display: inline-block;
-  border: 1px solid rgba(255, 193, 7, 0.2);
 `;
 
 const HeroSection = styled.section`
-  height: 50vh;
+  height: 90vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -410,32 +479,170 @@ const HeroSection = styled.section`
   text-align: center;
   color: white;
   position: relative;
-  padding-top: 0;
   
   .content {
-    margin-top: 0; 
-    max-width: 800px;
+    max-width: 900px;
     padding: 0 20px;
-    position: relative;
     z-index: 20;
-    h1 { font-size: 3.5rem; font-weight: 900; margin-bottom: 20px; color:#ffc107; text-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-      .since { font-size: 1.2rem; opacity: 0.8; color: white; vertical-align: middle; margin-left: 10px; font-weight: 500; }
+    h1 { font-size: 5rem; font-weight: 900; line-height: 1; margin-bottom: 20px; color:#ffc107; text-shadow: 0 4px 30px rgba(0,0,0,0.5); }
+    p { font-size: 1.5rem; color: white; margin-bottom: 40px; font-weight: 500; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+  }
+
+  .cta-row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .btn-arena {
+    background: #ffc107;
+    color: black;
+    border: none;
+    padding: 20px 60px;
+    font-size: 1.5rem;
+    font-weight: 900;
+    border-radius: 100px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 40px rgba(255, 193, 7, 0.3);
+
+    &:hover {
+      transform: scale(1.05) translateY(-5px);
+      background: white;
+      box-shadow: 0 30px 60px rgba(255, 193, 7, 0.4);
     }
-    p { font-size: 1.4rem; color: white; margin-bottom: 30px; font-weight: 500; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+  }
+
+  .hero-scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.7;
+    span { font-size: 0.7rem; font-weight: 800; letter-spacing: 3px; }
+    .mouse {
+      width: 25px;
+      height: 40px;
+      border: 2px solid white;
+      border-radius: 20px;
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        width: 4px;
+        height: 8px;
+        background: white;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 8px;
+        border-radius: 2px;
+        animation: scrollMouse 2s infinite;
+      }
+    }
+  }
+
+  @keyframes scrollMouse {
+    0% { top: 8px; opacity: 1; }
+    100% { top: 25px; opacity: 0; }
   }
 
   @media (max-width: 768px) {
-    height: auto;
-    padding: 60px 0;
-    .content {
-      padding: 0 16px;
-      h1 { font-size: 2rem; }
-      p { font-size: 1rem; }
-    }
+    height: 70vh;
+    .content h1 { font-size: 3rem; }
+    .content p { font-size: 1.1rem; }
+  }
+`;
+
+const StatsSection = styled.section`
+  padding: 0;
+  background: #000;
+  margin-top: -60px;
+  margin-bottom: 80px;
+  position: relative;
+  z-index: 30;
+  overflow: hidden;
+  border-top: 3px solid #ffc107;
+  border-bottom: 3px solid #ffc107;
+
+  .container {
+    max-width: 100%;
+    margin: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    @media (max-width: 900px) { flex-wrap: wrap; }
+  }
+`;
+
+const StatBox = styled.div`
+  flex: 1;
+  background: #0a0a0a;
+  padding: 40px 20px;
+  position: relative;
+  transform: skewX(-12deg);
+  margin-left: -15px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.4s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:first-child { margin-left: -40px; }
+  &:last-child { border-right: none; padding-right: 60px; }
+
+  .stat-content {
+    transform: skewX(12deg);
+    text-align: center;
+  }
+
+  .stat-icon {
+    color: #ffc107;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+
+  h3 { 
+    font-size: 3rem; 
+    font-weight: 950; 
+    margin: 0; 
+    color: white;
+    line-height: 1;
+    letter-spacing: -2px;
+    font-style: italic;
+  }
+
+  .stat-label { 
+    font-size: 0.65rem; 
+    font-weight: 900; 
+    letter-spacing: 4px; 
+    color: #ffc107;
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  &:hover {
+    background: #ffc107;
+    z-index: 10;
+    
+    .stat-icon, h3, .stat-label { color: #000; opacity: 1; }
+  }
+
+  @media (max-width: 900px) {
+    flex: none;
+    width: 50%;
+    transform: none;
+    margin: 0;
+    padding: 30px 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+    .stat-content { transform: none; }
   }
 
   @media (max-width: 480px) {
-    .content h1 { font-size: 1.8rem; }
+    width: 100%;
   }
 `;
 
@@ -721,13 +928,121 @@ const CTASection = styled.section`
   }
 `;
 
+const CoachesSection = styled.section`
+  padding: 100px 20px;
+  background: transparent;
+  .container { max-width: 1200px; margin: 0 auto; text-align: center; }
+  .section-desc { color: white; opacity: 0.8; margin-bottom: 50px; font-size: 1.2rem; }
+`;
+
+const CoachesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 40px;
+`;
+
+const CoachCard = styled.div`
+  position: relative;
+  height: 400px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  
+  .coach-image {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.6s ease;
+  }
+
+  .coach-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 30px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.9));
+    color: white;
+    text-align: left;
+    
+    h4 { font-weight: 900; font-size: 1.5rem; margin-bottom: 5px; color: #ffc107; }
+    span { font-size: 0.8rem; font-weight: 700; opacity: 0.7; letter-spacing: 1px; }
+  }
+
+  &:hover {
+    .coach-image { transform: scale(1.1); }
+  }
+`;
+
+const TransformationsSection = styled.section`
+  padding: 100px 20px;
+  background: rgba(255, 193, 7, 0.05);
+  .container { max-width: 1200px; margin: 0 auto; }
+`;
+
+const TransformationsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 40px;
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+`;
+
+const TransformationCard = styled.div`
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  height: 250px;
+
+  .trans-image {
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .trans-content {
+    flex: 1.2;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+    
+    p { font-style: italic; font-size: 1.1rem; margin-bottom: 15px; line-height: 1.6; }
+    h5 { font-weight: 900; color: #ffc107; }
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    height: auto;
+    .trans-image { height: 200px; }
+  }
+`;
+
+const Badge = styled.span`
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+  padding: 6px 15px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  display: inline-block;
+  border: 1px solid rgba(255, 193, 7, 0.2);
+`;
+
 const AboutSection = styled.section`
-  padding: 60px 20px;
+  padding: 100px 20px;
   background: transparent;
   .container { max-width: 1200px; margin: 0 auto; }
   .about-content {
     max-width: 900px;
-    p { font-size: 1.1rem; line-height: 1.8; color: #444; margin-bottom: 20px; font-weight: 500; }
+    p { font-size: 1.1rem; line-height: 1.8; color: white; margin-bottom: 20px; font-weight: 500; }
   }
 `;
 
