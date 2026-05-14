@@ -59,8 +59,8 @@ const Nutrition = () => {
         "Include plenty of leafy greens and high-fiber vegetables to stay full.",
         "Drink at least 3-4 liters of water daily to support metabolism."
       ],
-      color: "primary"
-
+      color: "primary",
+      backgroundImage: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=2070&auto=format&fit=crop"
     },
     "Muscle Gain": {
       description: "Requires a caloric surplus (250-500 calories above maintenance) and high protein intake.",
@@ -69,8 +69,8 @@ const Nutrition = () => {
         "Fuel intense training with complex carbs like sweet potatoes and brown rice.",
         "Don't skip healthy fats; they are crucial for hormone production."
       ],
-      color: "danger"
-
+      color: "danger",
+      backgroundImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop"
     },
     "Maintenance": {
       description: "Match your caloric intake with your energy expenditure for stable weight and performance.",
@@ -79,7 +79,8 @@ const Nutrition = () => {
         "Adjust intake based on daily activity levels.",
         "Excellent for improving strength and endurance without weight change."
       ],
-      color: "success"
+      color: "success",
+      backgroundImage: "https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=2071&auto=format&fit=crop"
     },
     "Keto Diet": {
       description: "A very low-carb, high-fat diet that shifts metabolism towards burning fat (ketosis).",
@@ -88,7 +89,8 @@ const Nutrition = () => {
         "Increase intake of healthy oils, avocados, and fatty fish.",
         "Monitor electrolyte levels (Sodium, Potassium, Magnesium)."
       ],
-      color: "warning"
+      color: "warning",
+      backgroundImage: "https://images.unsplash.com/photo-1532634922-8fe0b757fb13?q=80&w=2072&auto=format&fit=crop"
     },
     "Vegan Plan": {
       description: "A 100% plant-based approach focused on whole foods and high-quality plant proteins.",
@@ -97,7 +99,8 @@ const Nutrition = () => {
         "Source iron from lentils, spinach, and fortified cereals.",
         "Supplement with Vitamin B12 and Vitamin D regularly."
       ],
-      color: "info"
+      color: "info",
+      backgroundImage: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=2070&auto=format&fit=crop"
     }
   };
 
@@ -155,7 +158,7 @@ const Nutrition = () => {
           width: "100%",
         }}
       >
-        <h1 className="display-2 fw-bold mb-3">Fuel Your Fitness</h1>
+        <h1 className="display-2 fw-bold mb-3" style={{ color: "black" }}>Fuel Your Fitness</h1>
         <p className="lead fs-3">Eat right, train hard, and achieve your goals.</p>
         <a href="#meal-plans" className="btn btn-warning btn-lg mt-4 px-5 rounded-pill fw-bold shadow">View Meal Plans</a>
       </header>
@@ -169,30 +172,51 @@ const Nutrition = () => {
 
         <div className="row g-4 text-center justify-content-center">
           <div className="col-md-4">
-            <GlassCard className="card h-100 p-4 transition-hover">
-              <div className="bg-primary bg-opacity-10 rounded-circle p-4 mx-auto mb-4" style={{ width: "fit-content" }}>
-                <Activity size={40} className="text-primary" />
+            <GlassCard
+              className="card h-100 p-4 transition-hover border-0 text-white"
+              style={{
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("https://images.unsplash.com/photo-1532550907401-a500c9a57435?q=80&w=2070&auto=format&fit=crop")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            >
+              <div className="bg-warning rounded-circle p-4 mx-auto mb-4 shadow" style={{ width: "fit-content" }}>
+                <Activity size={40} className="text-dark" />
               </div>
-              <h3 className="fw-bold mb-3">Protein</h3>
-              <p className="text-muted">Essential for muscle growth and recovery. Aim for 1.6g-2.2g per kg of body weight.</p>
+              <h3 className="fw-bold mb-3 text-warning">Protein</h3>
+              <p className="text-white fw-medium">Essential for muscle growth and recovery. Aim for 1.6g-2.2g per kg of body weight.</p>
             </GlassCard>
           </div>
           <div className="col-md-4">
-            <GlassCard className="card h-100 p-4 transition-hover">
-              <div className="bg-success bg-opacity-10 rounded-circle p-4 mx-auto mb-4" style={{ width: "fit-content" }}>
-                <Zap size={40} className="text-success" />
+            <GlassCard
+              className="card h-100 p-4 transition-hover border-0 text-white"
+              style={{
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=2070&auto=format&fit=crop")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            >
+              <div className="bg-warning rounded-circle p-4 mx-auto mb-4 shadow" style={{ width: "fit-content" }}>
+                <Zap size={40} className="text-dark" />
               </div>
-              <h3 className="fw-bold mb-3">Carbohydrates</h3>
-              <p className="text-muted">The primary source of energy for intense workouts. Focus on complex carbs like oats and quinoa.</p>
+              <h3 className="fw-bold mb-3 text-warning">Carbohydrates</h3>
+              <p className="text-white fw-medium">The primary source of energy for intense workouts. Focus on complex carbs like oats and quinoa.</p>
             </GlassCard>
           </div>
           <div className="col-md-4">
-            <GlassCard className="card h-100 p-4 transition-hover">
-              <div className="bg-danger bg-opacity-10 rounded-circle p-4 mx-auto mb-4" style={{ width: "fit-content" }}>
-                <Droplets size={40} className="text-danger" />
+            <GlassCard
+              className="card h-100 p-4 transition-hover border-0 text-white"
+              style={{
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?q=80&w=2075&auto=format&fit=crop")`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            >
+              <div className="bg-warning rounded-circle p-4 mx-auto mb-4 shadow" style={{ width: "fit-content" }}>
+                <Droplets size={40} className="text-dark" />
               </div>
-              <h3 className="fw-bold mb-3">Fats</h3>
-              <p className="text-muted">Supports overall health, brain function, and hormone production. Choose healthy fats like avocado.</p>
+              <h3 className="fw-bold mb-3 text-warning">Fats</h3>
+              <p className="text-white fw-medium">Supports overall health, brain function, and hormone production. Choose healthy fats like avocado.</p>
             </GlassCard>
           </div>
         </div>
@@ -211,10 +235,9 @@ const Nutrition = () => {
             {/* Table Column */}
             <div className={activeGoal ? "col-lg-5 transition-all" : "col-lg-10 transition-all"}>
               <GlassCard
-                className="card overflow-hidden rounded-4"
+                className="card overflow-hidden shadow-lg border-0 text-white"
                 style={{
-                  background: `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
-                               url("https://images.unsplash.com/photo-1571902943202-507ec2618e8f?q=80&w=2075&auto=format&fit=crop")`,
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("https://images.unsplash.com/photo-1543339308-43e59d6b73a6?q=80&w=2070&auto=format&fit=crop")`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
@@ -224,15 +247,14 @@ const Nutrition = () => {
                     .hide-scrollbar::-webkit-scrollbar { display: none; }
                     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; overflow-x: auto; }
                     .clickable-row { cursor: pointer; transition: all 0.2s ease; }
-                    .clickable-row:hover { background-color: rgba(255, 193, 7, 0.05) !important; }
-                    .active-goal-row { background-color: rgba(255, 193, 7, 0.15) !important; border-left: 5px solid #ffc107; }
+                    .clickable-row:hover { background-color: rgba(255, 255, 255, 0.1) !important; }
+                    .active-goal-row { background-color: rgba(255, 193, 7, 0.2) !important; border-left: 5px solid #ffc107; }
                     .transition-all { transition: all 0.5s ease; }
-                    .form-control { background: rgba(255, 255, 255, 0.4) !important; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3); }
-                    .form-control:focus { background: rgba(255, 255, 255, 0.6) !important; box-shadow: 0 0 10px rgba(255, 193, 7, 0.2); border-color: #ffc107; }
+                    .table-dark-custom { --bs-table-bg: transparent; --bs-table-color: white; --bs-table-hover-bg: rgba(255,255,255,0.05); }
                   `}
                 </style>
                 <div className="hide-scrollbar">
-                  <table className="table table-hover mb-0 align-middle w-100">
+                  <table className="table table-hover mb-0 align-middle w-100 table-dark-custom">
                     <thead>
                       <tr style={{ background: "#212529", color: "#ffc107" }}>
                         <th className="py-3 px-3 fs-6 fw-bold border-0 text-center">Fitness Goal</th>
@@ -297,12 +319,12 @@ const Nutrition = () => {
                 <GlassCard
                   className={`card rounded-4 p-4 h-100 transition-all overflow-hidden position-relative`}
                   style={goalDetails[activeGoal].backgroundImage ? {
-                    backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('${goalDetails[activeGoal].backgroundImage}')`,
+                    backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('${goalDetails[activeGoal].backgroundImage}')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     color: 'white'
                   } : {
-                    background: 'rgba(255, 255, 255, 0.8)'
+                    background: '#ffffff'
                   }}
                 >
                   <div className="position-relative z-1">
@@ -353,43 +375,64 @@ const Nutrition = () => {
 
           <div className="row g-4 justify-content-center">
             <div className="col-md-4">
-              <GlassCard className="p-4 bg-secondary bg-opacity-10 rounded-4 border border-secondary border-opacity-25 h-100 shadow-sm position-relative overflow-hidden text-center transition-hover">
+              <GlassCard
+                className="p-4 rounded-4 border-0 h-100 shadow-lg position-relative overflow-hidden text-center transition-hover text-white"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=2070&auto=format&fit=crop")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
                 <div className="position-absolute top-0 end-0 bg-warning text-dark px-3 py-1 fw-bold rounded-bl-4">450 kcal</div>
                 <h4 className="text-warning fw-bold mb-3 mt-2">Breakfast</h4>
-                <p className="fs-5 mb-3 text-light">Oatmeal with fresh banana, walnuts & a scoop of whey protein.</p>
-                <ul className="small text-secondary list-unstyled d-inline-block text-start">
-                  <li><CheckCircle size={14} className="me-2 text-warning" /> High fiber for sustained energy</li>
-                  <li><CheckCircle size={14} className="me-2 text-warning" /> 30g Protein for muscle repair</li>
+                <p className="fs-5 mb-3">Oatmeal with fresh banana, walnuts & a scoop of whey protein.</p>
+                <ul className="small text-white-50 list-unstyled d-inline-block text-start">
+                  <li><CheckCircle size={14} className="me-2 text-warning" /> High fiber for energy</li>
+                  <li><CheckCircle size={14} className="me-2 text-warning" /> 30g Protein for repair</li>
                 </ul>
               </GlassCard>
             </div>
             <div className="col-md-4">
-              <GlassCard className="p-4 bg-secondary bg-opacity-10 rounded-4 border border-secondary border-opacity-25 h-100 shadow-sm position-relative overflow-hidden text-center transition-hover">
+              <GlassCard
+                className="p-4 rounded-4 border-0 h-100 shadow-lg position-relative overflow-hidden text-center transition-hover text-white"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=2060&auto=format&fit=crop")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
                 <div className="position-absolute top-0 end-0 bg-warning text-dark px-3 py-1 fw-bold rounded-bl-4">650 kcal</div>
                 <h4 className="text-warning fw-bold mb-3 mt-2">Lunch</h4>
-                <p className="fs-5 mb-3 text-light">Grilled chicken, quinoa, and mixed steamed vegetables.</p>
-                <ul className="small text-secondary list-unstyled d-inline-block text-start">
-                  <li><CheckCircle size={14} className="me-2 text-warning" /> Lean protein & complex carbs</li>
-                  <li><CheckCircle size={14} className="me-2 text-warning" /> Rich in vitamins A and K</li>
+                <p className="fs-5 mb-3">Grilled chicken, quinoa, and mixed steamed vegetables.</p>
+                <ul className="small text-white-50 list-unstyled d-inline-block text-start">
+                  <li><CheckCircle size={14} className="me-2 text-warning" /> Lean protein & carbs</li>
+                  <li><CheckCircle size={14} className="me-2 text-warning" /> Vitamins A and K</li>
                 </ul>
               </GlassCard>
             </div>
             <div className="col-md-4">
-              <GlassCard className="p-4 bg-secondary bg-opacity-10 rounded-4 border border-secondary border-opacity-25 h-100 shadow-sm position-relative overflow-hidden text-center transition-hover">
+              <GlassCard
+                className="p-4 rounded-4 border-0 h-100 shadow-lg position-relative overflow-hidden text-center transition-hover text-white"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url("https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=2070&auto=format&fit=crop")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
                 <div className="position-absolute top-0 end-0 bg-warning text-dark px-3 py-1 fw-bold rounded-bl-4">550 kcal</div>
                 <h4 className="text-warning fw-bold mb-3 mt-2">Dinner</h4>
-                <p className="fs-5 mb-3 text-light">Baked Atlantic salmon, roasted sweet potatoes, and spinach salad.</p>
-                <ul className="small text-secondary list-unstyled d-inline-block text-start">
-                  <li><CheckCircle size={14} className="me-2 text-warning" /> Omega-3 for joint health</li>
-                  <li><CheckCircle size={14} className="me-2 text-warning" /> Low glycemic index carbs</li>
+                <p className="fs-5 mb-3">Baked Atlantic salmon, roasted sweet potatoes, and spinach salad.</p>
+                <ul className="small text-white-50 list-unstyled d-inline-block text-start">
+                  <li><CheckCircle size={14} className="me-2 text-warning" /> Omega-3 for health</li>
+                  <li><CheckCircle size={14} className="me-2 text-warning" /> Low glycemic carbs</li>
                 </ul>
               </GlassCard>
             </div>
           </div>
 
           <div className="row justify-content-center mt-5">
-            <div className="col-lg-8 text-center p-4 bg-warning bg-opacity-10 rounded-4 border border-warning border-opacity-25">
-              <h4 className="fw-bold mb-0">Total Daily Estimate: <span className="text-warning">~1,650 - 1,800 Calories</span></h4>
+            <div className="col-lg-8 text-center p-4 bg-white rounded-4 border border-warning shadow-sm">
+              <h4 className="fw-bold mb-0 text-dark">Total Daily Estimate: <span className="text-warning">~1,650 - 1,800 Calories</span></h4>
               <p className="mb-0 text-muted small mt-2">*Note: Calorie needs vary based on age, weight, and activity level.</p>
             </div>
           </div>
@@ -407,58 +450,79 @@ const Nutrition = () => {
 
           <div className="row g-4">
             <div className="col-lg-4">
-              <GlassCard className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
-                <img src="/whey.png" className="card-img-top" alt="Whey Protein" style={{ height: "250px", objectFit: "cover" }} />
-                <div className="card-body p-4">
+              <GlassCard
+                className="card h-100 border-0 shadow-lg overflow-hidden transition-hover text-white"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("/whey.png")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  minHeight: '380px'
+                }}
+              >
+                <div className="card-body p-4 d-flex flex-column justify-content-end h-100">
                   <div className="d-flex align-items-center mb-3">
-                    <div className="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
+                    <div className="bg-warning text-dark rounded-circle p-2 me-3">
                       <Zap size={20} />
                     </div>
-                    <h3 className="h4 fw-bold mb-0">Whey Protein</h3>
+                    <h3 className="h4 fw-bold mb-0 text-warning">Whey Protein</h3>
                   </div>
-                  <p className="text-muted">The gold standard for muscle recovery. Fast-absorbing protein that provides essential amino acids to repair muscle fibers after intense workouts.</p>
-                  <ul className="small text-secondary list-unstyled">
-                    <li><CheckCircle size={14} className="me-2 text-primary" /> 20-25g protein per scoop</li>
-                    <li><CheckCircle size={14} className="me-2 text-primary" /> Low in fats and carbs</li>
-                    <li><CheckCircle size={14} className="me-2 text-primary" /> Ideal post-workout or between meals</li>
+                  <p className="text-white-50 small">The gold standard for muscle recovery. Fast-absorbing protein that provides essential amino acids to repair muscle fibers after intense workouts.</p>
+                  <ul className="small text-white list-unstyled mb-0">
+                    <li><CheckCircle size={14} className="me-2 text-warning" /> 20-25g protein per scoop</li>
+                    <li><CheckCircle size={14} className="me-2 text-warning" /> Low in fats and carbs</li>
+                    <li><CheckCircle size={14} className="me-2 text-warning" /> Ideal post-workout or between meals</li>
                   </ul>
                 </div>
               </GlassCard>
             </div>
             <div className="col-lg-4">
-              <GlassCard className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
-                <img src="/creatine.png" className="card-img-top" alt="Creatine Monohydrate" style={{ height: "250px", objectFit: "cover" }} />
-                <div className="card-body p-4">
+              <GlassCard
+                className="card h-100 border-0 shadow-lg overflow-hidden transition-hover text-white"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("/creatine.png")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  minHeight: '380px'
+                }}
+              >
+                <div className="card-body p-4 d-flex flex-column justify-content-end h-100">
                   <div className="d-flex align-items-center mb-3">
-                    <div className="bg-danger bg-opacity-10 text-danger rounded-circle p-2 me-3">
+                    <div className="bg-warning text-dark rounded-circle p-2 me-3">
                       <Flame size={20} />
                     </div>
-                    <h3 className="h4 fw-bold mb-0">Creatine</h3>
+                    <h3 className="h4 fw-bold mb-0 text-warning">Creatine</h3>
                   </div>
-                  <p className="text-muted">The most researched supplement in the world. Increases ATP production, allowing you to lift heavier and train harder for longer periods.</p>
-                  <ul className="small text-secondary list-unstyled">
-                    <li><CheckCircle size={14} className="me-2 text-danger" /> Increases strength & power</li>
-                    <li><CheckCircle size={14} className="me-2 text-danger" /> Improves muscle cell hydration</li>
-                    <li><CheckCircle size={14} className="me-2 text-danger" /> 3-5g daily maintenance dose</li>
+                  <p className="text-white-50 small">The most researched supplement in the world. Increases ATP production, allowing you to lift heavier and train harder for longer periods.</p>
+                  <ul className="small text-white list-unstyled mb-0">
+                    <li><CheckCircle size={14} className="me-2 text-warning" /> Increases strength & power</li>
+                    <li><CheckCircle size={14} className="me-2 text-warning" /> Improves muscle cell hydration</li>
+                    <li><CheckCircle size={14} className="me-2 text-warning" /> 3-5g daily maintenance dose</li>
                   </ul>
                 </div>
               </GlassCard>
             </div>
             <div className="col-lg-4">
-              <GlassCard className="card h-100 border-0 shadow-lg overflow-hidden rounded-4 transition-hover">
-                <img src="/vitamins.png" className="card-img-top" alt="Multivitamins" style={{ height: "250px", objectFit: "cover" }} />
-                <div className="card-body p-4">
+              <GlassCard
+                className="card h-100 border-0 shadow-lg overflow-hidden transition-hover text-white"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("/vitamins.png")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  minHeight: '380px'
+                }}
+              >
+                <div className="card-body p-4 d-flex flex-column justify-content-end h-100">
                   <div className="d-flex align-items-center mb-3">
-                    <div className="bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                    <div className="bg-warning text-dark rounded-circle p-2 me-3">
                       <Leaf size={20} />
                     </div>
-                    <h3 className="h4 fw-bold mb-0">Multivitamins</h3>
+                    <h3 className="h4 fw-bold mb-0 text-warning">Multivitamins</h3>
                   </div>
-                  <p className="text-muted">Ensures your body has the micro nutrients needed for optimal metabolic function, immune support, and overall physical well-being.</p>
-                  <ul className="small text-secondary list-unstyled">
-                    <li><CheckCircle size={14} className="me-2 text-success" /> Supports immune health</li>
-                    <li><CheckCircle size={14} className="me-2 text-success" /> Fills nutritional gaps</li>
-                    <li><CheckCircle size={14} className="me-2 text-success" /> Essential for hormone balance</li>
+                  <p className="text-white-50 small">Ensures your body has the micro nutrients needed for optimal metabolic function, immune support, and overall physical well-being.</p>
+                  <ul className="small text-white list-unstyled mb-0">
+                    <li><CheckCircle size={14} className="me-2 text-warning" /> Supports immune health</li>
+                    <li><CheckCircle size={14} className="me-2 text-warning" /> Fills nutritional gaps</li>
+                    <li><CheckCircle size={14} className="me-2 text-warning" /> Essential for hormone balance</li>
                   </ul>
                 </div>
               </GlassCard>
@@ -613,7 +677,7 @@ const Nutrition = () => {
 };
 
 const PageWrapper = styled.div`
-  background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), 
+  background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
               url("https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=2070&auto=format&fit=crop");
   background-size: cover;
   background-position: center;
@@ -621,6 +685,11 @@ const PageWrapper = styled.div`
   min-height: 100vh;
   padding-bottom: 50px;
   color: #1a1a1a;
+
+  header {
+    background: transparent !important;
+    height: 45vh !important;
+  }
 
   @media (max-width: 768px) {
     background-attachment: scroll;
@@ -632,11 +701,10 @@ const PageWrapper = styled.div`
 `;
 
 const GlassCard = styled.div`
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-  border-radius: 20px !important;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  border-radius: 16px !important;
   
   @media (max-width: 768px) {
     padding: 20px !important;
