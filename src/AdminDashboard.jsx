@@ -28,7 +28,8 @@ import {
   Calendar,
   Layers,
   Award,
-  Trash2
+  Trash2,
+  Plus
 } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
@@ -44,6 +45,8 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAddTrainerModalOpen, setIsAddTrainerModalOpen] = useState(false);
+  const [newTrainer, setNewTrainer] = useState({ name: "", specialty: "", salary: "", times: "" });
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -95,6 +98,15 @@ const AdminDashboard = () => {
     } catch (err) {
       alert("Error processing deletion.");
     }
+  };
+
+  const handleAddTrainer = (e) => {
+    e.preventDefault();
+    if (!newTrainer.name || !newTrainer.specialty) return;
+    const trainerToAdd = { ...newTrainer, id: Date.now(), students: 0 };
+    setTrainers([trainerToAdd, ...trainers]);
+    setNewTrainer({ name: "", specialty: "", salary: "", times: "" });
+    setIsAddTrainerModalOpen(false);
   };
 
   return (
@@ -233,7 +245,14 @@ const AdminDashboard = () => {
                 <TableCard>
                   <div className="table-header">
                     <h2>{activeTab.toUpperCase()} <small>MANAGEMENT</small></h2>
-                    <button onClick={fetchData} className="refresh-btn">REFRESH SYSTEM</button>
+                    <div className="d-flex gap-3">
+                      {activeTab === "trainers" && (
+                        <button onClick={() => setIsAddTrainerModalOpen(true)} className="add-btn">
+                          <Plus size={18} /> ADD TRAINER
+                        </button>
+                      )}
+                      <button onClick={fetchData} className="refresh-btn">REFRESH SYSTEM</button>
+                    </div>
                   </div>
                   <div className="table-responsive">
                     <table className="table">
@@ -316,6 +335,43 @@ const AdminDashboard = () => {
           )}
         </ContentContainer>
       </MainArea>
+
+      {/* ── ADD TRAINER MODAL ── */}
+      {isAddTrainerModalOpen && (
+        <ModalOverlay>
+          <ModalContent>
+            <div className="modal-header">
+              <h3>REGISTER NEW TRAINER</h3>
+              <button className="close-btn" onClick={() => setIsAddTrainerModalOpen(false)}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleAddTrainer}>
+              <div className="form-group">
+                <label>FULL NAME</label>
+                <input type="text" placeholder="e.g. John Doe" value={newTrainer.name} onChange={e => setNewTrainer({...newTrainer, name: e.target.value})} required />
+              </div>
+              <div className="form-group">
+                <label>SPECIALTY</label>
+                <input type="text" placeholder="e.g. Yoga Expert" value={newTrainer.specialty} onChange={e => setNewTrainer({...newTrainer, specialty: e.target.value})} required />
+              </div>
+              <div className="row">
+                <div className="col-6">
+                  <div className="form-group">
+                    <label>MONTHLY SALARY</label>
+                    <input type="text" placeholder="₹50,000" value={newTrainer.salary} onChange={e => setNewTrainer({...newTrainer, salary: e.target.value})} />
+                  </div>
+                </div>
+                <div className="col-6">
+                  <div className="form-group">
+                    <label>SHIFT TIME</label>
+                    <input type="text" placeholder="9AM - 5PM" value={newTrainer.times} onChange={e => setNewTrainer({...newTrainer, times: e.target.value})} />
+                  </div>
+                </div>
+              </div>
+              <button type="submit" className="submit-btn">ADD TO SYSTEM</button>
+            </form>
+          </ModalContent>
+        </ModalOverlay>
+      )}
 
       {isSidebarOpen && <Overlay onClick={() => setIsSidebarOpen(false)} />}
     </AuroraWrapper>
@@ -435,7 +491,12 @@ const ChartCard = styled.div`
 
 const TableCard = styled.div`
   background: #fff; border: 1px solid #e9ecef; border-radius: 20px; padding: 30px;
-  .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; h2 { font-weight: 900; margin: 0; small { font-size: 0.6rem; color: #007bff; letter-spacing: 2px; display: block; } } .refresh-btn { background: #1e293b; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; } }
+  .table-header { 
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; 
+    h2 { font-weight: 900; margin: 0; small { font-size: 0.6rem; color: #007bff; letter-spacing: 2px; display: block; } } 
+    .refresh-btn { background: #f1f5f9; color: #64748b; border: none; padding: 10px 20px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; }
+    .add-btn { background: #1e293b; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 8px; &:hover { background: #000; } }
+  }
   .table { width: 100%; th { background: #f8f9fa; color: #64748b; font-size: 0.75rem; font-weight: 800; padding: 15px; border: none; } td { padding: 20px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; } }
   .u-cell { display: flex; align-items: center; gap: 12px; .avatar-small { width: 32px; height: 32px; background: #e2e8f0; color: #1e293b; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; } .u-name { font-weight: 700; font-size: 0.9rem; } .u-email { font-size: 0.7rem; color: #64748b; } }
   .badge { padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; border: none; }
