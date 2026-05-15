@@ -285,7 +285,7 @@ const AdminDashboard = () => {
               </div>
             )}
           </MainPanel>
-        </div>
+        </DashboardGrid>
       </MainContent>
 
       {isSidebarOpen && <Overlay onClick={() => setIsSidebarOpen(false)} />}
