@@ -49,6 +49,7 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
   const [isPayrollDetailOpen, setIsPayrollDetailOpen] = useState(false);
+  const [selectedStaffForSlip, setSelectedStaffForSlip] = useState(null);
   const [newStaff, setNewStaff] = useState({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer", phone: "", address: "" });
 
   useEffect(() => {
@@ -368,15 +369,21 @@ const AdminDashboard = () => {
                   ) : (
                     <div className="payroll-detail-overlay animate-in">
                       <div className="detail-header">
-                        <button className="back-btn" onClick={() => setIsPayrollDetailOpen(false)}>
-                           <ArrowUpRight style={{ transform: 'rotate(-135deg)' }} size={16} /> BACK TO SUMMARY
-                        </button>
-                        <h2>Payroll <small>DETAILS / MAY 2024</small></h2>
+                        <div className="d-flex align-items-center gap-4">
+                          <button className="back-btn" onClick={() => setIsPayrollDetailOpen(false)}>
+                            <ArrowUpRight style={{ transform: 'rotate(-135deg)' }} size={16} /> BACK
+                          </button>
+                          <h2>Payroll <small>DETAILS / MAY 2024</small></h2>
+                        </div>
+                        <div className="d-flex gap-3">
+                          <button className="export-btn pdf"><Activity size={14} /> EXPORT PDF</button>
+                          <button className="export-btn csv"><Globe size={14} /> EXPORT CSV</button>
+                        </div>
                       </div>
                       
                       <TableCard style={{ border: 'none', padding: 0, background: 'transparent' }}>
                         <div className="table-responsive">
-                          <table className="table">
+                          <table className="table interactive-table">
                             <thead>
                               <tr>
                                 <th>EMPLOYEE</th>
@@ -389,7 +396,7 @@ const AdminDashboard = () => {
                             </thead>
                             <tbody>
                               {staffs.map(s => (
-                                <tr key={s.id}>
+                                <tr key={s.id} onClick={() => setSelectedStaffForSlip(s)}>
                                   <td>
                                     <div className="u-cell">
                                       <div className="avatar-small">{s.name.charAt(0)}</div>
@@ -398,14 +405,14 @@ const AdminDashboard = () => {
                                   </td>
                                   <td><span className="badge bg-primary-light">{s.role}</span></td>
                                   <td className="fw-bold">{s.salary}</td>
-                                  <td className="text-danger">₹2,450</td>
+                                  <td className="text-danger">₹2,450 <small style={{ display: 'block', fontSize: '0.6rem', opacity: 0.6 }}>TDS + PF</small></td>
                                   <td className="fw-black text-primary">₹{(parseInt(s.salary.replace(/[^\d]/g, '')) - 2450).toLocaleString()}</td>
                                   <td><span className="sync-badge">PAID</span></td>
                                 </tr>
                               ))}
                               {/* Extra mock rows for "high fidelity" */}
                               {[1,2,3,4,5,6,7].map(i => (
-                                <tr key={`mock-${i}`}>
+                                <tr key={`mock-${i}`} onClick={() => setSelectedStaffForSlip({ name: `Employee #${1300 + i}`, role: "Staff", salary: "₹42,000" })}>
                                   <td>
                                     <div className="u-cell">
                                       <div className="avatar-small">E</div>
@@ -414,7 +421,7 @@ const AdminDashboard = () => {
                                   </td>
                                   <td><span className="badge bg-primary-light">Staff</span></td>
                                   <td className="fw-bold">₹42,000</td>
-                                  <td className="text-danger">₹1,200</td>
+                                  <td className="text-danger">₹1,200 <small style={{ display: 'block', fontSize: '0.6rem', opacity: 0.6 }}>TDS + PF</small></td>
                                   <td className="fw-black text-primary">₹40,800</td>
                                   <td><span className="sync-badge">PAID</span></td>
                                 </tr>
@@ -423,6 +430,62 @@ const AdminDashboard = () => {
                           </table>
                         </div>
                       </TableCard>
+
+                      {/* ── PAY SLIP DRAWER ── */}
+                      {selectedStaffForSlip && (
+                        <>
+                          <div className="drawer-overlay" onClick={() => setSelectedStaffForSlip(null)} />
+                          <div className="pay-slip-drawer animate-slide-left">
+                            <div className="drawer-header">
+                              <h3>Employee Pay Slip</h3>
+                              <button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button>
+                            </div>
+                            
+                            <div className="slip-profile">
+                              <div className="big-avatar">{selectedStaffForSlip.name.charAt(0)}</div>
+                              <div className="info">
+                                <h4>{selectedStaffForSlip.name}</h4>
+                                <p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000}</p>
+                              </div>
+                            </div>
+
+                            <div className="slip-summary-cards">
+                              <div className="s-card green">
+                                <label>EARNINGS</label>
+                                <div className="val">{selectedStaffForSlip.salary}</div>
+                              </div>
+                              <div className="s-card red">
+                                <label>DEDUCTIONS</label>
+                                <div className="val">₹2,450</div>
+                              </div>
+                            </div>
+
+                            <div className="slip-section">
+                              <h5>EARNINGS BREAKDOWN</h5>
+                              <div className="line-item"><span>Basic Salary</span> <span>{selectedStaffForSlip.salary}</span></div>
+                              <div className="line-item"><span>HRA</span> <span>₹0.00</span></div>
+                              <div className="line-item"><span>Performance Bonus</span> <span>₹0.00</span></div>
+                            </div>
+
+                            <div className="slip-section">
+                              <h5>DEDUCTIONS</h5>
+                              <div className="line-item"><span>Provident Fund (PF)</span> <span>₹1,800</span></div>
+                              <div className="line-item"><span>Professional Tax</span> <span>₹450</span></div>
+                              <div className="line-item"><span>TDS Deduction</span> <span>₹200</span></div>
+                            </div>
+
+                            <div className="slip-total">
+                              <div className="total-row">
+                                <span>NET PAYABLE</span>
+                                <span className="final-val">₹{(parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) - 2450).toLocaleString()}</span>
+                              </div>
+                              <p>Payment via Bank Transfer • May 31, 2024</p>
+                            </div>
+
+                            <button className="download-btn-full">DOWNLOAD SLIP (PDF)</button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                 </PayrollContainer>
@@ -918,6 +981,66 @@ const ModalContent = styled.div`
       display: flex; justify-content: space-between; align-items: center;
       .back-btn { background: none; border: none; color: #007bff; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer; &:hover { gap: 12px; } }
       h2 { font-weight: 900; margin: 0; small { font-size: 0.6rem; color: #94a3b8; letter-spacing: 2px; display: block; } }
+      .export-btn { 
+        background: #fff; border: 1.5px solid #e2e8f0; padding: 10px 18px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer;
+        transition: all 0.2s; &:hover { border-color: #007bff; color: #007bff; transform: translateY(-2px); }
+        &.pdf { border-color: #fee2e2; color: #dc2626; &:hover { background: #fee2e2; } }
+      }
+    }
+
+    .interactive-table {
+      tr { cursor: pointer; transition: all 0.2s; &:hover { background: rgba(0, 123, 255, 0.03) !important; transform: scale(1.005); } }
+    }
+
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 1000; animation: fadeIn 0.3s ease; }
+    .pay-slip-drawer {
+      position: fixed; top: 0; right: 0; height: 100vh; width: 450px; background: #fff; z-index: 1100; padding: 40px; box-shadow: -20px 0 50px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; gap: 30px;
+      @media (max-width: 500px) { width: 100%; }
+      &.animate-slide-left { animation: slideLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+      @keyframes slideLeft { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+      .drawer-header {
+        display: flex; justify-content: space-between; align-items: center;
+        h3 { margin: 0; font-weight: 900; letter-spacing: -0.5px; }
+        button { background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748b; &:hover { background: #e2e8f0; color: #000; } }
+      }
+
+      .slip-profile {
+        display: flex; align-items: center; gap: 20px; background: #f8fafc; padding: 25px; border-radius: 24px;
+        .big-avatar { width: 64px; height: 64px; background: #1e293b; color: #fff; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; }
+        h4 { margin: 0; font-weight: 800; font-size: 1.2rem; }
+        p { margin: 5px 0 0; font-size: 0.8rem; color: #64748b; font-weight: 600; }
+      }
+
+      .slip-summary-cards {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+        .s-card {
+          padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0;
+          label { display: block; font-size: 0.65rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 10px; opacity: 0.6; }
+          .val { font-size: 1.3rem; font-weight: 900; }
+          &.green { background: #f0fdf4; border-color: #dcfce7; .val { color: #15803d; } }
+          &.red { background: #fef2f2; border-color: #fee2e2; .val { color: #b91c1c; } }
+        }
+      }
+
+      .slip-section {
+        border-bottom: 1px dashed #e2e8f0; padding-bottom: 20px;
+        h5 { font-size: 0.75rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px; margin-bottom: 15px; }
+        .line-item { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; color: #1e293b; margin-bottom: 10px; span:last-child { font-weight: 800; } }
+      }
+
+      .slip-total {
+        margin-top: auto; background: #1e293b; color: #fff; padding: 30px; border-radius: 24px;
+        .total-row {
+          display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+          span:first-child { font-size: 0.8rem; font-weight: 700; opacity: 0.7; }
+          .final-val { font-size: 1.8rem; font-weight: 900; }
+        }
+        p { margin: 0; font-size: 0.75rem; opacity: 0.6; font-weight: 500; }
+      }
+
+      .download-btn-full { width: 100%; padding: 20px; background: #007bff; color: #fff; border: none; border-radius: 16px; font-weight: 800; box-shadow: 0 10px 20px rgba(0, 123, 255, 0.2); &:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 123, 255, 0.3); } }
     }
   }
 `;
