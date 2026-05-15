@@ -10,12 +10,15 @@ import {
   Filter,
   AlertCircle,
   Trash2,
-  Edit3,
   CheckCircle,
   XCircle,
   Menu as MenuIcon,
   X,
-  MessageSquare
+  MessageSquare,
+  TrendingUp,
+  Activity,
+  Zap,
+  Target
 } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
@@ -48,6 +51,19 @@ const AdminDashboard = () => {
     fetchData();
   }, [activeTab]);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add("reveal-visible");
+        });
+      },
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [activeTab, loading]);
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -78,7 +94,7 @@ const AdminDashboard = () => {
         setConsultations(Array.isArray(data) ? data : []);
       }
     } catch (err) {
-      setError("Failed to fetch data. Please check if the server is running.");
+      setError("Failed to fetch data.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -86,12 +102,11 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteUser = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    if (!window.confirm("Are you sure? This action is permanent.")) return;
     try {
       const res = await fetch(`${API_BASE}/users/${id}`, { method: "DELETE" });
       if (res.ok) {
         setUsers(users.filter(u => u.id !== id));
-        alert("User deleted successfully!");
       }
     } catch (err) {
       alert("Failed to delete user.");
@@ -107,7 +122,6 @@ const AdminDashboard = () => {
       });
       if (res.ok) {
         setUsers(users.map(u => u.id === user.id ? { ...u, status: newStatus } : u));
-        alert(`User status updated to ${newStatus}`);
       }
     } catch (err) {
       alert("Failed to update status.");
@@ -115,11 +129,7 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userRole");
+    localStorage.clear();
     navigate("/login");
   };
 
@@ -129,13 +139,12 @@ const AdminDashboard = () => {
   );
 
   const filteredPayments = payments.filter(p =>
-    p.transactionId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.paymentStatus?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredAttendance = attendance.filter(a =>
-    a.user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    a.attendanceDate?.toString().includes(searchTerm)
+    a.user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const calculateDuration = (inTime, outTime) => {
@@ -154,46 +163,48 @@ const AdminDashboard = () => {
   return (
     <DashboardContainer>
       <MobileHeader>
-        <div className="logo">GD</div>
-        <button onClick={() => setIsSidebarOpen(true)}><MenuIcon /></button>
+        <div className="logo">SF</div>
+        <button onClick={() => setIsSidebarOpen(true)}><MenuIcon color="#ffc107" /></button>
       </MobileHeader>
 
       <Sidebar isOpen={isSidebarOpen}>
         <div className="sidebar-header">
           <Logo>
-            <div className="icon">GD</div>
-            <span>GymDash Admin</span>
+            <div className="icon"><Zap size={20} /></div>
+            <span>SLAYFIT <small>ADMIN</small></span>
           </Logo>
           <CloseButton onClick={() => setIsSidebarOpen(false)}><X /></CloseButton>
         </div>
 
         <NavMenu>
-          <NavItem active={activeTab === "users"} onClick={() => { setActiveTab("users"); setIsSidebarOpen(false); }}>
-            <Users size={20} /> Users Management
-          </NavItem>
-          <NavItem active={activeTab === "payments"} onClick={() => { setActiveTab("payments"); setIsSidebarOpen(false); }}>
-            <CreditCard size={20} /> Payment Records
-          </NavItem>
-          <NavItem active={activeTab === "attendance"} onClick={() => { setActiveTab("attendance"); setIsSidebarOpen(false); }}>
-            <Clock size={20} /> Attendance Logs
-          </NavItem>
-          <NavItem active={activeTab === "consultations"} onClick={() => { setActiveTab("consultations"); setIsSidebarOpen(false); }}>
-            <MessageSquare size={20} /> User Messages
-          </NavItem>
+          {[
+            { id: "users", icon: <Users size={20} />, label: "Warriors" },
+            { id: "payments", icon: <CreditCard size={20} />, label: "Revenue" },
+            { id: "attendance", icon: <Clock size={20} />, label: "Arena Logs" },
+            { id: "consultations", icon: <MessageSquare size={20} />, label: "Inquiries" }
+          ].map(item => (
+            <NavItem 
+              key={item.id}
+              active={activeTab === item.id} 
+              onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
+            >
+              {item.icon} {item.label}
+            </NavItem>
+          ))}
         </NavMenu>
 
         <LogoutBtn onClick={handleLogout}>
-          <LogOut size={20} /> Logout
+          <LogOut size={20} /> LOGOUT
         </LogoutBtn>
       </Sidebar>
 
       {isSidebarOpen && <Overlay onClick={() => setIsSidebarOpen(false)} />}
 
       <MainContent>
-        <Header>
+        <Header className="reveal">
           <TitleArea>
-            <h1>{activeTab === "users" ? "Users Details" : activeTab === "payments" ? "Payments History" : activeTab === "consultations" ? "User Inquiries" : "In/Out Timings"}</h1>
-            <p>Manage and monitor your gym's {activeTab} activity.</p>
+            <h1>{activeTab.toUpperCase()} <span className="text-warning">COMMAND</span></h1>
+            <p>Real-time analytics and management for the SlayFit Arena.</p>
           </TitleArea>
 
           <SearchArea>
@@ -209,46 +220,51 @@ const AdminDashboard = () => {
           </SearchArea>
         </Header>
 
-        <StatsRow>
-          <StatCard>
-            <div className="icon users"><Users /></div>
-            <div className="info">
-              <span className="label">Total Users</span>
+        <StatsRow className="reveal">
+          <StatCard color="#4318ff">
+            <div className="card-top">
+              <Users size={24} />
+              <TrendingUp size={16} className="trend" />
+            </div>
+            <div className="card-bottom">
               <span className="value">{users.length}</span>
+              <span className="label">ACTIVE WARRIORS</span>
             </div>
           </StatCard>
-          <StatCard>
-            <div className="icon payments"><CreditCard /></div>
-            <div className="info">
-              <span className="label">Total Revenue</span>
-              <span className="value">₹{payments.reduce((acc, p) => acc + (p.amount || 0), 0)}</span>
+          <StatCard color="#05cd99">
+            <div className="card-top">
+              <CreditCard size={24} />
+              <Activity size={16} className="trend" />
+            </div>
+            <div className="card-bottom">
+              <span className="value">₹{payments.reduce((acc, p) => acc + (p.amount || 0), 0).toLocaleString()}</span>
+              <span className="label">TOTAL REVENUE</span>
             </div>
           </StatCard>
-          <StatCard>
-            <div className="icon attendance"><Clock /></div>
-            <div className="info">
-              <span className="label">Total Records</span>
+          <StatCard color="#ff5b5b">
+            <div className="card-top">
+              <Clock size={24} />
+              <Target size={16} className="trend" />
+            </div>
+            <div className="card-bottom">
               <span className="value">{attendance.length}</span>
-            </div>
-          </StatCard>
-          <StatCard>
-            <div className="icon users"><MessageSquare /></div>
-            <div className="info">
-              <span className="label">New Messages</span>
-              <span className="value">{consultations.length}</span>
+              <span className="label">LOGGED SESSIONS</span>
             </div>
           </StatCard>
         </StatsRow>
 
         {error && (
-          <ErrorMessage>
+          <ErrorMessage className="reveal">
             <AlertCircle size={20} /> {error}
           </ErrorMessage>
         )}
 
-        <TableContainer>
+        <TableContainer className="reveal">
           {loading ? (
-            <LoadingState>Fetching records...</LoadingState>
+            <LoadingState>
+              <div className="spinner"></div>
+              <span>Synchronizing Arena Data...</span>
+            </LoadingState>
           ) : (
             <div className="responsive-table">
               <Table>
@@ -256,9 +272,9 @@ const AdminDashboard = () => {
                   <>
                     <thead>
                       <tr>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>NAME & EMAIL</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -266,35 +282,27 @@ const AdminDashboard = () => {
                         <React.Fragment key={user.id}>
                           <tr 
                             onClick={() => setExpandedUserId(expandedUserId === user.id ? null : user.id)}
-                            style={{ cursor: 'pointer' }}
                             className={expandedUserId === user.id ? "expanded-row" : ""}
                           >
-                            <td className="fw-bold">
-                              <div>{user.fullName}</div>
-                              <div style={{fontSize: '0.8rem', color: '#a3aed0', fontWeight: '400'}}>{user.email}</div>
+                            <td>
+                              <div className="user-info">
+                                <div className="avatar">{user.fullName.charAt(0)}</div>
+                                <div>
+                                  <div className="fw-bold">{user.fullName}</div>
+                                  <div className="sub-text">{user.email}</div>
+                                </div>
+                              </div>
                             </td>
                             <td><StatusBadge status={user.status}>{user.status}</StatusBadge></td>
                             <td>
                               <ActionGroup onClick={(e) => e.stopPropagation()}>
-                                <ActionButton 
-                                  title="Set Active" 
-                                  onClick={() => handleUpdateStatus(user, "ACTIVE")}
-                                  className="success"
-                                >
+                                <ActionButton className="success" onClick={() => handleUpdateStatus(user, "ACTIVE")}>
                                   <CheckCircle size={18} />
                                 </ActionButton>
-                                <ActionButton 
-                                  title="Set Inactive" 
-                                  onClick={() => handleUpdateStatus(user, "INACTIVE")}
-                                  className="warning"
-                                >
+                                <ActionButton className="warning" onClick={() => handleUpdateStatus(user, "INACTIVE")}>
                                   <XCircle size={18} />
                                 </ActionButton>
-                                <ActionButton 
-                                  title="Delete User" 
-                                  onClick={() => handleDeleteUser(user.id)}
-                                  className="danger"
-                                >
+                                <ActionButton className="danger" onClick={() => handleDeleteUser(user.id)}>
                                   <Trash2 size={18} />
                                 </ActionButton>
                               </ActionGroup>
@@ -302,34 +310,33 @@ const AdminDashboard = () => {
                           </tr>
                           {expandedUserId === user.id && (
                             <tr>
-                              <td colSpan="3" style={{ padding: '0' }}>
+                              <td colSpan="3" className="expanded-cell">
                                 <ExpandedDetails>
-                                  <div className="details-section">
-                                    <h6><CreditCard size={16} /> Recent Payments</h6>
+                                  <div className="details-col">
+                                    <h6><Zap size={16} /> RECENT REVENUE</h6>
                                     {payments.filter(p => p.user?.id === user.id).length > 0 ? (
                                       <ul className="details-list">
-                                        {payments.filter(p => p.user?.id === user.id).slice(0, 5).map(p => (
+                                        {payments.filter(p => p.user?.id === user.id).slice(0, 3).map(p => (
                                           <li key={p.id}>
-                                            <span>₹{p.amount} - {p.planName}</span>
-                                            <StatusBadge status={p.paymentStatus}>{p.paymentStatus}</StatusBadge>
-                                            <span className="date">{new Date(p.paymentDate).toLocaleDateString()}</span>
+                                            <span>{p.planName}</span>
+                                            <span className="price">₹{p.amount}</span>
                                           </li>
                                         ))}
                                       </ul>
-                                    ) : <p className="empty-msg">No payment history found.</p>}
+                                    ) : <p className="empty-msg">No transactions found.</p>}
                                   </div>
-                                  <div className="details-section">
-                                    <h6><Clock size={16} /> Recent Attendance</h6>
+                                  <div className="details-col">
+                                    <h6><Activity size={16} /> RECENT LOGS</h6>
                                     {attendance.filter(a => a.user?.id === user.id).length > 0 ? (
                                       <ul className="details-list">
-                                        {attendance.filter(a => a.user?.id === user.id).slice(0, 5).map(a => (
+                                        {attendance.filter(a => a.user?.id === user.id).slice(0, 3).map(a => (
                                           <li key={a.id}>
                                             <span>{a.attendanceDate}</span>
-                                            <span className="time">{a.checkInTime} - {a.checkOutTime || "Ongoing"}</span>
+                                            <span className="time">{a.checkInTime}</span>
                                           </li>
                                         ))}
                                       </ul>
-                                    ) : <p className="empty-msg">No attendance logs found.</p>}
+                                    ) : <p className="empty-msg">No logs found.</p>}
                                   </div>
                                 </ExpandedDetails>
                               </td>
@@ -344,20 +351,15 @@ const AdminDashboard = () => {
                 {activeTab === "payments" && (
                   <>
                     <thead>
-                      <tr>
-                        <th>User</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                      </tr>
+                      <tr><th>USER</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></tr>
                     </thead>
                     <tbody>
-                      {filteredPayments.map(payment => (
-                        <tr key={payment.id}>
-                          <td className="fw-bold">{payment.user?.fullName || "N/A"}</td>
-                          <td className="fw-bold">₹{payment.amount}</td>
-                          <td><StatusBadge status={payment.paymentStatus}>{payment.paymentStatus}</StatusBadge></td>
-                          <td>{payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : "N/A"}</td>
+                      {filteredPayments.map(p => (
+                        <tr key={p.id}>
+                          <td className="fw-bold">{p.user?.fullName || "N/A"}</td>
+                          <td className="text-warning fw-bold">₹{p.amount}</td>
+                          <td><StatusBadge status={p.paymentStatus}>{p.paymentStatus}</StatusBadge></td>
+                          <td className="sub-text">{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : "---"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -367,20 +369,16 @@ const AdminDashboard = () => {
                 {activeTab === "attendance" && (
                   <>
                     <thead>
-                      <tr>
-                        <th>User</th>
-                        <th>Date</th>
-                        <th>Check In</th>
-                        <th>Duration</th>
-                      </tr>
+                      <tr><th>USER</th><th>DATE</th><th>IN</th><th>OUT</th><th>DURATION</th></tr>
                     </thead>
                     <tbody>
                       {filteredAttendance.map(log => (
                         <tr key={log.id}>
                           <td className="fw-bold">{log.user?.fullName}</td>
                           <td>{log.attendanceDate}</td>
-                          <td className="text-success fw-bold">{log.checkInTime}</td>
-                          <td>{calculateDuration(log.checkInTime, log.checkOutTime)}</td>
+                          <td className="text-success">{log.checkInTime}</td>
+                          <td className="text-danger">{log.checkOutTime || "---"}</td>
+                          <td className="fw-bold">{calculateDuration(log.checkInTime, log.checkOutTime)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -390,28 +388,17 @@ const AdminDashboard = () => {
                 {activeTab === "consultations" && (
                   <>
                     <thead>
-                      <tr>
-                        <th>User Info</th>
-                        <th>Message / Goals</th>
-                        <th>Date</th>
-                      </tr>
+                      <tr><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></tr>
                     </thead>
                     <tbody>
                       {consultations.map(msg => (
                         <tr key={msg.id}>
                           <td>
                             <div className="fw-bold">{msg.fullName}</div>
-                            <div style={{fontSize: '0.8rem', color: '#a3aed0'}}>{msg.email}</div>
-                            <div style={{fontSize: '0.8rem', color: '#a3aed0'}}>{msg.phone}</div>
+                            <div className="sub-text">{msg.email}</div>
                           </td>
-                          <td style={{ maxWidth: '300px' }}>
-                            <p className="mb-0 small text-secondary">{msg.goals}</p>
-                          </td>
-                          <td>
-                            <div className="small text-secondary">
-                              {msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "N/A"}
-                            </div>
-                          </td>
+                          <td style={{ maxWidth: '400px' }}><p className="mb-0 sub-text italic">{msg.goals}</p></td>
+                          <td className="sub-text">{msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "---"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -420,9 +407,6 @@ const AdminDashboard = () => {
               </Table>
             </div>
           )}
-          {!loading && activeTab === "users" && filteredUsers.length === 0 && <EmptyState>No users found.</EmptyState>}
-          {!loading && activeTab === "payments" && filteredPayments.length === 0 && <EmptyState>No payments found.</EmptyState>}
-          {!loading && activeTab === "attendance" && filteredAttendance.length === 0 && <EmptyState>No attendance records found.</EmptyState>}
         </TableContainer>
       </MainContent>
     </DashboardContainer>
@@ -433,9 +417,9 @@ const AdminDashboard = () => {
 const DashboardContainer = styled.div`
   display: flex;
   min-height: 100vh;
-  background: #f4f7fe;
+  background: #050505;
+  color: white;
   font-family: 'Inter', sans-serif;
-  @media (max-width: 992px) { flex-direction: column; }
 `;
 
 const MobileHeader = styled.div`
@@ -445,27 +429,22 @@ const MobileHeader = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
-    background: #fff;
-    border-bottom: 1px solid #e2e8f0;
-    position: sticky;
-    top: 0;
-    z-index: 150;
-    .logo { background: #ffc107; color: #000; padding: 5px 10px; border-radius: 8px; font-weight: 800; }
-    button { background: none; border: none; cursor: pointer; color: #1b2559; }
+    background: #0a0a0a;
+    border-bottom: 1px solid #222;
+    position: sticky; top: 0; z-index: 150;
+    .logo { color: #ffc107; font-weight: 900; font-size: 1.5rem; }
   }
 `;
 
 const Sidebar = styled.div`
   width: 280px;
-  background: #fff;
-  border-right: 1px solid #e2e8f0;
+  background: #0a0a0a;
+  border-right: 1px solid #222;
   display: flex;
   flex-direction: column;
-  padding: 30px 20px;
-  position: fixed;
-  height: 100vh;
-  z-index: 200;
-  transition: transform 0.3s ease;
+  padding: 40px 25px;
+  position: fixed; height: 100vh; z-index: 200;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   @media (max-width: 992px) {
     transform: ${props => props.isOpen ? "translateX(0)" : "translateX(-100%)"};
@@ -473,268 +452,162 @@ const Sidebar = styled.div`
   }
 
   .sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 50px;
+    margin-bottom: 60px;
+    display: flex; justify-content: space-between; align-items: center;
   }
-`;
-
-const CloseButton = styled.button`
-  display: none;
-  @media (max-width: 992px) {
-    display: block;
-    background: none;
-    border: none;
-    color: #a3aed0;
-    cursor: pointer;
-  }
-`;
-
-const Overlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 190;
 `;
 
 const Logo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: flex; align-items: center; gap: 15px;
   .icon {
-    background: #ffc107;
-    color: #000;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    font-size: 1.2rem;
+    background: #ffc107; color: black; width: 42px; height: 42px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
   }
-  span {
-    font-weight: 800;
-    font-size: 1.2rem;
-    color: #1b2559;
+  span { font-weight: 950; font-style: italic; letter-spacing: -1px; font-size: 1.2rem;
+    small { display: block; font-size: 0.6rem; letter-spacing: 2px; color: #ffc107; font-style: normal; }
   }
 `;
 
-const NavMenu = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1;
-`;
+const NavMenu = styled.div` display: flex; flex-direction: column; gap: 12px; flex: 1; `;
 
 const NavItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 15px 20px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  color: ${props => props.active ? "#fff" : "#a3aed0"};
+  display: flex; align-items: center; gap: 15px; padding: 16px 20px; border-radius: 15px;
+  cursor: pointer; font-weight: 700; transition: all 0.3s ease;
+  color: ${props => props.active ? "black" : "#666"};
   background: ${props => props.active ? "#ffc107" : "transparent"};
-  box-shadow: ${props => props.active ? "0 10px 20px rgba(255, 193, 7, 0.2)" : "none"};
+  box-shadow: ${props => props.active ? "0 10px 20px rgba(255, 193, 7, 0.3)" : "none"};
 
   &:hover {
-    background: ${props => props.active ? "#ffc107" : "#f4f7fe"};
-    color: ${props => props.active ? "#fff" : "#1b2559"};
+    color: ${props => props.active ? "black" : "white"};
+    background: ${props => props.active ? "#ffc107" : "rgba(255,255,255,0.05)"};
   }
 `;
 
 const LogoutBtn = styled.button`
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 15px 20px;
-  border-radius: 12px;
-  border: none;
-  background: #fff5f5;
-  color: #ff5b5b;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  &:hover {
-    background: #ffe0e0;
-    transform: translateY(-2px);
-  }
+  margin-top: auto; display: flex; align-items: center; gap: 15px; padding: 16px 20px;
+  border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: transparent;
+  color: #ff5b5b; font-weight: 800; cursor: pointer; transition: all 0.3s ease;
+  &:hover { background: rgba(255,91,91,0.1); border-color: #ff5b5b; }
 `;
 
 const MainContent = styled.div`
-  margin-left: 280px;
-  flex: 1;
-  padding: 40px;
-  @media (max-width: 992px) { margin-left: 0; padding: 20px; }
+  margin-left: 280px; flex: 1; padding: 50px;
+  @media (max-width: 992px) { margin-left: 0; padding: 25px; }
+
+  .reveal {
+    opacity: 0; transform: translateY(20px); transition: all 0.8s ease;
+    &.reveal-visible { opacity: 1; transform: translateY(0); }
+  }
 `;
 
 const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 40px;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px;
   @media (max-width: 768px) { flex-direction: column; align-items: flex-start; gap: 20px; }
 `;
 
 const TitleArea = styled.div`
-  h1 { font-size: 2.2rem; font-weight: 800; color: #1b2559; margin-bottom: 5px; }
-  p { color: #a3aed0; font-weight: 500; }
-  @media (max-width: 480px) { h1 { font-size: 1.8rem; } }
+  h1 { font-size: 2.5rem; font-weight: 950; font-style: italic; margin: 0; }
+  p { color: #666; font-weight: 500; margin-top: 5px; }
+  .text-warning { color: #ffc107; }
 `;
 
 const SearchArea = styled.div`
-  display: flex;
-  gap: 15px;
-  width: 100%;
-  max-width: 400px;
+  width: 100%; max-width: 350px;
   .search-box {
-    background: #fff;
-    border-radius: 50px;
-    padding: 12px 25px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    border: 1px solid #e2e8f0;
-    width: 100%;
-    input { border: none; outline: none; width: 100%; font-weight: 500; color: #1b2559; }
-    svg { color: #a3aed0; }
+    background: #0a0a0a; border: 1px solid #222; border-radius: 12px; padding: 12px 20px;
+    display: flex; align-items: center; gap: 12px;
+    input { background: none; border: none; outline: none; color: white; width: 100%; font-weight: 500; }
+    svg { color: #ffc107; }
   }
 `;
 
 const StatsRow = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-  margin-bottom: 40px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 50px;
   @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 768px) { grid-template-columns: 1fr; gap: 15px; }
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
 `;
 
 const StatCard = styled.div`
-  background: #fff;
-  padding: 25px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-  .icon {
-    width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
-    &.users { background: #e7e9fb; color: #4318ff; }
-    &.payments { background: #e2f9ef; color: #05cd99; }
-    &.attendance { background: #ffede8; color: #ff5b5b; }
+  background: #0a0a0a; border: 1px solid #222; padding: 30px; border-radius: 25px;
+  position: relative; overflow: hidden;
+  
+  &::after {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, ${props => props.color}22 0%, transparent 70%);
   }
-  .info {
-    .label { color: #a3aed0; font-size: 0.9rem; font-weight: 600; display: block; }
-    .value { color: #1b2559; font-size: 1.5rem; font-weight: 800; }
+
+  .card-top {
+    display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;
+    svg { color: #ffc107; }
+    .trend { color: #666; }
+  }
+
+  .card-bottom {
+    position: relative; z-index: 2;
+    .value { display: block; font-size: 2.2rem; font-weight: 900; letter-spacing: -1px; }
+    .label { color: #666; font-size: 0.75rem; font-weight: 900; letter-spacing: 1px; }
   }
 `;
 
 const TableContainer = styled.div`
-  background: #fff;
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-  min-height: 400px;
-  .responsive-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  @media (max-width: 480px) { padding: 15px; }
+  background: #0a0a0a; border: 1px solid #222; border-radius: 25px; padding: 30px;
+  .responsive-table { overflow-x: auto; }
 `;
 
 const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 400px;
-  thead th { text-align: left; padding: 15px; color: #a3aed0; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #f4f7fe; }
-  tbody td { padding: 20px 15px; color: #1b2559; font-size: 0.95rem; border-bottom: 1px solid #f4f7fe; }
-  .fw-bold { font-weight: 700; }
+  width: 100%; border-collapse: collapse;
+  thead th { text-align: left; padding: 15px 20px; color: #ffc107; font-size: 0.75rem; font-weight: 900; letter-spacing: 1px; border-bottom: 1px solid #222; }
+  tbody td { padding: 25px 20px; border-bottom: 1px solid #111; font-size: 0.95rem; }
+  .user-info {
+    display: flex; align-items: center; gap: 15px;
+    .avatar { width: 40px; height: 40px; background: #222; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #ffc107; }
+    .sub-text { font-size: 0.8rem; color: #666; }
+  }
+  .expanded-row { background: rgba(255,193,7,0.02); }
+  .italic { font-style: italic; }
 `;
 
 const StatusBadge = styled.span`
-  padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
-  background: ${props => {
-    switch (props.status) {
-      case "ACTIVE": case "SUCCESS": return "#e2f9ef";
-      case "PENDING": return "#fff9e7";
-      case "INACTIVE": case "FAILED": return "#fff5f5";
-      default: return "#f4f7fe";
-    }
-  }};
-  color: ${props => {
-    switch (props.status) {
-      case "ACTIVE": case "SUCCESS": return "#05cd99";
-      case "PENDING": return "#ffbc11";
-      case "INACTIVE": case "FAILED": return "#ff5b5b";
-      default: return "#a3aed0";
-    }
-  }};
+  padding: 6px 14px; border-radius: 6px; font-size: 0.7rem; font-weight: 900; letter-spacing: 1px;
+  background: ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "rgba(5,205,153,0.1)" : "rgba(255,91,91,0.1)"};
+  color: ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "#05cd99" : "#ff5b5b"};
+  border: 1px solid ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "rgba(5,205,153,0.2)" : "rgba(255,91,91,0.2)"};
 `;
 
-const ActionGroup = styled.div` display: flex; gap: 8px; `;
-
+const ActionGroup = styled.div` display: flex; gap: 10px; `;
 const ActionButton = styled.button`
-  background: none; border: none; cursor: pointer; padding: 5px; border-radius: 6px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
-  &.success { color: #05cd99; &:hover { background: #e2f9ef; } }
-  &.warning { color: #ffbc11; &:hover { background: #fff9e7; } }
-  &.danger { color: #ff5b5b; &:hover { background: #fff5f5; } }
+  background: none; border: none; cursor: pointer; color: #444; transition: all 0.3s ease;
+  &:hover { color: white; transform: scale(1.1); }
+  &.success:hover { color: #05cd99; }
+  &.warning:hover { color: #ffbc11; }
+  &.danger:hover { color: #ff5b5b; }
 `;
 
 const ExpandedDetails = styled.div`
-  background: #fcfdfe;
-  padding: 20px 30px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  border-bottom: 2px solid #ffc107;
-  animation: fadeIn 0.3s ease;
-
-  @media (max-width: 768px) { grid-template-columns: 1fr; }
-
-  h6 {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    color: #1b2559;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-    svg { color: #ffc107; }
-  }
-
-  .details-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #f4f7fe;
-      font-size: 0.85rem;
-      &:last-child { border-bottom: none; }
-      .date, .time { color: #a3aed0; }
+  display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 30px;
+  .details-col {
+    h6 { display: flex; align-items: center; gap: 10px; font-weight: 800; color: #ffc107; font-size: 0.8rem; margin-bottom: 20px; }
+    .details-list {
+      list-style: none; padding: 0; margin: 0;
+      li {
+        display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #111; font-size: 0.85rem;
+        .price, .time { color: white; font-weight: 700; }
+        span:first-child { color: #666; }
+      }
     }
   }
-
-  .empty-msg { color: #a3aed0; font-size: 0.85rem; font-style: italic; }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  .empty-msg { color: #444; font-size: 0.85rem; }
 `;
 
-const LoadingState = styled.div` display: flex; justify-content: center; align-items: center; height: 300px; color: #a3aed0; font-weight: 600; `;
-const ErrorMessage = styled.div` background: #fff5f5; color: #ff5b5b; padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; font-weight: 600; `;
-const EmptyState = styled.div` text-align: center; padding: 50px; color: #a3aed0; font-weight: 500; `;
+const LoadingState = styled.div`
+  display: flex; flex-direction: column; justify-content: center; align-items: center; height: 400px; gap: 20px; color: #666;
+  .spinner { width: 40px; height: 40px; border: 4px solid #111; border-top-color: #ffc107; border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+`;
+
+const ErrorMessage = styled.div` background: rgba(255,91,91,0.1); color: #ff5b5b; padding: 20px; border-radius: 15px; border: 1px solid rgba(255,91,91,0.2); display: flex; align-items: center; gap: 15px; font-weight: 700; `;
+
+const CloseButton = styled.button` display: none; @media (max-width: 992px) { display: block; background: none; border: none; color: #666; } `;
+const Overlay = styled.div` position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 190; `;
 
 export default AdminDashboard;
