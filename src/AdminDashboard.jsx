@@ -325,23 +325,67 @@ const AdminDashboard = () => {
 
                         <div className="chart-section">
                           <div className="card-header">
-                            <h5>PAYROLL COST SUMMARY</h5>
-                            <select className="small-select"><option>This year</option></select>
-                          </div>
-                          <div className="chart-mockup">
-                            <div className="bars">
-                              {[80, 100, 90, 70, 60, 40, 85, 95, 110, 105, 98, 115].map((h, i) => (
-                                <div key={i} className="bar-stack">
-                                  <div className="segment red" style={{ height: `${h * 0.2}%` }} />
-                                  <div className="segment orange" style={{ height: `${h * 0.3}%` }} />
-                                  <div className="segment dark" style={{ height: `${h * 0.5}%` }} />
-                                </div>
-                              ))}
+                            <div>
+                              <h5>PAYROLL COST SUMMARY</h5>
+                              <p className="sub-text">Historical view of total disbursals</p>
                             </div>
-                            <div className="chart-legend">
-                              <div className="legend-item"><span className="dot red" /> Net Pay: ₹13,40,50,440.00</div>
-                              <div className="legend-item"><span className="dot orange" /> Taxes: ₹1,51,56,551.00</div>
-                              <div className="legend-item"><span className="dot dark" /> Statutories: ₹50,16,123.00</div>
+                            <select className="small-select"><option>Financial Year 2024</option></select>
+                          </div>
+                          
+                          <div className="chart-wrapper">
+                            <div className="y-axis">
+                              <span>₹1.5Cr</span>
+                              <span>₹1Cr</span>
+                              <span>₹50L</span>
+                              <span>₹0</span>
+                            </div>
+                            <div className="main-chart-area">
+                              <div className="chart-grid">
+                                <div className="grid-line" />
+                                <div className="grid-line" />
+                                <div className="grid-line" />
+                                <div className="grid-line" />
+                              </div>
+                              <div className="bars-container">
+                                {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((month, i) => {
+                                  const heights = [60, 75, 65, 80, 95, 70, 85, 90, 100, 110, 105, 115];
+                                  const h = heights[i];
+                                  return (
+                                    <div key={month} className="bar-column">
+                                      <div className="bar-stack">
+                                        <div className="segment red" title="Statutories" style={{ height: `${h * 0.15}%` }} />
+                                        <div className="segment orange" title="Taxes" style={{ height: `${h * 0.25}%` }} />
+                                        <div className="segment dark" title="Net Pay" style={{ height: `${h * 0.6}%` }} />
+                                      </div>
+                                      <span className="month-label">{month}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="chart-legend-grid">
+                            <div className="legend-item">
+                              <div className="dot dark" />
+                              <div className="details">
+                                <label>NET PAY</label>
+                                <strong>₹13,40,50,440.00</strong>
+                              </div>
+                            </div>
+                            <div className="legend-item">
+                              <div className="dot orange" />
+                              <div className="details">
+                                <label>TAXES</label>
+                                <strong>₹1,51,56,551.00</strong>
+                              </div>
+                            </div>
+                            <div className="legend-item">
+                              <div className="dot red" />
+                              <div className="details">
+                                <label>STATUTORIES</label>
+                                <strong>₹50,16,123.00</strong>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -870,27 +914,44 @@ const PayrollContainer = styled.div`
 
   .chart-section {
     background: #fff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 30px;
-    .chart-mockup {
-      margin-top: 25px;
-      .bars { 
-        height: 150px; display: flex; align-items: flex-end; gap: 15px; margin-bottom: 30px;
-        .bar-stack { 
-          flex: 1; display: flex; flex-direction: column; gap: 2px;
-          .segment { border-radius: 2px; width: 100%; transition: all 0.3s; &:hover { opacity: 0.8; } }
-          .segment.red { background: #ef4444; }
-          .segment.orange { background: #f97316; }
-          .segment.dark { background: #1e293b; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; h5 { font-weight: 800; margin: 0; color: #1e293b; } .sub-text { font-size: 0.75rem; color: #94a3b8; margin: 5px 0 0; font-weight: 600; } }
+    
+    .chart-wrapper {
+      display: flex; gap: 20px; height: 220px; margin-bottom: 40px;
+      .y-axis { display: flex; flex-direction: column; justify-content: space-between; padding-bottom: 25px; span { font-size: 0.65rem; font-weight: 700; color: #cbd5e1; text-align: right; min-width: 45px; } }
+      .main-chart-area {
+        flex: 1; position: relative;
+        .chart-grid {
+          position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding-bottom: 25px;
+          .grid-line { width: 100%; height: 1px; background: #f1f5f9; }
+        }
+        .bars-container {
+          position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 10px;
+          .bar-column {
+            flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; height: 100%; justify-content: flex-end;
+            .bar-stack {
+              width: 24px; display: flex; flex-direction: column-reverse; gap: 2px; border-radius: 4px; overflow: hidden; transition: all 0.3s;
+              &:hover { transform: scaleX(1.2); cursor: pointer; }
+              .segment { width: 100%; transition: all 0.3s; }
+              .segment.red { background: #ef4444; }
+              .segment.orange { background: #f97316; }
+              .segment.dark { background: #1e293b; }
+            }
+            .month-label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; }
+          }
         }
       }
-      .chart-legend {
-        display: flex; gap: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9;
-        .legend-item { 
-          display: flex; align-items: center; gap: 10px; font-size: 0.75rem; font-weight: 700; color: #64748b;
-          .dot { width: 10px; height: 10px; border-radius: 3px; }
-          .dot.red { background: #ef4444; }
-          .dot.orange { background: #f97316; }
-          .dot.dark { background: #1e293b; }
-        }
+    }
+
+    .chart-legend-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding-top: 30px; border-top: 1px solid #f1f5f9;
+      .legend-item {
+        display: flex; align-items: flex-start; gap: 12px;
+        .dot { width: 12px; height: 12px; border-radius: 4px; margin-top: 4px; }
+        .dot.red { background: #ef4444; }
+        .dot.orange { background: #f97316; }
+        .dot.dark { background: #1e293b; }
+        .details { label { display: block; font-size: 0.6rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px; margin-bottom: 4px; } strong { font-size: 0.9rem; font-weight: 800; color: #1e293b; } }
       }
     }
   }
