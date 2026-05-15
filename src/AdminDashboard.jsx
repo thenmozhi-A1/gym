@@ -242,10 +242,7 @@ const AdminDashboard = () => {
                       </div>
                     </ChartCard>
                   </div>
-                </div>
-              )}
-
-              {activeTab !== "dashboard" && (
+                     {activeTab !== "dashboard" && activeTab !== "payroll" && (
                 <TableCard>
                   <div className="table-header">
                     <h2>{activeTab.toUpperCase()} <small>MANAGEMENT</small></h2>
@@ -267,7 +264,6 @@ const AdminDashboard = () => {
                           {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
                           {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
                           {activeTab === "staffs" && <><th>STAFF NAME</th><th>ROLE</th><th>SPECIALTY / TASK</th><th>SHIFT TIME</th><th>SALARY</th></>}
-                          {activeTab === "payroll" && <><th>STAFF NAME</th><th>MONTHLY SALARY</th><th>PAYMENT STATUS</th><th>ACTIONS</th></>}
                         </tr>
                       </thead>
                       <tbody>
@@ -328,125 +324,131 @@ const AdminDashboard = () => {
                             <td><span className={`badge ${s.role === 'Trainer' ? 'bg-success-light' : 'bg-primary-light'}`}>{s.role}</span></td>
                             <td>{s.specialty}</td>
                             <td className="fw-bold text-secondary">{s.times}</td>
-                            {activeTab === "payroll" && (
-                              <PayrollContainer>
-                                <div className="payroll-main">
-                                  <header className="payroll-header">
-                                    <h1 className="welcome">Welcome Slayfit!</h1>
-                                    <div className="pay-run-status">
-                                      <span>Process Pay Run for May 2024</span>
-                                      <span className="badge-approved">APPROVED</span>
-                                    </div>
-                                  </header>
-
-                                  <div className="hero-card">
-                                    <div className="hero-stats">
-                                      <div className="stat-group">
-                                        <label>EMPLOYEES' NET PAY</label>
-                                        <div className="amount">₹17,25,23.00</div>
-                                      </div>
-                                      <div className="stat-divider" />
-                                      <div className="stat-group">
-                                        <label>PAYMENT DATE</label>
-                                        <div className="date">31 May 2024</div>
-                                      </div>
-                                      <div className="stat-divider" />
-                                      <div className="stat-group">
-                                        <label>NO. OF EMPLOYEES</label>
-                                        <div className="count">1308</div>
-                                      </div>
-                                      <button className="btn-black">View Details</button>
-                                    </div>
-                                    <p className="hero-note">
-                                      <Clock size={12} /> Pay your employees on 31/05/2024. Record it here once you made the payment.
-                                    </p>
-                                  </div>
-
-                                  <div className="payroll-grid">
-                                    <div className="grid-card deduction-card">
-                                      <div className="card-header">
-                                        <h5>DEDUCTION SUMMARY</h5>
-                                        <select className="small-select"><option>Previous Month</option></select>
-                                      </div>
-                                      <div className="deduction-row">
-                                        <div className="deduction-item">
-                                          <div className="icon-circle"><Layers size={14} /></div>
-                                          <label>EPF</label>
-                                          <div className="val">₹39,73,913.00</div>
-                                          <span className="link">View Details</span>
-                                        </div>
-                                        <div className="deduction-item">
-                                          <div className="icon-circle gold"><Award size={14} /></div>
-                                          <label>ESI</label>
-                                          <div className="val">₹91,010.00</div>
-                                          <span className="link">View Details</span>
-                                        </div>
-                                        <div className="deduction-item">
-                                          <div className="icon-circle red"><TrendingDown size={14} /></div>
-                                          <label>TDS DEDUCTION</label>
-                                          <div className="val">₹1,15,89,089.00</div>
-                                          <span className="link">View Details</span>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    <div className="grid-card summary-card">
-                                      <h5>EMPLOYEE SUMMARY</h5>
-                                      <div className="summary-body">
-                                        <label>ACTIVE EMPLOYEES</label>
-                                        <div className="big-count">1308</div>
-                                        <span className="link">View Employees</span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="chart-section">
-                                    <div className="card-header">
-                                      <h5>PAYROLL COST SUMMARY</h5>
-                                      <select className="small-select"><option>This year</option></select>
-                                    </div>
-                                    <div className="chart-mockup">
-                                      <div className="bars">
-                                        {[80, 100, 90, 70, 60, 40, 85, 95, 110, 105, 98, 115].map((h, i) => (
-                                          <div key={i} className="bar-stack">
-                                            <div className="segment red" style={{ height: `${h * 0.2}%` }} />
-                                            <div className="segment orange" style={{ height: `${h * 0.3}%` }} />
-                                            <div className="segment dark" style={{ height: `${h * 0.5}%` }} />
-                                          </div>
-                                        ))}
-                                      </div>
-                                      <div className="chart-legend">
-                                        <div className="legend-item"><span className="dot red" /> Net Pay: ₹13,40,50,440.00</div>
-                                        <div className="legend-item"><span className="dot orange" /> Taxes: ₹1,51,56,551.00</div>
-                                        <div className="legend-item"><span className="dot dark" /> Statutories: ₹50,16,123.00</div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <aside className="payroll-sidebar">
-                                  <h5>To Do Tasks</h5>
-                                  <div className="task-list">
-                                    {[
-                                      { label: "136 Reimbursement Claim(s)", sub: "Pending Approval" },
-                                      { label: "96 Proof of Investment(s)", sub: "Pending Approval" },
-                                      { label: "55 Salary Revision(s)", sub: "Pending Approval" }
-                                    ].map((task, i) => (
-                                      <div key={i} className="task-item">
-                                        <div className="task-info">
-                                          <h6>{task.label}</h6>
-                                          <p>{task.sub}</p>
-                                        </div>
-                                        <button className="btn-outline">Approve</button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </aside>
-                              </PayrollContainer>
-                            )}
-                          </tbody>
+                            <td className="fw-black text-primary">{s.salary}</td>
+                          </tr>
+                        ))}
+                      </tbody>
                     </table>
                   </div>
+                </TableCard>
+              )}
+
+              {activeTab === "payroll" && (
+                <PayrollContainer>
+                  <div className="payroll-main">
+                    <header className="payroll-header">
+                      <h1 className="welcome">Welcome Slayfit!</h1>
+                      <div className="pay-run-status">
+                        <span>Process Pay Run for May 2024</span>
+                        <span className="badge-approved">APPROVED</span>
+                      </div>
+                    </header>
+
+                    <div className="hero-card">
+                      <div className="hero-stats">
+                        <div className="stat-group">
+                          <label>EMPLOYEES' NET PAY</label>
+                          <div className="amount">₹17,25,23.00</div>
+                        </div>
+                        <div className="stat-divider" />
+                        <div className="stat-group">
+                          <label>PAYMENT DATE</label>
+                          <div className="date">31 May 2024</div>
+                        </div>
+                        <div className="stat-divider" />
+                        <div className="stat-group">
+                          <label>NO. OF EMPLOYEES</label>
+                          <div className="count">1308</div>
+                        </div>
+                        <button className="btn-black">View Details</button>
+                      </div>
+                      <p className="hero-note">
+                        <Clock size={12} /> Pay your employees on 31/05/2024. Record it here once you made the payment.
+                      </p>
+                    </div>
+
+                    <div className="payroll-grid">
+                      <div className="grid-card deduction-card">
+                        <div className="card-header">
+                          <h5>DEDUCTION SUMMARY</h5>
+                          <select className="small-select"><option>Previous Month</option></select>
+                        </div>
+                        <div className="deduction-row">
+                          <div className="deduction-item">
+                            <div className="icon-circle"><Layers size={14} /></div>
+                            <label>EPF</label>
+                            <div className="val">₹39,73,913.00</div>
+                            <span className="link">View Details</span>
+                          </div>
+                          <div className="deduction-item">
+                            <div className="icon-circle gold"><Award size={14} /></div>
+                            <label>ESI</label>
+                            <div className="val">₹91,010.00</div>
+                            <span className="link">View Details</span>
+                          </div>
+                          <div className="deduction-item">
+                            <div className="icon-circle red"><TrendingDown size={14} /></div>
+                            <label>TDS DEDUCTION</label>
+                            <div className="val">₹1,15,89,089.00</div>
+                            <span className="link">View Details</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid-card summary-card">
+                        <h5>EMPLOYEE SUMMARY</h5>
+                        <div className="summary-body">
+                          <label>ACTIVE EMPLOYEES</label>
+                          <div className="big-count">1308</div>
+                          <span className="link">View Employees</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="chart-section">
+                      <div className="card-header">
+                        <h5>PAYROLL COST SUMMARY</h5>
+                        <select className="small-select"><option>This year</option></select>
+                      </div>
+                      <div className="chart-mockup">
+                        <div className="bars">
+                          {[80, 100, 90, 70, 60, 40, 85, 95, 110, 105, 98, 115].map((h, i) => (
+                            <div key={i} className="bar-stack">
+                              <div className="segment red" style={{ height: `${h * 0.2}%` }} />
+                              <div className="segment orange" style={{ height: `${h * 0.3}%` }} />
+                              <div className="segment dark" style={{ height: `${h * 0.5}%` }} />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="chart-legend">
+                          <div className="legend-item"><span className="dot red" /> Net Pay: ₹13,40,50,440.00</div>
+                          <div className="legend-item"><span className="dot orange" /> Taxes: ₹1,51,56,551.00</div>
+                          <div className="legend-item"><span className="dot dark" /> Statutories: ₹50,16,123.00</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <aside className="payroll-sidebar">
+                    <h5>To Do Tasks</h5>
+                    <div className="task-list">
+                      {[
+                        { label: "136 Reimbursement Claim(s)", sub: "Pending Approval" },
+                        { label: "96 Proof of Investment(s)", sub: "Pending Approval" },
+                        { label: "55 Salary Revision(s)", sub: "Pending Approval" }
+                      ].map((task, i) => (
+                        <div key={i} className="task-item">
+                          <div className="task-info">
+                            <h6>{task.label}</h6>
+                            <p>{task.sub}</p>
+                          </div>
+                          <button className="btn-outline">Approve</button>
+                        </div>
+                      ))}
+                    </div>
+                  </aside>
+                </PayrollContainer>
+              )}div>
                 </TableCard>
               )}
             </>
