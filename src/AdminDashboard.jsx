@@ -41,12 +41,12 @@ const AdminDashboard = () => {
   const [payments, setPayments] = useState([]);
   const [attendance, setAttendance] = useState([]);
   const [consultations, setConsultations] = useState([]);
-  const [trainers, setTrainers] = useState([]);
+  const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isAddTrainerModalOpen, setIsAddTrainerModalOpen] = useState(false);
-  const [newTrainer, setNewTrainer] = useState({ name: "", specialty: "", salary: "", times: "" });
+  const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
+  const [newStaff, setNewStaff] = useState({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer" });
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -67,12 +67,12 @@ const AdminDashboard = () => {
 
       if (activeTab === "dashboard" || activeTab === "users") {
         setUsers(results[0]); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
-        // Mock trainers data for the new section
-        setTrainers([
-          { id: 1, name: "Alex Johnson", specialty: "Bodybuilding", students: 12, times: "06:00 AM - 11:00 AM", salary: "₹45,000" },
-          { id: 2, name: "Maya Patel", specialty: "Yoga & Flexibility", students: 18, times: "04:00 PM - 08:00 PM", salary: "₹52,000" },
-          { id: 3, name: "Chris Lee", specialty: "Crossfit", students: 15, times: "07:00 AM - 12:00 PM", salary: "₹48,000" },
-          { id: 4, name: "Sophia Martinez", specialty: "HIIT & Cardio", students: 22, times: "05:00 PM - 09:00 PM", salary: "₹55,000" }
+        // Mock staffs data
+        setStaffs([
+          { id: 1, name: "Alex Johnson", specialty: "Bodybuilding", students: 12, times: "06:00 AM - 11:00 AM", salary: "₹45,000", role: "Trainer" },
+          { id: 2, name: "Maya Patel", specialty: "Yoga & Flexibility", students: 18, times: "04:00 PM - 08:00 PM", salary: "₹52,000", role: "Trainer" },
+          { id: 5, name: "Jessica Smith", specialty: "Customer Relations", students: 0, times: "09:00 AM - 05:00 PM", salary: "₹35,000", role: "Front Office" },
+          { id: 6, name: "David Miller", specialty: "Sales & Billing", students: 0, times: "10:00 AM - 06:00 PM", salary: "₹38,000", role: "Front Office" }
         ]);
       } else {
         const data = results[0];
@@ -100,14 +100,14 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleAddTrainer = (e) => {
+  const handleAddStaff = (e) => {
     e.preventDefault();
-    if (!newTrainer.name || !newTrainer.specialty) return;
-    const trainerToAdd = { ...newTrainer, id: Date.now(), students: 0, status: "ACTIVE" };
-    setTrainers([trainerToAdd, ...trainers]);
-    setNewTrainer({ name: "", specialty: "", salary: "", times: "", email: "", phone: "" });
-    setIsAddTrainerModalOpen(false);
-    alert("WARRIOR COACH ADDED TO FLEET SUCCESSFULLY!");
+    if (!newStaff.name || !newStaff.role) return;
+    const staffToAdd = { ...newStaff, id: Date.now(), students: 0, status: "ACTIVE" };
+    setStaffs([staffToAdd, ...staffs]);
+    setNewStaff({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer" });
+    setIsAddStaffModalOpen(false);
+    alert("STAFF MEMBER ADDED TO SYSTEM SUCCESSFULLY!");
   };
 
   return (
@@ -127,7 +127,7 @@ const AdminDashboard = () => {
             { id: "users", icon: <Users size={18} />, label: "Warriors" },
             { id: "payments", icon: <CreditCard size={18} />, label: "Revenue" },
             { id: "attendance", icon: <Clock size={18} />, label: "Arena Logs" },
-            { id: "trainers", icon: <Layers size={18} />, label: "Trainers" },
+            { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
             { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" }
           ].map(item => (
             <NavItem
@@ -247,9 +247,9 @@ const AdminDashboard = () => {
                   <div className="table-header">
                     <h2>{activeTab.toUpperCase()} <small>MANAGEMENT</small></h2>
                     <div className="d-flex gap-3">
-                      {activeTab === "trainers" && (
-                        <button onClick={() => setIsAddTrainerModalOpen(true)} className="add-btn">
-                          <Plus size={18} /> ADD TRAINER
+                      {activeTab === "staffs" && (
+                        <button onClick={() => setIsAddStaffModalOpen(true)} className="add-btn">
+                          <Plus size={18} /> ADD STAFF
                         </button>
                       )}
                       <button onClick={fetchData} className="refresh-btn">REFRESH SYSTEM</button>
@@ -263,7 +263,7 @@ const AdminDashboard = () => {
                           {activeTab === "payments" && <><th>WARRIOR</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
                           {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
                           {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
-                          {activeTab === "trainers" && <><th>TRAINER</th><th>SPECIALTY</th><th>STUDENTS</th><th>HANDLING TIME</th><th>SALARY</th></>}
+                          {activeTab === "staffs" && <><th>STAFF NAME</th><th>ROLE</th><th>SPECIALTY / TASK</th><th>SHIFT TIME</th><th>SALARY</th></>}
                         </tr>
                       </thead>
                       <tbody>
@@ -313,18 +313,18 @@ const AdminDashboard = () => {
                             <td className="sub-text">{msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "Recent"}</td>
                           </tr>
                         ))}
-                        {activeTab === "trainers" && trainers.map(t => (
-                          <tr key={t.id}>
+                        {activeTab === "staffs" && staffs.map(s => (
+                          <tr key={s.id}>
                             <td>
                               <div className="u-cell">
-                                <div className="avatar-small bg-primary-light text-primary">{t.name.charAt(0)}</div>
-                                <div className="fw-bold">{t.name}</div>
+                                <div className="avatar-small bg-primary-light text-primary">{s.name.charAt(0)}</div>
+                                <div className="fw-bold">{s.name}</div>
                               </div>
                             </td>
-                            <td>{t.specialty}</td>
-                            <td><span className="badge bg-success-light">{t.students} Students</span></td>
-                            <td className="fw-bold text-secondary">{t.times}</td>
-                            <td className="fw-black text-primary">{t.salary}</td>
+                            <td><span className={`badge ${s.role === 'Trainer' ? 'bg-success-light' : 'bg-primary-light'}`}>{s.role}</span></td>
+                            <td>{s.specialty}</td>
+                            <td className="fw-bold text-secondary">{s.times}</td>
+                            <td className="fw-black text-primary">{s.salary}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -337,28 +337,44 @@ const AdminDashboard = () => {
         </ContentContainer>
       </MainArea>
 
-      {/* ── ADD TRAINER MODAL ── */}
-      {isAddTrainerModalOpen && (
+      {/* ── ADD STAFF MODAL ── */}
+      {isAddStaffModalOpen && (
         <ModalOverlay>
           <ModalContent className="animate-in">
             <div className="modal-header">
               <div className="title-area">
                 <div className="icon-wrap"><Plus size={24} /></div>
                 <div>
-                  <h3>ADD NEW COACH</h3>
-                  <p>Register a new warrior trainer to the SlayFit fleet.</p>
+                  <h3>ADD NEW STAFF</h3>
+                  <p>Register a new member to the SlayFit operations team.</p>
                 </div>
               </div>
-              <button className="close-btn" onClick={() => setIsAddTrainerModalOpen(false)}><X size={20} /></button>
+              <button className="close-btn" onClick={() => setIsAddStaffModalOpen(false)}><X size={20} /></button>
             </div>
             
-            <form onSubmit={handleAddTrainer}>
+            <form onSubmit={handleAddStaff}>
               <div className="form-grid">
-                <div className="form-group">
-                  <label>COACH FULL NAME</label>
-                  <div className="input-wrap">
-                    <Users size={18} />
-                    <input type="text" placeholder="e.g. Marcus Aurelius" value={newTrainer.name} onChange={e => setNewTrainer({...newTrainer, name: e.target.value})} required />
+                <div className="row">
+                  <div className="col-6">
+                    <div className="form-group">
+                      <label>STAFF FULL NAME</label>
+                      <div className="input-wrap">
+                        <Users size={18} />
+                        <input type="text" placeholder="e.g. Marcus Aurelius" value={newStaff.name} onChange={e => setNewStaff({...newStaff, name: e.target.value})} required />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="form-group">
+                      <label>STAFF ROLE</label>
+                      <div className="input-wrap">
+                        <Award size={18} />
+                        <select value={newStaff.role} onChange={e => setNewStaff({...newStaff, role: e.target.value})} style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontWeight: 600 }}>
+                          <option value="Trainer">Trainer</option>
+                          <option value="Front Office">Front Office</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -366,15 +382,15 @@ const AdminDashboard = () => {
                   <label>EMAIL ADDRESS</label>
                   <div className="input-wrap">
                     <Globe size={18} />
-                    <input type="email" placeholder="coach@slayfit.com" value={newTrainer.email} onChange={e => setNewTrainer({...newTrainer, email: e.target.value})} required />
+                    <input type="email" placeholder="staff@slayfit.com" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} required />
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label>SPECIALIZATION</label>
+                  <label>SPECIALTY / MAIN TASK</label>
                   <div className="input-wrap">
-                    <Award size={18} />
-                    <input type="text" placeholder="e.g. Strength & Conditioning" value={newTrainer.specialty} onChange={e => setNewTrainer({...newTrainer, specialty: e.target.value})} required />
+                    <Target size={18} />
+                    <input type="text" placeholder="e.g. Yoga Expert or Receptionist" value={newStaff.specialty} onChange={e => setNewStaff({...newStaff, specialty: e.target.value})} required />
                   </div>
                 </div>
 
@@ -384,7 +400,7 @@ const AdminDashboard = () => {
                       <label>MONTHLY SALARY</label>
                       <div className="input-wrap">
                         <CreditCard size={18} />
-                        <input type="text" placeholder="₹55,000" value={newTrainer.salary} onChange={e => setNewTrainer({...newTrainer, salary: e.target.value})} />
+                        <input type="text" placeholder="₹55,000" value={newStaff.salary} onChange={e => setNewStaff({...newStaff, salary: e.target.value})} />
                       </div>
                     </div>
                   </div>
@@ -393,7 +409,7 @@ const AdminDashboard = () => {
                       <label>SHIFT HOURS</label>
                       <div className="input-wrap">
                         <Clock size={18} />
-                        <input type="text" placeholder="6AM - 11AM" value={newTrainer.times} onChange={e => setNewTrainer({...newTrainer, times: e.target.value})} />
+                        <input type="text" placeholder="6AM - 11AM" value={newStaff.times} onChange={e => setNewStaff({...newStaff, times: e.target.value})} />
                       </div>
                     </div>
                   </div>
@@ -401,8 +417,8 @@ const AdminDashboard = () => {
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="cancel-btn" onClick={() => setIsAddTrainerModalOpen(false)}>CANCEL</button>
-                <button type="submit" className="submit-btn">ENLIST TRAINER</button>
+                <button type="button" className="cancel-btn" onClick={() => setIsAddStaffModalOpen(false)}>CANCEL</button>
+                <button type="submit" className="submit-btn">ENLIST STAFF</button>
               </div>
             </form>
           </ModalContent>
