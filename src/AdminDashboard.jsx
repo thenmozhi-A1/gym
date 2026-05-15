@@ -118,19 +118,7 @@ const AdminDashboard = () => {
           ))}
         </NavSection>
 
-        <PromoCard>
-          <div className="promo-inner">
-            <div className="promo-icon"><Award size={24} /></div>
-            <h6>Get More Features</h6>
-            <p>Starting at just <span className="price">$59</span></p>
-            <ul className="promo-list">
-              <li>10 customization options</li>
-              <li>100+ pages</li>
-              <li>12 pre-built apps</li>
-            </ul>
-            <button className="explore-btn">Explore now</button>
-          </div>
-        </PromoCard>
+
       </Sidebar>
 
       <MainArea>
