@@ -18,10 +18,14 @@ import {
   Target,
   Layout,
   Bell,
-  ArrowUpRight,
-  Shield,
-  Activity as PulseIcon,
-  Monitor
+  Cpu,
+  Globe,
+  Database,
+  Terminal,
+  ChevronRight,
+  TrendingDown,
+  Award,
+  Crown
 } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
@@ -35,7 +39,7 @@ const AdminDashboard = () => {
   const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -43,24 +47,38 @@ const AdminDashboard = () => {
     fetchData();
   }, [activeTab]);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add("reveal-visible");
+        });
+      },
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [activeTab, loading]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const endpoints = activeTab === "overview" || activeTab === "users" 
-        ? ["users", "payments", "attendance", "consultations"]
-        : [activeTab];
-      
-      const results = await Promise.all(
-        endpoints.map(ep => fetch(`${API_BASE}/${ep}`).then(r => r.json()))
-      );
-
       if (activeTab === "overview" || activeTab === "users") {
-        setUsers(results[0]); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
+        const [u, p, a, c] = await Promise.all([
+          fetch(`${API_BASE}/users`).then(r => r.json()),
+          fetch(`${API_BASE}/payments`).then(r => r.json()),
+          fetch(`${API_BASE}/attendance`).then(r => r.json()),
+          fetch(`${API_BASE}/consultations`).then(r => r.json())
+        ]);
+        setUsers(Array.isArray(u) ? u : []);
+        setPayments(Array.isArray(p) ? p : []);
+        setAttendance(Array.isArray(a) ? a : []);
+        setConsultations(Array.isArray(c) ? c : []);
       } else {
-        const data = results[0];
-        if (activeTab === "payments") setPayments(data);
-        else if (activeTab === "attendance") setAttendance(data);
-        else setConsultations(data);
+        const res = await fetch(`${API_BASE}/${activeTab}`);
+        const data = await res.json();
+        const setter = activeTab === "payments" ? setPayments : activeTab === "attendance" ? setAttendance : setConsultations;
+        setter(Array.isArray(data) ? data : []);
       }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -77,326 +95,403 @@ const AdminDashboard = () => {
   };
 
   return (
-    <BentoWrapper>
-      <StarField />
-      
-      {/* ── TOP NAV MODEL ── */}
-      <TopNavigation>
-        <div className="nav-container">
+    <Container>
+      <AnimatedBackground />
+      <Sidebar isOpen={isSidebarOpen}>
+        <div className="sidebar-inner">
           <Brand>
-            <div className="icon-box"><Shield size={20} /></div>
-            <span>SLAYFIT <small>SYSTEMS</small></span>
+            <div className="icon"><Crown size={24} /></div>
+            <div className="text">
+              <h3>SLAYFIT</h3>
+              <span>ELITE ADMIN</span>
+            </div>
           </Brand>
 
-          <NavLinks>
+          <NavMenu>
             {[
-              { id: "overview", label: "OVERVIEW", icon: <Layout size={16} /> },
-              { id: "users", label: "WARRIORS", icon: <Users size={16} /> },
-              { id: "payments", label: "REVENUE", icon: <CreditCard size={16} /> },
-              { id: "attendance", label: "LOGS", icon: <Clock size={16} /> }
-            ].map(link => (
-              <NavLink 
-                key={link.id} 
-                active={activeTab === link.id}
-                onClick={() => setActiveTab(link.id)}
+              { id: "overview", icon: <Layout size={20} />, label: "Dashboard" },
+              { id: "users", icon: <Users size={20} />, label: "Warriors" },
+              { id: "payments", icon: <CreditCard size={20} />, label: "Revenue" },
+              { id: "attendance", icon: <Clock size={20} />, label: "Arena Logs" },
+              { id: "consultations", icon: <MessageSquare size={20} />, label: "Inquiries" }
+            ].map(item => (
+              <NavItem 
+                key={item.id} 
+                active={activeTab === item.id}
+                onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
               >
-                {link.icon} <span>{link.label}</span>
-              </NavLink>
+                <div className="glow-bar" />
+                {item.icon} <span>{item.label}</span>
+              </NavItem>
             ))}
-          </NavLinks>
+          </NavMenu>
 
-          <UserActions>
-            <div className="search-bar">
-              <Search size={16} />
-              <input placeholder="SYS_SEARCH..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            </div>
-            <button className="logout-icon" onClick={handleLogout}><LogOut size={20} /></button>
-            <button className="mobile-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              {isMobileMenuOpen ? <X /> : <MenuIcon />}
-            </button>
-          </UserActions>
+          <LogoutBtn onClick={handleLogout}>
+            <LogOut size={20} /> <span>LOGOUT SYSTEM</span>
+          </LogoutBtn>
         </div>
-      </TopNavigation>
-
-      {isMobileMenuOpen && (
-        <MobileMenu>
-          {["overview", "users", "payments", "attendance"].map(id => (
-            <button key={id} onClick={() => { setActiveTab(id); setIsMobileMenuOpen(false); }}>{id.toUpperCase()}</button>
-          ))}
-          <button onClick={handleLogout} className="text-danger">LOGOUT</button>
-        </MobileMenu>
-      )}
+      </Sidebar>
 
       <MainContent>
-        <div className="bento-grid reveal">
-          {activeTab === "overview" && (
-            <>
-              {/* BENTO LARGE: Performance */}
-              <BentoItem className="large-card" glow="#ffc107">
-                <div className="card-header">
-                  <h5>REVENUE PERFORMANCE</h5>
-                  <span className="status">LIVE_SYNC</span>
-                </div>
-                <ChartContainer>
-                  <div className="bars-area">
-                    {[40, 65, 45, 85, 55, 95, 75, 60, 80, 50].map((h, i) => (
-                      <div className="bar-wrap" key={i}>
-                        <div className="bar" style={{ height: `${h}%`, animationDelay: `${i * 0.1}s` }}></div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="chart-info">
-                    <div className="stat">
-                      <span className="lab">TOTAL REVENUE</span>
-                      <span className="val">₹{payments.reduce((acc, p) => acc + (p.amount || 0), 0).toLocaleString()}</span>
-                    </div>
-                    <div className="stat">
-                      <span className="lab">GROWTH</span>
-                      <span className="val text-success">+14.2%</span>
-                    </div>
-                  </div>
-                </ChartContainer>
-              </BentoItem>
-
-              {/* BENTO SQUARE: Active Users */}
-              <BentoItem className="square-card" glow="#4318ff">
-                <div className="card-header"><h5>WARRIORS</h5></div>
-                <div className="big-num">{users.length}</div>
-                <p className="sub">Active Arena Members</p>
-                <div className="user-stack">
-                  {[1, 2, 3, 4].map(i => <div key={i} className="mini-avatar"></div>)}
-                  <div className="more">+{users.length - 4}</div>
-                </div>
-              </BentoItem>
-
-              {/* BENTO SQUARE: Attendance */}
-              <BentoItem className="square-card" glow="#05cd99">
-                <div className="card-header"><h5>LOGS</h5></div>
-                <div className="big-num">{attendance.length}</div>
-                <p className="sub">Daily Sessions Logged</p>
-                <PulseRing><PulseIcon size={32} /></PulseRing>
-              </BentoItem>
-
-              {/* BENTO MEDIUM: Recent Activity */}
-              <BentoItem className="medium-card" glow="#fff">
-                <div className="card-header"><h5>SYSTEM ACTIVITY</h5></div>
-                <ActivityList>
-                  {[...payments.slice(0, 2), ...attendance.slice(0, 2)].map((item, i) => (
-                    <div className="act-item" key={i}>
-                      <div className="dot" />
-                      <div className="text">
-                        <span className="user">{item.user?.fullName || item.fullName || "Warrior"}</span>
-                        <span className="desc">{item.amount ? `purchased a plan` : `checked into arena`}</span>
-                      </div>
-                      <span className="time">{item.paymentDate || item.attendanceDate}</span>
-                    </div>
-                  ))}
-                </ActivityList>
-              </BentoItem>
-
-              {/* BENTO SMALL: Server Status */}
-              <BentoItem className="small-card" glow="#ff5b5b">
-                <div className="d-flex align-items-center gap-3">
-                  <Monitor size={20} className="text-danger" />
-                  <div>
-                    <h6 className="m-0 fw-bold">SERVER_CORE</h6>
-                    <small className="text-secondary">Uptime: 99.9%</small>
-                  </div>
-                </div>
-              </BentoItem>
-            </>
-          )}
-
-          {activeTab !== "overview" && (
-            <BentoItem className="full-card">
-              <div className="card-header border-bottom pb-3 mb-3">
-                <h2 className="m-0 fw-black italic">{activeTab.toUpperCase()} <span className="text-warning">LIST</span></h2>
+        <Header className="reveal">
+          <div className="search-box">
+            <Search size={18} />
+            <input placeholder="SCAN SYSTEM RECORDS..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          </div>
+          <div className="actions">
+            <button className="icon-btn"><Bell size={20} /></button>
+            <div className="profile">
+              <div className="avatar">AD</div>
+              <div className="details">
+                <span className="name">ROOT_ADMIN</span>
+                <span className="status">SYNCED</span>
               </div>
-              <TableWrapper>
-                {loading ? (
-                  <div className="p-5 text-center"><div className="spinner-border text-warning"></div></div>
-                ) : (
-                  <table className="table table-dark table-hover mb-0">
-                    <thead>
-                      <tr>
-                        {activeTab === "users" && <><th>WARRIOR</th><th>STATUS</th><th>ACTIONS</th></>}
-                        {activeTab === "payments" && <><th>USER</th><th>AMOUNT</th><th>STATUS</th></>}
-                        {activeTab === "attendance" && <><th>USER</th><th>DATE</th><th>IN</th></>}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredData().map((u, i) => (
-                        <tr key={i}>
-                          {activeTab === "users" && (
-                            <>
-                              <td className="fw-bold">{u.fullName}</td>
-                              <td><span className={`badge ${u.status === 'ACTIVE' ? 'bg-success' : 'bg-danger'}`}>{u.status}</span></td>
-                              <td><button className="btn btn-sm btn-outline-warning">MANAGE</button></td>
-                            </>
-                          )}
-                          {activeTab === "payments" && (
-                            <>
-                              <td className="fw-bold">{u.user?.fullName || u.fullName || "---"}</td>
-                              <td className="text-warning">₹{u.amount}</td>
-                              <td>{u.paymentStatus}</td>
-                            </>
-                          )}
-                          {activeTab === "attendance" && (
-                            <>
-                              <td className="fw-bold">{u.user?.fullName || u.fullName || "---"}</td>
-                              <td>{u.attendanceDate}</td>
-                              <td className="text-success">{u.checkInTime}</td>
-                            </>
-                          )}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            </div>
+            <button className="mobile-btn" onClick={() => setIsSidebarOpen(true)}><MenuIcon /></button>
+          </div>
+        </Header>
+
+        <DashboardGrid>
+          <div className="welcome-section reveal">
+            <Badge>ARENA STATUS: OPTIMAL</Badge>
+            <h1>WELCOME BACK, <span className="text-gold">COMMANDER</span></h1>
+            <p>Your gym arena is operating at maximum performance.</p>
+          </div>
+
+          <StatsGrid className="reveal">
+            <StatCard color="linear-gradient(135deg, #4318ff 0%, #7d5fff 100%)">
+              <div className="card-inner">
+                <div className="header"><Users size={20} /> <span>WARRIORS</span></div>
+                <div className="value">{users.length}</div>
+                <div className="trend"><TrendingUp size={14} /> +12% GROWTH</div>
+              </div>
+            </StatCard>
+            <StatCard color="linear-gradient(135deg, #05cd99 0%, #00e0b0 100%)">
+              <div className="card-inner">
+                <div className="header"><CreditCard size={20} /> <span>REVENUE</span></div>
+                <div className="value">₹{payments.reduce((acc, p) => acc + (p.amount || 0), 0).toLocaleString()}</div>
+                <div className="trend"><TrendingUp size={14} /> +8.5% TARGET</div>
+              </div>
+            </StatCard>
+            <StatCard color="linear-gradient(135deg, #ffc107 0%, #ff9800 100%)">
+              <div className="card-inner">
+                <div className="header"><Zap size={20} /> <span>ENERGY</span></div>
+                <div className="value">{attendance.length}</div>
+                <div className="trend">SYSTEM ACTIVE</div>
+              </div>
+            </StatCard>
+          </StatsGrid>
+
+          <MainPanel className="reveal">
+            {loading ? (
+              <LoadingOverlay>
+                <div className="spinner"></div>
+                <span>UPDATING ARENA MODULES...</span>
+              </LoadingOverlay>
+            ) : (
+              <div className="panel-content">
+                {activeTab === "overview" && (
+                  <OverviewTab>
+                    <div className="row g-4">
+                      <div className="col-lg-8">
+                        <PanelCard>
+                          <div className="card-header">
+                            <h5>REVENUE FLOW (7D)</h5>
+                            <TrendingUp size={16} className="text-gold" />
+                          </div>
+                          <ChartSim>
+                            {[40, 65, 35, 80, 50, 95, 75].map((h, i) => (
+                              <div className="bar-group" key={i}>
+                                <div className="bar" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
+                                <span>D{i+1}</span>
+                              </div>
+                            ))}
+                          </ChartSim>
+                        </PanelCard>
+                      </div>
+                      <div className="col-lg-4">
+                        <PanelCard>
+                          <div className="card-header"><h5>WARRIOR MIX</h5></div>
+                          <div className="mix-stats">
+                            {['ELITE', 'PRO', 'BASIC'].map((t, i) => (
+                              <div className="mix-item" key={t}>
+                                <div className="d-flex justify-content-between mb-2">
+                                  <span className="label">{t}</span>
+                                  <span className="val">{70 - i*20}%</span>
+                                </div>
+                                <div className="progress"><div className="fill" style={{ width: `${70 - i*20}%`, background: i === 0 ? '#ffc107' : '#444' }} /></div>
+                              </div>
+                            ))}
+                          </div>
+                        </PanelCard>
+                      </div>
+                    </div>
+                  </OverviewTab>
                 )}
-              </TableWrapper>
-            </BentoItem>
-          )}
+
+                {activeTab !== "overview" && (
+                  <TableScroll>
+                    <Table>
+                      <thead>
+                        <tr>
+                          {activeTab === "users" && <><th>WARRIOR</th><th>STATUS</th><th>LEVEL</th><th>OPERATIONS</th></>}
+                          {activeTab === "payments" && <><th>WARRIOR</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
+                          {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATUS</th></>}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredData().map((item, idx) => (
+                          <tr key={idx}>
+                            {activeTab === "users" && (
+                              <>
+                                <td>
+                                  <div className="user-info">
+                                    <div className="avatar">{item.fullName.charAt(0)}</div>
+                                    <div><div className="name">{item.fullName}</div><div className="email">{item.email}</div></div>
+                                  </div>
+                                </td>
+                                <td><StatusBadge status={item.status}>{item.status}</StatusBadge></td>
+                                <td>{item.membershipType || "STANDARD"}</td>
+                                <td>
+                                  <div className="ops">
+                                    <button className="op-btn tick"><CheckCircle size={16} /></button>
+                                    <button className="op-btn trash"><Trash2 size={16} /></button>
+                                  </div>
+                                </td>
+                              </>
+                            )}
+                            {activeTab === "payments" && (
+                              <>
+                                <td className="fw-bold">{item.user?.fullName || item.fullName || "WARRIOR"}</td>
+                                <td className="text-gold fw-bold">₹{item.amount}</td>
+                                <td><StatusBadge status={item.paymentStatus}>{item.paymentStatus}</StatusBadge></td>
+                                <td className="sub-text">{item.paymentDate || "---"}</td>
+                              </>
+                            )}
+                            {activeTab === "attendance" && (
+                              <>
+                                <td className="fw-bold">{item.user?.fullName || item.fullName || "WARRIOR"}</td>
+                                <td>{item.attendanceDate}</td>
+                                <td className="text-success fw-bold">{item.checkInTime}</td>
+                                <td><StatusBadge status="ACTIVE">PRESENT</StatusBadge></td>
+                              </>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </TableScroll>
+                )}
+              </div>
+            )}
+          </MainPanel>
         </div>
       </MainContent>
-    </BentoWrapper>
+
+      {isSidebarOpen && <Overlay onClick={() => setIsSidebarOpen(false)} />}
+    </Container>
   );
 };
 
-// ── STYLED COMPONENTS (The "Bento Grid" Model) ──
+// ── STYLED COMPONENTS (The "Fantabulous" Solaris Model) ──
 
 const float = keyframes`
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 `;
 
+const shine = keyframes`
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+`;
+
 const slideUp = keyframes`
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 `;
 
-const BentoWrapper = styled.div`
-  min-height: 100vh; background: #000; color: #fff;
-  font-family: 'Inter', sans-serif; position: relative;
+const rotate = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 `;
 
-const StarField = styled.div`
-  position: fixed; inset: 0;
-  background-image: radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)), radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0));
-  background-size: 200px 200px; opacity: 0.1; pointer-events: none;
+const Container = styled.div`
+  min-height: 100vh; background: #050505; color: white; display: flex;
+  font-family: 'Outfit', sans-serif; overflow-x: hidden; position: relative;
 `;
 
-const TopNavigation = styled.nav`
-  position: sticky; top: 20px; z-index: 1000; padding: 0 40px;
-  @media (max-width: 768px) { padding: 0 20px; top: 10px; }
-
-  .nav-container {
-    background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
-    padding: 12px 30px; display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+const AnimatedBackground = styled.div`
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: 
+    radial-gradient(circle at 10% 10%, rgba(255, 193, 7, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(67, 24, 255, 0.05) 0%, transparent 40%);
+  &::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+    opacity: 0.2;
   }
+`;
+
+const Sidebar = styled.div`
+  width: 300px; height: 100vh; position: sticky; top: 0; z-index: 200;
+  background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(40px);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  
+  @media (max-width: 992px) {
+    position: fixed; left: 0; transform: ${props => props.isOpen ? "translateX(0)" : "translateX(-100%)"};
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-inner { padding: 40px; display: flex; flex-direction: column; height: 100%; }
 `;
 
 const Brand = styled.div`
-  display: flex; align-items: center; gap: 12px;
-  .icon-box { background: #ffc107; padding: 6px; border-radius: 8px; color: black; }
-  span { font-weight: 900; letter-spacing: -0.5px; font-size: 1.1rem; }
-  small { display: block; font-size: 0.5rem; letter-spacing: 2px; color: #ffc107; }
+  display: flex; align-items: center; gap: 15px; margin-bottom: 60px;
+  .icon { background: #ffc107; color: black; padding: 10px; border-radius: 12px; box-shadow: 0 0 20px rgba(255, 193, 7, 0.2); }
+  h3 { font-size: 1.5rem; font-weight: 900; font-style: italic; margin: 0; letter-spacing: -1px; }
+  span { font-size: 0.65rem; font-weight: 800; color: #ffc107; letter-spacing: 2px; }
 `;
 
-const NavLinks = styled.div`
-  display: flex; gap: 10px;
-  @media (max-width: 992px) { display: none; }
-`;
+const NavMenu = styled.div` display: flex; flex-direction: column; gap: 10px; flex: 1; `;
 
-const NavLink = styled.button`
-  background: ${props => props.active ? "rgba(255, 255, 255, 0.1)" : "transparent"};
-  border: none; color: ${props => props.active ? "#ffc107" : "#888"};
-  padding: 8px 18px; border-radius: 12px; font-weight: 700; font-size: 0.8rem;
-  display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;
-  &:hover { color: white; background: rgba(255, 255, 255, 0.05); }
-`;
+const NavItem = styled.div`
+  display: flex; align-items: center; gap: 15px; padding: 16px 20px; border-radius: 15px;
+  cursor: pointer; transition: all 0.3s ease; font-weight: 800; color: ${props => props.active ? "#fff" : "#666"};
+  background: ${props => props.active ? "rgba(255, 255, 255, 0.03)" : "transparent"};
+  position: relative; overflow: hidden;
 
-const UserActions = styled.div`
-  display: flex; align-items: center; gap: 20px;
-  .search-bar {
-    background: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 6px 15px;
-    display: flex; align-items: center; gap: 10px; width: 200px;
-    input { background: none; border: none; outline: none; color: white; font-size: 0.75rem; width: 100%; }
-    svg { color: #555; }
-    @media (max-width: 768px) { display: none; }
+  &:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+
+  .glow-bar {
+    position: absolute; left: 0; top: 0; width: 4px; height: 100%;
+    background: #ffc107; transform: scaleY(${props => props.active ? 1 : 0});
+    transition: transform 0.3s ease; box-shadow: 0 0 15px #ffc107;
   }
-  .logout-icon { background: none; border: none; color: #ff5b5b; cursor: pointer; &:hover { transform: scale(1.1); } }
-  .mobile-btn { display: none; background: none; border: none; color: white; @media (max-width: 992px) { display: block; } }
 `;
 
-const MobileMenu = styled.div`
-  position: fixed; top: 80px; left: 20px; right: 20px; background: rgba(10, 10, 10, 0.95);
-  backdrop-filter: blur(20px); padding: 20px; border-radius: 20px; z-index: 999;
-  display: flex; flex-direction: column; gap: 15px; border: 1px solid #222;
-  button { background: none; border: none; color: white; font-weight: 800; padding: 10px; text-align: left; }
+const LogoutBtn = styled.button`
+  background: none; border: 1px solid rgba(255, 255, 255, 0.05); color: #ff5b5b;
+  padding: 16px; border-radius: 15px; font-weight: 900; cursor: pointer;
+  display: flex; align-items: center; gap: 15px; transition: all 0.3s ease;
+  &:hover { background: #ff5b5b; color: white; transform: scale(1.02); }
 `;
 
 const MainContent = styled.main`
-  padding: 40px; margin-top: 20px;
-  .reveal { animation: ${slideUp} 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  flex: 1; padding: 40px 60px; z-index: 2;
+  @media (max-width: 992px) { padding: 30px 20px; }
+  .reveal { opacity: 0; transform: translateY(20px); transition: all 0.8s ease; &.reveal-visible { opacity: 1; transform: translateY(0); } }
+`;
+
+const Header = styled.header`
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px;
   
-  .bento-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 200px; gap: 20px;
-    @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
-    @media (max-width: 768px) { grid-template-columns: 1fr; grid-auto-rows: auto; }
+  .search-box {
+    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 50px; padding: 12px 30px; display: flex; align-items: center; gap: 15px; width: 400px;
+    input { background: none; border: none; outline: none; color: white; width: 100%; font-weight: 600; font-size: 0.9rem; }
+    svg { color: #ffc107; }
   }
 
-  .large-card { grid-column: span 2; grid-row: span 2; }
-  .medium-card { grid-column: span 2; grid-row: span 1; }
-  .full-card { grid-column: span 4; min-height: 500px; }
+  .actions {
+    display: flex; align-items: center; gap: 30px;
+    .icon-btn { background: none; border: none; color: #444; cursor: pointer; &:hover { color: #ffc107; } }
+    .profile {
+      display: flex; align-items: center; gap: 15px;
+      .avatar { width: 42px; height: 42px; background: #ffc107; color: black; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; box-shadow: 0 0 20px rgba(255, 193, 7, 0.2); }
+      .details { .name { display: block; font-weight: 900; font-size: 0.9rem; } .status { font-size: 0.65rem; color: #05cd99; font-weight: 800; letter-spacing: 1px; } }
+    }
+    .mobile-btn { display: none; background: none; border: none; color: white; @media (max-width: 992px) { display: block; } }
+  }
+
+  @media (max-width: 768px) { .search-box { display: none; } }
 `;
 
-const BentoItem = styled.div`
-  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 30px; padding: 30px; position: relative; overflow: hidden;
-  transition: all 0.4s ease;
+const DashboardGrid = styled.div`
+  .welcome-section {
+    margin-bottom: 50px;
+    h1 { font-size: 2.8rem; font-weight: 950; font-style: italic; letter-spacing: -1.5px; margin: 10px 0; }
+    p { color: #666; font-weight: 600; font-size: 1.1rem; }
+    .text-gold { color: #ffc107; text-shadow: 0 0 30px rgba(255, 193, 7, 0.3); }
+  }
+`;
+
+const Badge = styled.span`
+  background: rgba(255, 193, 7, 0.1); color: #ffc107; padding: 6px 15px;
+  border-radius: 50px; font-weight: 900; font-size: 0.75rem; letter-spacing: 1px; border: 1px solid rgba(255, 193, 7, 0.2);
+`;
+
+const StatsGrid = styled.div`
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 50px;
+  @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+`;
+
+const StatCard = styled.div`
+  background: ${props => props.color}; border-radius: 30px; padding: 2px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; overflow: hidden;
   
-  &:hover {
-    transform: translateY(-5px); border-color: ${props => props.glow};
-    box-shadow: 0 10px 40px ${props => props.glow}11;
+  .card-inner {
+    background: #0a0a0a; border-radius: 28px; padding: 30px; height: 100%;
+    .header { display: flex; align-items: center; gap: 12px; color: #666; font-size: 0.75rem; font-weight: 900; letter-spacing: 1.5px; margin-bottom: 25px; svg { color: #ffc107; } }
+    .value { font-size: 2.2rem; font-weight: 950; margin-bottom: 10px; }
+    .trend { font-size: 0.75rem; font-weight: 800; color: #05cd99; display: flex; align-items: center; gap: 8px; }
   }
-
-  .card-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-    h5 { font-size: 0.75rem; font-weight: 900; color: #555; letter-spacing: 1.5px; margin: 0; }
-    .status { font-size: 0.6rem; color: #ffc107; font-weight: 900; }
-  }
-
-  .big-num { font-size: 4rem; font-weight: 900; letter-spacing: -2px; line-height: 1; }
-  .sub { color: #666; font-size: 0.85rem; font-weight: 600; margin-top: 10px; }
 `;
 
-const ChartContainer = styled.div`
-  height: 100%; display: flex; flex-direction: column; justify-content: flex-end;
-  .bars-area { height: 180px; display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 30px; }
-  .bar-wrap { width: 8%; height: 100%; display: flex; align-items: flex-end; }
-  .bar { width: 100%; background: #ffc107; border-radius: 6px; animation: ${slideUp} 1s ease forwards; }
-  .chart-info { display: flex; gap: 40px; .stat { .lab { display: block; font-size: 0.65rem; color: #555; font-weight: 800; } .val { font-size: 1.5rem; font-weight: 900; } } }
+const MainPanel = styled.div`
+  background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 40px; padding: 40px; min-height: 500px; backdrop-filter: blur(20px);
+  @media (max-width: 768px) { padding: 25px; }
 `;
 
-const ActivityList = styled.div`
-  display: flex; flex-direction: column; gap: 15px;
-  .act-item {
+const PanelCard = styled.div`
+  background: rgba(255, 255, 255, 0.02); border-radius: 25px; padding: 30px; border: 1px solid rgba(255, 255, 255, 0.03);
+  h5 { font-size: 0.85rem; font-weight: 900; letter-spacing: 1.5px; color: #666; margin-bottom: 30px; }
+  .mix-item {
+    margin-bottom: 25px;
+    .label { color: #fff; font-weight: 800; font-size: 0.85rem; }
+    .val { color: #ffc107; font-weight: 900; }
+    .progress { height: 6px; background: #111; border-radius: 10px; margin-top: 10px; overflow: hidden; .fill { height: 100%; border-radius: 10px; transition: width 1s ease; } }
+  }
+`;
+
+const ChartSim = styled.div`
+  height: 200px; display: flex; align-items: flex-end; justify-content: space-between;
+  .bar-group { 
+    width: 10%; display: flex; flex-direction: column; align-items: center; gap: 15px;
+    .bar { width: 100%; background: linear-gradient(to top, #ffc107, #ff9800); border-radius: 6px; animation: ${slideUp} 1s ease forwards; box-shadow: 0 0 20px rgba(255, 193, 7, 0.2); }
+    span { font-size: 0.65rem; font-weight: 800; color: #444; }
+  }
+`;
+
+const TableScroll = styled.div` overflow-x: auto; `;
+const Table = styled.table`
+  width: 100%; border-collapse: collapse; min-width: 800px;
+  thead th { text-align: left; padding: 20px; color: #ffc107; font-size: 0.75rem; font-weight: 950; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+  tbody td { padding: 25px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.02); font-size: 1rem; }
+  .user-info {
     display: flex; align-items: center; gap: 15px;
-    .dot { width: 6px; height: 6px; background: #ffc107; border-radius: 50%; box-shadow: 0 0 10px #ffc107; }
-    .text { flex: 1; .user { font-weight: 700; margin-right: 8px; } .desc { color: #666; font-size: 0.85rem; } }
-    .time { font-size: 0.75rem; color: #444; font-weight: 700; }
+    .avatar { width: 40px; height: 40px; background: #111; border-radius: 10px; border: 1px solid rgba(255, 193, 7, 0.3); display: flex; align-items: center; justify-content: center; font-weight: 900; color: #ffc107; }
+    .name { font-weight: 800; } .email { font-size: 0.8rem; color: #555; }
   }
+  .ops { display: flex; gap: 10px; .op-btn { background: rgba(255,255,255,0.02); border: none; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #444; transition: all 0.3s ease; &:hover { color: white; background: #ffc10722; border: 1px solid #ffc107; } &.trash:hover { color: #ff5b5b; border-color: #ff5b5b; background: #ff5b5b22; } } }
 `;
 
-const PulseRing = styled.div`
-  position: absolute; bottom: 20px; right: 20px; color: #05cd99; animation: ${float} 3s ease-in-out infinite;
+const StatusBadge = styled.span`
+  padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 900;
+  background: ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "rgba(5,205,153,0.1)" : "rgba(255,255,255,0.05)"};
+  color: ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "#05cd99" : "#666"};
+  border: 1px solid ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "rgba(5,205,153,0.2)" : "rgba(255,255,255,0.1)"};
 `;
 
-const TableWrapper = styled.div`
-  background: rgba(0,0,0,0.2); border-radius: 20px; overflow: hidden;
-  .table { th { border: none; padding: 20px; font-size: 0.8rem; color: #555; font-weight: 900; } td { padding: 20px; border-color: rgba(255,255,255,0.02); } }
+const LoadingOverlay = styled.div`
+  display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; gap: 20px;
+  .spinner { width: 45px; height: 45px; border: 4px solid #111; border-top-color: #ffc107; border-radius: 50%; animation: ${rotate} 1s linear infinite; }
+  span { font-size: 0.8rem; font-weight: 900; letter-spacing: 2px; color: #444; }
 `;
+
+const Overlay = styled.div` position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 150; `;
+
+const OverviewTab = styled.div` animation: ${slideUp} 0.8s ease; `;
 
 export default AdminDashboard;
