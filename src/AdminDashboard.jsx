@@ -40,6 +40,7 @@ const AdminDashboard = () => {
   const [payments, setPayments] = useState([]);
   const [attendance, setAttendance] = useState([]);
   const [consultations, setConsultations] = useState([]);
+  const [trainers, setTrainers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -63,6 +64,13 @@ const AdminDashboard = () => {
 
       if (activeTab === "dashboard" || activeTab === "users") {
         setUsers(results[0]); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
+        // Mock trainers data for the new section
+        setTrainers([
+          { id: 1, name: "Alex Johnson", specialty: "Bodybuilding", students: 12, times: "06:00 AM - 11:00 AM" },
+          { id: 2, name: "Maya Patel", specialty: "Yoga & Flexibility", students: 18, times: "04:00 PM - 08:00 PM" },
+          { id: 3, name: "Chris Lee", specialty: "Crossfit", students: 15, times: "07:00 AM - 12:00 PM" },
+          { id: 4, name: "Sophia Martinez", specialty: "HIIT & Cardio", students: 22, times: "05:00 PM - 09:00 PM" }
+        ]);
       } else {
         const data = results[0];
         if (activeTab === "payments") setPayments(data);
@@ -106,6 +114,7 @@ const AdminDashboard = () => {
             { id: "users", icon: <Users size={18} />, label: "Warriors" },
             { id: "payments", icon: <CreditCard size={18} />, label: "Revenue" },
             { id: "attendance", icon: <Clock size={18} />, label: "Arena Logs" },
+            { id: "trainers", icon: <Layers size={18} />, label: "Trainers" },
             { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" }
           ].map(item => (
             <NavItem
@@ -234,6 +243,7 @@ const AdminDashboard = () => {
                           {activeTab === "payments" && <><th>WARRIOR</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
                           {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
                           {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
+                          {activeTab === "trainers" && <><th>TRAINER</th><th>SPECIALTY</th><th>STUDENTS</th><th>HANDLING TIME</th></>}
                         </tr>
                       </thead>
                       <tbody>
@@ -281,6 +291,19 @@ const AdminDashboard = () => {
                             </td>
                             <td style={{ maxWidth: '400px' }}><p className="mb-0 text-secondary">{msg.goals}</p></td>
                             <td className="sub-text">{msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "Recent"}</td>
+                          </tr>
+                        ))}
+                        {activeTab === "trainers" && trainers.map(t => (
+                          <tr key={t.id}>
+                            <td>
+                              <div className="u-cell">
+                                <div className="avatar-small bg-primary-light text-primary">{t.name.charAt(0)}</div>
+                                <div className="fw-bold">{t.name}</div>
+                              </div>
+                            </td>
+                            <td>{t.specialty}</td>
+                            <td><span className="badge bg-success-light">{t.students} Students</span></td>
+                            <td className="fw-bold text-secondary">{t.times}</td>
                           </tr>
                         ))}
                       </tbody>
