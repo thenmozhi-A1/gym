@@ -170,7 +170,7 @@ const AdminDashboard = () => {
             <LoaderArea><div className="spinner"></div></LoaderArea>
           ) : (
             <>
-              {activeTab === "dashboard" && (
+              {activeTab === "dashboard" ? (
                 <div className="dashboard-view">
                   <StatsRow>
                     <StatBox color="#007bff">
