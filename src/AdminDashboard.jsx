@@ -29,7 +29,9 @@ import {
   Layers,
   Award,
   Trash2,
-  Plus
+  Plus,
+  Phone,
+  MapPin
 } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
@@ -46,7 +48,7 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
-  const [newStaff, setNewStaff] = useState({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer" });
+  const [newStaff, setNewStaff] = useState({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer", phone: "", address: "" });
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -105,7 +107,7 @@ const AdminDashboard = () => {
     if (!newStaff.name || !newStaff.role) return;
     const staffToAdd = { ...newStaff, id: Date.now(), students: 0, status: "ACTIVE" };
     setStaffs([staffToAdd, ...staffs]);
-    setNewStaff({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer" });
+    setNewStaff({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer", phone: "", address: "" });
     setIsAddStaffModalOpen(false);
     alert("STAFF MEMBER ADDED TO SYSTEM SUCCESSFULLY!");
   };
@@ -404,6 +406,27 @@ const AdminDashboard = () => {
                   <div className="input-wrap">
                     <Globe size={18} />
                     <input type="email" placeholder="staff@slayfit.com" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} required />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-6">
+                    <div className="form-group">
+                      <label>PHONE NUMBER</label>
+                      <div className="input-wrap">
+                        <Phone size={18} />
+                        <input type="text" placeholder="+91 98765 43210" value={newStaff.phone} onChange={e => setNewStaff({...newStaff, phone: e.target.value})} required />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="form-group">
+                      <label>HOME ADDRESS</label>
+                      <div className="input-wrap">
+                        <MapPin size={18} />
+                        <input type="text" placeholder="City, State" value={newStaff.address} onChange={e => setNewStaff({...newStaff, address: e.target.value})} />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
