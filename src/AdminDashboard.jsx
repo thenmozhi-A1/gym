@@ -50,6 +50,8 @@ const AdminDashboard = () => {
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
   const [isPayrollDetailOpen, setIsPayrollDetailOpen] = useState(false);
   const [selectedStaffForSlip, setSelectedStaffForSlip] = useState(null);
+  const [payrollSearchTerm, setPayrollSearchTerm] = useState("");
+  const [payrollRoleFilter, setPayrollRoleFilter] = useState("ALL");
   const [newStaff, setNewStaff] = useState({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer", phone: "", address: "" });
 
   useEffect(() => {
@@ -262,11 +264,37 @@ const AdminDashboard = () => {
                           </div>
                         </header>
 
+                        {/* ── PAYROLL LIFECYCLE STEPPER ── */}
+                        <div className="payroll-stepper">
+                          <div className="step active">
+                            <div className="dot">1</div>
+                            <span>Data Verify</span>
+                          </div>
+                          <div className="connector active" />
+                          <div className="step active">
+                            <div className="dot">2</div>
+                            <span>Approval</span>
+                          </div>
+                          <div className="connector" />
+                          <div className="step">
+                            <div className="dot">3</div>
+                            <span>Bank Transfer</span>
+                          </div>
+                          <div className="connector" />
+                          <div className="step">
+                            <div className="dot">4</div>
+                            <span>Completed</span>
+                          </div>
+                        </div>
+
                         <div className="hero-card">
                           <div className="hero-stats">
                             <div className="stat-group">
                               <label>EMPLOYEES' NET PAY</label>
-                              <div className="amount">₹17,25,23.00</div>
+                              <div className="amount-row">
+                                <div className="amount">₹17,25,23.00</div>
+                                <div className="trend-badge positive">+4.2% <ArrowUpRight size={12} /></div>
+                              </div>
                             </div>
                             <div className="stat-divider" />
                             <div className="stat-group">
@@ -411,7 +439,6 @@ const AdminDashboard = () => {
                       </aside>
                     </>
                   ) : (
-                    <div className="payroll-detail-overlay animate-in">
                       <div className="detail-header">
                         <div className="d-flex align-items-center gap-4">
                           <button className="back-btn" onClick={() => setIsPayrollDetailOpen(false)}>
@@ -420,8 +447,25 @@ const AdminDashboard = () => {
                           <h2>Payroll <small>DETAILS / MAY 2024</small></h2>
                         </div>
                         <div className="d-flex gap-3">
-                          <button className="export-btn pdf"><Activity size={14} /> EXPORT PDF</button>
-                          <button className="export-btn csv"><Globe size={14} /> EXPORT CSV</button>
+                          <div className="search-box-mini">
+                            <Search size={14} />
+                            <input 
+                              type="text" 
+                              placeholder="Search Staff..." 
+                              value={payrollSearchTerm}
+                              onChange={(e) => setPayrollSearchTerm(e.target.value)}
+                            />
+                          </div>
+                          <select 
+                            className="role-filter-select"
+                            value={payrollRoleFilter}
+                            onChange={(e) => setPayrollRoleFilter(e.target.value)}
+                          >
+                            <option value="ALL">All Roles</option>
+                            <option value="Trainer">Trainers</option>
+                            <option value="Front Office">Front Office</option>
+                          </select>
+                          <button className="export-btn pdf"><Activity size={14} /> PDF</button>
                         </div>
                       </div>
                       
@@ -439,7 +483,12 @@ const AdminDashboard = () => {
                               </tr>
                             </thead>
                             <tbody>
-                              {staffs.map(s => (
+                              {staffs
+                                .filter(s => 
+                                  (payrollRoleFilter === "ALL" || s.role === payrollRoleFilter) &&
+                                  (s.name.toLowerCase().includes(payrollSearchTerm.toLowerCase()))
+                                )
+                                .map(s => (
                                 <tr key={s.id} onClick={() => setSelectedStaffForSlip(s)}>
                                   <td>
                                     <div className="u-cell">
@@ -455,21 +504,27 @@ const AdminDashboard = () => {
                                 </tr>
                               ))}
                               {/* Extra mock rows for "high fidelity" */}
-                              {[1,2,3,4,5,6,7].map(i => (
-                                <tr key={`mock-${i}`} onClick={() => setSelectedStaffForSlip({ name: `Employee #${1300 + i}`, role: "Staff", salary: "₹42,000" })}>
-                                  <td>
-                                    <div className="u-cell">
-                                      <div className="avatar-small">E</div>
-                                      <div className="fw-bold">Employee #{1300 + i}</div>
-                                    </div>
-                                  </td>
-                                  <td><span className="badge bg-primary-light">Staff</span></td>
-                                  <td className="fw-bold">₹42,000</td>
-                                  <td className="text-danger">₹1,200 <small style={{ display: 'block', fontSize: '0.6rem', opacity: 0.6 }}>TDS + PF</small></td>
-                                  <td className="fw-black text-primary">₹40,800</td>
-                                  <td><span className="sync-badge">PAID</span></td>
-                                </tr>
-                              ))}
+                              {[1,2,3,4,5,6,7].map(i => {
+                                const name = `Employee #${1300 + i}`;
+                                const role = i % 2 === 0 ? "Trainer" : "Front Office";
+                                if (payrollSearchTerm && !name.toLowerCase().includes(payrollSearchTerm.toLowerCase())) return null;
+                                if (payrollRoleFilter !== "ALL" && role !== payrollRoleFilter) return null;
+                                return (
+                                  <tr key={`mock-${i}`} onClick={() => setSelectedStaffForSlip({ name, role, salary: "₹42,000" })}>
+                                    <td>
+                                      <div className="u-cell">
+                                        <div className="avatar-small">E</div>
+                                        <div className="fw-bold">{name}</div>
+                                      </div>
+                                    </td>
+                                    <td><span className="badge bg-primary-light">{role}</span></td>
+                                    <td className="fw-bold">₹42,000</td>
+                                    <td className="text-danger">₹1,200 <small style={{ display: 'block', fontSize: '0.6rem', opacity: 0.6 }}>TDS + PF</small></td>
+                                    <td className="fw-black text-primary">₹40,800</td>
+                                    <td><span className="sync-badge">PAID</span></td>
+                                  </tr>
+                                );
+                              })}
                             </tbody>
                           </table>
                         </div>
@@ -860,13 +915,24 @@ const PayrollContainer = styled.div`
   .payroll-main {
     flex: 1; display: flex; flex-direction: column; gap: 30px;
     .payroll-header {
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
       .welcome { font-size: 1.8rem; font-weight: 900; margin: 0; color: #1e293b; }
       .pay-run-status { 
         display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px 20px; border-radius: 12px; border: 1px solid #e2e8f0;
         span { font-size: 0.85rem; font-weight: 700; color: #64748b; }
         .badge-approved { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
       }
+    }
+
+    .payroll-stepper {
+      display: flex; align-items: center; gap: 15px; margin-bottom: 40px; background: #f8fafc; padding: 15px 30px; border-radius: 20px;
+      .step { 
+        display: flex; align-items: center; gap: 10px; opacity: 0.4;
+        &.active { opacity: 1; .dot { background: #1e293b; color: #fff; border-color: #1e293b; } span { color: #1e293b; font-weight: 800; } }
+        .dot { width: 24px; height: 24px; border: 2px solid #cbd5e1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; }
+        span { font-size: 0.75rem; font-weight: 700; color: #64748b; }
+      }
+      .connector { flex: 1; height: 2px; background: #e2e8f0; &.active { background: #1e293b; } }
     }
   }
 
@@ -877,7 +943,14 @@ const PayrollContainer = styled.div`
       display: flex; align-items: center; justify-content: space-between;
       .stat-group {
         label { display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px; margin-bottom: 8px; }
-        .amount { font-size: 2.2rem; font-weight: 900; color: #1e293b; }
+        .amount-row { 
+          display: flex; align-items: center; gap: 15px;
+          .amount { font-size: 2.2rem; font-weight: 900; color: #1e293b; }
+          .trend-badge { 
+            padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 4px;
+            &.positive { background: #d1fae5; color: #065f46; }
+          }
+        }
         .date, .count { font-size: 1.4rem; font-weight: 800; color: #1e293b; }
       }
       .stat-divider { width: 1px; height: 50px; background: #e2e8f0; }
@@ -1042,6 +1115,16 @@ const ModalContent = styled.div`
       display: flex; justify-content: space-between; align-items: center;
       .back-btn { background: none; border: none; color: #007bff; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer; &:hover { gap: 12px; } }
       h2 { font-weight: 900; margin: 0; small { font-size: 0.6rem; color: #94a3b8; letter-spacing: 2px; display: block; } }
+      
+      .search-box-mini {
+        background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 8px 15px; display: flex; align-items: center; gap: 10px;
+        input { border: none; outline: none; font-size: 0.8rem; font-weight: 600; width: 150px; }
+        svg { color: #94a3b8; }
+        &:focus-within { border-color: #007bff; }
+      }
+
+      .role-filter-select { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 8px 12px; font-size: 0.75rem; font-weight: 700; color: #1e293b; outline: none; cursor: pointer; &:hover { border-color: #007bff; } }
+
       .export-btn { 
         background: #fff; border: 1.5px solid #e2e8f0; padding: 10px 18px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer;
         transition: all 0.2s; &:hover { border-color: #007bff; color: #007bff; transform: translateY(-2px); }
