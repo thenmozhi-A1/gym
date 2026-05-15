@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import {
   Users,
   CreditCard,
@@ -20,10 +20,13 @@ import {
   Zap,
   Target,
   Layout,
-  Layers,
-  PieChart,
   Shield,
-  Bell
+  Bell,
+  Cpu,
+  Globe,
+  Database,
+  Terminal,
+  ChevronRight
 } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
@@ -39,15 +42,12 @@ const AdminDashboard = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [expandedUserId, setExpandedUserId] = useState(null);
 
-  // Role Protection
   useEffect(() => {
     const role = localStorage.getItem("userRole");
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-
     if (!isLoggedIn || role !== "ADMIN") {
-      alert("Access Denied: Admins Only!");
+      alert("UNAUTHORIZED ACCESS DETECTED");
       navigate("/login");
     }
   }, [navigate]);
@@ -56,22 +56,8 @@ const AdminDashboard = () => {
     fetchData();
   }, [activeTab]);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add("reveal-visible");
-        });
-      },
-      { threshold: 0.1 }
-    );
-    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [activeTab, loading]);
-
   const fetchData = async () => {
     setLoading(true);
-    setError(null);
     try {
       if (activeTab === "overview" || activeTab === "users") {
         const [uRes, pRes, aRes, cRes] = await Promise.all([
@@ -80,57 +66,21 @@ const AdminDashboard = () => {
           fetch(`${API_BASE}/attendance`),
           fetch(`${API_BASE}/consultations`)
         ]);
-        const uData = await uRes.json();
-        const pData = await pRes.json();
-        const aData = await aRes.json();
-        const cData = await cRes.json();
-        setUsers(Array.isArray(uData) ? uData : []);
-        setPayments(Array.isArray(pData) ? pData : []);
-        setAttendance(Array.isArray(aData) ? aData : []);
-        setConsultations(Array.isArray(cData) ? cData : []);
-      } else if (activeTab === "payments") {
-        const res = await fetch(`${API_BASE}/payments`);
+        const [u, p, a, c] = await Promise.all([uRes.json(), pRes.json(), aRes.json(), cRes.json()]);
+        setUsers(Array.isArray(u) ? u : []);
+        setPayments(Array.isArray(p) ? p : []);
+        setAttendance(Array.isArray(a) ? a : []);
+        setConsultations(Array.isArray(c) ? c : []);
+      } else {
+        const res = await fetch(`${API_BASE}/${activeTab}`);
         const data = await res.json();
-        setPayments(Array.isArray(data) ? data : []);
-      } else if (activeTab === "attendance") {
-        const res = await fetch(`${API_BASE}/attendance`);
-        const data = await res.json();
-        setAttendance(Array.isArray(data) ? data : []);
-      } else if (activeTab === "consultations") {
-        const res = await fetch(`${API_BASE}/consultations`);
-        const data = await res.json();
-        setConsultations(Array.isArray(data) ? data : []);
+        const setter = activeTab === "payments" ? setPayments : activeTab === "attendance" ? setAttendance : setConsultations;
+        setter(Array.isArray(data) ? data : []);
       }
     } catch (err) {
-      setError("Failed to sync arena data.");
-      console.error(err);
+      setError("System sync failed.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUpdateStatus = async (user, newStatus) => {
-    try {
-      const res = await fetch(`${API_BASE}/users/${user.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...user, status: newStatus })
-      });
-      if (res.ok) {
-        setUsers(users.map(u => u.id === user.id ? { ...u, status: newStatus } : u));
-      }
-    } catch (err) {
-      alert("Status update failed.");
-    }
-  };
-
-  const handleDeleteUser = async (id) => {
-    if (!window.confirm("Permanent deletion cannot be undone. Proceed?")) return;
-    try {
-      const res = await fetch(`${API_BASE}/users/${id}`, { method: "DELETE" });
-      if (res.ok) setUsers(users.filter(u => u.id !== id));
-    } catch (err) {
-      alert("Deletion failed.");
     }
   };
 
@@ -139,434 +89,341 @@ const AdminDashboard = () => {
     navigate("/login");
   };
 
-  const filteredUsers = users.filter(u =>
-    u.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredPayments = payments.filter(p =>
-    (p.user?.fullName || p.fullName || p.userName || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredAttendance = attendance.filter(a =>
-    (a.user?.fullName || a.fullName || a.userName || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = () => {
+    const term = searchTerm.toLowerCase();
+    if (activeTab === "users") return users.filter(u => u.fullName?.toLowerCase().includes(term));
+    if (activeTab === "payments") return payments.filter(p => (p.user?.fullName || p.fullName || "").toLowerCase().includes(term));
+    if (activeTab === "attendance") return attendance.filter(a => (a.user?.fullName || a.fullName || "").toLowerCase().includes(term));
+    return consultations;
+  };
 
   return (
-    <PageLayout>
-      <BackgroundMesh />
-      
-      {/* ── FLOATING NAVIGATION ── */}
-      <FloatingSidebar isOpen={isSidebarOpen}>
-        <SidebarContent>
-          <Brand>
-            <div className="logo-box"><Shield size={24} color="black" /></div>
-            <div className="text">
-              <h3>SLAYFIT</h3>
-              <span>COMMAND CENTER</span>
+    <HUDWrapper>
+      <ScannerLine />
+      <HeaderHUD>
+        <div className="brand">
+          <Cpu className="pulse-icon" size={28} />
+          <div className="brand-text">
+            <h1>SLAYFIT <span className="highlight">OS_v2.0</span></h1>
+            <div className="system-status">
+              <span className="dot active"></span>
+              CORE_SYSTEM: ONLINE | MEM_COUNT: {users.length}
             </div>
-          </Brand>
+          </div>
+        </div>
 
-          <NavList>
+        <TopControls>
+          <div className="search-hud">
+            <Terminal size={16} />
+            <input 
+              placeholder="RUN SEARCH_QUERY..." 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="admin-status">
+            <Bell size={20} className="shake-hover" />
+            <div className="v-divider" />
+            <div className="profile-chip">
+              <div className="rank">LEVEL 10</div>
+              <div className="name">ROOT_ADMIN</div>
+            </div>
+            <button className="mobile-btn" onClick={() => setIsSidebarOpen(true)}><MenuIcon /></button>
+          </div>
+        </TopControls>
+      </HeaderHUD>
+
+      <ContentArea>
+        <SidebarHUD isOpen={isSidebarOpen}>
+          <NavGroup>
             {[
-              { id: "overview", icon: <Layout size={20} />, label: "Dashboard" },
-              { id: "users", icon: <Users size={20} />, label: "Warriors" },
-              { id: "payments", icon: <PieChart size={20} />, label: "Revenue" },
-              { id: "attendance", icon: <Layers size={20} />, label: "Arena Logs" },
-              { id: "consultations", icon: <MessageSquare size={20} />, label: "Inquiries" }
+              { id: "overview", icon: <Layout size={20} />, label: "NEURAL_OVERVIEW" },
+              { id: "users", icon: <Users size={20} />, label: "WARRIOR_SYNC" },
+              { id: "payments", icon: <Database size={20} />, label: "REVENUE_STREAM" },
+              { id: "attendance", icon: <Globe size={20} />, label: "ARENA_LOGS" },
+              { id: "consultations", icon: <MessageSquare size={20} />, label: "INQUIRIES" }
             ].map(item => (
-              <NavItem 
+              <HUDNavItem 
                 key={item.id} 
                 active={activeTab === item.id}
                 onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
               >
-                {item.icon} <span>{item.label}</span>
-              </NavItem>
+                <div className="nav-accent" />
+                {item.icon}
+                <span>{item.label}</span>
+                {activeTab === item.id && <ChevronRight className="chevron" size={14} />}
+              </HUDNavItem>
             ))}
-          </NavList>
+          </NavGroup>
 
-          <LogoutArea>
-            <button onClick={handleLogout}><LogOut size={20} /> <span>LOGOUT</span></button>
-          </LogoutArea>
-        </SidebarContent>
-      </FloatingSidebar>
+          <LogoutHUD onClick={handleLogout}>
+            <LogOut size={20} /> TERMINATE_SESSION
+          </LogoutHUD>
+        </SidebarHUD>
 
-      <MainStage>
-        {/* ── TOP ACTION BAR ── */}
-        <TopBar className="reveal">
-          <div className="search-wrapper">
-            <Search size={18} />
-            <input 
-              type="text" 
-              placeholder={`Search ${activeTab} records...`} 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="user-actions">
-            <button className="icon-btn"><Bell size={20} /></button>
-            <div className="admin-profile">
-              <div className="avatar">AD</div>
-              <div className="info">
-                <span className="name">Commander</span>
-                <span className="role">Senior Admin</span>
+        <MainDisplay>
+          {activeTab === "overview" && (
+            <div className="overview-grid">
+              <div className="hero-stats">
+                <HUDCard glow="#4318ff">
+                  <StatHeader>
+                    <Users size={18} /> <span>WARRIOR_POPULATION</span>
+                  </StatHeader>
+                  <div className="big-value">{users.length}</div>
+                  <MiniGraph>
+                    {[40, 20, 60, 30, 80, 50, 90].map((h, i) => <div key={i} className="m-bar" style={{ height: `${h}%` }} />)}
+                  </MiniGraph>
+                </HUDCard>
+
+                <HUDCard glow="#05cd99">
+                  <StatHeader>
+                    <CreditCard size={18} /> <span>TOTAL_REVENUE</span>
+                  </StatHeader>
+                  <div className="big-value">₹{payments.reduce((acc, p) => acc + (p.amount || 0), 0).toLocaleString()}</div>
+                  <div className="trend-box"><TrendingUp size={14} /> +12.5% PERFORMANCE</div>
+                </HUDCard>
+
+                <HUDCard glow="#ffc107">
+                  <StatHeader>
+                    <Zap size={18} /> <span>ACTIVE_UPLINKS</span>
+                  </StatHeader>
+                  <div className="big-value">{attendance.length}</div>
+                  <div className="status-label">SYS_STABLE</div>
+                </HUDCard>
+              </div>
+
+              <div className="bottom-row">
+                <HUDCard className="flex-2" glow="rgba(255,255,255,0.1)">
+                  <StatHeader><Activity size={18} /> <span>ARENA_THROUGHPUT</span></StatHeader>
+                  <BigChart>
+                    <div className="chart-line"></div>
+                    <div className="chart-bars">
+                      {[30, 50, 70, 40, 90, 60, 85, 45, 95, 75].map((h, i) => (
+                        <div key={i} className="main-bar" style={{ height: `${h}%`, animationDelay: `${i * 0.1}s` }} />
+                      ))}
+                    </div>
+                  </BigChart>
+                </HUDCard>
+
+                <HUDCard className="flex-1" glow="#ff5b5b">
+                  <StatHeader><Terminal size={18} /> <span>SYSTEM_LOG</span></StatHeader>
+                  <LogStream>
+                    {[...payments.slice(0, 3), ...attendance.slice(0, 3)].map((item, i) => (
+                      <div className="log-entry" key={i}>
+                        <span className="log-time">[{item.attendanceDate || "PAYMENT"}]</span>
+                        <span className="log-text">{item.user?.fullName || "UNKNOWN"} initialized action.</span>
+                      </div>
+                    ))}
+                  </LogStream>
+                </HUDCard>
               </div>
             </div>
-            <button className="mobile-toggle" onClick={() => setIsSidebarOpen(true)}><MenuIcon /></button>
-          </div>
-        </TopBar>
+          )}
 
-        {/* ── DASHBOARD MODULES ── */}
-        <div className="content-grid">
-          <WelcomeHeader className="reveal">
-            <h2>SYSTEM <span className="text-warning">STATUS</span>: OPTIMAL</h2>
-            <p>Welcome back, Commander. Here's your daily arena report.</p>
-          </WelcomeHeader>
-
-          <ModulesRow className="reveal">
-            <ModuleCard color="#4318ff">
-              <div className="module-info">
-                <span className="label">ACTIVE WARRIORS</span>
-                <h4 className="value">{users.length}</h4>
-                <span className="trend positive">+12% vs last month</span>
-              </div>
-              <div className="module-icon"><Users size={24} /></div>
-            </ModuleCard>
-            <ModuleCard color="#05cd99">
-              <div className="module-info">
-                <span className="label">MONTHLY REVENUE</span>
-                <h4 className="value">₹{payments.reduce((acc, p) => acc + (p.amount || 0), 0).toLocaleString()}</h4>
-                <span className="trend positive">+8.4% growth</span>
-              </div>
-              <div className="module-icon"><CreditCard size={24} /></div>
-            </ModuleCard>
-            <ModuleCard color="#ffc107">
-              <div className="module-info">
-                <span className="label">DAILY SESSIONS</span>
-                <h4 className="value">{attendance.length}</h4>
-                <span className="trend">System Stable</span>
-              </div>
-              <div className="module-icon"><Zap size={24} /></div>
-            </ModuleCard>
-          </ModulesRow>
-
-          <MainPanel className="reveal">
-            {loading ? (
-              <GlassLoader>
-                <div className="orbit"></div>
-                <span>UPDATING SYSTEM...</span>
-              </GlassLoader>
-            ) : (
-              <div className="panel-content">
-                {activeTab === "overview" && (
-                  <OverviewModule>
-                    <div className="row g-4">
-                      <div className="col-lg-8">
-                        <ModulePane>
-                          <h5>ARENA TRAFFIC (7D)</h5>
-                          <div className="chart-area">
-                            <div className="bar-chart">
-                              {[35, 55, 45, 80, 60, 90, 75].map((h, i) => (
-                                <div className="bar-wrap" key={i}>
-                                  <div className="bar" style={{ height: `${h}%` }}></div>
-                                  <span className="label">DAY {i+1}</span>
-                                </div>
-                              ))}
+          {activeTab !== "overview" && (
+            <HUDTableCard>
+              <table className="hud-table">
+                <thead>
+                  <tr>
+                    {activeTab === "users" && <><th>WARRIOR_ID</th><th>STATUS</th><th>LVL</th><th>OPERATIONS</th></>}
+                    {activeTab === "payments" && <><th>USER_CREDENTIALS</th><th>TX_AMOUNT</th><th>STATUS</th><th>TS_STAMP</th></>}
+                    {activeTab === "attendance" && <><th>ARENA_WARRIOR</th><th>TS_DATE</th><th>CHECK_IN</th><th>SYNC_STATE</th></>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredData().map((u, idx) => (
+                    <tr key={idx}>
+                      {activeTab === "users" && (
+                        <>
+                          <td><div className="warrior-cell"><div className="w-icon">{u.fullName.charAt(0)}</div><div>{u.fullName}</div></div></td>
+                          <td><HUDStatus status={u.status}>{u.status}</HUDStatus></td>
+                          <td>{u.membershipType || "STD"}</td>
+                          <td>
+                            <div className="ops">
+                              <button className="op-btn tick"><CheckCircle size={14} /></button>
+                              <button className="op-btn trash"><Trash2 size={14} /></button>
                             </div>
-                          </div>
-                        </ModulePane>
-                      </div>
-                      <div className="col-lg-4">
-                        <ModulePane>
-                          <h5>DISTRIBUTION</h5>
-                          <div className="dist-stats">
-                            <div className="dist-item">
-                              <div className="d-flex justify-content-between"><span>Elite</span><span>65%</span></div>
-                              <div className="prog"><div className="fill" style={{width: '65%'}}></div></div>
-                            </div>
-                            <div className="dist-item">
-                              <div className="d-flex justify-content-between"><span>Pro</span><span>25%</span></div>
-                              <div className="prog"><div className="fill warning" style={{width: '25%'}}></div></div>
-                            </div>
-                            <div className="dist-item">
-                              <div className="d-flex justify-content-between"><span>Guest</span><span>10%</span></div>
-                              <div className="prog"><div className="fill danger" style={{width: '10%'}}></div></div>
-                            </div>
-                          </div>
-                        </ModulePane>
-                      </div>
-                    </div>
-                  </OverviewModule>
-                )}
+                          </td>
+                        </>
+                      )}
+                      {activeTab === "payments" && (
+                        <>
+                          <td>{u.user?.fullName || u.fullName || "---"}</td>
+                          <td className="text-warning">₹{u.amount}</td>
+                          <td><HUDStatus status={u.paymentStatus}>{u.paymentStatus}</HUDStatus></td>
+                          <td className="dim">{u.paymentDate || "---"}</td>
+                        </>
+                      )}
+                      {activeTab === "attendance" && (
+                        <>
+                          <td>{u.user?.fullName || u.fullName || "---"}</td>
+                          <td>{u.attendanceDate}</td>
+                          <td className="text-success">{u.checkInTime}</td>
+                          <td><span className="sync-dot"></span> SYNCED</td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </HUDTableCard>
+          )}
+        </MainDisplay>
+      </ContentArea>
 
-                {activeTab !== "overview" && (
-                  <TableArea>
-                    <table className="glass-table">
-                      <thead>
-                        <tr>
-                          {activeTab === "users" && <><th style={{width: '300px'}}>WARRIOR</th><th>STATUS</th><th>LEVEL</th><th>ACTIONS</th></>}
-                          {activeTab === "payments" && <><th>USER</th><th>PLAN</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
-                          {activeTab === "attendance" && <><th>WARRIOR</th><th>SESSION DATE</th><th>CHECK-IN</th><th>STATUS</th></>}
-                          {activeTab === "consultations" && <><th>USER</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activeTab === "users" && filteredUsers.map(u => (
-                          <tr key={u.id}>
-                            <td>
-                              <div className="user-profile">
-                                <div className="avatar">{u.fullName.charAt(0)}</div>
-                                <div><div className="name">{u.fullName}</div><div className="email">{u.email}</div></div>
-                              </div>
-                            </td>
-                            <td><StatusPill status={u.status}>{u.status}</StatusPill></td>
-                            <td>{u.membershipType || "Standard"}</td>
-                            <td>
-                              <div className="actions">
-                                <button className="act-btn tick" onClick={() => handleUpdateStatus(u, "ACTIVE")}><CheckCircle size={16} /></button>
-                                <button className="act-btn cross" onClick={() => handleUpdateStatus(u, "INACTIVE")}><XCircle size={16} /></button>
-                                <button className="act-btn trash" onClick={() => handleDeleteUser(u.id)}><Trash2 size={16} /></button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                        {activeTab === "payments" && filteredPayments.map(p => (
-                          <tr key={p.id}>
-                            <td className="fw-bold">{p.user?.fullName || p.fullName || p.userName || "Unknown"}</td>
-                            <td>{p.planName || "Monthly"}</td>
-                            <td className="text-warning fw-bold">₹{p.amount}</td>
-                            <td><StatusPill status={p.paymentStatus}>{p.paymentStatus}</StatusPill></td>
-                            <td className="sub-text">{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : "---"}</td>
-                          </tr>
-                        ))}
-                        {activeTab === "attendance" && filteredAttendance.map(log => (
-                          <tr key={log.id}>
-                            <td className="fw-bold">{log.user?.fullName || log.fullName || log.userName || "Unknown"}</td>
-                            <td>{log.attendanceDate}</td>
-                            <td className="text-success fw-bold">{log.checkInTime}</td>
-                            <td><StatusPill status="ACTIVE">PRESENT</StatusPill></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </TableArea>
-                )}
-              </div>
-            )}
-          </MainPanel>
-        </div>
-      </MainStage>
-
-      {isSidebarOpen && <Overlay onClick={() => setIsSidebarOpen(false)} />}
-    </PageLayout>
+      {isSidebarOpen && <HUDOverlay onClick={() => setIsSidebarOpen(false)} />}
+    </HUDWrapper>
   );
 };
 
-// ── STYLED COMPONENTS (New "Modular Command" Model) ──
+// ── STYLED COMPONENTS (Advanced "Aegis HUD" Model) ──
 
-const PageLayout = styled.div`
-  min-height: 100vh;
-  background: #050505;
-  color: white;
-  display: flex;
-  font-family: 'Inter', sans-serif;
-  overflow-x: hidden;
-  position: relative;
+const scanMove = keyframes`
+  0% { top: -100px; }
+  100% { top: 100vh; }
 `;
 
-const BackgroundMesh = styled.div`
-  position: fixed; inset: 0; pointer-events: none;
-  background: 
-    radial-gradient(circle at 0% 0%, rgba(67, 24, 255, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(255, 193, 7, 0.05) 0%, transparent 50%);
-  z-index: 1;
+const pulse = keyframes`
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
 `;
 
-const FloatingSidebar = styled.div`
-  width: 300px;
-  padding: 30px;
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(10, 10, 10, 0.8);
-  backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-
-  @media (max-width: 992px) {
-    position: fixed;
-    left: 0;
-    transform: ${props => props.isOpen ? "translateX(0)" : "translateX(-100%)"};
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+const growBar = keyframes`
+  from { height: 0; }
+  to { height: var(--h); }
 `;
 
-const SidebarContent = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const Brand = styled.div`
-  display: flex; align-items: center; gap: 15px; margin-bottom: 60px;
-  .logo-box { background: #ffc107; padding: 10px; border-radius: 12px; }
-  h3 { font-size: 1.4rem; font-weight: 950; font-style: italic; margin: 0; }
-  span { font-size: 0.65rem; font-weight: 800; color: #666; letter-spacing: 2px; }
-`;
-
-const NavList = styled.div` display: flex; flex-direction: column; gap: 8px; flex: 1; `;
-
-const NavItem = styled.div`
-  display: flex; align-items: center; gap: 15px; padding: 16px 20px; border-radius: 14px;
-  cursor: pointer; transition: all 0.3s ease; font-weight: 700;
-  color: ${props => props.active ? "black" : "#777"};
-  background: ${props => props.active ? "#ffc107" : "transparent"};
-  box-shadow: ${props => props.active ? "0 10px 25px rgba(255, 193, 7, 0.3)" : "none"};
-
-  &:hover {
-    color: ${props => props.active ? "black" : "white"};
-    background: ${props => props.active ? "#ffc107" : "rgba(255,255,255,0.03)"};
-  }
-
-  span { font-size: 0.95rem; }
-`;
-
-const LogoutArea = styled.div`
-  button {
-    width: 100%; display: flex; align-items: center; gap: 12px; padding: 15px; border-radius: 14px;
-    background: rgba(255, 91, 91, 0.05); border: 1px solid rgba(255, 91, 91, 0.1);
-    color: #ff5b5b; font-weight: 800; cursor: pointer; transition: all 0.3s ease;
-    &:hover { background: #ff5b5b; color: white; }
-  }
-`;
-
-const MainStage = styled.div`
-  flex: 1; padding: 40px 60px; z-index: 2;
-  @media (max-width: 992px) { padding: 30px 20px; }
-  
-  .reveal {
-    opacity: 0; transform: translateY(20px); transition: all 0.8s ease;
-    &.reveal-visible { opacity: 1; transform: translateY(0); }
-  }
-`;
-
-const TopBar = styled.div`
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px;
-  
-  .search-wrapper {
-    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 15px; padding: 12px 25px; display: flex; align-items: center; gap: 15px; width: 400px;
-    input { background: none; border: none; outline: none; color: white; width: 100%; font-weight: 500; }
-    svg { color: #ffc107; }
-  }
-
-  .user-actions {
-    display: flex; align-items: center; gap: 25px;
-    .icon-btn { background: none; border: none; color: #666; cursor: pointer; &:hover { color: #ffc107; } }
-    .admin-profile {
-      display: flex; align-items: center; gap: 15px;
-      .avatar { width: 42px; height: 42px; background: #222; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #ffc107; }
-      .info { .name { display: block; font-weight: 800; font-size: 0.9rem; } .role { font-size: 0.7rem; color: #666; font-weight: 600; } }
-    }
-    .mobile-toggle { display: none; background: none; border: none; color: #ffc107; cursor: pointer; @media (max-width: 992px) { display: block; } }
-  }
-
-  @media (max-width: 768px) { .search-wrapper { display: none; } }
-`;
-
-const WelcomeHeader = styled.div`
-  margin-bottom: 40px;
-  h2 { font-size: 2.2rem; font-weight: 950; font-style: italic; letter-spacing: -1px; }
-  p { color: #666; font-weight: 500; }
-  .text-warning { color: #ffc107; }
-`;
-
-const ModulesRow = styled.div`
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 40px;
-  @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 768px) { grid-template-columns: 1fr; }
-`;
-
-const ModuleCard = styled.div`
-  background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 24px; padding: 30px; display: flex; justify-content: space-between; align-items: flex-end;
+const HUDWrapper = styled.div`
+  min-height: 100vh; background: #000; color: #00f2ff;
+  font-family: 'Share Tech Mono', 'Inter', monospace;
   position: relative; overflow: hidden;
-  
   &::before {
-    content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: ${props => props.color};
-  }
-
-  .module-info {
-    .label { color: #666; font-size: 0.75rem; font-weight: 900; letter-spacing: 1px; display: block; margin-bottom: 8px; }
-    .value { font-size: 1.8rem; font-weight: 900; margin: 0; }
-    .trend { font-size: 0.75rem; font-weight: 700; color: #444; &.positive { color: #05cd99; } }
-  }
-  .module-icon { width: 50px; height: 50px; border-radius: 12px; background: rgba(255,255,255,0.02); display: flex; align-items: center; justify-content: center; color: ${props => props.color}; }
-`;
-
-const MainPanel = styled.div`
-  background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 30px; padding: 40px; min-height: 500px;
-  @media (max-width: 768px) { padding: 25px; }
-`;
-
-const OverviewModule = styled.div`
-  .chart-area { height: 250px; display: flex; align-items: flex-end; padding-top: 30px; }
-  .bar-chart { display: flex; align-items: flex-end; justify-content: space-between; width: 100%; height: 100%; }
-  .bar-wrap { 
-    width: 12%; display: flex; flex-direction: column; align-items: center; gap: 15px; 
-    .bar { width: 100%; background: #ffc107; border-radius: 6px; min-height: 5px; transition: all 1s ease; box-shadow: 0 0 15px rgba(255, 193, 7, 0.2); }
-    .label { font-size: 0.6rem; font-weight: 900; color: #444; }
+    content: ''; position: fixed; inset: 0;
+    background-image: radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.05) 0%, transparent 80%);
+    pointer-events: none;
   }
 `;
 
-const ModulePane = styled.div`
-  background: rgba(0,0,0,0.2); border-radius: 20px; padding: 25px; border: 1px solid rgba(255,255,255,0.01); height: 100%;
-  h5 { font-size: 0.8rem; font-weight: 900; letter-spacing: 1.5px; color: #ffc107; margin-bottom: 25px; }
+const ScannerLine = styled.div`
+  position: fixed; left: 0; width: 100%; height: 2px;
+  background: linear-gradient(to right, transparent, #00f2ff, transparent);
+  box-shadow: 0 0 20px #00f2ff;
+  opacity: 0.1; z-index: 1000;
+  animation: ${scanMove} 8s linear infinite;
+`;
+
+const HeaderHUD = styled.header`
+  padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(0, 242, 255, 0.1); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+  position: sticky; top: 0; z-index: 500;
+
+  .brand {
+    display: flex; align-items: center; gap: 20px;
+    .pulse-icon { color: #00f2ff; animation: ${pulse} 2s infinite; }
+    h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: 2px; margin: 0; 
+      .highlight { color: #ffc107; font-size: 0.7rem; vertical-align: top; }
+    }
+    .system-status { font-size: 0.6rem; color: #555; letter-spacing: 1px; margin-top: 5px; display: flex; align-items: center; gap: 8px;
+      .dot { width: 6px; height: 6px; border-radius: 50%; background: #222; &.active { background: #00f2ff; box-shadow: 0 0 5px #00f2ff; } }
+    }
+  }
+`;
+
+const TopControls = styled.div`
+  display: flex; align-items: center; gap: 30px;
+  .search-hud {
+    background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.2);
+    padding: 10px 20px; border-radius: 4px; display: flex; align-items: center; gap: 15px; width: 300px;
+    input { background: none; border: none; outline: none; color: #00f2ff; width: 100%; font-size: 0.8rem; letter-spacing: 1px; }
+    svg { color: #00f2ff; opacity: 0.5; }
+  }
+  .admin-status {
+    display: flex; align-items: center; gap: 20px;
+    .v-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.1); }
+    .profile-chip { text-align: right; .rank { font-size: 0.6rem; color: #ffc107; font-weight: 900; } .name { font-size: 0.9rem; font-weight: 900; } }
+    .mobile-btn { display: none; background: none; border: none; color: #00f2ff; @media (max-width: 992px) { display: block; } }
+  }
+`;
+
+const ContentArea = styled.div` display: flex; padding: 20px; gap: 20px; height: calc(100vh - 90px); `;
+
+const SidebarHUD = styled.div`
+  width: 260px; display: flex; flex-direction: column; gap: 40px;
+  @media (max-width: 992px) {
+    position: fixed; left: 0; top: 0; height: 100vh; background: #000; padding: 40px;
+    transform: ${props => props.isOpen ? "translateX(0)" : "translateX(-100%)"};
+    transition: transform 0.4s ease; z-index: 600;
+  }
+`;
+
+const HUDNavItem = styled.div`
+  padding: 15px 25px; cursor: pointer; display: flex; align-items: center; gap: 15px;
+  color: ${props => props.active ? "#00f2ff" : "#555"}; font-weight: 900; letter-spacing: 1.5px;
+  position: relative; transition: all 0.3s ease; font-size: 0.8rem;
   
-  .dist-item {
-    margin-bottom: 20px;
-    span { font-size: 0.8rem; font-weight: 700; color: #666; }
-    .prog { height: 5px; background: #111; border-radius: 10px; margin-top: 8px; overflow: hidden;
-      .fill { height: 100%; background: #4318ff; &.warning { background: #ffc107; } &.danger { background: #ff5b5b; } }
-    }
+  .nav-accent { position: absolute; left: 0; top: 15%; height: 70%; width: 3px; background: #00f2ff; transform: scaleY(${props => props.active ? 1 : 0}); transition: transform 0.3s ease; box-shadow: 0 0 10px #00f2ff; }
+  .chevron { margin-left: auto; color: #ffc107; }
+  &:hover { color: #00f2ff; background: rgba(0, 242, 255, 0.05); }
+`;
+
+const NavGroup = styled.div` display: flex; flex-direction: column; gap: 5px; `;
+
+const LogoutHUD = styled.div`
+  margin-top: auto; padding: 20px; border: 1px solid rgba(255, 91, 91, 0.2);
+  color: #ff5b5b; font-size: 0.7rem; font-weight: 900; text-align: center; cursor: pointer;
+  transition: all 0.3s ease; &:hover { background: #ff5b5b; color: white; }
+`;
+
+const MainDisplay = styled.main`
+  flex: 1; overflow-y: auto; padding-right: 10px;
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.2); border-radius: 10px; }
+`;
+
+const HUDCard = styled.div`
+  background: rgba(0, 242, 255, 0.02); border: 1px solid rgba(0, 242, 255, 0.1);
+  padding: 25px; position: relative; border-radius: 2px;
+  box-shadow: inset 0 0 15px rgba(0, 0, 242, 0.05);
+  
+  &::before { content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-top: 2px solid ${props => props.glow}; border-left: 2px solid ${props => props.glow}; }
+  &::after { content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-bottom: 2px solid ${props => props.glow}; border-right: 2px solid ${props => props.glow}; }
+`;
+
+const StatHeader = styled.div`
+  display: flex; align-items: center; gap: 10px; color: #555; font-size: 0.65rem; font-weight: 900; letter-spacing: 1px; margin-bottom: 15px;
+  span { color: #888; }
+`;
+
+const BigChart = styled.div`
+  height: 200px; position: relative; margin-top: 30px;
+  .chart-bars { display: flex; align-items: flex-end; justify-content: space-between; height: 100%; gap: 5px; }
+  .main-bar { width: 8%; background: #00f2ff; opacity: 0.6; animation: ${growBar} 1s ease forwards; box-shadow: 0 0 15px #00f2ff; }
+`;
+
+const LogStream = styled.div`
+  height: 200px; overflow-y: auto; font-size: 0.7rem; color: #444; margin-top: 20px;
+  .log-entry { margin-bottom: 10px; .log-time { color: #00f2ff; margin-right: 10px; } .log-text { color: #aaa; } }
+`;
+
+const HUDTableCard = styled(HUDCard)` padding: 0; background: transparent; border: none;
+  .hud-table {
+    width: 100%; border-collapse: separate; border-spacing: 0 10px;
+    th { padding: 15px 20px; text-align: left; font-size: 0.7rem; color: #555; border-bottom: 1px solid rgba(0, 242, 255, 0.1); }
+    td { padding: 20px; background: rgba(0, 242, 255, 0.03); font-size: 0.85rem; border-top: 1px solid rgba(0, 242, 255, 0.05); border-bottom: 1px solid rgba(0, 242, 255, 0.05); }
+    .warrior-cell { display: flex; align-items: center; gap: 15px; .w-icon { width: 32px; height: 32px; background: #00f2ff22; border: 1px solid #00f2ff; color: #00f2ff; display: flex; align-items: center; justify-content: center; font-weight: 900; } }
+    .ops { display: flex; gap: 10px; .op-btn { background: none; border: 1px solid #333; color: #444; padding: 5px; cursor: pointer; &:hover { border-color: #00f2ff; color: #00f2ff; } } }
   }
 `;
 
-const TableArea = styled.div`
-  overflow-x: auto;
-  .glass-table {
-    width: 100%; border-collapse: collapse; min-width: 800px;
-    th { text-align: left; padding: 15px 20px; color: #666; font-size: 0.75rem; font-weight: 950; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    td { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 0.95rem; }
-  }
-  .user-profile {
-    display: flex; align-items: center; gap: 15px;
-    .avatar { width: 42px; height: 42px; background: rgba(255,255,255,0.03); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #ffc107; }
-    .name { font-weight: 800; } .email { font-size: 0.75rem; color: #555; }
-  }
-  .actions { display: flex; gap: 10px;
-    .act-btn { background: rgba(255,255,255,0.02); border: none; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #444; cursor: pointer; transition: all 0.3s ease;
-      &:hover { color: white; background: rgba(255,255,255,0.05); transform: translateY(-2px); }
-      &.tick:hover { color: #05cd99; } &.cross:hover { color: #ffc107; } &.trash:hover { color: #ff5b5b; }
-    }
-  }
+const HUDStatus = styled.span`
+  font-size: 0.65rem; font-weight: 900; padding: 4px 10px; border: 1px solid;
+  color: ${props => props.status === "ACTIVE" ? "#00f2ff" : "#ff5b5b"};
+  border-color: ${props => props.status === "ACTIVE" ? "#00f2ff55" : "#ff5b5b55"};
+  background: ${props => props.status === "ACTIVE" ? "#00f2ff11" : "#ff5b5b11"};
 `;
 
-const StatusPill = styled.span`
-  padding: 6px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 900; letter-spacing: 1px;
-  background: ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "rgba(5,205,153,0.1)" : "rgba(255,193,7,0.05)"};
-  color: ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "#05cd99" : "#ffc107"};
-  border: 1px solid ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "rgba(5,205,153,0.1)" : "rgba(255,193,7,0.1)"};
-`;
-
-const GlassLoader = styled.div`
-  display: flex; flex-direction: column; justify-content: center; align-items: center; height: 300px; gap: 20px;
-  .orbit { width: 40px; height: 40px; border: 3px solid rgba(255,193,7,0.1); border-top-color: #ffc107; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  span { font-size: 0.8rem; font-weight: 900; color: #444; letter-spacing: 2px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-`;
-
-const Overlay = styled.div` position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 190; `;
+const MiniGraph = styled.div` display: flex; align-items: flex-end; gap: 3px; height: 30px; margin-top: 10px; .m-bar { width: 3px; background: #00f2ff; opacity: 0.5; } `;
+const HUDOverlay = styled.div` position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); z-index: 550; `;
+const HUDCardGlow = styled.div` position: absolute; inset: 0; box-shadow: 0 0 30px ${props => props.color}; opacity: 0.1; pointer-events: none; `;
 
 export default AdminDashboard;
