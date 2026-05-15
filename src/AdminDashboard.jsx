@@ -328,29 +328,123 @@ const AdminDashboard = () => {
                             <td><span className={`badge ${s.role === 'Trainer' ? 'bg-success-light' : 'bg-primary-light'}`}>{s.role}</span></td>
                             <td>{s.specialty}</td>
                             <td className="fw-bold text-secondary">{s.times}</td>
-                            <td className="fw-black text-primary">{s.salary}</td>
-                          </tr>
-                        ))}
-                        {activeTab === "payroll" && staffs.map(s => (
-                          <tr key={s.id}>
-                            <td>
-                              <div className="fw-bold">{s.name}</div>
-                              <div className="sub-text text-uppercase small">{s.role}</div>
-                            </td>
-                            <td className="fw-bold text-primary">{s.salary}</td>
-                            <td><span className={`badge ${s.id % 2 === 0 ? 'bg-success-light' : 'bg-danger-light'}`}>{s.id % 2 === 0 ? 'PAID' : 'PENDING'}</span></td>
-                            <td>
-                              {s.id % 2 !== 0 ? (
-                                <button className="btn-icon text-success" onClick={() => alert(`Processing ${s.salary} payment for ${s.name}...`)}>
-                                  <CheckCircle size={18} /> RELEASE
-                                </button>
-                              ) : (
-                                <span className="text-secondary small italic fw-bold">PROCESSED</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
+                            {activeTab === "payroll" && (
+                              <PayrollContainer>
+                                <div className="payroll-main">
+                                  <header className="payroll-header">
+                                    <h1 className="welcome">Welcome Slayfit!</h1>
+                                    <div className="pay-run-status">
+                                      <span>Process Pay Run for May 2024</span>
+                                      <span className="badge-approved">APPROVED</span>
+                                    </div>
+                                  </header>
+
+                                  <div className="hero-card">
+                                    <div className="hero-stats">
+                                      <div className="stat-group">
+                                        <label>EMPLOYEES' NET PAY</label>
+                                        <div className="amount">₹17,25,23.00</div>
+                                      </div>
+                                      <div className="stat-divider" />
+                                      <div className="stat-group">
+                                        <label>PAYMENT DATE</label>
+                                        <div className="date">31 May 2024</div>
+                                      </div>
+                                      <div className="stat-divider" />
+                                      <div className="stat-group">
+                                        <label>NO. OF EMPLOYEES</label>
+                                        <div className="count">1308</div>
+                                      </div>
+                                      <button className="btn-black">View Details</button>
+                                    </div>
+                                    <p className="hero-note">
+                                      <Clock size={12} /> Pay your employees on 31/05/2024. Record it here once you made the payment.
+                                    </p>
+                                  </div>
+
+                                  <div className="payroll-grid">
+                                    <div className="grid-card deduction-card">
+                                      <div className="card-header">
+                                        <h5>DEDUCTION SUMMARY</h5>
+                                        <select className="small-select"><option>Previous Month</option></select>
+                                      </div>
+                                      <div className="deduction-row">
+                                        <div className="deduction-item">
+                                          <div className="icon-circle"><Layers size={14} /></div>
+                                          <label>EPF</label>
+                                          <div className="val">₹39,73,913.00</div>
+                                          <span className="link">View Details</span>
+                                        </div>
+                                        <div className="deduction-item">
+                                          <div className="icon-circle gold"><Award size={14} /></div>
+                                          <label>ESI</label>
+                                          <div className="val">₹91,010.00</div>
+                                          <span className="link">View Details</span>
+                                        </div>
+                                        <div className="deduction-item">
+                                          <div className="icon-circle red"><TrendingDown size={14} /></div>
+                                          <label>TDS DEDUCTION</label>
+                                          <div className="val">₹1,15,89,089.00</div>
+                                          <span className="link">View Details</span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="grid-card summary-card">
+                                      <h5>EMPLOYEE SUMMARY</h5>
+                                      <div className="summary-body">
+                                        <label>ACTIVE EMPLOYEES</label>
+                                        <div className="big-count">1308</div>
+                                        <span className="link">View Employees</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="chart-section">
+                                    <div className="card-header">
+                                      <h5>PAYROLL COST SUMMARY</h5>
+                                      <select className="small-select"><option>This year</option></select>
+                                    </div>
+                                    <div className="chart-mockup">
+                                      <div className="bars">
+                                        {[80, 100, 90, 70, 60, 40, 85, 95, 110, 105, 98, 115].map((h, i) => (
+                                          <div key={i} className="bar-stack">
+                                            <div className="segment red" style={{ height: `${h * 0.2}%` }} />
+                                            <div className="segment orange" style={{ height: `${h * 0.3}%` }} />
+                                            <div className="segment dark" style={{ height: `${h * 0.5}%` }} />
+                                          </div>
+                                        ))}
+                                      </div>
+                                      <div className="chart-legend">
+                                        <div className="legend-item"><span className="dot red" /> Net Pay: ₹13,40,50,440.00</div>
+                                        <div className="legend-item"><span className="dot orange" /> Taxes: ₹1,51,56,551.00</div>
+                                        <div className="legend-item"><span className="dot dark" /> Statutories: ₹50,16,123.00</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <aside className="payroll-sidebar">
+                                  <h5>To Do Tasks</h5>
+                                  <div className="task-list">
+                                    {[
+                                      { label: "136 Reimbursement Claim(s)", sub: "Pending Approval" },
+                                      { label: "96 Proof of Investment(s)", sub: "Pending Approval" },
+                                      { label: "55 Salary Revision(s)", sub: "Pending Approval" }
+                                    ].map((task, i) => (
+                                      <div key={i} className="task-item">
+                                        <div className="task-info">
+                                          <h6>{task.label}</h6>
+                                          <p>{task.sub}</p>
+                                        </div>
+                                        <button className="btn-outline">Approve</button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </aside>
+                              </PayrollContainer>
+                            )}
+                          </tbody>
                     </table>
                   </div>
                 </TableCard>
@@ -374,7 +468,7 @@ const AdminDashboard = () => {
               </div>
               <button className="close-btn" onClick={() => setIsAddStaffModalOpen(false)}><X size={20} /></button>
             </div>
-            
+
             <form onSubmit={handleAddStaff}>
               <div className="form-grid">
                 <div className="row">
@@ -383,7 +477,7 @@ const AdminDashboard = () => {
                       <label>STAFF FULL NAME</label>
                       <div className="input-wrap">
                         <Users size={18} />
-                        <input type="text" placeholder="e.g. Marcus Aurelius" value={newStaff.name} onChange={e => setNewStaff({...newStaff, name: e.target.value})} required />
+                        <input type="text" placeholder="e.g. Marcus Aurelius" value={newStaff.name} onChange={e => setNewStaff({ ...newStaff, name: e.target.value })} required />
                       </div>
                     </div>
                   </div>
@@ -392,7 +486,7 @@ const AdminDashboard = () => {
                       <label>STAFF ROLE</label>
                       <div className="input-wrap">
                         <Award size={18} />
-                        <select value={newStaff.role} onChange={e => setNewStaff({...newStaff, role: e.target.value})} style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontWeight: 600 }}>
+                        <select value={newStaff.role} onChange={e => setNewStaff({ ...newStaff, role: e.target.value })} style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontWeight: 600 }}>
                           <option value="Trainer">Trainer</option>
                           <option value="Front Office">Front Office</option>
                         </select>
@@ -405,7 +499,7 @@ const AdminDashboard = () => {
                   <label>EMAIL ADDRESS</label>
                   <div className="input-wrap">
                     <Globe size={18} />
-                    <input type="email" placeholder="staff@slayfit.com" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} required />
+                    <input type="email" placeholder="staff@slayfit.com" value={newStaff.email} onChange={e => setNewStaff({ ...newStaff, email: e.target.value })} required />
                   </div>
                 </div>
 
@@ -415,7 +509,7 @@ const AdminDashboard = () => {
                       <label>PHONE NUMBER</label>
                       <div className="input-wrap">
                         <Phone size={18} />
-                        <input type="text" placeholder="+91 98765 43210" value={newStaff.phone} onChange={e => setNewStaff({...newStaff, phone: e.target.value})} required />
+                        <input type="text" placeholder="+91 98765 43210" value={newStaff.phone} onChange={e => setNewStaff({ ...newStaff, phone: e.target.value })} required />
                       </div>
                     </div>
                   </div>
@@ -424,7 +518,7 @@ const AdminDashboard = () => {
                       <label>HOME ADDRESS</label>
                       <div className="input-wrap">
                         <MapPin size={18} />
-                        <input type="text" placeholder="City, State" value={newStaff.address} onChange={e => setNewStaff({...newStaff, address: e.target.value})} />
+                        <input type="text" placeholder="City, State" value={newStaff.address} onChange={e => setNewStaff({ ...newStaff, address: e.target.value })} />
                       </div>
                     </div>
                   </div>
@@ -434,7 +528,7 @@ const AdminDashboard = () => {
                   <label>SPECIALTY / MAIN TASK</label>
                   <div className="input-wrap">
                     <Target size={18} />
-                    <input type="text" placeholder="e.g. Yoga Expert or Receptionist" value={newStaff.specialty} onChange={e => setNewStaff({...newStaff, specialty: e.target.value})} required />
+                    <input type="text" placeholder="e.g. Yoga Expert or Receptionist" value={newStaff.specialty} onChange={e => setNewStaff({ ...newStaff, specialty: e.target.value })} required />
                   </div>
                 </div>
 
@@ -444,7 +538,7 @@ const AdminDashboard = () => {
                       <label>MONTHLY SALARY</label>
                       <div className="input-wrap">
                         <CreditCard size={18} />
-                        <input type="text" placeholder="₹55,000" value={newStaff.salary} onChange={e => setNewStaff({...newStaff, salary: e.target.value})} />
+                        <input type="text" placeholder="₹55,000" value={newStaff.salary} onChange={e => setNewStaff({ ...newStaff, salary: e.target.value })} />
                       </div>
                     </div>
                   </div>
@@ -453,7 +547,7 @@ const AdminDashboard = () => {
                       <label>SHIFT HOURS</label>
                       <div className="input-wrap">
                         <Clock size={18} />
-                        <input type="text" placeholder="6AM - 11AM" value={newStaff.times} onChange={e => setNewStaff({...newStaff, times: e.target.value})} />
+                        <input type="text" placeholder="6AM - 11AM" value={newStaff.times} onChange={e => setNewStaff({ ...newStaff, times: e.target.value })} />
                       </div>
                     </div>
                   </div>
