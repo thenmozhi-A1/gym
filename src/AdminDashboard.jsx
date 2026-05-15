@@ -66,10 +66,10 @@ const AdminDashboard = () => {
         setUsers(results[0]); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
         // Mock trainers data for the new section
         setTrainers([
-          { id: 1, name: "Alex Johnson", specialty: "Bodybuilding", students: 12, times: "06:00 AM - 11:00 AM" },
-          { id: 2, name: "Maya Patel", specialty: "Yoga & Flexibility", students: 18, times: "04:00 PM - 08:00 PM" },
-          { id: 3, name: "Chris Lee", specialty: "Crossfit", students: 15, times: "07:00 AM - 12:00 PM" },
-          { id: 4, name: "Sophia Martinez", specialty: "HIIT & Cardio", students: 22, times: "05:00 PM - 09:00 PM" }
+          { id: 1, name: "Alex Johnson", specialty: "Bodybuilding", students: 12, times: "06:00 AM - 11:00 AM", salary: "₹45,000" },
+          { id: 2, name: "Maya Patel", specialty: "Yoga & Flexibility", students: 18, times: "04:00 PM - 08:00 PM", salary: "₹52,000" },
+          { id: 3, name: "Chris Lee", specialty: "Crossfit", students: 15, times: "07:00 AM - 12:00 PM", salary: "₹48,000" },
+          { id: 4, name: "Sophia Martinez", specialty: "HIIT & Cardio", students: 22, times: "05:00 PM - 09:00 PM", salary: "₹55,000" }
         ]);
       } else {
         const data = results[0];
@@ -243,7 +243,7 @@ const AdminDashboard = () => {
                           {activeTab === "payments" && <><th>WARRIOR</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
                           {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
                           {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
-                          {activeTab === "trainers" && <><th>TRAINER</th><th>SPECIALTY</th><th>STUDENTS</th><th>HANDLING TIME</th></>}
+                          {activeTab === "trainers" && <><th>TRAINER</th><th>SPECIALTY</th><th>STUDENTS</th><th>HANDLING TIME</th><th>SALARY</th></>}
                         </tr>
                       </thead>
                       <tbody>
@@ -304,6 +304,7 @@ const AdminDashboard = () => {
                             <td>{t.specialty}</td>
                             <td><span className="badge bg-success-light">{t.students} Students</span></td>
                             <td className="fw-bold text-secondary">{t.times}</td>
+                            <td className="fw-black text-primary">{t.salary}</td>
                           </tr>
                         ))}
                       </tbody>
