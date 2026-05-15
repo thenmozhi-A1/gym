@@ -59,6 +59,11 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
+      if (activeTab === "payroll") {
+        setLoading(false);
+        return;
+      }
+
       const endpoints = activeTab === "dashboard" || activeTab === "users"
         ? ["users", "payments", "attendance", "consultations"]
         : [activeTab];
@@ -675,6 +680,110 @@ const ChartCard = styled.div`
   }
 
   .bar-chart { height: 200px; display: flex; align-items: flex-end; justify-content: space-between; .bar-group { width: 12%; height: 100%; display: flex; align-items: flex-end; .bar { width: 100%; background: #007bff; border-radius: 6px; } } }
+`;
+
+const PayrollContainer = styled.div`
+  display: flex; gap: 30px; animation: fadeIn 0.5s ease;
+  @media (max-width: 1200px) { flex-direction: column; }
+
+  .payroll-main {
+    flex: 1; display: flex; flex-direction: column; gap: 30px;
+    .payroll-header {
+      display: flex; justify-content: space-between; align-items: center;
+      .welcome { font-size: 1.8rem; font-weight: 900; margin: 0; color: #1e293b; }
+      .pay-run-status { 
+        display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px 20px; border-radius: 12px; border: 1px solid #e2e8f0;
+        span { font-size: 0.85rem; font-weight: 700; color: #64748b; }
+        .badge-approved { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
+      }
+    }
+  }
+
+  .hero-card {
+    background: linear-gradient(135deg, #fff 0%, #f8faff 100%); border: 1px solid #e2e8f0; border-radius: 24px; padding: 35px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+    .hero-stats {
+      display: flex; align-items: center; justify-content: space-between;
+      .stat-group {
+        label { display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px; margin-bottom: 8px; }
+        .amount { font-size: 2.2rem; font-weight: 900; color: #1e293b; }
+        .date, .count { font-size: 1.4rem; font-weight: 800; color: #1e293b; }
+      }
+      .stat-divider { width: 1px; height: 50px; background: #e2e8f0; }
+      .btn-black { background: #1e293b; color: #fff; border: none; padding: 15px 30px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s; &:hover { transform: scale(1.05); background: #000; } }
+    }
+    .hero-note { margin-top: 25px; padding-top: 20px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #64748b; font-weight: 500; }
+  }
+
+  .payroll-grid {
+    display: grid; grid-template-columns: 2fr 1fr; gap: 25px;
+    .grid-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 25px;
+      h5 { font-weight: 800; margin: 0 0 20px 0; font-size: 0.9rem; color: #1e293b; }
+      .link { color: #007bff; font-weight: 700; font-size: 0.8rem; cursor: pointer; &:hover { text-decoration: underline; } }
+    }
+    .deduction-row {
+      display: flex; justify-content: space-between; margin-top: 20px;
+      .deduction-item {
+        text-align: center; flex: 1;
+        .icon-circle { 
+          width: 40px; height: 40px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: #64748b;
+          &.gold { background: #fef3c7; color: #d97706; }
+          &.red { background: #fee2e2; color: #dc2626; }
+        }
+        label { display: block; font-size: 0.65rem; font-weight: 800; color: #94a3b8; margin-bottom: 5px; }
+        .val { font-size: 0.95rem; font-weight: 800; color: #1e293b; margin-bottom: 5px; }
+      }
+    }
+    .summary-body {
+      .big-count { font-size: 2.5rem; font-weight: 900; color: #1e293b; margin: 10px 0; }
+      label { font-size: 0.7rem; font-weight: 800; color: #94a3b8; }
+    }
+  }
+
+  .chart-section {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 30px;
+    .chart-mockup {
+      margin-top: 25px;
+      .bars { 
+        height: 150px; display: flex; align-items: flex-end; gap: 15px; margin-bottom: 30px;
+        .bar-stack { 
+          flex: 1; display: flex; flex-direction: column; gap: 2px;
+          .segment { border-radius: 2px; width: 100%; transition: all 0.3s; &:hover { opacity: 0.8; } }
+          .segment.red { background: #ef4444; }
+          .segment.orange { background: #f97316; }
+          .segment.dark { background: #1e293b; }
+        }
+      }
+      .chart-legend {
+        display: flex; gap: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9;
+        .legend-item { 
+          display: flex; align-items: center; gap: 10px; font-size: 0.75rem; font-weight: 700; color: #64748b;
+          .dot { width: 10px; height: 10px; border-radius: 3px; }
+          .dot.red { background: #ef4444; }
+          .dot.orange { background: #f97316; }
+          .dot.dark { background: #1e293b; }
+        }
+      }
+    }
+  }
+
+  .payroll-sidebar {
+    width: 320px; background: #fff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 25px;
+    @media (max-width: 1200px) { width: 100%; }
+    h5 { font-weight: 800; margin-bottom: 25px; color: #1e293b; }
+    .task-list {
+      display: flex; flex-direction: column; gap: 15px;
+      .task-item {
+        background: #f8fafc; border-radius: 16px; padding: 18px; display: flex; justify-content: space-between; align-items: center;
+        .task-info {
+          h6 { margin: 0; font-weight: 800; font-size: 0.85rem; color: #1e293b; }
+          p { margin: 4px 0 0; font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+        }
+        .btn-outline { background: #fff; border: 1px solid #e2e8f0; color: #1e293b; font-weight: 800; font-size: 0.7rem; padding: 6px 12px; border-radius: 8px; cursor: pointer; &:hover { background: #1e293b; color: #fff; border-color: #1e293b; } }
+      }
+    }
+  }
 `;
 
 const TableCard = styled.div`
