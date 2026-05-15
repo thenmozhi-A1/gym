@@ -144,7 +144,8 @@ const AdminDashboard = () => {
   );
 
   const filteredAttendance = attendance.filter(a =>
-    a.user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
+    (a.user?.fullName || a.fullName || a.userName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    a.attendanceDate?.toString().includes(searchTerm)
   );
 
   const calculateDuration = (inTime, outTime) => {
@@ -374,7 +375,10 @@ const AdminDashboard = () => {
                     <tbody>
                       {filteredAttendance.map(log => (
                         <tr key={log.id}>
-                          <td className="fw-bold">{log.user?.fullName}</td>
+                          <td>
+                            <div className="fw-bold">{log.user?.fullName || log.fullName || log.userName || "Unknown Warrior"}</div>
+                            <div className="sub-text">{log.user?.email || ""}</div>
+                          </td>
                           <td>{log.attendanceDate}</td>
                           <td className="text-success">{log.checkInTime}</td>
                           <td className="text-danger">{log.checkOutTime || "---"}</td>
