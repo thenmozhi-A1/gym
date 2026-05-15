@@ -439,6 +439,7 @@ const AdminDashboard = () => {
                       </aside>
                     </>
                   ) : (
+                    <div className="payroll-detail-overlay animate-in">
                       <div className="detail-header">
                         <div className="d-flex align-items-center gap-4">
                           <button className="back-btn" onClick={() => setIsPayrollDetailOpen(false)}>
