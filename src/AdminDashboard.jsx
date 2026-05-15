@@ -52,10 +52,10 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const endpoints = activeTab === "dashboard" || activeTab === "users" 
+      const endpoints = activeTab === "dashboard" || activeTab === "users"
         ? ["users", "payments", "attendance", "consultations"]
         : [activeTab];
-      
+
       const results = await Promise.all(
         endpoints.map(ep => fetch(`${API_BASE}/${ep}`).then(r => r.json()))
       );
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
         <div className="sidebar-header">
           <div className="logo">
             <div className="logo-icon"><Zap size={24} /></div>
-            <span>aurora</span>
+            <span>SLAYFIT</span>
           </div>
         </div>
 
@@ -93,8 +93,8 @@ const AdminDashboard = () => {
             { id: "attendance", icon: <Clock size={18} />, label: "Arena Logs" },
             { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" }
           ].map(item => (
-            <NavItem 
-              key={item.id} 
+            <NavItem
+              key={item.id}
               active={activeTab === item.id}
               onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
             >
