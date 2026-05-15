@@ -128,6 +128,7 @@ const AdminDashboard = () => {
             { id: "payments", icon: <CreditCard size={18} />, label: "Revenue" },
             { id: "attendance", icon: <Clock size={18} />, label: "Arena Logs" },
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
+            { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },
             { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" }
           ].map(item => (
             <NavItem
@@ -264,6 +265,7 @@ const AdminDashboard = () => {
                           {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
                           {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
                           {activeTab === "staffs" && <><th>STAFF NAME</th><th>ROLE</th><th>SPECIALTY / TASK</th><th>SHIFT TIME</th><th>SALARY</th></>}
+                          {activeTab === "payroll" && <><th>STAFF NAME</th><th>MONTHLY SALARY</th><th>PAYMENT STATUS</th><th>ACTIONS</th></>}
                         </tr>
                       </thead>
                       <tbody>
@@ -325,6 +327,25 @@ const AdminDashboard = () => {
                             <td>{s.specialty}</td>
                             <td className="fw-bold text-secondary">{s.times}</td>
                             <td className="fw-black text-primary">{s.salary}</td>
+                          </tr>
+                        ))}
+                        {activeTab === "payroll" && staffs.map(s => (
+                          <tr key={s.id}>
+                            <td>
+                              <div className="fw-bold">{s.name}</div>
+                              <div className="sub-text text-uppercase small">{s.role}</div>
+                            </td>
+                            <td className="fw-bold text-primary">{s.salary}</td>
+                            <td><span className={`badge ${s.id % 2 === 0 ? 'bg-success-light' : 'bg-danger-light'}`}>{s.id % 2 === 0 ? 'PAID' : 'PENDING'}</span></td>
+                            <td>
+                              {s.id % 2 !== 0 ? (
+                                <button className="btn-icon text-success" onClick={() => alert(`Processing ${s.salary} payment for ${s.name}...`)}>
+                                  <CheckCircle size={18} /> RELEASE
+                                </button>
+                              ) : (
+                                <span className="text-secondary small italic fw-bold">PROCESSED</span>
+                              )}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
