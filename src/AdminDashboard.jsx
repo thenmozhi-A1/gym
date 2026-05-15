@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import {
   Users,
   CreditCard,
   Clock,
   LogOut,
   Search,
-  Filter,
-  AlertCircle,
-  Trash2,
   CheckCircle,
   XCircle,
   Menu as MenuIcon,
@@ -21,9 +18,10 @@ import {
   Target,
   Layout,
   Bell,
-  MoreVertical,
   ArrowUpRight,
-  Plus
+  Shield,
+  Activity as PulseIcon,
+  Monitor
 } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
@@ -37,33 +35,32 @@ const AdminDashboard = () => {
   const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
-    if (role !== "ADMIN") { navigate("/login"); }
+    if (role !== "ADMIN") navigate("/login");
     fetchData();
   }, [activeTab]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
+      const endpoints = activeTab === "overview" || activeTab === "users" 
+        ? ["users", "payments", "attendance", "consultations"]
+        : [activeTab];
+      
+      const results = await Promise.all(
+        endpoints.map(ep => fetch(`${API_BASE}/${ep}`).then(r => r.json()))
+      );
+
       if (activeTab === "overview" || activeTab === "users") {
-        const [u, p, a, c] = await Promise.all([
-          fetch(`${API_BASE}/users`).then(r => r.json()),
-          fetch(`${API_BASE}/payments`).then(r => r.json()),
-          fetch(`${API_BASE}/attendance`).then(r => r.json()),
-          fetch(`${API_BASE}/consultations`).then(r => r.json())
-        ]);
-        setUsers(Array.isArray(u) ? u : []);
-        setPayments(Array.isArray(p) ? p : []);
-        setAttendance(Array.isArray(a) ? a : []);
-        setConsultations(Array.isArray(c) ? c : []);
+        setUsers(results[0]); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
       } else {
-        const res = await fetch(`${API_BASE}/${activeTab}`);
-        const data = await res.json();
-        const setter = activeTab === "payments" ? setPayments : activeTab === "attendance" ? setAttendance : setConsultations;
-        setter(Array.isArray(data) ? data : []);
+        const data = results[0];
+        if (activeTab === "payments") setPayments(data);
+        else if (activeTab === "attendance") setAttendance(data);
+        else setConsultations(data);
       }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -80,316 +77,326 @@ const AdminDashboard = () => {
   };
 
   return (
-    <PageWrapper>
-      <Sidebar isOpen={isSidebarOpen}>
-        <SidebarHeader>
-          <div className="brand-logo">SF</div>
-          <span>SLAYFIT <small>ADMIN</small></span>
-          <button className="close-btn" onClick={() => setIsSidebarOpen(false)}><X /></button>
-        </SidebarHeader>
+    <BentoWrapper>
+      <StarField />
+      
+      {/* ── TOP NAV MODEL ── */}
+      <TopNavigation>
+        <div className="nav-container">
+          <Brand>
+            <div className="icon-box"><Shield size={20} /></div>
+            <span>SLAYFIT <small>SYSTEMS</small></span>
+          </Brand>
 
-        <NavGroup>
-          <NavLabel>MAIN MENU</NavLabel>
-          {[
-            { id: "overview", icon: <Layout size={18} />, label: "Overview" },
-            { id: "users", icon: <Users size={18} />, label: "Warriors" },
-            { id: "payments", icon: <CreditCard size={18} />, label: "Revenue" },
-            { id: "attendance", icon: <Clock size={18} />, label: "Arena Logs" },
-            { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" }
-          ].map(item => (
-            <NavItem 
-              key={item.id} 
-              active={activeTab === item.id}
-              onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
-            >
-              {item.icon} {item.label}
-            </NavItem>
-          ))}
-        </NavGroup>
+          <NavLinks>
+            {[
+              { id: "overview", label: "OVERVIEW", icon: <Layout size={16} /> },
+              { id: "users", label: "WARRIORS", icon: <Users size={16} /> },
+              { id: "payments", label: "REVENUE", icon: <CreditCard size={16} /> },
+              { id: "attendance", label: "LOGS", icon: <Clock size={16} /> }
+            ].map(link => (
+              <NavLink 
+                key={link.id} 
+                active={activeTab === link.id}
+                onClick={() => setActiveTab(link.id)}
+              >
+                {link.icon} <span>{link.label}</span>
+              </NavLink>
+            ))}
+          </NavLinks>
 
-        <LogoutBtn onClick={handleLogout}>
-          <LogOut size={18} /> Logout Session
-        </LogoutBtn>
-      </Sidebar>
-
-      <MainArea>
-        <Header>
-          <div className="search-box">
-            <Search size={18} />
-            <input 
-              placeholder={`Search ${activeTab}...`} 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="top-actions">
-            <button className="notify-btn"><Bell size={20} /></button>
-            <div className="user-info">
-              <div className="avatar">AD</div>
-              <div className="text">
-                <span className="name">Admin User</span>
-                <span className="status">Online</span>
-              </div>
+          <UserActions>
+            <div className="search-bar">
+              <Search size={16} />
+              <input placeholder="SYS_SEARCH..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
-            <button className="mobile-toggle" onClick={() => setIsSidebarOpen(true)}><MenuIcon /></button>
-          </div>
-        </Header>
+            <button className="logout-icon" onClick={handleLogout}><LogOut size={20} /></button>
+            <button className="mobile-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              {isMobileMenuOpen ? <X /> : <MenuIcon />}
+            </button>
+          </UserActions>
+        </div>
+      </TopNavigation>
 
-        <DashboardGrid>
-          <div className="welcome-row">
-            <h1>Good Morning, <span className="text-warning">Admin</span></h1>
-            <p>Your gym arena is performing at its peak today.</p>
-          </div>
+      {isMobileMenuOpen && (
+        <MobileMenu>
+          {["overview", "users", "payments", "attendance"].map(id => (
+            <button key={id} onClick={() => { setActiveTab(id); setIsMobileMenuOpen(false); }}>{id.toUpperCase()}</button>
+          ))}
+          <button onClick={handleLogout} className="text-danger">LOGOUT</button>
+        </MobileMenu>
+      )}
 
-          <StatsGrid>
-            <StatCard color="#4318ff">
-              <div className="card-top">
-                <div className="icon-wrap"><Users size={20} /></div>
-                <span className="badge">+5.2%</span>
-              </div>
-              <div className="card-bottom">
-                <span className="val">{users.length}</span>
-                <span className="lab">Total Warriors</span>
-              </div>
-            </StatCard>
-            <StatCard color="#05cd99">
-              <div className="card-top">
-                <div className="icon-wrap"><CreditCard size={20} /></div>
-                <span className="badge success">+12.4%</span>
-              </div>
-              <div className="card-bottom">
-                <span className="val">₹{payments.reduce((acc, p) => acc + (p.amount || 0), 0).toLocaleString()}</span>
-                <span className="lab">Total Revenue</span>
-              </div>
-            </StatCard>
-            <StatCard color="#ffc107">
-              <div className="card-top">
-                <div className="icon-wrap"><Zap size={20} /></div>
-                <span className="badge warning">Stable</span>
-              </div>
-              <div className="card-bottom">
-                <span className="val">{attendance.length}</span>
-                <span className="lab">Arena Check-ins</span>
-              </div>
-            </StatCard>
-          </StatsGrid>
-
-          <ContentPanel>
-            {loading ? (
-              <LoaderWrap>
-                <div className="spinner"></div>
-                <p>Synchronizing data...</p>
-              </LoaderWrap>
-            ) : (
-              <>
-                {activeTab === "overview" && (
-                  <OverviewLayout>
-                    <div className="row g-4">
-                      <div className="col-lg-8">
-                        <PanelCard>
-                          <div className="card-header">
-                            <h5>Revenue Analytics</h5>
-                            <button className="more"><MoreVertical size={16} /></button>
-                          </div>
-                          <div className="chart-sim">
-                            {[40, 60, 30, 80, 50, 90, 70].map((h, i) => (
-                              <div className="bar-group" key={i}>
-                                <div className="bar" style={{ height: `${h}%` }}></div>
-                                <span>Day {i+1}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </PanelCard>
+      <MainContent>
+        <div className="bento-grid reveal">
+          {activeTab === "overview" && (
+            <>
+              {/* BENTO LARGE: Performance */}
+              <BentoItem className="large-card" glow="#ffc107">
+                <div className="card-header">
+                  <h5>REVENUE PERFORMANCE</h5>
+                  <span className="status">LIVE_SYNC</span>
+                </div>
+                <ChartContainer>
+                  <div className="bars-area">
+                    {[40, 65, 45, 85, 55, 95, 75, 60, 80, 50].map((h, i) => (
+                      <div className="bar-wrap" key={i}>
+                        <div className="bar" style={{ height: `${h}%`, animationDelay: `${i * 0.1}s` }}></div>
                       </div>
-                      <div className="col-lg-4">
-                        <PanelCard>
-                          <div className="card-header"><h5>Member Growth</h5></div>
-                          <div className="growth-items">
-                            {['Monthly', 'Yearly', 'VIP'].map((t, i) => (
-                              <div className="growth-item" key={t}>
-                                <div className="d-flex justify-content-between mb-2">
-                                  <span>{t}</span><span>{60 - i*20}%</span>
-                                </div>
-                                <div className="progress"><div className="fill" style={{ width: `${60 - i*20}%` }}></div></div>
-                              </div>
-                            ))}
-                          </div>
-                        </PanelCard>
-                      </div>
+                    ))}
+                  </div>
+                  <div className="chart-info">
+                    <div className="stat">
+                      <span className="lab">TOTAL REVENUE</span>
+                      <span className="val">₹{payments.reduce((acc, p) => acc + (p.amount || 0), 0).toLocaleString()}</span>
                     </div>
-                  </OverviewLayout>
-                )}
+                    <div className="stat">
+                      <span className="lab">GROWTH</span>
+                      <span className="val text-success">+14.2%</span>
+                    </div>
+                  </div>
+                </ChartContainer>
+              </BentoItem>
 
-                {activeTab !== "overview" && (
-                  <TableScroll>
-                    <Table>
-                      <thead>
-                        <tr>
-                          {activeTab === "users" && <><th>WARRIOR</th><th>STATUS</th><th>LEVEL</th><th>ACTIONS</th></>}
-                          {activeTab === "payments" && <><th>WARRIOR</th><th>PLAN</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
-                          {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>TIME</th><th>STATUS</th></>}
+              {/* BENTO SQUARE: Active Users */}
+              <BentoItem className="square-card" glow="#4318ff">
+                <div className="card-header"><h5>WARRIORS</h5></div>
+                <div className="big-num">{users.length}</div>
+                <p className="sub">Active Arena Members</p>
+                <div className="user-stack">
+                  {[1, 2, 3, 4].map(i => <div key={i} className="mini-avatar"></div>)}
+                  <div className="more">+{users.length - 4}</div>
+                </div>
+              </BentoItem>
+
+              {/* BENTO SQUARE: Attendance */}
+              <BentoItem className="square-card" glow="#05cd99">
+                <div className="card-header"><h5>LOGS</h5></div>
+                <div className="big-num">{attendance.length}</div>
+                <p className="sub">Daily Sessions Logged</p>
+                <PulseRing><PulseIcon size={32} /></PulseRing>
+              </BentoItem>
+
+              {/* BENTO MEDIUM: Recent Activity */}
+              <BentoItem className="medium-card" glow="#fff">
+                <div className="card-header"><h5>SYSTEM ACTIVITY</h5></div>
+                <ActivityList>
+                  {[...payments.slice(0, 2), ...attendance.slice(0, 2)].map((item, i) => (
+                    <div className="act-item" key={i}>
+                      <div className="dot" />
+                      <div className="text">
+                        <span className="user">{item.user?.fullName || item.fullName || "Warrior"}</span>
+                        <span className="desc">{item.amount ? `purchased a plan` : `checked into arena`}</span>
+                      </div>
+                      <span className="time">{item.paymentDate || item.attendanceDate}</span>
+                    </div>
+                  ))}
+                </ActivityList>
+              </BentoItem>
+
+              {/* BENTO SMALL: Server Status */}
+              <BentoItem className="small-card" glow="#ff5b5b">
+                <div className="d-flex align-items-center gap-3">
+                  <Monitor size={20} className="text-danger" />
+                  <div>
+                    <h6 className="m-0 fw-bold">SERVER_CORE</h6>
+                    <small className="text-secondary">Uptime: 99.9%</small>
+                  </div>
+                </div>
+              </BentoItem>
+            </>
+          )}
+
+          {activeTab !== "overview" && (
+            <BentoItem className="full-card">
+              <div className="card-header border-bottom pb-3 mb-3">
+                <h2 className="m-0 fw-black italic">{activeTab.toUpperCase()} <span className="text-warning">LIST</span></h2>
+              </div>
+              <TableWrapper>
+                {loading ? (
+                  <div className="p-5 text-center"><div className="spinner-border text-warning"></div></div>
+                ) : (
+                  <table className="table table-dark table-hover mb-0">
+                    <thead>
+                      <tr>
+                        {activeTab === "users" && <><th>WARRIOR</th><th>STATUS</th><th>ACTIONS</th></>}
+                        {activeTab === "payments" && <><th>USER</th><th>AMOUNT</th><th>STATUS</th></>}
+                        {activeTab === "attendance" && <><th>USER</th><th>DATE</th><th>IN</th></>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredData().map((u, i) => (
+                        <tr key={i}>
+                          {activeTab === "users" && (
+                            <>
+                              <td className="fw-bold">{u.fullName}</td>
+                              <td><span className={`badge ${u.status === 'ACTIVE' ? 'bg-success' : 'bg-danger'}`}>{u.status}</span></td>
+                              <td><button className="btn btn-sm btn-outline-warning">MANAGE</button></td>
+                            </>
+                          )}
+                          {activeTab === "payments" && (
+                            <>
+                              <td className="fw-bold">{u.user?.fullName || u.fullName || "---"}</td>
+                              <td className="text-warning">₹{u.amount}</td>
+                              <td>{u.paymentStatus}</td>
+                            </>
+                          )}
+                          {activeTab === "attendance" && (
+                            <>
+                              <td className="fw-bold">{u.user?.fullName || u.fullName || "---"}</td>
+                              <td>{u.attendanceDate}</td>
+                              <td className="text-success">{u.checkInTime}</td>
+                            </>
+                          )}
                         </tr>
-                      </thead>
-                      <tbody>
-                        {filteredData().map((item, idx) => (
-                          <tr key={idx}>
-                            {activeTab === "users" && (
-                              <>
-                                <td>
-                                  <div className="user-cell">
-                                    <div className="avatar">{item.fullName.charAt(0)}</div>
-                                    <div><div className="name">{item.fullName}</div><div className="email">{item.email}</div></div>
-                                  </div>
-                                </td>
-                                <td><StatusPill status={item.status}>{item.status}</StatusPill></td>
-                                <td>{item.membershipType || "Standard"}</td>
-                                <td><ActionBtn><MoreVertical size={16} /></ActionBtn></td>
-                              </>
-                            )}
-                            {activeTab === "payments" && (
-                              <>
-                                <td className="fw-bold">{item.user?.fullName || item.fullName || "---"}</td>
-                                <td>{item.planName || "Standard"}</td>
-                                <td className="text-warning fw-bold">₹{item.amount}</td>
-                                <td><StatusPill status={item.paymentStatus}>{item.paymentStatus}</StatusPill></td>
-                                <td className="sub-text">{item.paymentDate || "---"}</td>
-                              </>
-                            )}
-                            {activeTab === "attendance" && (
-                              <>
-                                <td className="fw-bold">{item.user?.fullName || item.fullName || "---"}</td>
-                                <td>{item.attendanceDate}</td>
-                                <td className="text-success fw-bold">{item.checkInTime}</td>
-                                <td><StatusPill status="ACTIVE">PRESENT</StatusPill></td>
-                              </>
-                            )}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </TableScroll>
+                      ))}
+                    </tbody>
+                  </table>
                 )}
-              </>
-            )}
-          </ContentPanel>
-        </DashboardGrid>
-      </MainArea>
-
-      {isSidebarOpen && <Overlay onClick={() => setIsSidebarOpen(false)} />}
-    </PageWrapper>
+              </TableWrapper>
+            </BentoItem>
+          )}
+        </div>
+      </MainContent>
+    </BentoWrapper>
   );
 };
 
-// ── STYLED COMPONENTS (New "Obsidian Elite" Model) ──
+// ── STYLED COMPONENTS (The "Bento Grid" Model) ──
 
-const PageWrapper = styled.div`
-  display: flex; min-height: 100vh; background: #080808; color: #fff;
-  font-family: 'Inter', sans-serif;
+const float = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 `;
 
-const Sidebar = styled.div`
-  width: 280px; background: #111; border-right: 1px solid #222;
-  display: flex; flex-direction: column; padding: 30px 20px;
-  position: sticky; top: 0; height: 100vh; z-index: 200;
-  @media (max-width: 992px) {
-    position: fixed; left: 0; transform: ${props => props.isOpen ? "translateX(0)" : "translateX(-100%)"};
-    transition: transform 0.4s ease; background: #0a0a0a;
+const slideUp = keyframes`
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const BentoWrapper = styled.div`
+  min-height: 100vh; background: #000; color: #fff;
+  font-family: 'Inter', sans-serif; position: relative;
+`;
+
+const StarField = styled.div`
+  position: fixed; inset: 0;
+  background-image: radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)), radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0));
+  background-size: 200px 200px; opacity: 0.1; pointer-events: none;
+`;
+
+const TopNavigation = styled.nav`
+  position: sticky; top: 20px; z-index: 1000; padding: 0 40px;
+  @media (max-width: 768px) { padding: 0 20px; top: 10px; }
+
+  .nav-container {
+    background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+    padding: 12px 30px; display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   }
 `;
 
-const SidebarHeader = styled.div`
-  display: flex; align-items: center; gap: 15px; margin-bottom: 50px;
-  .brand-logo { background: #ffc107; color: black; padding: 8px 12px; border-radius: 10px; font-weight: 900; }
-  span { font-weight: 800; letter-spacing: 1px; font-size: 1.1rem; 
-    small { display: block; font-size: 0.6rem; color: #ffc107; letter-spacing: 2px; }
+const Brand = styled.div`
+  display: flex; align-items: center; gap: 12px;
+  .icon-box { background: #ffc107; padding: 6px; border-radius: 8px; color: black; }
+  span { font-weight: 900; letter-spacing: -0.5px; font-size: 1.1rem; }
+  small { display: block; font-size: 0.5rem; letter-spacing: 2px; color: #ffc107; }
+`;
+
+const NavLinks = styled.div`
+  display: flex; gap: 10px;
+  @media (max-width: 992px) { display: none; }
+`;
+
+const NavLink = styled.button`
+  background: ${props => props.active ? "rgba(255, 255, 255, 0.1)" : "transparent"};
+  border: none; color: ${props => props.active ? "#ffc107" : "#888"};
+  padding: 8px 18px; border-radius: 12px; font-weight: 700; font-size: 0.8rem;
+  display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;
+  &:hover { color: white; background: rgba(255, 255, 255, 0.05); }
+`;
+
+const UserActions = styled.div`
+  display: flex; align-items: center; gap: 20px;
+  .search-bar {
+    background: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 6px 15px;
+    display: flex; align-items: center; gap: 10px; width: 200px;
+    input { background: none; border: none; outline: none; color: white; font-size: 0.75rem; width: 100%; }
+    svg { color: #555; }
+    @media (max-width: 768px) { display: none; }
   }
-  .close-btn { display: none; background: none; border: none; color: #444; @media (max-width: 992px) { display: block; margin-left: auto; } }
+  .logout-icon { background: none; border: none; color: #ff5b5b; cursor: pointer; &:hover { transform: scale(1.1); } }
+  .mobile-btn { display: none; background: none; border: none; color: white; @media (max-width: 992px) { display: block; } }
 `;
 
-const NavLabel = styled.div` font-size: 0.7rem; font-weight: 800; color: #444; letter-spacing: 2px; margin-bottom: 20px; `;
-
-const NavGroup = styled.div` display: flex; flex-direction: column; gap: 8px; flex: 1; `;
-
-const NavItem = styled.div`
-  display: flex; align-items: center; gap: 15px; padding: 14px 20px; border-radius: 12px;
-  cursor: pointer; transition: all 0.3s ease; font-weight: 600; color: ${props => props.active ? "#fff" : "#666"};
-  background: ${props => props.active ? "#1a1a1a" : "transparent"};
-  border: 1px solid ${props => props.active ? "#333" : "transparent"};
-
-  &:hover { color: #fff; background: #1a1a1a; }
+const MobileMenu = styled.div`
+  position: fixed; top: 80px; left: 20px; right: 20px; background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(20px); padding: 20px; border-radius: 20px; z-index: 999;
+  display: flex; flex-direction: column; gap: 15px; border: 1px solid #222;
+  button { background: none; border: none; color: white; font-weight: 800; padding: 10px; text-align: left; }
 `;
 
-const LogoutBtn = styled.button`
-  margin-top: auto; background: none; border: 1px solid #222; color: #ff5b5b; padding: 14px;
-  border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 10px; justify-content: center;
-  &:hover { background: #ff5b5b; color: #fff; }
-`;
-
-const MainArea = styled.main` flex: 1; display: flex; flex-direction: column; `;
-
-const Header = styled.header`
-  padding: 20px 40px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center;
-  background: #080808; position: sticky; top: 0; z-index: 100;
-
-  .search-box {
-    display: flex; align-items: center; gap: 15px; background: #111; padding: 10px 20px; border-radius: 12px; border: 1px solid #222; width: 350px;
-    input { background: none; border: none; outline: none; color: #fff; width: 100%; font-size: 0.9rem; }
-    svg { color: #444; }
+const MainContent = styled.main`
+  padding: 40px; margin-top: 20px;
+  .reveal { animation: ${slideUp} 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  
+  .bento-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 200px; gap: 20px;
+    @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 768px) { grid-template-columns: 1fr; grid-auto-rows: auto; }
   }
 
-  .top-actions {
-    display: flex; align-items: center; gap: 25px;
-    .notify-btn { background: none; border: none; color: #444; &:hover { color: #ffc107; } }
-    .user-info { display: flex; align-items: center; gap: 12px; .avatar { width: 36px; height: 36px; background: #ffc107; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; } .text { .name { display: block; font-size: 0.85rem; font-weight: 700; } .status { font-size: 0.7rem; color: #05cd99; font-weight: 600; } } }
-    .mobile-toggle { display: none; background: none; border: none; color: #ffc107; @media (max-width: 992px) { display: block; } }
+  .large-card { grid-column: span 2; grid-row: span 2; }
+  .medium-card { grid-column: span 2; grid-row: span 1; }
+  .full-card { grid-column: span 4; min-height: 500px; }
+`;
+
+const BentoItem = styled.div`
+  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 30px; padding: 30px; position: relative; overflow: hidden;
+  transition: all 0.4s ease;
+  
+  &:hover {
+    transform: translateY(-5px); border-color: ${props => props.glow};
+    box-shadow: 0 10px 40px ${props => props.glow}11;
+  }
+
+  .card-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+    h5 { font-size: 0.75rem; font-weight: 900; color: #555; letter-spacing: 1.5px; margin: 0; }
+    .status { font-size: 0.6rem; color: #ffc107; font-weight: 900; }
+  }
+
+  .big-num { font-size: 4rem; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+  .sub { color: #666; font-size: 0.85rem; font-weight: 600; margin-top: 10px; }
+`;
+
+const ChartContainer = styled.div`
+  height: 100%; display: flex; flex-direction: column; justify-content: flex-end;
+  .bars-area { height: 180px; display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 30px; }
+  .bar-wrap { width: 8%; height: 100%; display: flex; align-items: flex-end; }
+  .bar { width: 100%; background: #ffc107; border-radius: 6px; animation: ${slideUp} 1s ease forwards; }
+  .chart-info { display: flex; gap: 40px; .stat { .lab { display: block; font-size: 0.65rem; color: #555; font-weight: 800; } .val { font-size: 1.5rem; font-weight: 900; } } }
+`;
+
+const ActivityList = styled.div`
+  display: flex; flex-direction: column; gap: 15px;
+  .act-item {
+    display: flex; align-items: center; gap: 15px;
+    .dot { width: 6px; height: 6px; background: #ffc107; border-radius: 50%; box-shadow: 0 0 10px #ffc107; }
+    .text { flex: 1; .user { font-weight: 700; margin-right: 8px; } .desc { color: #666; font-size: 0.85rem; } }
+    .time { font-size: 0.75rem; color: #444; font-weight: 700; }
   }
 `;
 
-const DashboardGrid = styled.div` padding: 40px; @media (max-width: 768px) { padding: 25px; } .welcome-row { margin-bottom: 40px; h1 { font-size: 2rem; font-weight: 900; } p { color: #666; font-weight: 500; } .text-warning { color: #ffc107; } } `;
-
-const StatsGrid = styled.div` display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 40px; @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); } @media (max-width: 768px) { grid-template-columns: 1fr; } `;
-
-const StatCard = styled.div`
-  background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222;
-  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; .icon-wrap { width: 45px; height: 45px; background: rgba(255,255,255,0.02); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: ${props => props.color}; border: 1px solid rgba(255,255,255,0.05); } .badge { font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; background: rgba(255,255,255,0.05); color: #666; &.success { color: #05cd99; background: rgba(5,205,153,0.05); } &.warning { color: #ffc107; background: rgba(255,193,7,0.05); } } }
-  .card-bottom { .val { display: block; font-size: 1.8rem; font-weight: 900; } .lab { color: #666; font-size: 0.8rem; font-weight: 700; } }
+const PulseRing = styled.div`
+  position: absolute; bottom: 20px; right: 20px; color: #05cd99; animation: ${float} 3s ease-in-out infinite;
 `;
 
-const ContentPanel = styled.div` background: #111; border: 1px solid #222; border-radius: 24px; padding: 30px; min-height: 400px; `;
-
-const OverviewLayout = styled.div``;
-
-const PanelCard = styled.div`
-  background: #0a0a0a; border: 1px solid #222; padding: 25px; border-radius: 20px; height: 100%;
-  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; h5 { font-size: 0.9rem; font-weight: 800; margin: 0; } .more { background: none; border: none; color: #444; } }
-  .chart-sim { height: 200px; display: flex; align-items: flex-end; justify-content: space-between; .bar-group { width: 10%; display: flex; flex-direction: column; align-items: center; gap: 10px; .bar { width: 100%; background: #ffc107; border-radius: 4px; transition: all 1s ease; } span { font-size: 0.6rem; font-weight: 700; color: #444; } } }
-  .growth-item { margin-bottom: 20px; span { font-size: 0.8rem; font-weight: 700; color: #666; } .progress { height: 6px; background: #1a1a1a; border-radius: 10px; .fill { height: 100%; background: #ffc107; } } }
+const TableWrapper = styled.div`
+  background: rgba(0,0,0,0.2); border-radius: 20px; overflow: hidden;
+  .table { th { border: none; padding: 20px; font-size: 0.8rem; color: #555; font-weight: 900; } td { padding: 20px; border-color: rgba(255,255,255,0.02); } }
 `;
-
-const TableScroll = styled.div` overflow-x: auto; `;
-const Table = styled.table`
-  width: 100%; border-collapse: collapse; min-width: 800px;
-  thead th { text-align: left; padding: 15px 20px; font-size: 0.75rem; color: #444; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid #222; }
-  tbody td { padding: 20px; border-bottom: 1px solid #1a1a1a; font-size: 0.9rem; }
-  .user-cell { display: flex; align-items: center; gap: 15px; .avatar { width: 40px; height: 40px; background: #1a1a1a; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #ffc107; } .name { font-weight: 700; } .email { font-size: 0.75rem; color: #444; } }
-`;
-
-const StatusPill = styled.span`
-  padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 800;
-  background: ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "rgba(5,205,153,0.05)" : "rgba(255,255,255,0.03)"};
-  color: ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "#05cd99" : "#666"};
-  border: 1px solid ${props => props.status === "ACTIVE" || props.status === "SUCCESS" ? "rgba(5,205,153,0.1)" : "rgba(255,255,255,0.05)"};
-`;
-
-const ActionBtn = styled.button` background: none; border: none; color: #444; cursor: pointer; &:hover { color: #fff; } `;
-
-const LoaderWrap = styled.div`
-  display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; gap: 15px;
-  .spinner { width: 30px; height: 30px; border: 3px solid #222; border-top-color: #ffc107; border-radius: 50%; animation: spin 1s linear infinite; }
-  p { color: #444; font-size: 0.9rem; font-weight: 600; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-`;
-
-const Overlay = styled.div` position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 150; `;
 
 export default AdminDashboard;
