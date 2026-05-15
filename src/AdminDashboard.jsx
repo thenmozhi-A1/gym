@@ -48,6 +48,7 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
+  const [isPayrollDetailOpen, setIsPayrollDetailOpen] = useState(false);
   const [newStaff, setNewStaff] = useState({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer", phone: "", address: "" });
 
   useEffect(() => {
@@ -248,119 +249,182 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               ) : activeTab === "payroll" ? (
-                <PayrollContainer className="animate-in">
-                  <div className="payroll-main">
-                    <header className="payroll-header">
-                      <h1 className="welcome">Welcome Slayfit!</h1>
-                      <div className="pay-run-status">
-                        <span>Process Pay Run for May 2024</span>
-                        <span className="badge-approved">APPROVED</span>
-                      </div>
-                    </header>
-
-                    <div className="hero-card">
-                      <div className="hero-stats">
-                        <div className="stat-group">
-                          <label>EMPLOYEES' NET PAY</label>
-                          <div className="amount">₹17,25,23.00</div>
-                        </div>
-                        <div className="stat-divider" />
-                        <div className="stat-group">
-                          <label>PAYMENT DATE</label>
-                          <div className="date">31 May 2024</div>
-                        </div>
-                        <div className="stat-divider" />
-                        <div className="stat-group">
-                          <label>NO. OF EMPLOYEES</label>
-                          <div className="count">1308</div>
-                        </div>
-                        <button className="btn-black">View Details</button>
-                      </div>
-                      <p className="hero-note">
-                        <Clock size={12} /> Pay your employees on 31/05/2024. Record it here once you made the payment.
-                      </p>
-                    </div>
-
-                    <div className="payroll-grid">
-                      <div className="grid-card deduction-card">
-                        <div className="card-header">
-                          <h5>DEDUCTION SUMMARY</h5>
-                          <select className="small-select"><option>Previous Month</option></select>
-                        </div>
-                        <div className="deduction-row">
-                          <div className="deduction-item">
-                            <div className="icon-circle"><Layers size={14} /></div>
-                            <label>EPF</label>
-                            <div className="val">₹39,73,913.00</div>
-                            <span className="link">View Details</span>
+                <PayrollContainer className="animate-in" style={{ position: 'relative', overflow: 'hidden' }}>
+                  {!isPayrollDetailOpen ? (
+                    <>
+                      <div className="payroll-main">
+                        <header className="payroll-header">
+                          <h1 className="welcome">Welcome Slayfit!</h1>
+                          <div className="pay-run-status">
+                            <span>Process Pay Run for May 2024</span>
+                            <span className="badge-approved">APPROVED</span>
                           </div>
-                          <div className="deduction-item">
-                            <div className="icon-circle gold"><Award size={14} /></div>
-                            <label>ESI</label>
-                            <div className="val">₹91,010.00</div>
-                            <span className="link">View Details</span>
+                        </header>
+
+                        <div className="hero-card">
+                          <div className="hero-stats">
+                            <div className="stat-group">
+                              <label>EMPLOYEES' NET PAY</label>
+                              <div className="amount">₹17,25,23.00</div>
+                            </div>
+                            <div className="stat-divider" />
+                            <div className="stat-group">
+                              <label>PAYMENT DATE</label>
+                              <div className="date">31 May 2024</div>
+                            </div>
+                            <div className="stat-divider" />
+                            <div className="stat-group">
+                              <label>NO. OF EMPLOYEES</label>
+                              <div className="count">1308</div>
+                            </div>
+                            <button className="btn-black" onClick={() => setIsPayrollDetailOpen(true)}>View Details</button>
                           </div>
-                          <div className="deduction-item">
-                            <div className="icon-circle red"><TrendingDown size={14} /></div>
-                            <label>TDS DEDUCTION</label>
-                            <div className="val">₹1,15,89,089.00</div>
-                            <span className="link">View Details</span>
+                          <p className="hero-note">
+                            <Clock size={12} /> Pay your employees on 31/05/2024. Record it here once you made the payment.
+                          </p>
+                        </div>
+
+                        <div className="payroll-grid">
+                          <div className="grid-card deduction-card">
+                            <div className="card-header">
+                              <h5>DEDUCTION SUMMARY</h5>
+                              <select className="small-select"><option>Previous Month</option></select>
+                            </div>
+                            <div className="deduction-row">
+                              <div className="deduction-item">
+                                <div className="icon-circle"><Layers size={14} /></div>
+                                <label>EPF</label>
+                                <div className="val">₹39,73,913.00</div>
+                                <span className="link">View Details</span>
+                              </div>
+                              <div className="deduction-item">
+                                <div className="icon-circle gold"><Award size={14} /></div>
+                                <label>ESI</label>
+                                <div className="val">₹91,010.00</div>
+                                <span className="link">View Details</span>
+                              </div>
+                              <div className="deduction-item">
+                                <div className="icon-circle red"><TrendingDown size={14} /></div>
+                                <label>TDS DEDUCTION</label>
+                                <div className="val">₹1,15,89,089.00</div>
+                                <span className="link">View Details</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid-card summary-card">
+                            <h5>EMPLOYEE SUMMARY</h5>
+                            <div className="summary-body">
+                              <label>ACTIVE EMPLOYEES</label>
+                              <div className="big-count">1308</div>
+                              <span className="link">View Employees</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="chart-section">
+                          <div className="card-header">
+                            <h5>PAYROLL COST SUMMARY</h5>
+                            <select className="small-select"><option>This year</option></select>
+                          </div>
+                          <div className="chart-mockup">
+                            <div className="bars">
+                              {[80, 100, 90, 70, 60, 40, 85, 95, 110, 105, 98, 115].map((h, i) => (
+                                <div key={i} className="bar-stack">
+                                  <div className="segment red" style={{ height: `${h * 0.2}%` }} />
+                                  <div className="segment orange" style={{ height: `${h * 0.3}%` }} />
+                                  <div className="segment dark" style={{ height: `${h * 0.5}%` }} />
+                                </div>
+                              ))}
+                            </div>
+                            <div className="chart-legend">
+                              <div className="legend-item"><span className="dot red" /> Net Pay: ₹13,40,50,440.00</div>
+                              <div className="legend-item"><span className="dot orange" /> Taxes: ₹1,51,56,551.00</div>
+                              <div className="legend-item"><span className="dot dark" /> Statutories: ₹50,16,123.00</div>
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="grid-card summary-card">
-                        <h5>EMPLOYEE SUMMARY</h5>
-                        <div className="summary-body">
-                          <label>ACTIVE EMPLOYEES</label>
-                          <div className="big-count">1308</div>
-                          <span className="link">View Employees</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="chart-section">
-                      <div className="card-header">
-                        <h5>PAYROLL COST SUMMARY</h5>
-                        <select className="small-select"><option>This year</option></select>
-                      </div>
-                      <div className="chart-mockup">
-                        <div className="bars">
-                          {[80, 100, 90, 70, 60, 40, 85, 95, 110, 105, 98, 115].map((h, i) => (
-                            <div key={i} className="bar-stack">
-                              <div className="segment red" style={{ height: `${h * 0.2}%` }} />
-                              <div className="segment orange" style={{ height: `${h * 0.3}%` }} />
-                              <div className="segment dark" style={{ height: `${h * 0.5}%` }} />
+                      <aside className="payroll-sidebar">
+                        <h5>To Do Tasks</h5>
+                        <div className="task-list">
+                          {[
+                            { label: "136 Reimbursement Claim(s)", sub: "Pending Approval" },
+                            { label: "96 Proof of Investment(s)", sub: "Pending Approval" },
+                            { label: "55 Salary Revision(s)", sub: "Pending Approval" }
+                          ].map((task, i) => (
+                            <div key={i} className="task-item">
+                              <div className="task-info">
+                                <h6>{task.label}</h6>
+                                <p>{task.sub}</p>
+                              </div>
+                              <button className="btn-outline">Approve</button>
                             </div>
                           ))}
                         </div>
-                        <div className="chart-legend">
-                          <div className="legend-item"><span className="dot red" /> Net Pay: ₹13,40,50,440.00</div>
-                          <div className="legend-item"><span className="dot orange" /> Taxes: ₹1,51,56,551.00</div>
-                          <div className="legend-item"><span className="dot dark" /> Statutories: ₹50,16,123.00</div>
-                        </div>
+                      </aside>
+                    </>
+                  ) : (
+                    <div className="payroll-detail-overlay animate-in">
+                      <div className="detail-header">
+                        <button className="back-btn" onClick={() => setIsPayrollDetailOpen(false)}>
+                           <ArrowUpRight style={{ transform: 'rotate(-135deg)' }} size={16} /> BACK TO SUMMARY
+                        </button>
+                        <h2>Payroll <small>DETAILS / MAY 2024</small></h2>
                       </div>
-                    </div>
-                  </div>
-
-                  <aside className="payroll-sidebar">
-                    <h5>To Do Tasks</h5>
-                    <div className="task-list">
-                      {[
-                        { label: "136 Reimbursement Claim(s)", sub: "Pending Approval" },
-                        { label: "96 Proof of Investment(s)", sub: "Pending Approval" },
-                        { label: "55 Salary Revision(s)", sub: "Pending Approval" }
-                      ].map((task, i) => (
-                        <div key={i} className="task-item">
-                          <div className="task-info">
-                            <h6>{task.label}</h6>
-                            <p>{task.sub}</p>
-                          </div>
-                          <button className="btn-outline">Approve</button>
+                      
+                      <TableCard style={{ border: 'none', padding: 0, background: 'transparent' }}>
+                        <div className="table-responsive">
+                          <table className="table">
+                            <thead>
+                              <tr>
+                                <th>EMPLOYEE</th>
+                                <th>ROLE</th>
+                                <th>GROSS PAY</th>
+                                <th>DEDUCTIONS</th>
+                                <th>NET PAY</th>
+                                <th>STATUS</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {staffs.map(s => (
+                                <tr key={s.id}>
+                                  <td>
+                                    <div className="u-cell">
+                                      <div className="avatar-small">{s.name.charAt(0)}</div>
+                                      <div className="fw-bold">{s.name}</div>
+                                    </div>
+                                  </td>
+                                  <td><span className="badge bg-primary-light">{s.role}</span></td>
+                                  <td className="fw-bold">{s.salary}</td>
+                                  <td className="text-danger">₹2,450</td>
+                                  <td className="fw-black text-primary">₹{(parseInt(s.salary.replace(/[^\d]/g, '')) - 2450).toLocaleString()}</td>
+                                  <td><span className="sync-badge">PAID</span></td>
+                                </tr>
+                              ))}
+                              {/* Extra mock rows for "high fidelity" */}
+                              {[1,2,3,4,5,6,7].map(i => (
+                                <tr key={`mock-${i}`}>
+                                  <td>
+                                    <div className="u-cell">
+                                      <div className="avatar-small">E</div>
+                                      <div className="fw-bold">Employee #{1300 + i}</div>
+                                    </div>
+                                  </td>
+                                  <td><span className="badge bg-primary-light">Staff</span></td>
+                                  <td className="fw-bold">₹42,000</td>
+                                  <td className="text-danger">₹1,200</td>
+                                  <td className="fw-black text-primary">₹40,800</td>
+                                  <td><span className="sync-badge">PAID</span></td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
-                      ))}
+                      </TableCard>
                     </div>
-                  </aside>
+                  )}
                 </PayrollContainer>
               ) : (
                 <TableCard className="animate-in">
@@ -843,6 +907,18 @@ const ModalContent = styled.div`
     button { flex: 1; padding: 16px; border-radius: 16px; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
     .cancel-btn { background: #f1f5f9; color: #64748b; border: none; &:hover { background: #e2e8f0; } }
     .submit-btn { background: #1e293b; color: #fff; border: none; box-shadow: 0 10px 25px rgba(30, 41, 59, 0.2); &:hover { background: #000; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); } }
+  }
+
+  .payroll-detail-overlay {
+    position: absolute; inset: 0; background: #f8fafc; z-index: 100; padding: 40px; display: flex; flex-direction: column; gap: 30px;
+    &.animate-in { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    
+    .detail-header {
+      display: flex; justify-content: space-between; align-items: center;
+      .back-btn { background: none; border: none; color: #007bff; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer; &:hover { gap: 12px; } }
+      h2 { font-weight: 900; margin: 0; small { font-size: 0.6rem; color: #94a3b8; letter-spacing: 2px; display: block; } }
+    }
   }
 `;
 
