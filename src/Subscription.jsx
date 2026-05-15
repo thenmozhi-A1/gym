@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
-import { Clock, Award, Users } from "lucide-react";
+import { Clock, Award, Users, Check, Zap, Shield, Star, Crown, Info } from "lucide-react";
 
 const plans = [
   {
@@ -22,7 +22,7 @@ const plans = [
       "Online Support Community",
     ],
     bonus: "7-Day Money Back Guarantee",
-    accent: "#00d2ff",
+    accent: "#3b82f6",
   },
   {
     id: 2,
@@ -42,7 +42,7 @@ const plans = [
       "Monthly Body Scan Analysis",
     ],
     bonus: "10% Discount on Supplements",
-    accent: "#ff9900",
+    accent: "#f97316",
   },
   {
     id: 3,
@@ -62,7 +62,7 @@ const plans = [
       "Biometric Health Tracking",
     ],
     bonus: "Includes Free Gym Apparel",
-    accent: "#ff3e3e",
+    accent: "#ef4444",
   },
   {
     id: 4,
@@ -102,12 +102,30 @@ const plans = [
       "Special Event Hosting",
     ],
     bonus: "Dedicated Account Manager",
-    accent: "#9c27b0",
+    accent: "#a855f7",
   },
 ];
 
 const Subscription = () => {
   const { hash } = useLocation();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("reveal-visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const revealElements = document.querySelectorAll(".reveal");
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (hash) {
@@ -127,9 +145,9 @@ const Subscription = () => {
     document.body.appendChild(script);
   }, []);
 
-  const handlePayment = (amount) => {
+  const handlePayment = (amount, planName) => {
     if (!window.Razorpay) {
-      alert("Razorpay SDK not loaded. Please check your internet connection.");
+      alert("Razorpay SDK not loaded.");
       return;
     }
 
@@ -137,19 +155,13 @@ const Subscription = () => {
       key: "rzp_test_SoL1lxm6LzPqie",
       amount: amount * 100,
       currency: "INR",
-      name: "GymDash",
-      description: "Gym Membership Payment",
+      name: "SlayFit Arena",
+      description: `Membership: ${planName}`,
       handler: function (response) {
-        alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
+        alert("Payment Successful! ID: " + response.razorpay_payment_id);
       },
-      prefill: {
-        name: "Dinesh",
-        email: "dinesh@gmail.com",
-        contact: "1234567890",
-      },
-      theme: {
-        color: "#ffcc00",
-      },
+      prefill: { name: "Warrior", email: "warrior@slayfit.com", contact: "9999999999" },
+      theme: { color: "#ffc107" },
     };
 
     const paymentObject = new window.Razorpay(options);
@@ -157,847 +169,379 @@ const Subscription = () => {
   };
 
   return (
-    <Container>
-      <HeaderSection>
-        <h2>CHOOSE YOUR TRANSFORMATION</h2>
-        <p>Unlock your potential with our premium membership plans.</p>
-      </HeaderSection>
+    <PageWrapper>
+      {/* ── HERO SECTION ── */}
+      <HeroSection className="reveal">
+        <div className="hero-overlay"></div>
+        <div className="container position-relative z-2">
+          <Badge>PRICING & MEMBERSHIP</Badge>
+          <h1 className="display-1 fw-black italic">CHOOSE YOUR <span className="text-warning">LEVEL</span></h1>
+          <p className="lead mx-auto" style={{ maxWidth: '700px' }}>
+            No hidden fees. No contracts. Just pure, unadulterated performance. 
+            Choose the plan that fits your ambition.
+          </p>
+        </div>
+      </HeroSection>
 
-      <StyledWrapper>
-        {/* Monthly Plans Section */}
-        <div id="monthly-plans" className="plan-category w-100 mt-5">
-          <CategoryHeader>
-            <Clock size={32} />
+      <div className="container py-5">
+        {/* ── MONTHLY PLANS ── */}
+        <section id="monthly-plans" className="mb-5 reveal">
+          <SectionHeader>
+            <Clock size={40} className="text-warning" />
             <div>
-              <h3>Monthly Memberships</h3>
-              <p>Flexible month-to-month plans for those who value freedom and variety.</p>
+              <h2 className="fw-black italic">MONTHLY <span className="text-warning">ACCESS</span></h2>
+              <p className="text-secondary">Flexible training for the modern warrior.</p>
             </div>
-          </CategoryHeader>
-          <div className="plans-grid">
+          </SectionHeader>
+          <div className="row g-4 mt-2">
             {plans.filter(p => p.duration.includes("Month")).map(plan => (
-              <PlanCard key={plan.id} accent={plan.accent}>
-                <div className="card-container">
-                  {plan.badge && <div className="badge">{plan.badge}</div>}
-                  <div className="card">
-                    <div className="front-content">
-                      <div className="top-accent" style={{ background: plan.accent }}></div>
-                      <img src={plan.image} alt={plan.title} />
-                      <div className="title-overlay">
-                        {plan.title}
-                        <div className="card-stats">
-                          <span style={{ color: 'white' }}  >⭐ {plan.rating}</span>
-                          <span style={{ color: 'white' }} >👥 {plan.userCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="content">
-                      <p className="heading">{plan.title}</p>
-                      <p className="price-label">₹{plan.price} <small>{plan.duration}</small></p>
-                      <ul className="feature-list">
-                        {plan.features.map((feature, index) => (
-                          <li key={index}><CheckIcon /> {feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div className="payment-section">
-                  <button onClick={() => handlePayment(plan.price)}>Join Now</button>
-                </div>
-              </PlanCard>
-            ))}
-          </div>
-        </div>
-
-        {/* Yearly Plans Section */}
-        <div id="yearly-plans" className="plan-category w-100 mt-5 pt-5 border-top border-secondary border-opacity-25">
-          <CategoryHeader>
-            <Award size={32} />
-            <div>
-              <h3>Annual Elite Programs</h3>
-              <p>Commit to a year of transformation and unlock our most exclusive premium benefits.</p>
-            </div>
-          </CategoryHeader>
-          <div className="plans-grid">
-            {plans.filter(p => p.duration.includes("Year")).map(plan => (
-              <PlanCard key={plan.id} accent={plan.accent}>
-                <div className="card-container">
-                  {plan.badge && <div className="badge">{plan.badge}</div>}
-                  <div className="card">
-                    <div className="front-content">
-                      <div className="top-accent" style={{ background: plan.accent }}></div>
-                      <img src={plan.image} alt={plan.title} />
-                      <div className="title-overlay">
-                        {plan.title}
-                        <div className="card-stats">
-                          <span>⭐ {plan.rating}</span>
-                          <span>👥 {plan.userCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="content">
-                      <p className="heading">{plan.title}</p>
-                      <p className="price-label">₹{plan.price} <small>{plan.duration}</small></p>
-                      <ul className="feature-list">
-                        {plan.features.map((feature, index) => (
-                          <li key={index}><CheckIcon /> {feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div className="payment-section">
-                  <button onClick={() => handlePayment(plan.price)}>Join Now</button>
-                </div>
-              </PlanCard>
-            ))}
-          </div>
-        </div>
-
-        {/* Custom Plans Section */}
-        <div id="custom-plans" className="plan-category w-100 mt-5 pt-5 border-top border-secondary border-opacity-25">
-          <CategoryHeader>
-            <Users size={32} />
-            <div>
-              <h3>Tailored Group & Corporate Plans</h3>
-              <p>Specialized fitness solutions for teams, organizations, and private groups.</p>
-            </div>
-          </CategoryHeader>
-          <div className="plans-grid">
-            {plans.filter(p => p.title.includes("Custom")).map(plan => (
-              <PlanCard key={plan.id} accent={plan.accent}>
-                <div className="card-container">
-                  {plan.badge && <div className="badge">{plan.badge}</div>}
-                  <div className="card">
-                    <div className="front-content">
-                      <div className="top-accent" style={{ background: plan.accent }}></div>
-                      <img src={plan.image} alt={plan.title} />
-                      <div className="title-overlay">
-                        {plan.title}
-                        <div className="card-stats">
-                          <span>⭐ {plan.rating}</span>
-                          <span>👥 {plan.userCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="content">
-                      <p className="heading">{plan.title}</p>
-                      <p className="price-label">₹{plan.price} <small>{plan.duration}</small></p>
-                      <ul className="feature-list">
-                        {plan.features.map((feature, index) => (
-                          <li key={index}><CheckIcon /> {feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div className="payment-section">
-                  <button onClick={() => window.location.href = "mailto:custom@gymdash.com"}>Enquire Now</button>
-                </div>
-              </PlanCard>
-            ))}
-          </div>
-        </div>
-      </StyledWrapper>
-
-      <DetailedSections>
-        {plans.map((plan) => (
-          <div className="detail-row" key={plan.id} id={`detail-${plan.id}`}>
-            <div className="detail-image">
-              <img src={plan.image} alt={plan.title} />
-              <div className="image-overlay" style={{ background: plan.accent + "33" }}></div>
-            </div>
-            <div className="detail-text">
-              <span className="detail-tag" style={{ color: plan.accent }}>{plan.badge}</span>
-              <h3>{plan.title} Deep Dive</h3>
-              <p className="description">
-                {plan.id === 1 && "Our Elite membership is designed for high-performance athletes and those who refuse to settle for anything but the best. With 24/7 access and personalized coaching, your goals are always within reach."}
-                {plan.id === 2 && "The Pro membership is our most popular choice, offering a balanced mix of independence and professional guidance. It's perfect for regular gym-goers who want to take their training to the next level."}
-                {plan.id === 3 && "The Standard plan provides all the essentials you need to start your fitness journey. High-quality equipment, a supportive community, and flexible access during peak hours."}
-              </p>
-              <div className="highlight-grid">
-                <div className="highlight">
-                  <h5>Who is this for?</h5>
-                  <p>
-                    {plan.id === 1 && "Serious athletes, competitors, and luxury-seekers."}
-                    {plan.id === 2 && "Consistent trainers and fitness enthusiasts."}
-                    {plan.id === 3 && "Beginners and those with a flexible schedule."}
-                  </p>
-                </div>
-                <div className="highlight">
-                  <h5>Key Advantage</h5>
-                  <p>
-                    {plan.id === 1 && "Complete 1-on-1 personalized transformation."}
-                    {plan.id === 2 && "Access to all group classes and professional guidance."}
-                    {plan.id === 3 && "Most affordable entry into a premium gym environment."}
-                  </p>
-                </div>
+              <div className="col-lg-6" key={plan.id}>
+                <PricingCard plan={plan} onJoin={() => handlePayment(plan.price, plan.title)} />
               </div>
-              <button className="cta-btn" onClick={() => handlePayment(plan.price)}>Join {plan.title}</button>
+            ))}
+          </div>
+        </section>
+
+        {/* ── YEARLY ELITE ── */}
+        <section id="yearly-plans" className="py-5 reveal">
+          <SectionHeader>
+            <Crown size={40} className="text-warning" />
+            <div>
+              <h2 className="fw-black italic">ELITE <span className="text-warning">ANNUALS</span></h2>
+              <p className="text-secondary">Maximum commitment. Maximum results.</p>
             </div>
+          </SectionHeader>
+          <div className="row g-4 mt-2">
+            {plans.filter(p => p.duration.includes("Year")).map(plan => (
+              <div className="col-lg-4" key={plan.id}>
+                <PricingCard plan={plan} onJoin={() => handlePayment(plan.price, plan.title)} />
+              </div>
+            ))}
           </div>
-        ))}
-      </DetailedSections>
+        </section>
 
-      <ComparisonSection id="compare">
-        <h3>Compare Our Plans</h3>
-        <TableWrapper>
-          <table>
-            <thead>
-              <tr>
-                <th>Features</th>
-                <th>Standard</th>
-                <th>Pro</th>
-                <th>Elite Yearly</th>
-                <th>VIP Yearly</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Gym Access</td>
-                <td>Peak Hours</td>
-                <td>6 AM - Midnight</td>
-                <td>24/7 VIP</td>
-                <td>24/7 VIP + Guest</td>
-              </tr>
-              <tr>
-                <td>Personal Trainer</td>
-                <td>❌</td>
-                <td>4 Sessions/Mo</td>
-                <td>Unlimited</td>
-                <td>Daily Coaching</td>
-              </tr>
-              <tr>
-                <td>Nutrition Plan</td>
-                <td>Generic</td>
-                <td>Guided</td>
-                <td>DNA-Based</td>
-                <td>Personal Nutritionist</td>
-              </tr>
-              <tr>
-                <td>Spa & Massage</td>
-                <td>❌</td>
-                <td>❌</td>
-                <td>Spa Access</td>
-                <td>Monthly Massage</td>
-              </tr>
-              <tr>
-                <td>Locker Service</td>
-                <td>Standard</td>
-                <td>Premium</td>
-                <td>Private Suite</td>
-                <td>Named Private Locker</td>
-              </tr>
-            </tbody>
-          </table>
-        </TableWrapper>
-      </ComparisonSection>
+        {/* ── COMPARISON TABLE ── */}
+        <section className="py-5 reveal">
+          <div className="text-center mb-5">
+            <h2 className="fw-black italic display-5">ARENA <span className="text-warning">COMPARISON</span></h2>
+            <p className="text-secondary">Find exactly what you need to slay your goals.</p>
+          </div>
+          <ComparisonWrapper>
+            <table className="table table-dark table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>FEATURES</th>
+                  <th>STANDARD</th>
+                  <th>PRO</th>
+                  <th className="text-warning">ELITE</th>
+                  <th className="text-warning">VIP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["Gym Access", "Peak Hours", "6 AM - 12 AM", "24/7 Access", "24/7 + Guest"],
+                  ["Personal Trainer", "❌", "4 Sessions/Mo", "Unlimited", "Daily Elite"],
+                  ["Nutrition Plan", "Generic", "Guided", "DNA-Based", "Personal Coach"],
+                  ["Spa & Recovery", "❌", "❌", "Full Access", "Monthly Massage"],
+                  ["Locker Type", "Standard", "Premium", "Private Suite", "Named Suite"]
+                ].map((row, i) => (
+                  <tr key={i}>
+                    <td className="fw-bold">{row[0]}</td>
+                    <td>{row[1]}</td>
+                    <td>{row[2]}</td>
+                    <td className="text-warning-light">{row[3]}</td>
+                    <td className="text-warning-light">{row[4]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ComparisonWrapper>
+        </section>
 
-      <FaqSection id="faq">
-        <h3>Membership FAQ</h3>
-        <FaqGrid>
-          <div className="faq-item">
-            <h4>Can I upgrade my plan later?</h4>
-            <p>Yes! You can upgrade to a higher tier at any time. We will prorate your remaining balance.</p>
+        {/* ── FAQ ── */}
+        <section className="py-5 reveal">
+          <div className="text-center mb-5">
+            <h2 className="fw-black italic display-5">COMMON <span className="text-warning">QUESTIONS</span></h2>
           </div>
-          <div className="faq-item">
-            <h4>Is there a joining fee?</h4>
-            <p>Absolutely not. We believe in transparent pricing with no hidden costs.</p>
+          <div className="row g-4">
+            {[
+              { q: "Can I upgrade my plan?", a: "Yes, you can upgrade anytime. We will adjust the remaining balance automatically." },
+              { q: "Is there a joining fee?", a: "Zero hidden fees. You only pay for your membership and nothing else." },
+              { q: "Can I freeze my account?", a: "Elite and VIP members can freeze their membership for up to 30 days per year." },
+              { q: "Do you have trial plans?", a: "We offer a 3-day guest pass for new members to experience the SlayFit Arena." }
+            ].map((faq, i) => (
+              <div className="col-md-6" key={i}>
+                <FaqBox>
+                  <h4 className="fw-bold text-warning mb-2">{faq.q}</h4>
+                  <p className="text-secondary mb-0">{faq.a}</p>
+                </FaqBox>
+              </div>
+            ))}
           </div>
-          <div className="faq-item">
-            <h4>Can I freeze my membership?</h4>
-            <p>Elite and Pro members can freeze their membership for up to 30 days per year for free.</p>
-          </div>
-          <div className="faq-item">
-            <h4>Do you offer student discounts?</h4>
-            <p>Yes, show your valid student ID at the front desk to get an additional 15% off any plan.</p>
-          </div>
-        </FaqGrid>
-      </FaqSection>
+        </section>
+      </div>
 
-      <CustomSection id="custom-plans">
-        <div className="custom-box">
-          <h3>Need a Custom Plan?</h3>
-          <p>Looking for something tailored specifically for your organization or a group of athletes? Our experts will craft a plan that fits your exact needs.</p>
-          <button onClick={() => window.location.href = "mailto:custom@gymdash.com"}>Contact for Custom Pricing</button>
+      {/* ── CUSTOM SECTION ── */}
+      <section className="py-5 bg-black reveal">
+        <div className="container">
+          <CTASection>
+            <div className="cta-content">
+              <h2 className="display-4 fw-black italic">CORPORATE <span className="text-warning">SLAY</span></h2>
+              <p className="lead">Tailored fitness solutions for elite teams and organizations.</p>
+              <button onClick={() => window.location.href = "mailto:custom@slayfit.com"}>ENQUIRE NOW</button>
+            </div>
+          </CTASection>
         </div>
-      </CustomSection>
-    </Container>
+      </section>
+
+    </PageWrapper>
   );
 };
 
-const CheckIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="3"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{ marginRight: "8px", color: "#ffcc00" }}
-  >
-    <polyline points="20 6 9 17 4 12"></polyline>
-  </svg>
+const PricingCard = ({ plan, onJoin }) => (
+  <CardWrapper accent={plan.accent}>
+    <div className="image-part">
+      <img src={plan.image} alt={plan.title} />
+      <div className="overlay"></div>
+      <div className="top-tags">
+        <span className="badge-slay">{plan.badge}</span>
+        <div className="rating">⭐ {plan.rating}</div>
+      </div>
+      <div className="title-box">
+        <h3 className="fw-black italic">{plan.title.toUpperCase()}</h3>
+        <span className="members">{plan.userCount}</span>
+      </div>
+    </div>
+    <div className="info-part">
+      <div className="price-box">
+        <span className="currency">₹</span>
+        <span className="amount">{typeof plan.price === 'number' ? plan.price.toLocaleString() : plan.price}</span>
+        <span className="period">/{plan.duration}</span>
+      </div>
+      <ul className="feature-list">
+        {plan.features.map((f, i) => (
+          <li key={i}><Check size={16} className="text-warning" /> {f}</li>
+        ))}
+      </ul>
+      <button className="join-btn" onClick={onJoin}>JOIN THE ARENA</button>
+    </div>
+  </CardWrapper>
 );
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+// ── STYLED COMPONENTS ──
+
+const PageWrapper = styled.div`
+  background: #0a0a0a;
+  color: white;
   min-height: 100vh;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-    url("https://i.etsystatic.com/29035216/r/il/7e7e20/3640388699/il_1080xN.3640388699_sg0x.jpg");
+  overflow-x: hidden;
+  font-family: 'Inter', sans-serif;
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    &.reveal-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const HeroSection = styled.header`
+  height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  background-image: url("https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=2000");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  color: white;
-  padding: 80px 20px;
-`;
 
-const HeaderSection = styled.div`
-  text-align: center;
-  margin-bottom: 40px;
-
-  h2 {
-    font-size: 3rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-    background: linear-gradient(to right, #fff, #ffcc00);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(10,10,10,1));
+    z-index: 1;
   }
 
-  p {
-    font-size: 1.1rem;
-    color: #ccc;
-    max-width: 600px;
-    margin: 0 auto;
-  }
+  .fw-black { font-weight: 900; }
+  .italic { font-style: italic; }
 `;
 
-const StyledWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 80px;
-  max-width: 1200px;
-  width: 100%;
-
-  .plans-grid {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 40px;
-    width: 100%;
-  }
+const Badge = styled.span`
+  background: #ffc107;
+  color: black;
+  padding: 5px 15px;
+  font-weight: 900;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  display: inline-block;
 `;
 
-const CategoryHeader = styled.div`
+const SectionHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
   margin-bottom: 40px;
-  text-align: left;
-  border-left: 5px solid #ffcc00;
+  border-left: 5px solid #ffc107;
   padding-left: 25px;
-
-  svg {
-    color: #ffcc00;
-    flex-shrink: 0;
-  }
-
-  h3 {
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: 5px;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  p {
-    color: #aaa;
-    font-size: 1.1rem;
-    margin: 0;
-  }
+  
+  h2 { font-size: 2.5rem; margin: 0; }
+  p { margin: 0; opacity: 0.6; }
 `;
 
-const PlanCard = styled.div`
-  background: #1a1a1a;
-  padding: 15px;
-  border-radius: 20px;
-  text-align: center;
-  transition: transform 0.3s ease;
-  flex: 1;
-  min-width: 300px;
-  max-width: 350px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+const CardWrapper = styled.div`
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 25px;
+  overflow: hidden;
+  display: flex;
+  height: 400px;
+  transition: all 0.4s ease;
 
   &:hover {
     transform: translateY(-10px);
-    border-color: ${(props) => props.accent || "#ffcc00"};
+    border-color: #ffc107;
+    box-shadow: 0 0 30px rgba(255,193,7,0.2);
+    .image-part img { transform: scale(1.1); }
   }
 
-  .card-container {
-    width: 100%;
-    height: 380px;
-    position: relative;
-    border-radius: 15px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    position: relative;
-  }
-
-  .badge {
-    position: absolute;
-    top: 20px;
-    right: -35px;
-    background: ${(props) => props.accent || "#ffcc00"};
-    color: #000;
-    padding: 5px 40px;
-    transform: rotate(45deg);
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    z-index: 10;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    letter-spacing: 1px;
-  }
-
-  .card {
-    width: 100%;
-    height: 100%;
-    position: relative;
-  }
-
-  .top-accent {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 6px;
-    z-index: 2;
-  }
-
-  .front-content {
-    width: 100%;
-    height: 100%;
-    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-    position: relative;
-    
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: brightness(0.8);
-    }
-
-    .title-overlay {
-      position: absolute;
-      bottom: 20px;
-      left: 0;
-      width: 100%;
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .card-stats {
-      display: flex;
-      gap: 15px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      text-transform: none;
-      letter-spacing: 0;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 4px 12px;
-      border-radius: 20px;
-      backdrop-filter: blur(5px);
-    }
-  }
-
-  .content {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 30px 20px;
-    background: rgba(15, 15, 15, 0.95);
-    backdrop-filter: blur(10px);
-    color: #e8e8e8;
-    transform: translateY(100%);
-    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-    z-index: 3;
-  }
-
-  .card:hover .content {
-    transform: translateY(0);
-  }
-
-  .card:hover .front-content {
-    transform: scale(1.1);
-  }
-
-  .heading {
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin-bottom: 5px;
-    color: ${(props) => props.accent || "#ffcc00"};
-    text-transform: uppercase;
-  }
-
-  .price-label {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: #fff;
-    
-    small {
-      font-size: 0.8rem;
-      color: #aaa;
-      font-weight: 400;
-    }
-  }
-
-  .feature-list {
-    list-style: none;
-    padding: 0;
-    text-align: left;
-    width: 100%;
-    
-    li {
-      margin-bottom: 15px;
-      font-size: 0.95rem;
-      display: flex;
-      align-items: center;
-      color: #ddd;
-    }
-  }
-
-  .bonus-tag {
-    margin-top: auto;
-    background: rgba(255, 204, 0, 0.1);
-    border: 1px dashed #ffcc00;
-    padding: 10px;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    color: #ffcc00;
-    width: 100%;
-    
-    strong {
-      color: #fff;
-    }
-  }
-
-  .payment-section {
-    padding: 10px 0;
-    
-    button {
-      background: #ffcc00;
-      color: #000;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 50px;
-      cursor: pointer;
-      font-size: 1.1rem;
-      font-weight: 700;
-      width: 100%;
-      transition: all 0.3s ease;
-      box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
-
-      &:hover {
-        background: #fff;
-        transform: scale(1.05);
-        box-shadow: 0 8px 20px rgba(255, 204, 0, 0.5);
-      }
-      
-      &:active {
-        transform: scale(0.98);
-      }
-    }
-  }
-`;
-
-const DetailedSections = styled.div`
-  margin-top: 100px;
-  width: 100%;
-  max-width: 1200px;
-  display: flex;
-  flex-direction: column;
-  gap: 80px;
-
-  .detail-row {
-    display: flex;
-    align-items: center;
-    gap: 60px;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 40px;
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
-
-    &:nth-child(even) {
-      flex-direction: row-reverse;
-    }
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 204, 0, 0.2);
-    }
-  }
-
-  .detail-image {
+  .image-part {
     flex: 1;
     position: relative;
-    height: 400px;
-    border-radius: 20px;
     overflow: hidden;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .image-overlay {
+    
+    img { width: 100%; height: 100%; object-fit: cover; transition: all 0.6s ease; }
+    .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
+    
+    .top-tags {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-  }
-
-  .detail-text {
-    flex: 1.2;
-    text-align: left;
-
-    .detail-tag {
-      font-weight: 800;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-      letter-spacing: 2px;
-      margin-bottom: 10px;
-      display: block;
-    }
-
-    h3 {
-      font-size: 2.5rem;
-      font-weight: 900;
-      margin-bottom: 20px;
-      color: #fff;
-    }
-
-    .description {
-      font-size: 1.1rem;
-      color: #ccc;
-      line-height: 1.8;
-      margin-bottom: 30px;
-    }
-
-    .highlight-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      margin-bottom: 40px;
-
-      h5 {
-        color: #ffcc00;
-        font-weight: 700;
-        margin-bottom: 10px;
-      }
-
-      p {
-        color: #aaa;
-        font-size: 0.95rem;
-      }
-    }
-
-    .cta-btn {
-      background: transparent;
-      border: 2px solid #ffcc00;
-      color: #ffcc00;
-      padding: 12px 30px;
-      border-radius: 50px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-
-      &:hover {
-        background: #ffcc00;
-        color: #000;
-      }
-    }
-  }
-
-  @media (max-width: 992px) {
-    .detail-row {
-      flex-direction: column !important;
-      padding: 20px;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
     }
     
-    .detail-image {
-      width: 100%;
-      height: 300px;
+    .badge-slay { background: #ffc107; color: black; padding: 4px 12px; border-radius: 4px; font-weight: 900; font-size: 0.7rem; }
+    .rating { background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; }
+    
+    .title-box {
+      position: absolute;
+      bottom: 25px;
+      left: 25px;
+      z-index: 2;
+      h3 { color: #ffc107; margin: 0; font-size: 1.8rem; }
+      .members { font-size: 0.8rem; opacity: 0.6; }
     }
   }
-`;
 
-const ComparisonSection = styled.div`
-  margin-top: 100px;
-  width: 100%;
-  max-width: 1000px;
-  text-align: center;
+  .info-part {
+    flex: 1;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.02);
 
-  h3 {
-    font-size: 2.5rem;
-    margin-bottom: 40px;
-    font-weight: 800;
-  }
-`;
-
-const TableWrapper = styled.div`
-  background: rgba(26, 26, 26, 0.8);
-  padding: 30px;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow-x: auto;
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    color: #eee;
-
-    th, td {
-      padding: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      text-align: left;
+    .price-box {
+      .currency { font-size: 1.5rem; font-weight: 900; color: #ffc107; }
+      .amount { font-size: 3rem; font-weight: 900; line-height: 1; }
+      .period { font-size: 0.9rem; opacity: 0.5; }
     }
 
-    th {
-      font-size: 1.2rem;
-      color: #ffcc00;
-      text-transform: uppercase;
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+      li { font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; opacity: 0.8; }
     }
 
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover {
-      background: rgba(255, 204, 0, 0.05);
-    }
-  }
-`;
-
-const FaqSection = styled.div`
-  margin-top: 100px;
-  width: 100%;
-  max-width: 1000px;
-  text-align: center;
-  padding-bottom: 50px;
-
-  h3 {
-    font-size: 2.5rem;
-    margin-bottom: 40px;
-    font-weight: 800;
-  }
-`;
-
-const FaqGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 30px;
-  text-align: left;
-
-  .faq-item {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 25px;
-    border-radius: 15px;
-    border-left: 4px solid #ffcc00;
-
-    h4 {
-      color: #ffcc00;
-      margin-bottom: 10px;
-      font-size: 1.1rem;
-    }
-
-    p {
-      color: #ccc;
-      line-height: 1.6;
+    .join-btn {
+      background: #ffc107;
+      color: black;
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-style: italic;
+      transition: all 0.3s ease;
+      &:hover { background: white; transform: scale(1.02); }
     }
   }
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    height: auto;
+    .image-part { height: 200px; }
   }
 `;
 
-const CustomSection = styled.div`
-  margin-top: 80px;
-  width: 100%;
-  max-width: 1000px;
-  padding-bottom: 100px;
+const ComparisonWrapper = styled.div`
+  background: rgba(255,255,255,0.03);
+  border-radius: 25px;
+  padding: 30px;
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow-x: auto;
+  
+  table { 
+    margin-bottom: 0;
+    th { border: none; font-weight: 900; font-style: italic; letter-spacing: 1px; color: #ffc107; padding: 20px; }
+    td { border-color: rgba(255,255,255,0.05); padding: 15px 20px; opacity: 0.8; }
+    .text-warning-light { color: #ffe082; font-weight: 600; }
+  }
+`;
 
-  .custom-box {
-    background: linear-gradient(135deg, rgba(255, 204, 0, 0.1) 0%, rgba(255, 204, 0, 0.05) 100%);
-    border: 1px solid rgba(255, 204, 0, 0.3);
-    padding: 60px;
-    border-radius: 30px;
-    text-align: center;
-    backdrop-filter: blur(10px);
+const FaqBox = styled.div`
+  background: rgba(255,255,255,0.03);
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  height: 100%;
+  transition: all 0.3s ease;
+  &:hover { background: rgba(255,255,255,0.05); border-color: #ffc107; }
+`;
 
-    h3 {
-      font-size: 2.2rem;
-      margin-bottom: 20px;
-      color: #ffcc00;
-      font-weight: 800;
-    }
+const CTASection = styled.div`
+  background-image: linear-gradient(to right, rgba(0,0,0,0.8), transparent), url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000");
+  background-size: cover;
+  background-position: center;
+  border-radius: 30px;
+  padding: 80px 60px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
 
-    p {
-      font-size: 1.1rem;
-      color: #ccc;
-      max-width: 700px;
-      margin: 0 auto 30px;
-      line-height: 1.6;
-    }
-
+  .cta-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
     button {
-      background: transparent;
-      color: #ffcc00;
-      border: 2px solid #ffcc00;
-      padding: 15px 40px;
-      border-radius: 50px;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
+      margin-top: 30px;
+      background: #ffc107;
+      color: black;
+      border: none;
+      padding: 18px 45px;
+      border-radius: 15px;
+      font-weight: 900;
+      font-style: italic;
+      font-size: 1.1rem;
       transition: all 0.3s ease;
-
-      &:hover {
-        background: #ffcc00;
-        color: #000;
-        box-shadow: 0 0 30px rgba(255, 204, 0, 0.3);
-      }
+      &:hover { background: white; transform: scale(1.05); }
     }
+  }
+
+  @media (max-width: 768px) {
+    padding: 60px 30px;
+    text-align: center;
+    background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000");
   }
 `;
 

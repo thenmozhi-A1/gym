@@ -326,7 +326,7 @@ const Home = () => {
               </div>
             </CoachCard>
             <CoachCard>
-              <div className="coach-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1552196564-972b49917d61?q=80&w=400&auto=format&fit=crop")' }}></div>
+              <div className="coach-image" style={{ backgroundImage: 'url("/assets/coach-mark.png")' }}></div>
               <div className="coach-info">
                 <h4>MARK VOID</h4>
                 <span>MMA & COMBAT DRILLS</span>
