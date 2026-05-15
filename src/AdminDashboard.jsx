@@ -27,7 +27,8 @@ import {
   BarChart3,
   Calendar,
   Layers,
-  Award
+  Award,
+  Trash2
 } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
@@ -73,6 +74,20 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => { localStorage.clear(); navigate("/login"); };
+
+  const handleDeleteUser = async (id) => {
+    if (!window.confirm("Permanent deletion cannot be undone. Proceed?")) return;
+    try {
+      const res = await fetch(`${API_BASE}/users/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setUsers(users.filter(u => u.id !== id));
+      } else {
+        alert("Failed to delete warrior.");
+      }
+    } catch (err) {
+      alert("Error processing deletion.");
+    }
+  };
 
   return (
     <AuroraWrapper>
@@ -244,7 +259,14 @@ const AdminDashboard = () => {
                             </td>
                             <td><span className={`badge ${u.status === 'ACTIVE' ? 'bg-success-light' : 'bg-danger-light'}`}>{u.status}</span></td>
                             <td>{u.membershipType || "Standard"}</td>
-                            <td><button className="btn-icon"><MoreVertical size={16} /></button></td>
+                            <td>
+                              <div className="d-flex gap-2">
+                                <button className="btn-icon text-danger" onClick={() => handleDeleteUser(u.id)} title="Delete Warrior">
+                                  <Trash2 size={16} />
+                                </button>
+                                <button className="btn-icon"><MoreVertical size={16} /></button>
+                              </div>
+                            </td>
                           </tr>
                         ))}
                         {activeTab === "payments" && payments.map(p => (
