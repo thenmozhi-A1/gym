@@ -213,17 +213,16 @@ const AdminDashboard = () => {
                         </div>
                       </div>
                       <div className="main-chart">
-                        <div className="line-sim">
-                          <svg width="100%" height="200" viewBox="0 0 1000 200" preserveAspectRatio="none">
-                            <path d="M0,150 L100,120 L200,160 L300,100 L400,130 L500,80 L600,110 L700,60 L800,100 L900,50 L1000,90" fill="none" stroke="#007bff" strokeWidth="3" />
-                            <path d="M0,160 L100,140 L200,170 L300,130 L400,150 L500,110 L600,130 L700,90 L800,120 L900,80 L1000,110" fill="none" stroke="#28a745" strokeWidth="2" strokeDasharray="5,5" />
+                        <div style={{ height: '200px', display: 'flex', alignItems: 'flex-end', gap: '10px' }}>
+                          <svg width="100%" height="100%" viewBox="0 0 800 200">
+                            <path d="M0,180 Q100,150 200,160 T400,80 T600,100 T800,40" fill="none" stroke="#007bff" strokeWidth="4" />
+                            <path d="M0,180 Q100,150 200,160 T400,80 T600,100 T800,40 V200 H0 Z" fill="url(#grad)" opacity="0.1" />
+                            <defs><linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#007bff" /><stop offset="100%" stopColor="#fff" /></linearGradient></defs>
                           </svg>
                         </div>
                         <div className="chart-footer">
                           <div className="f-stat"><span>275K</span><small>New Users</small></div>
                           <div className="f-stat"><span>3m 12s</span><small>Avg. Session</small></div>
-                          <div className="f-stat"><span>3.72 M</span><small>Subscribers</small></div>
-                          <div className="f-stat"><span>523K</span><small>Page View</small></div>
                         </div>
                       </div>
                     </ChartCard>
@@ -242,99 +241,9 @@ const AdminDashboard = () => {
                       </div>
                     </ChartCard>
                   </div>
-                     {activeTab !== "dashboard" && activeTab !== "payroll" && (
-                <TableCard>
-                  <div className="table-header">
-                    <h2>{activeTab.toUpperCase()} <small>MANAGEMENT</small></h2>
-                    <div className="d-flex gap-3">
-                      {activeTab === "staffs" && (
-                        <button onClick={() => setIsAddStaffModalOpen(true)} className="add-btn">
-                          <Plus size={18} /> ADD STAFF
-                        </button>
-                      )}
-                      <button onClick={fetchData} className="refresh-btn">REFRESH SYSTEM</button>
-                    </div>
-                  </div>
-                  <div className="table-responsive">
-                    <table className="table">
-                      <thead>
-                        <tr>
-                          {activeTab === "users" && <><th>WARRIOR</th><th>STATUS</th><th>TYPE</th><th>ACTIONS</th></>}
-                          {activeTab === "payments" && <><th>WARRIOR</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
-                          {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
-                          {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
-                          {activeTab === "staffs" && <><th>STAFF NAME</th><th>ROLE</th><th>SPECIALTY / TASK</th><th>SHIFT TIME</th><th>SALARY</th></>}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activeTab === "users" && users.map(u => (
-                          <tr key={u.id}>
-                            <td>
-                              <div className="u-cell">
-                                <div className="avatar-small">{u.fullName.charAt(0)}</div>
-                                <div><div className="u-name">{u.fullName}</div><div className="u-email">{u.email}</div></div>
-                              </div>
-                            </td>
-                            <td><span className={`badge ${u.status === 'ACTIVE' ? 'bg-success-light' : 'bg-danger-light'}`}>{u.status}</span></td>
-                            <td>{u.membershipType || "Standard"}</td>
-                            <td>
-                              <div className="d-flex gap-2">
-                                <button className="btn-icon text-danger" onClick={() => handleDeleteUser(u.id)} title="Delete Warrior">
-                                  <Trash2 size={16} />
-                                </button>
-                                <button className="btn-icon"><MoreVertical size={16} /></button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                        {activeTab === "payments" && payments.map(p => (
-                          <tr key={p.id}>
-                            <td className="fw-bold">{p.user?.fullName || p.fullName || "Warrior"}</td>
-                            <td className="text-primary fw-bold">₹{p.amount}</td>
-                            <td><span className="badge bg-primary-light">{p.paymentStatus}</span></td>
-                            <td className="sub-text">{p.paymentDate}</td>
-                          </tr>
-                        ))}
-                        {activeTab === "attendance" && attendance.map(log => (
-                          <tr key={log.id}>
-                            <td className="fw-bold">{log.user?.fullName || log.fullName || "Warrior"}</td>
-                            <td>{log.attendanceDate}</td>
-                            <td className="text-success fw-bold">{log.checkInTime}</td>
-                            <td><span className="sync-badge">PRESENT</span></td>
-                          </tr>
-                        ))}
-                        {activeTab === "consultations" && consultations.map(msg => (
-                          <tr key={msg.id}>
-                            <td>
-                              <div className="fw-bold">{msg.fullName}</div>
-                              <div className="sub-text">{msg.email}</div>
-                            </td>
-                            <td style={{ maxWidth: '400px' }}><p className="mb-0 text-secondary">{msg.goals}</p></td>
-                            <td className="sub-text">{msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "Recent"}</td>
-                          </tr>
-                        ))}
-                        {activeTab === "staffs" && staffs.map(s => (
-                          <tr key={s.id}>
-                            <td>
-                              <div className="u-cell">
-                                <div className="avatar-small bg-primary-light text-primary">{s.name.charAt(0)}</div>
-                                <div className="fw-bold">{s.name}</div>
-                              </div>
-                            </td>
-                            <td><span className={`badge ${s.role === 'Trainer' ? 'bg-success-light' : 'bg-primary-light'}`}>{s.role}</span></td>
-                            <td>{s.specialty}</td>
-                            <td className="fw-bold text-secondary">{s.times}</td>
-                            <td className="fw-black text-primary">{s.salary}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </TableCard>
-              )}
-
-              {activeTab === "payroll" && (
-                <PayrollContainer>
+                </div>
+              ) : activeTab === "payroll" ? (
+                <PayrollContainer className="animate-in">
                   <div className="payroll-main">
                     <header className="payroll-header">
                       <h1 className="welcome">Welcome Slayfit!</h1>
@@ -448,7 +357,94 @@ const AdminDashboard = () => {
                     </div>
                   </aside>
                 </PayrollContainer>
-              )}div>
+              ) : (
+                <TableCard className="animate-in">
+                  <div className="table-header">
+                    <h2>{activeTab.toUpperCase()} <small>MANAGEMENT</small></h2>
+                    <div className="d-flex gap-3">
+                      {activeTab === "staffs" && (
+                        <button onClick={() => setIsAddStaffModalOpen(true)} className="add-btn">
+                          <Plus size={18} /> ADD STAFF
+                        </button>
+                      )}
+                      <button onClick={fetchData} className="refresh-btn">REFRESH SYSTEM</button>
+                    </div>
+                  </div>
+                  <div className="table-responsive">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          {activeTab === "users" && <><th>WARRIOR</th><th>STATUS</th><th>TYPE</th><th>ACTIONS</th></>}
+                          {activeTab === "payments" && <><th>WARRIOR</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
+                          {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
+                          {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
+                          {activeTab === "staffs" && <><th>STAFF NAME</th><th>ROLE</th><th>SPECIALTY / TASK</th><th>SHIFT TIME</th><th>SALARY</th></>}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeTab === "users" && users.map(u => (
+                          <tr key={u.id}>
+                            <td>
+                              <div className="u-cell">
+                                <div className="avatar-small">{u.fullName.charAt(0)}</div>
+                                <div><div className="u-name">{u.fullName}</div><div className="u-email">{u.email}</div></div>
+                              </div>
+                            </td>
+                            <td><span className={`badge ${u.status === 'ACTIVE' ? 'bg-success-light' : 'bg-danger-light'}`}>{u.status}</span></td>
+                            <td>{u.membershipType || "Standard"}</td>
+                            <td>
+                              <div className="d-flex gap-2">
+                                <button className="btn-icon text-danger" onClick={() => handleDeleteUser(u.id)} title="Delete Warrior">
+                                  <Trash2 size={16} />
+                                </button>
+                                <button className="btn-icon"><MoreVertical size={16} /></button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {activeTab === "payments" && payments.map(p => (
+                          <tr key={p.id}>
+                            <td className="fw-bold">{p.user?.fullName || p.fullName || "Warrior"}</td>
+                            <td className="text-primary fw-bold">₹{p.amount}</td>
+                            <td><span className="badge bg-primary-light">{p.paymentStatus}</span></td>
+                            <td className="sub-text">{p.paymentDate}</td>
+                          </tr>
+                        ))}
+                        {activeTab === "attendance" && attendance.map(log => (
+                          <tr key={log.id}>
+                            <td className="fw-bold">{log.user?.fullName || log.fullName || "Warrior"}</td>
+                            <td>{log.attendanceDate}</td>
+                            <td className="text-success fw-bold">{log.checkInTime}</td>
+                            <td><span className="sync-badge">PRESENT</span></td>
+                          </tr>
+                        ))}
+                        {activeTab === "consultations" && consultations.map(msg => (
+                          <tr key={msg.id}>
+                            <td>
+                              <div className="fw-bold">{msg.fullName}</div>
+                              <div className="sub-text">{msg.email}</div>
+                            </td>
+                            <td style={{ maxWidth: '400px' }}><p className="mb-0 text-secondary">{msg.goals}</p></td>
+                            <td className="sub-text">{msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "Recent"}</td>
+                          </tr>
+                        ))}
+                        {activeTab === "staffs" && staffs.map(s => (
+                          <tr key={s.id}>
+                            <td>
+                              <div className="u-cell">
+                                <div className="avatar-small bg-primary-light text-primary">{s.name.charAt(0)}</div>
+                                <div className="fw-bold">{s.name}</div>
+                              </div>
+                            </td>
+                            <td><span className={`badge ${s.role === 'Trainer' ? 'bg-success-light' : 'bg-primary-light'}`}>{s.role}</span></td>
+                            <td>{s.specialty}</td>
+                            <td className="fw-bold text-secondary">{s.times}</td>
+                            <td className="fw-black text-primary">{s.salary}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </TableCard>
               )}
             </>
