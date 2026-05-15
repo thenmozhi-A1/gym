@@ -230,6 +230,7 @@ const AdminDashboard = () => {
                           {activeTab === "users" && <><th>WARRIOR</th><th>STATUS</th><th>TYPE</th><th>ACTIONS</th></>}
                           {activeTab === "payments" && <><th>WARRIOR</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
                           {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
+                          {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
                         </tr>
                       </thead>
                       <tbody>
@@ -260,6 +261,16 @@ const AdminDashboard = () => {
                             <td>{log.attendanceDate}</td>
                             <td className="text-success fw-bold">{log.checkInTime}</td>
                             <td><span className="sync-badge">PRESENT</span></td>
+                          </tr>
+                        ))}
+                        {activeTab === "consultations" && consultations.map(msg => (
+                          <tr key={msg.id}>
+                            <td>
+                              <div className="fw-bold">{msg.fullName}</div>
+                              <div className="sub-text">{msg.email}</div>
+                            </td>
+                            <td style={{ maxWidth: '400px' }}><p className="mb-0 text-secondary">{msg.goals}</p></td>
+                            <td className="sub-text">{msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "Recent"}</td>
                           </tr>
                         ))}
                       </tbody>
