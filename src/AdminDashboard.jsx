@@ -103,10 +103,11 @@ const AdminDashboard = () => {
   const handleAddTrainer = (e) => {
     e.preventDefault();
     if (!newTrainer.name || !newTrainer.specialty) return;
-    const trainerToAdd = { ...newTrainer, id: Date.now(), students: 0 };
+    const trainerToAdd = { ...newTrainer, id: Date.now(), students: 0, status: "ACTIVE" };
     setTrainers([trainerToAdd, ...trainers]);
-    setNewTrainer({ name: "", specialty: "", salary: "", times: "" });
+    setNewTrainer({ name: "", specialty: "", salary: "", times: "", email: "", phone: "" });
     setIsAddTrainerModalOpen(false);
+    alert("WARRIOR COACH ADDED TO FLEET SUCCESSFULLY!");
   };
 
   return (
@@ -339,35 +340,70 @@ const AdminDashboard = () => {
       {/* ── ADD TRAINER MODAL ── */}
       {isAddTrainerModalOpen && (
         <ModalOverlay>
-          <ModalContent>
+          <ModalContent className="animate-in">
             <div className="modal-header">
-              <h3>REGISTER NEW TRAINER</h3>
+              <div className="title-area">
+                <div className="icon-wrap"><Plus size={24} /></div>
+                <div>
+                  <h3>ADD NEW COACH</h3>
+                  <p>Register a new warrior trainer to the SlayFit fleet.</p>
+                </div>
+              </div>
               <button className="close-btn" onClick={() => setIsAddTrainerModalOpen(false)}><X size={20} /></button>
             </div>
+            
             <form onSubmit={handleAddTrainer}>
-              <div className="form-group">
-                <label>FULL NAME</label>
-                <input type="text" placeholder="e.g. John Doe" value={newTrainer.name} onChange={e => setNewTrainer({...newTrainer, name: e.target.value})} required />
-              </div>
-              <div className="form-group">
-                <label>SPECIALTY</label>
-                <input type="text" placeholder="e.g. Yoga Expert" value={newTrainer.specialty} onChange={e => setNewTrainer({...newTrainer, specialty: e.target.value})} required />
-              </div>
-              <div className="row">
-                <div className="col-6">
-                  <div className="form-group">
-                    <label>MONTHLY SALARY</label>
-                    <input type="text" placeholder="₹50,000" value={newTrainer.salary} onChange={e => setNewTrainer({...newTrainer, salary: e.target.value})} />
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>COACH FULL NAME</label>
+                  <div className="input-wrap">
+                    <Users size={18} />
+                    <input type="text" placeholder="e.g. Marcus Aurelius" value={newTrainer.name} onChange={e => setNewTrainer({...newTrainer, name: e.target.value})} required />
                   </div>
                 </div>
-                <div className="col-6">
-                  <div className="form-group">
-                    <label>SHIFT TIME</label>
-                    <input type="text" placeholder="9AM - 5PM" value={newTrainer.times} onChange={e => setNewTrainer({...newTrainer, times: e.target.value})} />
+
+                <div className="form-group">
+                  <label>EMAIL ADDRESS</label>
+                  <div className="input-wrap">
+                    <Globe size={18} />
+                    <input type="email" placeholder="coach@slayfit.com" value={newTrainer.email} onChange={e => setNewTrainer({...newTrainer, email: e.target.value})} required />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>SPECIALIZATION</label>
+                  <div className="input-wrap">
+                    <Award size={18} />
+                    <input type="text" placeholder="e.g. Strength & Conditioning" value={newTrainer.specialty} onChange={e => setNewTrainer({...newTrainer, specialty: e.target.value})} required />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-6">
+                    <div className="form-group">
+                      <label>MONTHLY SALARY</label>
+                      <div className="input-wrap">
+                        <CreditCard size={18} />
+                        <input type="text" placeholder="₹55,000" value={newTrainer.salary} onChange={e => setNewTrainer({...newTrainer, salary: e.target.value})} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="form-group">
+                      <label>SHIFT HOURS</label>
+                      <div className="input-wrap">
+                        <Clock size={18} />
+                        <input type="text" placeholder="6AM - 11AM" value={newTrainer.times} onChange={e => setNewTrainer({...newTrainer, times: e.target.value})} />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <button type="submit" className="submit-btn">ADD TO SYSTEM</button>
+
+              <div className="modal-footer">
+                <button type="button" className="cancel-btn" onClick={() => setIsAddTrainerModalOpen(false)}>CANCEL</button>
+                <button type="submit" className="submit-btn">ENLIST TRAINER</button>
+              </div>
             </form>
           </ModalContent>
         </ModalOverlay>
@@ -505,6 +541,50 @@ const TableCard = styled.div`
 `;
 
 const LoaderArea = styled.div` display: flex; align-items: center; justify-content: center; height: 300px; .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } } `;
+
+const ModalOverlay = styled.div`
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+  animation: fadeIn 0.3s ease;
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+`;
+
+const ModalContent = styled.div`
+  background: #fff; width: 100%; max-width: 600px; border-radius: 32px; padding: 40px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative;
+  &.animate-in { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px;
+    .title-area { 
+      display: flex; gap: 20px; 
+      .icon-wrap { background: #1e293b; color: #fff; padding: 12px; border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+      h3 { margin: 0; font-weight: 900; letter-spacing: -1px; font-size: 1.5rem; }
+      p { margin: 5px 0 0; font-size: 0.85rem; color: #64748b; font-weight: 500; }
+    }
+    .close-btn { background: #f1f5f9; border: none; color: #64748b; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; &:hover { background: #e2e8f0; color: #000; } }
+  }
+
+  .form-group {
+    margin-bottom: 25px;
+    label { display: block; font-size: 0.7rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px; margin-bottom: 10px; }
+    .input-wrap {
+      display: flex; align-items: center; gap: 12px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 4px 18px; transition: all 0.2s;
+      svg { color: #cbd5e1; transition: color 0.2s; }
+      input { width: 100%; background: none; border: none; outline: none; padding: 12px 0; font-weight: 600; font-size: 0.95rem; color: #1e293b; &::placeholder { color: #94a3b8; } }
+      &:focus-within { border-color: #007bff; box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1); svg { color: #007bff; } }
+    }
+  }
+
+  .modal-footer {
+    display: flex; gap: 20px; margin-top: 40px;
+    button { flex: 1; padding: 16px; border-radius: 16px; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+    .cancel-btn { background: #f1f5f9; color: #64748b; border: none; &:hover { background: #e2e8f0; } }
+    .submit-btn { background: #1e293b; color: #fff; border: none; box-shadow: 0 10px 25px rgba(30, 41, 59, 0.2); &:hover { background: #000; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); } }
+  }
+`;
+
 const Overlay = styled.div` position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 450; `;
 
 export default AdminDashboard;
