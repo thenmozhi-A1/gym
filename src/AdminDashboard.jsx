@@ -139,7 +139,7 @@ const AdminDashboard = () => {
   );
 
   const filteredPayments = payments.filter(p =>
-    p.user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.user?.fullName || p.fullName || p.userName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.paymentStatus?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -357,7 +357,10 @@ const AdminDashboard = () => {
                     <tbody>
                       {filteredPayments.map(p => (
                         <tr key={p.id}>
-                          <td className="fw-bold">{p.user?.fullName || "N/A"}</td>
+                          <td>
+                            <div className="fw-bold">{p.user?.fullName || p.fullName || p.userName || "Unknown Warrior"}</div>
+                            <div className="sub-text">{p.user?.email || ""}</div>
+                          </td>
                           <td className="text-warning fw-bold">₹{p.amount}</td>
                           <td><StatusBadge status={p.paymentStatus}>{p.paymentStatus}</StatusBadge></td>
                           <td className="sub-text">{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : "---"}</td>
