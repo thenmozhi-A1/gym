@@ -25,7 +25,7 @@ const API_BASE = "https://gymj-9.onrender.com/api";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState("overview");
   const [users, setUsers] = useState([]);
   const [payments, setPayments] = useState([]);
   const [attendance, setAttendance] = useState([]);
@@ -68,18 +68,21 @@ const AdminDashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      if (activeTab === "users") {
-        const [uRes, pRes, aRes] = await Promise.all([
+      if (activeTab === "overview" || activeTab === "users") {
+        const [uRes, pRes, aRes, cRes] = await Promise.all([
           fetch(`${API_BASE}/users`),
           fetch(`${API_BASE}/payments`),
-          fetch(`${API_BASE}/attendance`)
+          fetch(`${API_BASE}/attendance`),
+          fetch(`${API_BASE}/consultations`)
         ]);
         const uData = await uRes.json();
         const pData = await pRes.json();
         const aData = await aRes.json();
+        const cData = await cRes.json();
         setUsers(Array.isArray(uData) ? uData : []);
         setPayments(Array.isArray(pData) ? pData : []);
         setAttendance(Array.isArray(aData) ? aData : []);
+        setConsultations(Array.isArray(cData) ? cData : []);
       } else if (activeTab === "payments") {
         const res = await fetch(`${API_BASE}/payments`);
         const data = await res.json();
@@ -179,6 +182,7 @@ const AdminDashboard = () => {
 
         <NavMenu>
           {[
+            { id: "overview", icon: <TrendingUp size={20} />, label: "Overview" },
             { id: "users", icon: <Users size={20} />, label: "Warriors" },
             { id: "payments", icon: <CreditCard size={20} />, label: "Revenue" },
             { id: "attendance", icon: <Clock size={20} />, label: "Arena Logs" },
@@ -204,8 +208,8 @@ const AdminDashboard = () => {
       <MainContent>
         <Header className="reveal">
           <TitleArea>
-            <h1>{activeTab.toUpperCase()} <span className="text-warning">COMMAND</span></h1>
-            <p>Real-time analytics and management for the SlayFit Arena.</p>
+            <h1>{activeTab === "overview" ? "ARENA" : activeTab.toUpperCase()} <span className="text-warning">COMMAND</span></h1>
+            <p>{activeTab === "overview" ? "Holistic performance overview of SlayFit Arena." : "Real-time analytics and management for the SlayFit Arena."}</p>
           </TitleArea>
 
           <SearchArea>
@@ -268,6 +272,75 @@ const AdminDashboard = () => {
             </LoadingState>
           ) : (
             <div className="responsive-table">
+              {activeTab === "overview" && (
+                <OverviewSection>
+                  <div className="row g-4">
+                    <div className="col-lg-8">
+                      <OverviewCard>
+                        <div className="card-header">
+                          <h5><TrendingUp size={18} /> PERFORMANCE TREND</h5>
+                        </div>
+                        <ChartBox>
+                          {/* Simple CSS-based bar chart */}
+                          <div className="bars">
+                            {[45, 60, 40, 85, 70, 95, 80].map((h, i) => (
+                              <div key={i} className="bar-group">
+                                <div className="bar" style={{ height: `${h}%` }}></div>
+                                <span>D{i+1}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </ChartBox>
+                      </OverviewCard>
+                    </div>
+                    <div className="col-lg-4">
+                      <OverviewCard>
+                        <div className="card-header">
+                          <h5><Zap size={18} /> MEMBER MIX</h5>
+                        </div>
+                        <div className="stats-list py-3">
+                          <div className="stat-item">
+                            <span>Monthly</span>
+                            <div className="progress"><div className="fill" style={{width: '65%'}}></div></div>
+                          </div>
+                          <div className="stat-item">
+                            <span>Yearly Elite</span>
+                            <div className="progress"><div className="fill warning" style={{width: '25%'}}></div></div>
+                          </div>
+                          <div className="stat-item">
+                            <span>VIP Warriors</span>
+                            <div className="progress"><div className="fill success" style={{width: '10%'}}></div></div>
+                          </div>
+                        </div>
+                      </OverviewCard>
+                    </div>
+                    <div className="col-12 mt-4">
+                      <OverviewCard>
+                        <div className="card-header">
+                          <h5><Activity size={18} /> RECENT ACTIVITY FEED</h5>
+                        </div>
+                        <ActivityFeed>
+                          {[...payments.slice(0, 3), ...attendance.slice(0, 3)].sort(() => 0.5 - Math.random()).map((item, i) => (
+                            <div className="activity-item" key={i}>
+                              <div className="icon-box">
+                                {item.amount ? <CreditCard size={14} /> : <Clock size={14} />}
+                              </div>
+                              <div className="details">
+                                <p className="mb-0">
+                                  <span className="fw-bold">{item.user?.fullName || "A Warrior"}</span> 
+                                  {item.amount ? ` paid ₹${item.amount} for ${item.planName}` : ` logged a session at ${item.checkInTime}`}
+                                </p>
+                                <span className="time">{item.paymentDate || item.attendanceDate}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </ActivityFeed>
+                      </OverviewCard>
+                    </div>
+                  </div>
+                </OverviewSection>
+              )}
+
               <Table>
                 {activeTab === "users" && (
                   <>
@@ -610,6 +683,46 @@ const LoadingState = styled.div`
   display: flex; flex-direction: column; justify-content: center; align-items: center; height: 400px; gap: 20px; color: #666;
   .spinner { width: 40px; height: 40px; border: 4px solid #111; border-top-color: #ffc107; border-radius: 50%; animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+`;
+
+const OverviewSection = styled.div` padding: 10px 0; `;
+const OverviewCard = styled.div`
+  background: rgba(255,255,255,0.02);
+  border: 1px solid #222;
+  border-radius: 20px;
+  padding: 25px;
+  height: 100%;
+  
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+    h5 { font-size: 0.8rem; font-weight: 900; letter-spacing: 1px; color: #ffc107; margin: 0; display: flex; align-items: center; gap: 10px; }
+  }
+
+  .stat-item {
+    margin-bottom: 20px;
+    span { display: block; font-size: 0.8rem; font-weight: 700; color: #666; margin-bottom: 8px; }
+    .progress { height: 6px; background: #111; border-radius: 10px; overflow: hidden;
+      .fill { height: 100%; background: #4318ff; &.warning { background: #ffc107; } &.success { background: #05cd99; } }
+    }
+  }
+`;
+
+const ChartBox = styled.div`
+  height: 200px; display: flex; align-items: flex-end; padding-top: 20px;
+  .bars { display: flex; align-items: flex-end; justify-content: space-between; width: 100%; height: 100%; }
+  .bar-group { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 10%;
+    .bar { width: 100%; background: linear-gradient(to top, #ffc107, #ff9800); border-radius: 5px; min-height: 5px; transition: height 1s ease; }
+    span { font-size: 0.6rem; font-weight: 900; color: #444; }
+  }
+`;
+
+const ActivityFeed = styled.div`
+  display: flex; flex-direction: column; gap: 15px;
+  .activity-item {
+    display: flex; align-items: center; gap: 15px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.01);
+    .icon-box { width: 32px; height: 32px; border-radius: 8px; background: #111; display: flex; align-items: center; justify-content: center; color: #ffc107; }
+    .details { p { font-size: 0.85rem; color: #eee; } .time { font-size: 0.7rem; color: #444; font-weight: 700; } }
+  }
 `;
 
 const ErrorMessage = styled.div` background: rgba(255,91,91,0.1); color: #ff5b5b; padding: 20px; border-radius: 15px; border: 1px solid rgba(255,91,91,0.2); display: flex; align-items: center; gap: 15px; font-weight: 700; `;
