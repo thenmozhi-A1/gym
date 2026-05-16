@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {
@@ -58,6 +58,8 @@ const AdminDashboard = () => {
   const [payrollSearchTerm, setPayrollSearchTerm] = useState("");
   const [payrollRoleFilter, setPayrollRoleFilter] = useState("ALL");
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const holdTimer = useRef(null);
+  const progressTimer = useRef(null);
   const [enrollProgress, setEnrollProgress] = useState(0);
   const [newStaff, setNewStaff] = useState({ 
     name: "", specialty: "", salary: "", times: "", email: "", 
@@ -137,31 +139,28 @@ const AdminDashboard = () => {
   const isWebAuthnSupported = () => window.PublicKeyCredential !== undefined && typeof window.PublicKeyCredential === 'function';
   const bufferToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
 
-  const handleEnrollBiometric = () => {
+  const startScan = (e) => {
+    if (e) e.preventDefault();
     if (!newStaff.email) {
       alert("Please enter the staff email before scanning fingerprint.");
       return;
     }
+    if (newStaff.fingerprintEnrolled) return;
     
     setIsEnrolling(true);
     setEnrollProgress(0);
     
-    // Simulate a 3-second hardware fingerprint scan
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.floor(Math.random() * 15) + 5; // Random increments for realism
-      if (progress > 99) progress = 99;
-      setEnrollProgress(progress);
-    }, 300);
+    let p = 0;
+    progressTimer.current = setInterval(() => {
+      p = Math.min(p + 2, 100);
+      setEnrollProgress(p);
+    }, 50);
 
-    setTimeout(() => {
-      clearInterval(interval);
+    holdTimer.current = setTimeout(() => {
+      clearInterval(progressTimer.current);
       setEnrollProgress(100);
       
-      // Generate a mock secure hash simulating the hardware response
       const mockCredentialId = "fp_" + btoa(newStaff.email + Date.now()).substring(0, 32);
-      
-      // Save locally so the employee can "log in" via the Employee portal mock scanner
       const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
       stored[newStaff.email] = mockCredentialId;
       localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
@@ -170,7 +169,16 @@ const AdminDashboard = () => {
         setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: mockCredentialId }));
         setIsEnrolling(false);
       }, 500);
-    }, 3000); // Exactly 3 seconds
+    }, 2500);
+  };
+
+  const cancelScan = () => {
+    clearTimeout(holdTimer.current);
+    clearInterval(progressTimer.current);
+    if (isEnrolling) {
+      setIsEnrolling(false);
+      setEnrollProgress(0);
+    }
   };
 
   const handleAddStaff = async (e) => {
@@ -928,7 +936,12 @@ const AdminDashboard = () => {
                   <label>BIOMETRIC ENROLLMENT <span style={{color: '#ffc107', fontSize: '0.7rem', marginLeft: '10px'}}>REQUIRED FOR LOGIN</span></label>
                   <div 
                     className={`biometric-enroll-pad ${newStaff.fingerprintEnrolled ? 'success' : isEnrolling ? 'scanning' : ''}`}
-                    onClick={!newStaff.fingerprintEnrolled && !isEnrolling ? handleEnrollBiometric : undefined}
+                    onTouchStart={!newStaff.fingerprintEnrolled ? startScan : undefined}
+                    onTouchEnd={!newStaff.fingerprintEnrolled ? cancelScan : undefined}
+                    onMouseDown={!newStaff.fingerprintEnrolled ? startScan : undefined}
+                    onMouseUp={!newStaff.fingerprintEnrolled ? cancelScan : undefined}
+                    onMouseLeave={!newStaff.fingerprintEnrolled ? cancelScan : undefined}
+                    style={{ userSelect: 'none', cursor: newStaff.fingerprintEnrolled ? 'default' : 'pointer', WebkitUserSelect: 'none' }}
                   >
                     <div className="pad-content">
                       <Fingerprint size={32} />
@@ -937,7 +950,7 @@ const AdminDashboard = () => {
                           ? "✓ FINGERPRINT CAPTURED" 
                           : isEnrolling 
                             ? `SCANNING... ${enrollProgress}%` 
-                            : "TAP TO SCAN STAFF FINGERPRINT"}
+                            : "PRESS & HOLD TO SCAN FINGERPRINT"}
                       </span>
                     </div>
                     {isEnrolling && <div className="progress-bar"><div className="fill" style={{width: `${enrollProgress}%`}}></div></div>}
