@@ -119,19 +119,65 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleEnrollBiometric = () => {
+  const isWebAuthnSupported = () => window.PublicKeyCredential !== undefined && typeof window.PublicKeyCredential === 'function';
+  const bufferToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
+
+  const handleEnrollBiometric = async () => {
+    if (!newStaff.email) {
+      alert("Please enter the staff email before scanning fingerprint.");
+      return;
+    }
+    if (!isWebAuthnSupported()) {
+      alert("Biometric scanning not supported on this browser/device.");
+      return;
+    }
+
     setIsEnrolling(true);
-    setEnrollProgress(0);
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 5;
-      setEnrollProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: `fp_${Date.now()}` }));
+    setEnrollProgress(20);
+    
+    try {
+      const challenge = new Uint8Array(32); 
+      window.crypto.getRandomValues(challenge);
+      const userId = new TextEncoder().encode(newStaff.email);
+      
+      setEnrollProgress(50);
+      const credential = await navigator.credentials.create({ 
+        publicKey: {
+          challenge, 
+          rp: { name: "SlayFit Gym", id: window.location.hostname },
+          user: { id: userId, name: newStaff.email, displayName: newStaff.name || newStaff.email },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+          authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", requireResidentKey: false },
+          timeout: 60000, 
+          attestation: "none",
+        }
+      });
+      
+      setEnrollProgress(80);
+      const credentialId = bufferToBase64(credential.rawId);
+      
+      // Save locally (same format as users so they can log in via Employee login using WebAuthn)
+      const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
+      stored[newStaff.email] = credentialId;
+      localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
+      
+      setEnrollProgress(100);
+      setTimeout(() => {
+        setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: credentialId }));
         setIsEnrolling(false);
+      }, 500);
+
+    } catch (err) {
+      setIsEnrolling(false);
+      setEnrollProgress(0);
+      if (err.name === "InvalidStateError") { 
+        const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
+        const existingId = stored[newStaff.email] || `fp_${Date.now()}`;
+        setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: existingId }));
+      } else {
+        alert(`Fingerprint scan failed: ${err.message || err.name}`);
       }
-    }, 100);
+    }
   };
 
   const handleAddStaff = async (e) => {
