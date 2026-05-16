@@ -94,7 +94,17 @@ const Navbar = () => {
                 </button>
                 <ul className="dropdown-menu dropdown-menu-end">
                   <li>
-                    <Link className="dropdown-item d-flex align-items-center" to={userRole === 'ADMIN' ? "/AdminDashboard" : "/userdashboard"} onClick={handleNavClick}>
+                    <Link 
+                      className="dropdown-item d-flex align-items-center" 
+                      to={
+                        userRole?.toUpperCase() === 'ADMIN' 
+                          ? "/AdminDashboard" 
+                          : (['TRAINER', 'FRONT OFFICE', 'STAFF'].some(r => userRole?.toUpperCase().includes(r)) 
+                            ? "/EmployeeDashboard" 
+                            : "/userdashboard")
+                      } 
+                      onClick={handleNavClick}
+                    >
                       <LayoutDashboard size={16} className="me-2" /> Dashboard
                     </Link>
                   </li>
