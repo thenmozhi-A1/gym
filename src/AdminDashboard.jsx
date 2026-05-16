@@ -85,10 +85,10 @@ const AdminDashboard = () => {
         setUsers(results[0]); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
         // Mock staffs data
         setStaffs([
-          { id: 1, name: "Alex Johnson", specialty: "Bodybuilding", students: 12, times: "06:00 AM - 11:00 AM", salary: "₹45,000", role: "Trainer" },
-          { id: 2, name: "Maya Patel", specialty: "Yoga & Flexibility", students: 18, times: "04:00 PM - 08:00 PM", salary: "₹52,000", role: "Trainer" },
-          { id: 5, name: "Jessica Smith", specialty: "Customer Relations", students: 0, times: "09:00 AM - 05:00 PM", salary: "₹35,000", role: "Front Office" },
-          { id: 6, name: "David Miller", specialty: "Sales & Billing", students: 0, times: "10:00 AM - 06:00 PM", salary: "₹38,000", role: "Front Office" }
+          { id: 1, name: "Alex Johnson", specialty: "Bodybuilding", students: 12, times: "06:00 AM - 11:00 AM", salary: "₹45,000", role: "Trainer", leaves: 2, permissions: 1 },
+          { id: 2, name: "Maya Patel", specialty: "Yoga & Flexibility", students: 18, times: "04:00 PM - 08:00 PM", salary: "₹52,000", role: "Trainer", leaves: 0, permissions: 3 },
+          { id: 5, name: "Jessica Smith", specialty: "Customer Relations", students: 0, times: "09:00 AM - 05:00 PM", salary: "₹35,000", role: "Front Office", leaves: 1, permissions: 0 },
+          { id: 6, name: "David Miller", specialty: "Sales & Billing", students: 0, times: "10:00 AM - 06:00 PM", salary: "₹38,000", role: "Front Office", leaves: 3, permissions: 2 }
         ]);
       } else {
         const data = results[0];
@@ -297,7 +297,15 @@ const AdminDashboard = () => {
                                   <div className="stat-group">
                                     <label>EMPLOYEES' NET PAY</label>
                                     <div className="amount-row">
-                                      <div className="amount">₹17,25,23.00</div>
+                                      <div className="amount">
+                                        ₹{staffs.reduce((acc, s) => {
+                                          const gross = parseInt(s.salary.replace(/[^\d]/g, ''));
+                                          const daily = gross / 30;
+                                          const leaveDed = daily * (s.leaves || 0);
+                                          const permDed = (daily / 8) * (s.permissions || 0);
+                                          return acc + (gross - leaveDed - permDed - 2450);
+                                        }, 0).toLocaleString()}
+                                      </div>
                                       <div className="trend-badge positive">+4.2% <ArrowUpRight size={12} /></div>
                                     </div>
                                   </div>
@@ -397,19 +405,36 @@ const AdminDashboard = () => {
                               <div className="table-responsive">
                                 <table className="table interactive-table">
                                   <thead>
-                                    <tr><th>EMPLOYEE</th><th>ROLE</th><th>GROSS PAY</th><th>DEDUCTIONS</th><th>NET PAY</th><th>STATUS</th></tr>
+                                    <tr><th>EMPLOYEE</th><th>ROLE</th><th>GROSS PAY</th><th>LEAVES/PERM</th><th>DEDUCTIONS</th><th>NET PAY</th><th>STATUS</th></tr>
                                   </thead>
                                   <tbody>
-                                    {staffs.filter(s => (payrollRoleFilter === "ALL" || s.role === payrollRoleFilter) && (s.name.toLowerCase().includes(payrollSearchTerm.toLowerCase()))).map(s => (
-                                      <tr key={s.id} onClick={() => setSelectedStaffForSlip(s)}>
-                                        <td><div className="u-cell"><div className="avatar-small">{s.name.charAt(0)}</div><div className="fw-bold">{s.name}</div></div></td>
-                                        <td><span className="badge bg-primary-light">{s.role}</span></td>
-                                        <td className="fw-bold">{s.salary}</td>
-                                        <td className="text-danger">₹2,450 <small style={{ display: 'block', fontSize: '0.6rem', opacity: 0.6 }}>TDS + PF</small></td>
-                                        <td className="fw-black text-primary">₹{(parseInt(s.salary.replace(/[^\d]/g, '')) - 2450).toLocaleString()}</td>
-                                        <td><span className="sync-badge">PAID</span></td>
-                                      </tr>
-                                    ))}
+                                    {staffs.filter(s => (payrollRoleFilter === "ALL" || s.role === payrollRoleFilter) && (s.name.toLowerCase().includes(payrollSearchTerm.toLowerCase()))).map(s => {
+                                      const gross = parseInt(s.salary.replace(/[^\d]/g, ''));
+                                      const daily = gross / 30;
+                                      const leaveDed = daily * (s.leaves || 0);
+                                      const permDed = (daily / 8) * (s.permissions || 0);
+                                      const netPay = gross - leaveDed - permDed - 2450;
+                                      
+                                      return (
+                                        <tr key={s.id} onClick={() => setSelectedStaffForSlip(s)}>
+                                          <td><div className="u-cell"><div className="avatar-small">{s.name.charAt(0)}</div><div className="fw-bold">{s.name}</div></div></td>
+                                          <td><span className="badge bg-primary-light">{s.role}</span></td>
+                                          <td className="fw-bold">{s.salary}</td>
+                                          <td>
+                                            <div className="d-flex flex-column">
+                                              <span className="text-danger" style={{fontSize: '0.75rem', fontWeight: 700}}>{s.leaves} Leaves</span>
+                                              <span className="text-warning" style={{fontSize: '0.65rem', fontWeight: 600}}>{s.permissions} Perms</span>
+                                            </div>
+                                          </td>
+                                          <td className="text-danger">
+                                            ₹{Math.floor(2450 + leaveDed + permDed).toLocaleString()}
+                                            <small style={{ display: 'block', fontSize: '0.6rem', opacity: 0.6 }}>TDS + PF + Attnd</small>
+                                          </td>
+                                          <td className="fw-black text-primary">₹{Math.floor(netPay).toLocaleString()}</td>
+                                          <td><span className="sync-badge">PAID</span></td>
+                                        </tr>
+                                      );
+                                    })}
                                   </tbody>
                                 </table>
                               </div>
@@ -423,20 +448,46 @@ const AdminDashboard = () => {
                                   <div className="slip-profile"><div className="big-avatar">{selectedStaffForSlip.name.charAt(0)}</div><div className="info"><h4>{selectedStaffForSlip.name}</h4><p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000}</p></div></div>
                                   <div className="slip-summary-cards">
                                     <div className="s-card green"><label>EARNINGS</label><div className="val">{selectedStaffForSlip.salary}</div></div>
-                                    <div className="s-card red"><label>DEDUCTIONS</label><div className="val">₹2,450</div></div>
+                                    <div className="s-card red">
+                                      <label>TOTAL DEDUCTIONS</label>
+                                      <div className="val">
+                                        ₹{Math.floor(2450 + (parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) + ((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0))).toLocaleString()}
+                                      </div>
+                                    </div>
                                   </div>
                                   <div className="slip-section">
                                     <h5>EARNINGS BREAKDOWN</h5>
                                     <div className="line-item"><span>Basic Salary</span> <span>{selectedStaffForSlip.salary}</span></div>
-                                    <div className="line-item"><span>HRA</span> <span>₹0.00</span></div>
+                                    <div className="line-item"><span>HRA / Incentives</span> <span>₹0.00</span></div>
                                   </div>
                                   <div className="slip-section">
-                                    <h5>DEDUCTIONS</h5>
+                                    <h5>ATTENDANCE DEDUCTIONS</h5>
+                                    <div className="line-item">
+                                      <span>Leaves ({selectedStaffForSlip.leaves || 0} days)</span> 
+                                      <span className="text-danger">-₹{Math.floor((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
+                                    </div>
+                                    <div className="line-item">
+                                      <span>Permissions ({selectedStaffForSlip.permissions || 0} hrs)</span> 
+                                      <span className="text-danger">-₹{Math.floor(((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30) / 8) * (selectedStaffForSlip.permissions || 0)).toLocaleString()}</span>
+                                    </div>
+                                  </div>
+                                  <div className="slip-section">
+                                    <h5>STATUTORY DEDUCTIONS</h5>
                                     <div className="line-item"><span>Provident Fund (PF)</span> <span>₹1,800</span></div>
-                                    <div className="line-item"><span>Professional Tax</span> <span>₹450</span></div>
+                                    <div className="line-item"><span>Professional Tax / TDS</span> <span>₹650</span></div>
                                   </div>
                                   <div className="slip-total">
-                                    <div className="total-row"><span>NET PAYABLE</span><span className="final-val">₹{(parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) - 2450).toLocaleString()}</span></div>
+                                    <div className="total-row">
+                                      <span>NET PAYABLE</span>
+                                      <span className="final-val">
+                                        ₹{Math.floor(
+                                          parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) - 
+                                          (parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) - 
+                                          ((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0)) - 
+                                          2450
+                                        ).toLocaleString()}
+                                      </span>
+                                    </div>
                                     <p>Payment via Bank Transfer • May 31, 2024</p>
                                   </div>
                                   <button className="download-btn-full">DOWNLOAD SLIP (PDF)</button>
