@@ -695,7 +695,7 @@ const Login = () => {
                       🔒 Admin Access
                     </a>
                     <span className="divider">|</span>
-                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setError(""); }}>
+                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); navigate("/EmployeeDashboard"); }}>
                       👤 Employee Login
                     </a>
                   </>
