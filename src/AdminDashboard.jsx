@@ -9,7 +9,6 @@ import {
   Search,
   CheckCircle,
   XCircle,
-  Menu as MenuIcon,
   X,
   MessageSquare,
   TrendingUp,
@@ -231,7 +230,7 @@ const AdminDashboard = () => {
             <div className="profile-chip">
               <div className="avatar">AD</div>
             </div>
-            <button className="mobile-toggle" onClick={() => setIsSidebarOpen(true)}><MenuIcon /></button>
+            <button className="mobile-toggle" onClick={() => setIsSidebarOpen(true)}><Layout size={24} /></button>
           </div>
         </Header>
 
