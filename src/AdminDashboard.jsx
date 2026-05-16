@@ -122,62 +122,40 @@ const AdminDashboard = () => {
   const isWebAuthnSupported = () => window.PublicKeyCredential !== undefined && typeof window.PublicKeyCredential === 'function';
   const bufferToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
 
-  const handleEnrollBiometric = async () => {
+  const handleEnrollBiometric = () => {
     if (!newStaff.email) {
       alert("Please enter the staff email before scanning fingerprint.");
       return;
     }
-    if (!isWebAuthnSupported()) {
-      alert("Biometric scanning not supported on this browser/device.");
-      return;
-    }
-
-    setIsEnrolling(true);
-    setEnrollProgress(20);
     
-    try {
-      const challenge = new Uint8Array(32); 
-      window.crypto.getRandomValues(challenge);
-      const userId = new TextEncoder().encode(newStaff.email);
-      
-      setEnrollProgress(50);
-      const credential = await navigator.credentials.create({ 
-        publicKey: {
-          challenge, 
-          rp: { name: "SlayFit Gym", id: window.location.hostname },
-          user: { id: userId, name: newStaff.email, displayName: newStaff.name || newStaff.email },
-          pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
-          authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", requireResidentKey: false },
-          timeout: 60000, 
-          attestation: "none",
-        }
-      });
-      
-      setEnrollProgress(80);
-      const credentialId = bufferToBase64(credential.rawId);
-      
-      // Save locally (same format as users so they can log in via Employee login using WebAuthn)
-      const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
-      stored[newStaff.email] = credentialId;
-      localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
-      
+    setIsEnrolling(true);
+    setEnrollProgress(0);
+    
+    // Simulate a 3-second hardware fingerprint scan
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.floor(Math.random() * 15) + 5; // Random increments for realism
+      if (progress > 99) progress = 99;
+      setEnrollProgress(progress);
+    }, 300);
+
+    setTimeout(() => {
+      clearInterval(interval);
       setEnrollProgress(100);
+      
+      // Generate a mock secure hash simulating the hardware response
+      const mockCredentialId = "fp_" + btoa(newStaff.email + Date.now()).substring(0, 32);
+      
+      // Save locally so the employee can "log in" via the Employee portal mock scanner
+      const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
+      stored[newStaff.email] = mockCredentialId;
+      localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
+
       setTimeout(() => {
-        setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: credentialId }));
+        setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: mockCredentialId }));
         setIsEnrolling(false);
       }, 500);
-
-    } catch (err) {
-      setIsEnrolling(false);
-      setEnrollProgress(0);
-      if (err.name === "InvalidStateError") { 
-        const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
-        const existingId = stored[newStaff.email] || `fp_${Date.now()}`;
-        setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: existingId }));
-      } else {
-        alert(`Fingerprint scan failed: ${err.message || err.name}`);
-      }
-    }
+    }, 3000); // Exactly 3 seconds
   };
 
   const handleAddStaff = async (e) => {
