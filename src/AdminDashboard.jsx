@@ -11,6 +11,7 @@ import {
   XCircle,
   X,
   MessageSquare,
+  Fingerprint,
   TrendingUp,
   Activity,
   Zap,
