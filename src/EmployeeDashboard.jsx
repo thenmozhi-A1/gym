@@ -18,6 +18,8 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
 
@@ -106,6 +108,72 @@ const EmployeeDashboard = () => {
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
+  };
+
+  const handleDownloadSlip = () => {
+    if (!employeeData) return;
+
+    const doc = new jsPDF();
+    const netPay = calculateNetPay();
+    const date = new Date();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const currentMonth = monthNames[date.getMonth()];
+    const currentYear = date.getFullYear();
+
+    // Header
+    doc.setFillColor(30, 41, 59); // Midnight Slate
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("SLAYFIT GYM", 105, 20, { align: "center" });
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`PAYSLIP FOR ${currentMonth.toUpperCase()} ${currentYear}`, 105, 30, { align: "center" });
+
+    // Employee Info
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(12);
+    doc.text(`Employee Name: ${employeeData.fullName || employeeData.name}`, 20, 55);
+    doc.text(`Designation: ${employeeData.role}`, 20, 62);
+    doc.text(`Email: ${employeeData.email}`, 20, 69);
+    doc.text(`Date of Issue: ${date.toLocaleDateString()}`, 140, 55);
+
+    // Earnings & Deductions Table
+    autoTable(doc, {
+      startY: 80,
+      head: [['Description', 'Earnings (INR)', 'Deductions (INR)']],
+      body: [
+        ['Basic Salary', employeeData.salary.toLocaleString(), '-'],
+        [`Leaves (${employeeData.leaves} days)`, '-', Math.floor((employeeData.salary / 30) * employeeData.leaves).toLocaleString()],
+        [`Permissions (${employeeData.permissions} hr)`, '-', Math.floor((employeeData.salary / 30 / 8) * employeeData.permissions).toLocaleString()],
+        ['Provident Fund (PF)', '-', '1,800'],
+        ['TDS / Professional Tax', '-', '650'],
+      ],
+      theme: 'striped',
+      headStyles: { fillColor: [0, 123, 255], textColor: [255, 255, 255] },
+      styles: { fontSize: 10, cellPadding: 5 }
+    });
+
+    // Summary
+    const finalY = (doc).lastAutoTable.finalY + 10;
+    doc.setDrawColor(226, 232, 240);
+    doc.line(20, finalY, 190, finalY);
+    
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Net Payable Amount:", 20, finalY + 15);
+    doc.setTextColor(0, 123, 255);
+    doc.text(`INR ${netPay.toLocaleString()}`, 190, finalY + 15, { align: "right" });
+
+    // Footer
+    doc.setTextColor(148, 163, 184);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    doc.text("This is a computer generated payslip and does not require a signature.", 105, 280, { align: "center" });
+    doc.text("SlayFit Gym - Elite Fitness Operations Center", 105, 285, { align: "center" });
+
+    doc.save(`Payslip_${employeeData.fullName || 'Employee'}_${currentMonth}.pdf`);
   };
 
   // Removed redundant secondary lock screen to show dashboard content immediately
@@ -201,7 +269,7 @@ const EmployeeDashboard = () => {
                 <h2>₹{calculateNetPay().toLocaleString()}</h2>
                 <div className="status-badge">Payment Processing</div>
               </div>
-              <button className="download-btn"><Download size={18} /> Download Slip</button>
+              <button className="download-btn" onClick={handleDownloadSlip}><Download size={18} /> Download Slip</button>
             </div>
 
             <div className="grid-2 mt-4">
