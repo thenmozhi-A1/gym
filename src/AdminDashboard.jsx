@@ -31,7 +31,11 @@ import {
   Trash2,
   Plus,
   Phone,
-  MapPin
+  MapPin,
+  FileText,
+  CheckSquare,
+  Briefcase,
+  FileCheck
 } from "lucide-react";
 
 const API_BASE = "https://gymj-9.onrender.com/api";
@@ -49,6 +53,7 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
   const [isPayrollDetailOpen, setIsPayrollDetailOpen] = useState(false);
+  const [payrollTab, setPayrollTab] = useState("overview"); // overview, payruns, attendance, tax
   const [selectedStaffForSlip, setSelectedStaffForSlip] = useState(null);
   const [payrollSearchTerm, setPayrollSearchTerm] = useState("");
   const [payrollRoleFilter, setPayrollRoleFilter] = useState("ALL");
@@ -252,342 +257,323 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               ) : activeTab === "payroll" ? (
-                <PayrollContainer className="animate-in" style={{ position: 'relative', overflow: 'hidden' }}>
-                  {!isPayrollDetailOpen ? (
-                    <>
-                      <div className="payroll-main">
-                        <header className="payroll-header">
-                          <h1 className="welcome">Welcome Slayfit!</h1>
-                          <div className="pay-run-status">
-                            <span>Process Pay Run for May 2024</span>
-                            <span className="badge-approved">APPROVED</span>
-                          </div>
-                        </header>
+                <PayrollContainer className="animate-in" style={{ position: 'relative', overflow: 'hidden', flexDirection: 'column' }}>
+                  {/* ── PAYROLL SUB-NAV ── */}
+                  <PayrollSubNav>
+                    <div className="nav-items">
+                      <button className={payrollTab === "overview" ? "active" : ""} onClick={() => setPayrollTab("overview")}>Overview</button>
+                      <button className={payrollTab === "payruns" ? "active" : ""} onClick={() => setPayrollTab("payruns")}>Pay Runs</button>
+                      <button className={payrollTab === "attendance" ? "active" : ""} onClick={() => setPayrollTab("attendance")}>Leave & Attendance</button>
+                      <button className={payrollTab === "tax" ? "active" : ""} onClick={() => setPayrollTab("tax")}>Tax & Forms</button>
+                    </div>
+                  </PayrollSubNav>
 
-                        {/* ── PAYROLL LIFECYCLE STEPPER ── */}
-                        <div className="payroll-stepper">
-                          <div className="step active">
-                            <div className="dot">1</div>
-                            <span>Data Verify</span>
-                          </div>
-                          <div className="connector active" />
-                          <div className="step active">
-                            <div className="dot">2</div>
-                            <span>Approval</span>
-                          </div>
-                          <div className="connector" />
-                          <div className="step">
-                            <div className="dot">3</div>
-                            <span>Bank Transfer</span>
-                          </div>
-                          <div className="connector" />
-                          <div className="step">
-                            <div className="dot">4</div>
-                            <span>Completed</span>
-                          </div>
-                        </div>
+                  <div className="payroll-content-wrapper" style={{ display: 'flex', gap: '30px' }}>
+                    {payrollTab === "overview" && (
+                      <>
+                        {!isPayrollDetailOpen ? (
+                          <>
+                            <div className="payroll-main">
+                              <header className="payroll-header">
+                                <h1 className="welcome">Welcome Slayfit!</h1>
+                                <div className="pay-run-status">
+                                  <span>Process Pay Run for May 2024</span>
+                                  <span className="badge-approved">APPROVED</span>
+                                </div>
+                              </header>
 
-                        <div className="hero-card">
-                          <div className="hero-stats">
-                            <div className="stat-group">
-                              <label>EMPLOYEES' NET PAY</label>
-                              <div className="amount-row">
-                                <div className="amount">₹17,25,23.00</div>
-                                <div className="trend-badge positive">+4.2% <ArrowUpRight size={12} /></div>
+                              <div className="payroll-stepper">
+                                <div className="step active"><div className="dot">1</div><span>Data Verify</span></div>
+                                <div className="connector active" />
+                                <div className="step active"><div className="dot">2</div><span>Approval</span></div>
+                                <div className="connector" />
+                                <div className="step"><div className="dot">3</div><span>Bank Transfer</span></div>
+                                <div className="connector" />
+                                <div className="step"><div className="dot">4</div><span>Completed</span></div>
                               </div>
-                            </div>
-                            <div className="stat-divider" />
-                            <div className="stat-group">
-                              <label>PAYMENT DATE</label>
-                              <div className="date">31 May 2024</div>
-                            </div>
-                            <div className="stat-divider" />
-                            <div className="stat-group">
-                              <label>NO. OF EMPLOYEES</label>
-                              <div className="count">1308</div>
-                            </div>
-                            <button className="btn-black" onClick={() => setIsPayrollDetailOpen(true)}>View Details</button>
-                          </div>
-                          <p className="hero-note">
-                            <Clock size={12} /> Pay your employees on 31/05/2024. Record it here once you made the payment.
-                          </p>
-                        </div>
 
-                        <div className="payroll-grid">
-                          <div className="grid-card deduction-card">
-                            <div className="card-header">
-                              <h5>DEDUCTION SUMMARY</h5>
-                              <select className="small-select"><option>Previous Month</option></select>
-                            </div>
-                            <div className="deduction-row">
-                              <div className="deduction-item">
-                                <div className="icon-circle"><Layers size={14} /></div>
-                                <label>EPF</label>
-                                <div className="val">₹39,73,913.00</div>
-                                <span className="link">View Details</span>
-                              </div>
-                              <div className="deduction-item">
-                                <div className="icon-circle gold"><Award size={14} /></div>
-                                <label>ESI</label>
-                                <div className="val">₹91,010.00</div>
-                                <span className="link">View Details</span>
-                              </div>
-                              <div className="deduction-item">
-                                <div className="icon-circle red"><TrendingDown size={14} /></div>
-                                <label>TDS DEDUCTION</label>
-                                <div className="val">₹1,15,89,089.00</div>
-                                <span className="link">View Details</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="grid-card summary-card">
-                            <h5>EMPLOYEE SUMMARY</h5>
-                            <div className="summary-body">
-                              <label>ACTIVE EMPLOYEES</label>
-                              <div className="big-count">1308</div>
-                              <span className="link">View Employees</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="chart-section">
-                          <div className="card-header">
-                            <div>
-                              <h5>PAYROLL COST SUMMARY</h5>
-                              <p className="sub-text">Historical view of total disbursals</p>
-                            </div>
-                            <select className="small-select"><option>Financial Year 2024</option></select>
-                          </div>
-                          
-                          <div className="chart-wrapper">
-                            <div className="y-axis">
-                              <span>₹1.5Cr</span>
-                              <span>₹1Cr</span>
-                              <span>₹50L</span>
-                              <span>₹0</span>
-                            </div>
-                            <div className="main-chart-area">
-                              <div className="chart-grid">
-                                <div className="grid-line" />
-                                <div className="grid-line" />
-                                <div className="grid-line" />
-                                <div className="grid-line" />
-                              </div>
-                              <div className="bars-container">
-                                {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((month, i) => {
-                                  const heights = [60, 75, 65, 80, 95, 70, 85, 90, 100, 110, 105, 115];
-                                  const h = heights[i];
-                                  return (
-                                    <div key={month} className="bar-column">
-                                      <div className="bar-stack">
-                                        <div className="segment red" title="Statutories" style={{ height: `${h * 0.15}%` }} />
-                                        <div className="segment orange" title="Taxes" style={{ height: `${h * 0.25}%` }} />
-                                        <div className="segment dark" title="Net Pay" style={{ height: `${h * 0.6}%` }} />
-                                      </div>
-                                      <span className="month-label">{month}</span>
+                              <div className="hero-card">
+                                <div className="hero-stats">
+                                  <div className="stat-group">
+                                    <label>EMPLOYEES' NET PAY</label>
+                                    <div className="amount-row">
+                                      <div className="amount">₹17,25,23.00</div>
+                                      <div className="trend-badge positive">+4.2% <ArrowUpRight size={12} /></div>
                                     </div>
-                                  );
-                                })}
+                                  </div>
+                                  <div className="stat-divider" />
+                                  <div className="stat-group">
+                                    <label>PAYMENT DATE</label>
+                                    <div className="date">31 May 2024</div>
+                                  </div>
+                                  <div className="stat-divider" />
+                                  <div className="stat-group">
+                                    <label>NO. OF EMPLOYEES</label>
+                                    <div className="count">1308</div>
+                                  </div>
+                                  <button className="btn-black" onClick={() => setIsPayrollDetailOpen(true)}>View Details</button>
+                                </div>
+                                <p className="hero-note">
+                                  <Clock size={12} /> Pay your employees on 31/05/2024. Record it here once you made the payment.
+                                </p>
                               </div>
-                            </div>
-                          </div>
 
-                          <div className="chart-legend-grid">
-                            <div className="legend-item">
-                              <div className="dot dark" />
-                              <div className="details">
-                                <label>NET PAY</label>
-                                <strong>₹13,40,50,440.00</strong>
-                              </div>
-                            </div>
-                            <div className="legend-item">
-                              <div className="dot orange" />
-                              <div className="details">
-                                <label>TAXES</label>
-                                <strong>₹1,51,56,551.00</strong>
-                              </div>
-                            </div>
-                            <div className="legend-item">
-                              <div className="dot red" />
-                              <div className="details">
-                                <label>STATUTORIES</label>
-                                <strong>₹50,16,123.00</strong>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                              <div className="payroll-grid">
+                                <div className="grid-card deduction-card">
+                                  <div className="card-header">
+                                    <h5>DEDUCTION SUMMARY</h5>
+                                    <select className="small-select"><option>Previous Month</option></select>
+                                  </div>
+                                  <div className="deduction-row">
+                                    <div className="deduction-item">
+                                      <div className="icon-circle"><Layers size={14} /></div>
+                                      <label>EPF</label>
+                                      <div className="val">₹39,73,913.00</div>
+                                      <span className="link">View Details</span>
+                                    </div>
+                                    <div className="deduction-item">
+                                      <div className="icon-circle gold"><Award size={14} /></div>
+                                      <label>ESI</label>
+                                      <div className="val">₹91,010.00</div>
+                                      <span className="link">View Details</span>
+                                    </div>
+                                    <div className="deduction-item">
+                                      <div className="icon-circle red"><TrendingDown size={14} /></div>
+                                      <label>TDS DEDUCTION</label>
+                                      <div className="val">₹1,15,89,089.00</div>
+                                      <span className="link">View Details</span>
+                                    </div>
+                                  </div>
+                                </div>
 
-                      <aside className="payroll-sidebar">
-                        <h5>To Do Tasks</h5>
-                        <div className="task-list">
+                                <div className="grid-card summary-card">
+                                  <h5>EMPLOYEE SUMMARY</h5>
+                                  <div className="summary-body">
+                                    <label>ACTIVE EMPLOYEES</label>
+                                    <div className="big-count">1308</div>
+                                    <span className="link">View Employees</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <aside className="payroll-sidebar">
+                              <h5>To Do Tasks</h5>
+                              <div className="task-list">
+                                {[
+                                  { label: "136 Reimbursement Claim(s)", sub: "Pending Approval" },
+                                  { label: "96 Proof of Investment(s)", sub: "Pending Approval" },
+                                  { label: "55 Salary Revision(s)", sub: "Pending Approval" }
+                                ].map((task, i) => (
+                                  <div key={i} className="task-item">
+                                    <div className="task-info"><h6>{task.label}</h6><p>{task.sub}</p></div>
+                                    <button className="btn-outline">Approve</button>
+                                  </div>
+                                ))}
+                              </div>
+                            </aside>
+                          </>
+                        ) : (
+                          <div className="payroll-detail-overlay animate-in">
+                            <div className="detail-header">
+                              <div className="d-flex align-items-center gap-4">
+                                <button className="back-btn" onClick={() => setIsPayrollDetailOpen(false)}>
+                                  <ArrowUpRight style={{ transform: 'rotate(-135deg)' }} size={16} /> BACK
+                                </button>
+                                <h2>Payroll <small>DETAILS / MAY 2024</small></h2>
+                              </div>
+                              <div className="d-flex gap-3">
+                                <div className="search-box-mini"><Search size={14} /><input type="text" placeholder="Search Staff..." value={payrollSearchTerm} onChange={(e) => setPayrollSearchTerm(e.target.value)} /></div>
+                                <select className="role-filter-select" value={payrollRoleFilter} onChange={(e) => setPayrollRoleFilter(e.target.value)}>
+                                  <option value="ALL">All Roles</option>
+                                  <option value="Trainer">Trainers</option>
+                                  <option value="Front Office">Front Office</option>
+                                </select>
+                                <button className="export-btn pdf"><Activity size={14} /> PDF</button>
+                              </div>
+                            </div>
+                            
+                            <TableCard style={{ border: 'none', padding: 0, background: 'transparent' }}>
+                              <div className="table-responsive">
+                                <table className="table interactive-table">
+                                  <thead>
+                                    <tr><th>EMPLOYEE</th><th>ROLE</th><th>GROSS PAY</th><th>DEDUCTIONS</th><th>NET PAY</th><th>STATUS</th></tr>
+                                  </thead>
+                                  <tbody>
+                                    {staffs.filter(s => (payrollRoleFilter === "ALL" || s.role === payrollRoleFilter) && (s.name.toLowerCase().includes(payrollSearchTerm.toLowerCase()))).map(s => (
+                                      <tr key={s.id} onClick={() => setSelectedStaffForSlip(s)}>
+                                        <td><div className="u-cell"><div className="avatar-small">{s.name.charAt(0)}</div><div className="fw-bold">{s.name}</div></div></td>
+                                        <td><span className="badge bg-primary-light">{s.role}</span></td>
+                                        <td className="fw-bold">{s.salary}</td>
+                                        <td className="text-danger">₹2,450 <small style={{ display: 'block', fontSize: '0.6rem', opacity: 0.6 }}>TDS + PF</small></td>
+                                        <td className="fw-black text-primary">₹{(parseInt(s.salary.replace(/[^\d]/g, '')) - 2450).toLocaleString()}</td>
+                                        <td><span className="sync-badge">PAID</span></td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </TableCard>
+
+                            {selectedStaffForSlip && (
+                              <>
+                                <div className="drawer-overlay" onClick={() => setSelectedStaffForSlip(null)} />
+                                <div className="pay-slip-drawer animate-slide-left">
+                                  <div className="drawer-header"><h3>Employee Pay Slip</h3><button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button></div>
+                                  <div className="slip-profile"><div className="big-avatar">{selectedStaffForSlip.name.charAt(0)}</div><div className="info"><h4>{selectedStaffForSlip.name}</h4><p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000}</p></div></div>
+                                  <div className="slip-summary-cards">
+                                    <div className="s-card green"><label>EARNINGS</label><div className="val">{selectedStaffForSlip.salary}</div></div>
+                                    <div className="s-card red"><label>DEDUCTIONS</label><div className="val">₹2,450</div></div>
+                                  </div>
+                                  <div className="slip-section">
+                                    <h5>EARNINGS BREAKDOWN</h5>
+                                    <div className="line-item"><span>Basic Salary</span> <span>{selectedStaffForSlip.salary}</span></div>
+                                    <div className="line-item"><span>HRA</span> <span>₹0.00</span></div>
+                                  </div>
+                                  <div className="slip-section">
+                                    <h5>DEDUCTIONS</h5>
+                                    <div className="line-item"><span>Provident Fund (PF)</span> <span>₹1,800</span></div>
+                                    <div className="line-item"><span>Professional Tax</span> <span>₹450</span></div>
+                                  </div>
+                                  <div className="slip-total">
+                                    <div className="total-row"><span>NET PAYABLE</span><span className="final-val">₹{(parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) - 2450).toLocaleString()}</span></div>
+                                    <p>Payment via Bank Transfer • May 31, 2024</p>
+                                  </div>
+                                  <button className="download-btn-full">DOWNLOAD SLIP (PDF)</button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {payrollTab === "payruns" && (
+                      <div className="payroll-main animate-in">
+                        <header className="payroll-header">
+                          <h1 className="welcome">Pay Runs</h1>
+                          <button className="btn-black"><Plus size={18} /> Create Pay Run</button>
+                        </header>
+                        <div className="payrun-list">
                           {[
-                            { label: "136 Reimbursement Claim(s)", sub: "Pending Approval" },
-                            { label: "96 Proof of Investment(s)", sub: "Pending Approval" },
-                            { label: "55 Salary Revision(s)", sub: "Pending Approval" }
-                          ].map((task, i) => (
-                            <div key={i} className="task-item">
-                              <div className="task-info">
-                                <h6>{task.label}</h6>
-                                <p>{task.sub}</p>
+                            { month: "May 2024", status: "PROCESSING", amount: "₹17,25,230", employees: 1308, date: "May 31, 2024" },
+                            { month: "April 2024", status: "COMPLETED", amount: "₹16,80,450", employees: 1295, date: "Apr 30, 2024" },
+                            { month: "March 2024", status: "COMPLETED", amount: "₹16,50,000", employees: 1280, date: "Mar 31, 2024" }
+                          ].map((run, i) => (
+                            <div key={i} className="payrun-card">
+                              <div className="run-info">
+                                <h3>{run.month}</h3>
+                                <p>Scheduled for {run.date}</p>
                               </div>
-                              <button className="btn-outline">Approve</button>
+                              <div className="run-stats">
+                                <div><label>NET PAY</label><strong>{run.amount}</strong></div>
+                                <div><label>EMPLOYEES</label><strong>{run.employees}</strong></div>
+                              </div>
+                              <div className="run-status">
+                                <span className={`badge ${run.status === 'COMPLETED' ? 'bg-success-light' : 'bg-primary-light'}`}>{run.status}</span>
+                              </div>
+                              <button className="btn-outline">View Details</button>
                             </div>
                           ))}
                         </div>
-                      </aside>
-                    </>
-                  ) : (
-                    <div className="payroll-detail-overlay animate-in">
-                      <div className="detail-header">
-                        <div className="d-flex align-items-center gap-4">
-                          <button className="back-btn" onClick={() => setIsPayrollDetailOpen(false)}>
-                            <ArrowUpRight style={{ transform: 'rotate(-135deg)' }} size={16} /> BACK
-                          </button>
-                          <h2>Payroll <small>DETAILS / MAY 2024</small></h2>
-                        </div>
-                        <div className="d-flex gap-3">
-                          <div className="search-box-mini">
-                            <Search size={14} />
-                            <input 
-                              type="text" 
-                              placeholder="Search Staff..." 
-                              value={payrollSearchTerm}
-                              onChange={(e) => setPayrollSearchTerm(e.target.value)}
-                            />
+                      </div>
+                    )}
+
+                    {payrollTab === "attendance" && (
+                      <div className="payroll-main animate-in">
+                        <header className="payroll-header">
+                          <h1 className="welcome">Leave & Attendance</h1>
+                          <div className="d-flex gap-2">
+                            <button className="btn-outline">Attendance Logs</button>
+                            <button className="btn-black">Leave Policy</button>
                           </div>
-                          <select 
-                            className="role-filter-select"
-                            value={payrollRoleFilter}
-                            onChange={(e) => setPayrollRoleFilter(e.target.value)}
-                          >
-                            <option value="ALL">All Roles</option>
-                            <option value="Trainer">Trainers</option>
-                            <option value="Front Office">Front Office</option>
-                          </select>
-                          <button className="export-btn pdf"><Activity size={14} /> PDF</button>
+                        </header>
+                        <div className="attendance-grid">
+                          <div className="grid-card">
+                            <h5>Pending Leave Requests</h5>
+                            <div className="request-list">
+                              {[
+                                { name: "Marcus Aurelius", role: "Trainer", type: "Sick Leave", dates: "May 18 - May 20", reason: "Fever" },
+                                { name: "David Miller", role: "Front Office", type: "Casual Leave", dates: "May 22", reason: "Family Function" }
+                              ].map((req, i) => (
+                                <div key={i} className="request-item">
+                                  <div className="req-profile">
+                                    <div className="avatar-small">{req.name.charAt(0)}</div>
+                                    <div><strong>{req.name}</strong><p>{req.role}</p></div>
+                                  </div>
+                                  <div className="req-details">
+                                    <span className="type">{req.type}</span>
+                                    <span className="dates">{req.dates}</span>
+                                  </div>
+                                  <div className="req-actions">
+                                    <button className="btn-icon text-success"><CheckCircle size={18} /></button>
+                                    <button className="btn-icon text-danger"><XCircle size={18} /></button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="grid-card">
+                            <h5>Monthly Attendance Summary</h5>
+                            <div className="summary-list">
+                              <div className="summary-item"><span>Present Today</span> <strong>128/130</strong></div>
+                              <div className="summary-item"><span>On Leave</span> <strong>2</strong></div>
+                              <div className="summary-item"><span>Late Arrivals</span> <strong>5</strong></div>
+                            </div>
+                            <button className="btn-outline w-100 mt-3">View Full Report</button>
+                          </div>
                         </div>
                       </div>
-                      
-                      <TableCard style={{ border: 'none', padding: 0, background: 'transparent' }}>
-                        <div className="table-responsive">
-                          <table className="table interactive-table">
-                            <thead>
-                              <tr>
-                                <th>EMPLOYEE</th>
-                                <th>ROLE</th>
-                                <th>GROSS PAY</th>
-                                <th>DEDUCTIONS</th>
-                                <th>NET PAY</th>
-                                <th>STATUS</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {staffs
-                                .filter(s => 
-                                  (payrollRoleFilter === "ALL" || s.role === payrollRoleFilter) &&
-                                  (s.name.toLowerCase().includes(payrollSearchTerm.toLowerCase()))
-                                )
-                                .map(s => (
-                                <tr key={s.id} onClick={() => setSelectedStaffForSlip(s)}>
-                                  <td>
-                                    <div className="u-cell">
-                                      <div className="avatar-small">{s.name.charAt(0)}</div>
-                                      <div className="fw-bold">{s.name}</div>
-                                    </div>
-                                  </td>
-                                  <td><span className="badge bg-primary-light">{s.role}</span></td>
-                                  <td className="fw-bold">{s.salary}</td>
-                                  <td className="text-danger">₹2,450 <small style={{ display: 'block', fontSize: '0.6rem', opacity: 0.6 }}>TDS + PF</small></td>
-                                  <td className="fw-black text-primary">₹{(parseInt(s.salary.replace(/[^\d]/g, '')) - 2450).toLocaleString()}</td>
-                                  <td><span className="sync-badge">PAID</span></td>
-                                </tr>
-                              ))}
-                              {/* Extra mock rows for "high fidelity" */}
-                              {[1,2,3,4,5,6,7].map(i => {
-                                const name = `Employee #${1300 + i}`;
-                                const role = i % 2 === 0 ? "Trainer" : "Front Office";
-                                if (payrollSearchTerm && !name.toLowerCase().includes(payrollSearchTerm.toLowerCase())) return null;
-                                if (payrollRoleFilter !== "ALL" && role !== payrollRoleFilter) return null;
-                                return (
-                                  <tr key={`mock-${i}`} onClick={() => setSelectedStaffForSlip({ name, role, salary: "₹42,000" })}>
-                                    <td>
-                                      <div className="u-cell">
-                                        <div className="avatar-small">E</div>
-                                        <div className="fw-bold">{name}</div>
-                                      </div>
-                                    </td>
-                                    <td><span className="badge bg-primary-light">{role}</span></td>
-                                    <td className="fw-bold">₹42,000</td>
-                                    <td className="text-danger">₹1,200 <small style={{ display: 'block', fontSize: '0.6rem', opacity: 0.6 }}>TDS + PF</small></td>
-                                    <td className="fw-black text-primary">₹40,800</td>
-                                    <td><span className="sync-badge">PAID</span></td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      </TableCard>
+                    )}
 
-                      {/* ── PAY SLIP DRAWER ── */}
-                      {selectedStaffForSlip && (
-                        <>
-                          <div className="drawer-overlay" onClick={() => setSelectedStaffForSlip(null)} />
-                          <div className="pay-slip-drawer animate-slide-left">
-                            <div className="drawer-header">
-                              <h3>Employee Pay Slip</h3>
-                              <button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button>
-                            </div>
-                            
-                            <div className="slip-profile">
-                              <div className="big-avatar">{selectedStaffForSlip.name.charAt(0)}</div>
-                              <div className="info">
-                                <h4>{selectedStaffForSlip.name}</h4>
-                                <p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000}</p>
+                    {payrollTab === "tax" && (
+                      <div className="payroll-main animate-in">
+                        <header className="payroll-header">
+                          <h1 className="welcome">Tax & Forms</h1>
+                          <button className="btn-outline"><FileText size={18} /> Tax Calendar</button>
+                        </header>
+                        <div className="tax-grid">
+                          <div className="grid-card">
+                            <h5>Statutory Compliances</h5>
+                            <div className="tax-list-mini">
+                              <div className="tax-item-mini">
+                                <div className="tax-icon"><FileCheck size={18} /></div>
+                                <div className="tax-info"><strong>EPF Filing</strong><p>Due: June 15, 2024</p></div>
+                                <button className="btn-link">Pay Now</button>
+                              </div>
+                              <div className="tax-item-mini">
+                                <div className="tax-icon"><FileCheck size={18} /></div>
+                                <div className="tax-info"><strong>ESI Filing</strong><p>Due: June 15, 2024</p></div>
+                                <button className="btn-link">Pay Now</button>
+                              </div>
+                              <div className="tax-item-mini">
+                                <div className="tax-icon"><FileCheck size={18} /></div>
+                                <div className="tax-info"><strong>TDS Return (Q1)</strong><p>Due: July 31, 2024</p></div>
+                                <button className="btn-link disabled">Upcoming</button>
                               </div>
                             </div>
-
-                            <div className="slip-summary-cards">
-                              <div className="s-card green">
-                                <label>EARNINGS</label>
-                                <div className="val">{selectedStaffForSlip.salary}</div>
-                              </div>
-                              <div className="s-card red">
-                                <label>DEDUCTIONS</label>
-                                <div className="val">₹2,450</div>
-                              </div>
-                            </div>
-
-                            <div className="slip-section">
-                              <h5>EARNINGS BREAKDOWN</h5>
-                              <div className="line-item"><span>Basic Salary</span> <span>{selectedStaffForSlip.salary}</span></div>
-                              <div className="line-item"><span>HRA</span> <span>₹0.00</span></div>
-                              <div className="line-item"><span>Performance Bonus</span> <span>₹0.00</span></div>
-                            </div>
-
-                            <div className="slip-section">
-                              <h5>DEDUCTIONS</h5>
-                              <div className="line-item"><span>Provident Fund (PF)</span> <span>₹1,800</span></div>
-                              <div className="line-item"><span>Professional Tax</span> <span>₹450</span></div>
-                              <div className="line-item"><span>TDS Deduction</span> <span>₹200</span></div>
-                            </div>
-
-                            <div className="slip-total">
-                              <div className="total-row">
-                                <span>NET PAYABLE</span>
-                                <span className="final-val">₹{(parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) - 2450).toLocaleString()}</span>
-                              </div>
-                              <p>Payment via Bank Transfer • May 31, 2024</p>
-                            </div>
-
-                            <button className="download-btn-full">DOWNLOAD SLIP (PDF)</button>
                           </div>
-                        </>
-                      )}
-                    </div>
-                  )}
+                          <div className="grid-card">
+                            <h5>Employee Tax Forms</h5>
+                            <div className="form-downloads">
+                              <div className="form-item">
+                                <span>Form 16 (FY 2023-24)</span>
+                                <button className="btn-icon"><ArrowUpRight size={16} /></button>
+                              </div>
+                              <div className="form-item">
+                                <span>Investment Declarations</span>
+                                <button className="btn-icon"><ArrowUpRight size={16} /></button>
+                              </div>
+                              <div className="form-item">
+                                <span>Salary Certificates</span>
+                                <button className="btn-icon"><ArrowUpRight size={16} /></button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </PayrollContainer>
               ) : (
                 <TableCard className="animate-in">
@@ -986,50 +972,6 @@ const PayrollContainer = styled.div`
     }
   }
 
-  .chart-section {
-    background: #fff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 30px;
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; h5 { font-weight: 800; margin: 0; color: #1e293b; } .sub-text { font-size: 0.75rem; color: #94a3b8; margin: 5px 0 0; font-weight: 600; } }
-    
-    .chart-wrapper {
-      display: flex; gap: 20px; height: 220px; margin-bottom: 40px;
-      .y-axis { display: flex; flex-direction: column; justify-content: space-between; padding-bottom: 25px; span { font-size: 0.65rem; font-weight: 700; color: #cbd5e1; text-align: right; min-width: 45px; } }
-      .main-chart-area {
-        flex: 1; position: relative;
-        .chart-grid {
-          position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding-bottom: 25px;
-          .grid-line { width: 100%; height: 1px; background: #f1f5f9; }
-        }
-        .bars-container {
-          position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 10px;
-          .bar-column {
-            flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; height: 100%; justify-content: flex-end;
-            .bar-stack {
-              width: 24px; display: flex; flex-direction: column-reverse; gap: 2px; border-radius: 4px; overflow: hidden; transition: all 0.3s;
-              &:hover { transform: scaleX(1.2); cursor: pointer; }
-              .segment { width: 100%; transition: all 0.3s; }
-              .segment.red { background: #ef4444; }
-              .segment.orange { background: #f97316; }
-              .segment.dark { background: #1e293b; }
-            }
-            .month-label { font-size: 0.65rem; font-weight: 800; color: #94a3b8; }
-          }
-        }
-      }
-    }
-
-    .chart-legend-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding-top: 30px; border-top: 1px solid #f1f5f9;
-      .legend-item {
-        display: flex; align-items: flex-start; gap: 12px;
-        .dot { width: 12px; height: 12px; border-radius: 4px; margin-top: 4px; }
-        .dot.red { background: #ef4444; }
-        .dot.orange { background: #f97316; }
-        .dot.dark { background: #1e293b; }
-        .details { label { display: block; font-size: 0.6rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px; margin-bottom: 4px; } strong { font-size: 0.9rem; font-weight: 800; color: #1e293b; } }
-      }
-    }
-  }
-
   .payroll-sidebar {
     width: 320px; background: #fff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 25px;
     @media (max-width: 1200px) { width: 100%; }
@@ -1044,6 +986,58 @@ const PayrollContainer = styled.div`
         }
         .btn-outline { background: #fff; border: 1px solid #e2e8f0; color: #1e293b; font-weight: 800; font-size: 0.7rem; padding: 6px 12px; border-radius: 8px; cursor: pointer; &:hover { background: #1e293b; color: #fff; border-color: #1e293b; } }
       }
+    }
+  }
+
+  .payrun-list {
+    display: flex; flex-direction: column; gap: 15px;
+    .payrun-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 25px;
+      display: grid; grid-template-columns: 2fr 2fr 1fr 1fr; align-items: center; gap: 20px;
+      transition: all 0.2s; &:hover { border-color: #007bff; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.02); }
+      h3 { margin: 0; font-size: 1.1rem; font-weight: 800; }
+      p { margin: 4px 0 0; font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+      .run-stats { display: flex; gap: 30px; label { display: block; font-size: 0.6rem; font-weight: 800; color: #94a3b8; margin-bottom: 4px; } strong { font-size: 0.95rem; font-weight: 800; } }
+    }
+  }
+
+  .attendance-grid, .tax-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 25px;
+    @media (max-width: 992px) { grid-template-columns: 1fr; }
+  }
+
+  .request-list, .summary-list, .tax-list-mini, .form-downloads {
+    display: flex; flex-direction: column; gap: 12px; margin-top: 20px;
+  }
+
+  .request-item {
+    background: #f8fafc; border-radius: 16px; padding: 15px; display: flex; justify-content: space-between; align-items: center;
+    .req-profile { display: flex; align-items: center; gap: 12px; strong { font-size: 0.85rem; } p { font-size: 0.7rem; color: #94a3b8; margin: 0; } }
+    .req-details { text-align: right; .type { display: block; font-size: 0.75rem; font-weight: 800; color: #1e293b; } .dates { font-size: 0.7rem; color: #94a3b8; } }
+  }
+
+  .tax-item-mini {
+    display: flex; align-items: center; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 16px;
+    .tax-icon { width: 36px; height: 36px; background: #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #007bff; }
+    .tax-info { flex: 1; strong { font-size: 0.85rem; } p { font-size: 0.7rem; color: #94a3b8; margin: 0; } }
+  }
+
+  .form-item {
+    display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #f8fafc; border-radius: 12px;
+    span { font-size: 0.85rem; font-weight: 600; }
+  }
+
+  .btn-link { background: none; border: none; color: #007bff; font-weight: 800; font-size: 0.75rem; cursor: pointer; &.disabled { color: #94a3b8; cursor: default; } }
+`;
+
+const PayrollSubNav = styled.div`
+  background: #fff; border-bottom: 1px solid #e2e8f0; margin: -40px -40px 30px -40px; padding: 0 40px;
+  .nav-items {
+    display: flex; gap: 30px;
+    button {
+      background: none; border: none; padding: 20px 0; font-size: 0.85rem; font-weight: 700; color: #64748b; cursor: pointer; position: relative;
+      &.active { color: #1e293b; &::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #1e293b; border-radius: 3px 3px 0 0; } }
+      &:hover { color: #1e293b; }
     }
   }
 `;
@@ -1106,12 +1100,6 @@ const ModalContent = styled.div`
     .cancel-btn { background: #f1f5f9; color: #64748b; border: none; &:hover { background: #e2e8f0; } }
     .submit-btn { background: #1e293b; color: #fff; border: none; box-shadow: 0 10px 25px rgba(30, 41, 59, 0.2); &:hover { background: #000; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); } }
   }
-
-  .payroll-detail-overlay {
-    position: absolute; inset: 0; background: #f8fafc; z-index: 100; padding: 40px; display: flex; flex-direction: column; gap: 30px;
-    &.animate-in { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-    
     .detail-header {
       display: flex; justify-content: space-between; align-items: center;
       .back-btn { background: none; border: none; color: #007bff; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer; &:hover { gap: 12px; } }
