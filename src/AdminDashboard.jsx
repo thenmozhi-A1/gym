@@ -796,7 +796,7 @@ const AdminDashboard = () => {
             <form onSubmit={handleAddStaff}>
               <div className="form-grid">
                 <div className="row">
-                  <div className="col-6">
+                  <div className="col-12 col-md-6">
                     <div className="form-group">
                       <label>STAFF FULL NAME</label>
                       <div className="input-wrap">
@@ -805,7 +805,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="col-6">
+                  <div className="col-12 col-md-6">
                     <div className="form-group">
                       <label>STAFF ROLE</label>
                       <div className="input-wrap">
@@ -828,7 +828,7 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="row">
-                  <div className="col-6">
+                  <div className="col-12 col-md-6">
                     <div className="form-group">
                       <label>PHONE NUMBER</label>
                       <div className="input-wrap">
@@ -837,7 +837,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="col-6">
+                  <div className="col-12 col-md-6">
                     <div className="form-group">
                       <label>HOME ADDRESS</label>
                       <div className="input-wrap">
@@ -857,7 +857,7 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="row">
-                  <div className="col-6">
+                  <div className="col-12 col-md-6">
                     <div className="form-group">
                       <label>MONTHLY SALARY</label>
                       <div className="input-wrap">
@@ -866,7 +866,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="col-6">
+                  <div className="col-12 col-md-6">
                     <div className="form-group">
                       <label>SHIFT HOURS</label>
                       <div className="input-wrap">
@@ -1199,6 +1199,11 @@ const ModalContent = styled.div`
   box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative;
   max-height: 90vh; overflow-y: auto;
   
+  @media (max-width: 768px) {
+    padding: 25px;
+    border-radius: 24px;
+  }
+  
   &::-webkit-scrollbar { width: 6px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -1208,8 +1213,14 @@ const ModalContent = styled.div`
   
   .modal-header {
     display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px;
+    @media (max-width: 768px) {
+      margin-bottom: 25px;
+    }
     .title-area { 
       display: flex; gap: 20px; 
+      @media (max-width: 768px) {
+        gap: 12px;
+      }
       .icon-wrap { background: #1e293b; color: #fff; padding: 12px; border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
       h3 { margin: 0; font-weight: 900; letter-spacing: -1px; font-size: 1.5rem; }
       p { margin: 5px 0 0; font-size: 0.85rem; color: #64748b; font-weight: 500; }
