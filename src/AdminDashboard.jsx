@@ -144,7 +144,7 @@ const AdminDashboard = () => {
     const staffToAdd = { 
       fullName: newStaff.name,
       email: newStaff.email,
-      password: "staff123", // Default password for new staff
+      password: "staff123",
       role: newStaff.role,
       salary: newStaff.salary,
       times: newStaff.times,
@@ -157,20 +157,20 @@ const AdminDashboard = () => {
     };
     
     try {
-      const res = await fetch(`${API_BASE}/users/register`, {
+      const response = await fetch(`${API_BASE}/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(staffToAdd)
       });
       
-      if (!res.ok) {
-        const err = await res.json();
-        alert(`Failed to add staff: ${err.error}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(`Failed to add staff: ${errorData.error}`);
         return;
       }
 
-      const savedStaff = await res.json();
-      setStaffs([savedStaff, ...staffs]);
+      const savedStaffData = await response.json();
+      setStaffs([savedStaffData, ...staffs]);
       setNewStaff({ 
         name: "", specialty: "", salary: "", times: "", email: "", 
         role: "Trainer", phone: "", address: "", 
@@ -178,7 +178,7 @@ const AdminDashboard = () => {
       });
       setIsAddStaffModalOpen(false);
       alert("STAFF MEMBER ADDED & BIOMETRICS STORED IN DATABASE!");
-    } catch (err) {
+    } catch (error) {
       alert("Cannot connect to server to save staff.");
     }
   };
