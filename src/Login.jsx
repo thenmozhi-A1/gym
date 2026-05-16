@@ -55,6 +55,7 @@ const Login = () => {
   const progressTimer = React.useRef(null);
   const IS_MOBILE = React.useMemo(() => isMobileDevice(), []);
   const [isAdminLogin, setIsAdminLogin] = useState(false);
+  const [isEmployeeLogin, setIsEmployeeLogin] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -480,14 +481,16 @@ const Login = () => {
             </>
           ) : (
             <>
-              <h2>{isNewUser ? "Join the Elite" : "Biometric Access Control"}</h2>
+              <h2>{isNewUser ? "Join the Elite" : isAdminLogin ? "Admin Secure Access" : isEmployeeLogin ? "Employee Secure Access" : "Biometric Access Control"}</h2>
               <p className="subtitle">
                 {isNewUser 
                   ? "Start your fitness journey with SlayFit today." 
-                  : "Please scan your fingerprint to enter the gym or access your staff dashboard."}
+                  : isEmployeeLogin
+                    ? "Scan your staff fingerprint to access the SlayFit operations dashboard."
+                    : "Please scan your fingerprint to enter the gym."}
               </p>
 
-              {!isNewUser && (
+              {!isNewUser && !isAdminLogin && (
                 <BiometricSection>
                   {IS_MOBILE ? (
                     /* ── MOBILE LOGIN: touch pad ── */
@@ -676,12 +679,12 @@ const Login = () => {
               )}
 
               <div className="auth-footer">
-                {!isNewUser && !isAdminLogin ? (
+                {!isNewUser && !isAdminLogin && !isEmployeeLogin ? (
                   <a href="#" onClick={(e) => { e.preventDefault(); setIsNewUser(true); }}>
                     New User? Create Account
                   </a>
-                ) : isAdminLogin ? (
-                  <a href="#" onClick={(e) => { e.preventDefault(); setIsAdminLogin(false); }}>
+                ) : isAdminLogin || isEmployeeLogin ? (
+                  <a href="#" onClick={(e) => { e.preventDefault(); setIsAdminLogin(false); setIsEmployeeLogin(false); }}>
                     ← Back to Member Login
                   </a>
                 ) : (
@@ -689,13 +692,13 @@ const Login = () => {
                     Already have an account? Login
                   </a>
                 )}
-                {!isAdminLogin && !isNewUser && (
+                {!isAdminLogin && !isNewUser && !isEmployeeLogin && (
                   <>
-                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setIsAdminLogin(true); setIsNewUser(false); setError(""); }}>
+                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setIsAdminLogin(true); setIsNewUser(false); setIsEmployeeLogin(false); setError(""); }}>
                       🔒 Admin Access
                     </a>
                     <span className="divider">|</span>
-                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); navigate("/EmployeeDashboard"); }}>
+                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setIsEmployeeLogin(true); setIsAdminLogin(false); setIsNewUser(false); setError(""); }}>
                       👤 Employee Login
                     </a>
                   </>
