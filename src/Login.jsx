@@ -172,8 +172,10 @@ const Login = () => {
       localStorage.setItem('userName', user.fullName); localStorage.setItem('userEmail', user.email);
       localStorage.setItem('userRole', user.role);
       setTimeout(() => { 
-        if (user.role === 'ADMIN') navigate('/AdminDashboard');
-        else if (['Trainer', 'Front Office'].includes(user.role)) navigate('/EmployeeDashboard');
+        console.log("Login Role Detected:", user.role);
+        const upperRole = user.role?.toUpperCase();
+        if (upperRole === 'ADMIN') navigate('/AdminDashboard');
+        else if (upperRole === 'TRAINER' || upperRole === 'FRONT OFFICE' || user.role === 'Trainer' || user.role === 'Front Office') navigate('/EmployeeDashboard');
         else navigate('/userdashboard');
         window.location.reload(); 
       }, 1500);
@@ -315,8 +317,10 @@ const Login = () => {
         localStorage.setItem("userEmail", data.email);
         localStorage.setItem("userRole", data.role); // Store role
 
-        if (data.role === 'ADMIN') navigate('/AdminDashboard');
-        else if (['Trainer', 'Front Office'].includes(data.role)) navigate('/EmployeeDashboard');
+        console.log("Login Data Detected:", data.role);
+        const upperRole = data.role?.toUpperCase();
+        if (upperRole === 'ADMIN') navigate('/AdminDashboard');
+        else if (upperRole === 'TRAINER' || upperRole === 'FRONT OFFICE' || data.role === 'Trainer' || data.role === 'Front Office') navigate('/EmployeeDashboard');
         else navigate('/userdashboard');
         window.location.reload();
       }
@@ -424,8 +428,10 @@ const Login = () => {
       localStorage.setItem("userRole", user.role);
 
       setTimeout(() => {
-        if (user.role === 'ADMIN') navigate('/AdminDashboard');
-        else if (['Trainer', 'Front Office'].includes(user.role)) navigate('/EmployeeDashboard');
+        console.log("Biometric Role Detected:", user.role);
+        const upperRole = user.role?.toUpperCase();
+        if (upperRole === 'ADMIN') navigate('/AdminDashboard');
+        else if (upperRole === 'TRAINER' || upperRole === 'FRONT OFFICE' || user.role === 'Trainer' || user.role === 'Front Office') navigate('/EmployeeDashboard');
         else navigate('/userdashboard');
         window.location.reload();
       }, 1500);
