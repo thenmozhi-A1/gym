@@ -119,6 +119,21 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteStaff = async (id) => {
+    if (!window.confirm("Remove this staff member from the system?")) return;
+    try {
+      const res = await fetch(`${API_BASE}/users/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setStaffs(staffs.filter(s => s.id !== id));
+        setUsers(users.filter(u => u.id !== id));
+      } else {
+        alert("Failed to remove staff.");
+      }
+    } catch (err) {
+      alert("Error processing staff removal.");
+    }
+  };
+
   const isWebAuthnSupported = () => window.PublicKeyCredential !== undefined && typeof window.PublicKeyCredential === 'function';
   const bufferToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
 
@@ -728,7 +743,7 @@ const AdminDashboard = () => {
                           {activeTab === "payments" && <><th>WARRIOR</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
                           {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
                           {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
-                          {activeTab === "staffs" && <><th>STAFF NAME</th><th>ROLE</th><th>SPECIALTY / TASK</th><th>SHIFT TIME</th><th>SALARY</th></>}
+                          {activeTab === "staffs" && <><th>STAFF NAME</th><th>ROLE</th><th>SPECIALTY / TASK</th><th>SHIFT TIME</th><th>SALARY</th><th>ACTIONS</th></>}
                         </tr>
                       </thead>
                       <tbody>
@@ -790,6 +805,14 @@ const AdminDashboard = () => {
                             <td>{s.specialty}</td>
                             <td className="fw-bold text-secondary">{s.times}</td>
                             <td className="fw-black text-primary">{s.salary}</td>
+                            <td>
+                              <div className="d-flex gap-2">
+                                <button className="btn-icon text-danger" onClick={() => handleDeleteStaff(s.id)} title="Remove Staff">
+                                  <Trash2 size={16} />
+                                </button>
+                                <button className="btn-icon"><MoreVertical size={16} /></button>
+                              </div>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
