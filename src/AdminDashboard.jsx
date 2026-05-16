@@ -57,7 +57,14 @@ const AdminDashboard = () => {
   const [selectedStaffForSlip, setSelectedStaffForSlip] = useState(null);
   const [payrollSearchTerm, setPayrollSearchTerm] = useState("");
   const [payrollRoleFilter, setPayrollRoleFilter] = useState("ALL");
-  const [newStaff, setNewStaff] = useState({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer", phone: "", address: "" });
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  const [enrollProgress, setEnrollProgress] = useState(0);
+  const [newStaff, setNewStaff] = useState({ 
+    name: "", specialty: "", salary: "", times: "", email: "", 
+    role: "Trainer", phone: "", address: "", 
+    fingerprintEnrolled: false, 
+    fingerprintHash: "" 
+  });
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -116,14 +123,51 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleEnrollBiometric = () => {
+    setIsEnrolling(true);
+    setEnrollProgress(0);
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 5;
+      setEnrollProgress(progress);
+      if (progress >= 100) {
+        clearInterval(interval);
+        setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: `fp_${Date.now()}` }));
+        setIsEnrolling(false);
+      }
+    }, 100);
+  };
+
   const handleAddStaff = (e) => {
     e.preventDefault();
     if (!newStaff.name || !newStaff.role) return;
-    const staffToAdd = { ...newStaff, id: Date.now(), students: 0, status: "ACTIVE" };
+    if (!newStaff.fingerprintEnrolled) {
+      alert("Please enroll staff fingerprint before adding them to the system.");
+      return;
+    }
+    const staffToAdd = { 
+      ...newStaff, 
+      id: Date.now(), 
+      students: 0, 
+      status: "ACTIVE",
+      leaves: 0,
+      permissions: 0
+    };
+    
+    // Simulate saving fingerprint to system
+    const storedCreds = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
+    storedCreds[newStaff.email] = newStaff.fingerprintHash;
+    localStorage.setItem("webauthnCredentials", JSON.stringify(storedCreds));
+    localStorage.setItem("lastEnrolledEmail", newStaff.email);
+
     setStaffs([staffToAdd, ...staffs]);
-    setNewStaff({ name: "", specialty: "", salary: "", times: "", email: "", role: "Trainer", phone: "", address: "" });
+    setNewStaff({ 
+      name: "", specialty: "", salary: "", times: "", email: "", 
+      role: "Trainer", phone: "", address: "", 
+      fingerprintEnrolled: false, fingerprintHash: "" 
+    });
     setIsAddStaffModalOpen(false);
-    alert("STAFF MEMBER ADDED TO SYSTEM SUCCESSFULLY!");
+    alert("STAFF MEMBER ADDED & BIOMETRICS ENROLLED SUCCESSFULLY!");
   };
 
   return (
@@ -400,7 +444,7 @@ const AdminDashboard = () => {
                                 <button className="export-btn pdf"><Activity size={14} /> PDF</button>
                               </div>
                             </div>
-                            
+
                             <TableCard style={{ border: 'none', padding: 0, background: 'transparent' }}>
                               <div className="table-responsive">
                                 <table className="table interactive-table">
@@ -414,7 +458,7 @@ const AdminDashboard = () => {
                                       const leaveDed = daily * (s.leaves || 0);
                                       const permDed = (daily / 8) * (s.permissions || 0);
                                       const netPay = gross - leaveDed - permDed - 2450;
-                                      
+
                                       return (
                                         <tr key={s.id} onClick={() => setSelectedStaffForSlip(s)}>
                                           <td><div className="u-cell"><div className="avatar-small">{s.name.charAt(0)}</div><div className="fw-bold">{s.name}</div></div></td>
@@ -422,8 +466,8 @@ const AdminDashboard = () => {
                                           <td className="fw-bold">{s.salary}</td>
                                           <td>
                                             <div className="d-flex flex-column">
-                                              <span className="text-danger" style={{fontSize: '0.75rem', fontWeight: 700}}>{s.leaves} Leaves</span>
-                                              <span className="text-warning" style={{fontSize: '0.65rem', fontWeight: 600}}>{s.permissions} Perms</span>
+                                              <span className="text-danger" style={{ fontSize: '0.75rem', fontWeight: 700 }}>{s.leaves} Leaves</span>
+                                              <span className="text-warning" style={{ fontSize: '0.65rem', fontWeight: 600 }}>{s.permissions} Perms</span>
                                             </div>
                                           </td>
                                           <td className="text-danger">
@@ -463,11 +507,11 @@ const AdminDashboard = () => {
                                   <div className="slip-section">
                                     <h5>ATTENDANCE DEDUCTIONS</h5>
                                     <div className="line-item">
-                                      <span>Leaves ({selectedStaffForSlip.leaves || 0} days)</span> 
+                                      <span>Leaves ({selectedStaffForSlip.leaves || 0} days)</span>
                                       <span className="text-danger">-₹{Math.floor((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
                                     </div>
                                     <div className="line-item">
-                                      <span>Permissions ({selectedStaffForSlip.permissions || 0} hrs)</span> 
+                                      <span>Permissions ({selectedStaffForSlip.permissions || 0} hrs)</span>
                                       <span className="text-danger">-₹{Math.floor(((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30) / 8) * (selectedStaffForSlip.permissions || 0)).toLocaleString()}</span>
                                     </div>
                                   </div>
@@ -481,9 +525,9 @@ const AdminDashboard = () => {
                                       <span>NET PAYABLE</span>
                                       <span className="final-val">
                                         ₹{Math.floor(
-                                          parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) - 
-                                          (parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) - 
-                                          ((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0)) - 
+                                          parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) -
+                                          (parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) -
+                                          ((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0)) -
                                           2450
                                         ).toLocaleString()}
                                       </span>
@@ -819,6 +863,26 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                 </div>
+
+                <div className="form-group">
+                  <label>BIOMETRIC ENROLLMENT <span style={{color: '#ffc107', fontSize: '0.7rem', marginLeft: '10px'}}>REQUIRED FOR LOGIN</span></label>
+                  <div 
+                    className={`biometric-enroll-pad ${newStaff.fingerprintEnrolled ? 'success' : isEnrolling ? 'scanning' : ''}`}
+                    onClick={!newStaff.fingerprintEnrolled && !isEnrolling ? handleEnrollBiometric : undefined}
+                  >
+                    <div className="pad-content">
+                      <Fingerprint size={32} />
+                      <span>
+                        {newStaff.fingerprintEnrolled 
+                          ? "✓ FINGERPRINT CAPTURED" 
+                          : isEnrolling 
+                            ? `SCANNING... ${enrollProgress}%` 
+                            : "TAP TO SCAN STAFF FINGERPRINT"}
+                      </span>
+                    </div>
+                    {isEnrolling && <div className="progress-bar"><div className="fill" style={{width: `${enrollProgress}%`}}></div></div>}
+                  </div>
+                </div>
               </div>
 
               <div className="modal-footer">
@@ -1151,6 +1215,18 @@ const ModalContent = styled.div`
     .cancel-btn { background: #f1f5f9; color: #64748b; border: none; &:hover { background: #e2e8f0; } }
     .submit-btn { background: #1e293b; color: #fff; border: none; box-shadow: 0 10px 25px rgba(30, 41, 59, 0.2); &:hover { background: #000; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.2); } }
   }
+
+  .biometric-enroll-pad {
+    background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 20px; padding: 25px; cursor: pointer; transition: all 0.3s; margin-top: 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; position: relative; overflow: hidden;
+    .pad-content { display: flex; align-items: center; gap: 15px; color: #64748b; font-weight: 800; font-size: 0.85rem; }
+    &:hover { border-color: #007bff; background: rgba(0, 123, 255, 0.02); .pad-content { color: #007bff; } }
+    &.scanning { border-color: #007bff; background: rgba(0, 123, 255, 0.05); .pad-content { color: #007bff; animation: pulse 1s infinite; } }
+    &.success { border-color: #28a745; background: rgba(40, 167, 69, 0.05); border-style: solid; .pad-content { color: #28a745; } }
+
+    .progress-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #e2e8f0; .fill { height: 100%; background: #007bff; transition: width 0.1s linear; } }
+  }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     .detail-header {
       display: flex; justify-content: space-between; align-items: center;
       .back-btn { background: none; border: none; color: #007bff; font-weight: 800; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; cursor: pointer; &:hover { gap: 12px; } }
