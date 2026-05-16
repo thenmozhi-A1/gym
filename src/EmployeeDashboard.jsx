@@ -108,44 +108,8 @@ const EmployeeDashboard = () => {
     navigate("/login");
   };
 
-  if (!isVerified) {
-    return (
-      <LockScreen>
-        <div className="aurora-bg" />
-        <div className="lock-content">
-          <div className="logo">
-            <Zap size={32} color="#007bff" />
-            <span>SLAYFIT</span>
-          </div>
-          <h2>Secure Employee Access</h2>
-          <p>Please scan your registered fingerprint to access your personal dashboard.</p>
-          
-          <div className={`fingerprint-scanner ${scanState}`} onClick={scanState === 'idle' ? handleFingerprintScan : undefined}>
-            <div className="scanner-ring">
-              <Fingerprint size={80} className="icon" />
-              {scanState === 'scanning' && <div className="sweep" />}
-            </div>
-            {scanState === 'scanning' && (
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: `${scanProgress}%` }} />
-              </div>
-            )}
-          </div>
-
-          <div className="status-label">
-            {scanState === 'idle' && "Tap scanner to begin"}
-            {scanState === 'scanning' && `Verifying Biometrics... ${scanProgress}%`}
-            {scanState === 'success' && <span className="text-success"><ShieldCheck size={18} /> Identity Verified</span>}
-            {scanState === 'error' && <span className="text-danger"><ShieldAlert size={18} /> Authentication Failed</span>}
-          </div>
-
-          <button className="back-btn" onClick={() => navigate("/login")}>
-            <ArrowLeft size={16} /> Back to Login
-          </button>
-        </div>
-      </LockScreen>
-    );
-  }
+  // Removed redundant secondary lock screen to show dashboard content immediately
+  // if (!isVerified) { ... }
 
   return (
     <DashboardContainer>
