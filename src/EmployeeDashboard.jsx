@@ -49,14 +49,24 @@ const EmployeeDashboard = () => {
             ? parseInt(me.salary.replace(/[^0-9]/g, '')) 
             : (me.salary || 0);
 
+          const attendanceLog = me.attendance || [
+            { date: "May 15", status: "Present", checkIn: "06:05 AM", checkOut: "11:15 AM" },
+            { date: "May 14", status: "Present", checkIn: "05:58 AM", checkOut: "11:05 AM" },
+            { date: "May 13", status: "Leave", checkIn: "-", checkOut: "-" },
+            { date: "May 12", status: "Present", checkIn: "06:00 AM", checkOut: "11:00 AM" },
+            { date: "May 11", status: "Present", checkIn: "05:55 AM", checkOut: "11:10 AM" },
+          ];
+
+          const daysWorked = attendanceLog.filter(log => log.status === "Present").length;
+          const leaves = attendanceLog.filter(log => log.status === "Leave").length;
+
           setEmployeeData({
             ...me,
             salary: cleanSalary,
-            attendance: me.attendance || [
-              { date: "May 15", status: "Present", checkIn: "06:05 AM", checkOut: "11:15 AM" },
-              { date: "May 14", status: "Present", checkIn: "05:58 AM", checkOut: "11:05 AM" },
-              { date: "May 13", status: "Leave", checkIn: "-", checkOut: "-" }
-            ]
+            attendance: attendanceLog,
+            daysWorked,
+            leaves,
+            permissions: me.permissions || 0
           });
         }
       } catch (err) {
@@ -163,11 +173,11 @@ const EmployeeDashboard = () => {
       <MainArea>
         <header className="main-header">
           <div className="welcome">
-            <h1>Welcome, {employeeData?.name}</h1>
-            <p>{employeeData?.role} • Elite Fitness Team</p>
+            <h1>Welcome, {employeeData?.fullName || employeeData?.name || "Employee"}</h1>
+            <p>{employeeData?.role || "Staff Member"} • Elite Fitness Team</p>
           </div>
           <div className="user-profile">
-            <div className="avatar">{employeeData?.name.charAt(0)}</div>
+            <div className="avatar">{(employeeData?.fullName || employeeData?.name || "E").charAt(0).toUpperCase()}</div>
           </div>
         </header>
 
@@ -175,9 +185,9 @@ const EmployeeDashboard = () => {
           <div className="view-content animate-in">
             <div className="stats-row">
               <StatCard color="#007bff">
-                <div className="label">Monthly Attendance</div>
-                <div className="value">92%</div>
-                <div className="sub">28 Days Present</div>
+                <div className="label">Days Worked</div>
+                <div className="value">{employeeData?.daysWorked || 0}</div>
+                <div className="sub">Current Month</div>
               </StatCard>
               <StatCard color="#28a745">
                 <div className="label">Est. Net Payable</div>
@@ -186,7 +196,7 @@ const EmployeeDashboard = () => {
               </StatCard>
               <StatCard color="#ef4444">
                 <div className="label">Total Leaves</div>
-                <div className="value">{employeeData?.leaves}</div>
+                <div className="value">{employeeData?.leaves || 0}</div>
                 <div className="sub">This Month</div>
               </StatCard>
             </div>
