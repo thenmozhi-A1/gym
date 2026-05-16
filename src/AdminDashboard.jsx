@@ -1197,6 +1197,12 @@ const ModalOverlay = styled.div`
 const ModalContent = styled.div`
   background: #fff; width: 100%; max-width: 600px; border-radius: 32px; padding: 40px;
   box-shadow: 0 40px 100px rgba(0,0,0,0.3); position: relative;
+  max-height: 90vh; overflow-y: auto;
+  
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   &.animate-in { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
   @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   
