@@ -689,9 +689,9 @@ const Login = () => {
                       🔒 Admin Access
                     </a>
                     <span className="divider">|</span>
-                    <span className="staff-portal-hint" style={{ fontSize: '0.75rem', color: '#444', border: '1px solid #2a2a2a', padding: '3px 10px', borderRadius: '20px' }}>
-                      👤 Staff Portal Active
-                    </span>
+                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setError(""); }}>
+                      👤 Employee Login
+                    </a>
                   </>
                 )}
               </div>
