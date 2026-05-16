@@ -172,13 +172,20 @@ const Login = () => {
       localStorage.setItem('isLoggedIn','true'); localStorage.setItem('userId', user.id);
       localStorage.setItem('userName', user.fullName); localStorage.setItem('userEmail', user.email);
       localStorage.setItem('userRole', user.role);
+      const redirectUser = (role) => {
+        const r = (role || "").toString().trim().toUpperCase();
+        console.log("Redirecting user with role:", r);
+        if (r === 'ADMIN') {
+          navigate('/AdminDashboard');
+        } else if (r === 'TRAINER' || r === 'FRONT OFFICE' || r === 'STAFF' || r.includes('TRAINER') || r.includes('OFFICE')) {
+          navigate('/EmployeeDashboard');
+        } else {
+          navigate('/userdashboard');
+        }
+      };
+
       setTimeout(() => { 
-        console.log("Login Role Detected:", user.role);
-        const upperRole = user.role?.toUpperCase();
-        if (upperRole === 'ADMIN') navigate('/AdminDashboard');
-        else if (upperRole === 'TRAINER' || upperRole === 'FRONT OFFICE' || user.role === 'Trainer' || user.role === 'Front Office') navigate('/EmployeeDashboard');
-        else navigate('/userdashboard');
-        window.location.reload(); 
+        redirectUser(user.role);
       }, 1500);
     } catch { setBiometricState('error'); setError('Cannot connect to server.'); }
   };
@@ -230,7 +237,7 @@ const Login = () => {
       localStorage.setItem("userName",  data.fullName);
       localStorage.setItem("userEmail", data.email);
       localStorage.setItem("userRole",  data.role);
-      navigate("/AdminDashboard"); window.location.reload();
+      navigate("/AdminDashboard");
     } catch { setError("Cannot connect to server."); }
     finally   { setLoading(false); }
   };
@@ -429,12 +436,14 @@ const Login = () => {
       localStorage.setItem("userRole", user.role);
 
       setTimeout(() => {
-        console.log("Biometric Role Detected:", user.role);
-        const upperRole = user.role?.toUpperCase();
-        if (upperRole === 'ADMIN') navigate('/AdminDashboard');
-        else if (upperRole === 'TRAINER' || upperRole === 'FRONT OFFICE' || user.role === 'Trainer' || user.role === 'Front Office') navigate('/EmployeeDashboard');
-        else navigate('/userdashboard');
-        window.location.reload();
+        const r = (user.role || "").toString().trim().toUpperCase();
+        if (r === 'ADMIN') {
+          navigate('/AdminDashboard');
+        } else if (r === 'TRAINER' || r === 'FRONT OFFICE' || r === 'STAFF' || r.includes('TRAINER') || r.includes('OFFICE')) {
+          navigate('/EmployeeDashboard');
+        } else {
+          navigate('/userdashboard');
+        }
       }, 1500);
 
     } catch (err) {
