@@ -88,15 +88,11 @@ const AdminDashboard = () => {
         endpoints.map(ep => fetch(`${API_BASE}/${ep}`).then(r => r.json()))
       );
 
-      if (activeTab === "dashboard" || activeTab === "users") {
+      if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs") {
         setUsers(results[0]); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
-        // Mock staffs data
-        setStaffs([
-          { id: 1, name: "Alex Johnson", specialty: "Bodybuilding", students: 12, times: "06:00 AM - 11:00 AM", salary: "₹45,000", role: "Trainer", leaves: 2, permissions: 1 },
-          { id: 2, name: "Maya Patel", specialty: "Yoga & Flexibility", students: 18, times: "04:00 PM - 08:00 PM", salary: "₹52,000", role: "Trainer", leaves: 0, permissions: 3 },
-          { id: 5, name: "Jessica Smith", specialty: "Customer Relations", students: 0, times: "09:00 AM - 05:00 PM", salary: "₹35,000", role: "Front Office", leaves: 1, permissions: 0 },
-          { id: 6, name: "David Miller", specialty: "Sales & Billing", students: 0, times: "10:00 AM - 06:00 PM", salary: "₹38,000", role: "Front Office", leaves: 3, permissions: 2 }
-        ]);
+        // Extract staffs from users list based on role
+        const staffMembers = results[0].filter(u => ['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office'].includes(u.role));
+        setStaffs(staffMembers);
       } else {
         const data = results[0];
         if (activeTab === "payments") setPayments(data);
@@ -146,28 +142,45 @@ const AdminDashboard = () => {
       return;
     }
     const staffToAdd = { 
-      ...newStaff, 
-      id: Date.now(), 
-      students: 0, 
-      status: "ACTIVE",
-      leaves: 0,
-      permissions: 0
+      fullName: newStaff.name,
+      email: newStaff.email,
+      password: "staff123", // Default password for new staff
+      role: newStaff.role,
+      salary: newStaff.salary,
+      times: newStaff.times,
+      specialty: newStaff.specialty,
+      phone: newStaff.phone,
+      address: newStaff.address,
+      fingerprintHash: newStaff.fingerprintHash,
+      fingerprintEnrolled: true,
+      status: "ACTIVE"
     };
     
-    // Simulate saving fingerprint to system
-    const storedCreds = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
-    storedCreds[newStaff.email] = newStaff.fingerprintHash;
-    localStorage.setItem("webauthnCredentials", JSON.stringify(storedCreds));
-    localStorage.setItem("lastEnrolledEmail", newStaff.email);
+    try {
+      const res = await fetch(`${API_BASE}/users/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(staffToAdd)
+      });
+      
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`Failed to add staff: ${err.error}`);
+        return;
+      }
 
-    setStaffs([staffToAdd, ...staffs]);
-    setNewStaff({ 
-      name: "", specialty: "", salary: "", times: "", email: "", 
-      role: "Trainer", phone: "", address: "", 
-      fingerprintEnrolled: false, fingerprintHash: "" 
-    });
-    setIsAddStaffModalOpen(false);
-    alert("STAFF MEMBER ADDED & BIOMETRICS ENROLLED SUCCESSFULLY!");
+      const savedStaff = await res.json();
+      setStaffs([savedStaff, ...staffs]);
+      setNewStaff({ 
+        name: "", specialty: "", salary: "", times: "", email: "", 
+        role: "Trainer", phone: "", address: "", 
+        fingerprintEnrolled: false, fingerprintHash: "" 
+      });
+      setIsAddStaffModalOpen(false);
+      alert("STAFF MEMBER ADDED & BIOMETRICS STORED IN DATABASE!");
+    } catch (err) {
+      alert("Cannot connect to server to save staff.");
+    }
   };
 
   return (

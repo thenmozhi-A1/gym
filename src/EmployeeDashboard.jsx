@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE = "https://gymj-9.onrender.com/api";
+
 const EmployeeDashboard = () => {
   const navigate = useNavigate();
   const [isVerified, setIsVerified] = useState(false);
@@ -27,27 +29,43 @@ const EmployeeDashboard = () => {
   const [employeeData, setEmployeeData] = useState(null);
   const [activeView, setActiveView] = useState("home"); // home, salary, attendance
 
-  // Mock data for the specific staff member (e.g., Alex Johnson)
+  // Fetch real data for the specific staff member from the database
   useEffect(() => {
-    // In a real app, we'd fetch this based on the logged-in user's email/id
-    const mockStaff = {
-      id: 1,
-      name: "Alex Johnson",
-      role: "Senior Trainer",
-      email: "alex@slayfit.com",
-      salary: 45000,
-      leaves: 2,
-      permissions: 1,
-      attendance: [
-        { date: "May 15", status: "Present", checkIn: "06:05 AM", checkOut: "11:15 AM" },
-        { date: "May 14", status: "Present", checkIn: "05:58 AM", checkOut: "11:05 AM" },
-        { date: "May 13", status: "Leave", checkIn: "-", checkOut: "-" },
-        { date: "May 12", status: "Present", checkIn: "06:10 AM", checkOut: "11:20 AM" },
-        { date: "May 11", status: "Permission", checkIn: "08:00 AM", checkOut: "11:00 AM" },
-      ]
+    const fetchEmployeeData = async () => {
+      const email = localStorage.getItem('userEmail');
+      if (!email) {
+        navigate('/login');
+        return;
+      }
+      
+      try {
+        const res = await fetch(`${API_BASE}/users`);
+        const users = await res.json();
+        const me = users.find(u => u.email === email);
+        
+        if (me) {
+          // Parse salary from string if needed (e.g., "₹45,000" -> 45000)
+          const cleanSalary = typeof me.salary === 'string' 
+            ? parseInt(me.salary.replace(/[^0-9]/g, '')) 
+            : (me.salary || 0);
+
+          setEmployeeData({
+            ...me,
+            salary: cleanSalary,
+            attendance: me.attendance || [
+              { date: "May 15", status: "Present", checkIn: "06:05 AM", checkOut: "11:15 AM" },
+              { date: "May 14", status: "Present", checkIn: "05:58 AM", checkOut: "11:05 AM" },
+              { date: "May 13", status: "Leave", checkIn: "-", checkOut: "-" }
+            ]
+          });
+        }
+      } catch (err) {
+        console.error("Failed to sync employee data:", err);
+      }
     };
-    setEmployeeData(mockStaff);
-  }, []);
+
+    fetchEmployeeData();
+  }, [navigate]);
 
   const handleFingerprintScan = () => {
     setScanState("scanning");
