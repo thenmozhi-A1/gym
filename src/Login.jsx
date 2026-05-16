@@ -171,7 +171,12 @@ const Login = () => {
       localStorage.setItem('isLoggedIn','true'); localStorage.setItem('userId', user.id);
       localStorage.setItem('userName', user.fullName); localStorage.setItem('userEmail', user.email);
       localStorage.setItem('userRole', user.role);
-      setTimeout(() => { navigate(user.role === 'ADMIN' ? '/AdminDashboard' : '/userdashboard'); window.location.reload(); }, 1500);
+      setTimeout(() => { 
+        if (user.role === 'ADMIN') navigate('/AdminDashboard');
+        else if (['Trainer', 'Front Office'].includes(user.role)) navigate('/EmployeeDashboard');
+        else navigate('/userdashboard');
+        window.location.reload(); 
+      }, 1500);
     } catch { setBiometricState('error'); setError('Cannot connect to server.'); }
   };
 
@@ -310,7 +315,9 @@ const Login = () => {
         localStorage.setItem("userEmail", data.email);
         localStorage.setItem("userRole", data.role); // Store role
 
-        navigate(data.role === "ADMIN" ? "/AdminDashboard" : "/userdashboard");
+        if (data.role === 'ADMIN') navigate('/AdminDashboard');
+        else if (['Trainer', 'Front Office'].includes(data.role)) navigate('/EmployeeDashboard');
+        else navigate('/userdashboard');
         window.location.reload();
       }
     } catch (err) {
@@ -417,7 +424,9 @@ const Login = () => {
       localStorage.setItem("userRole", user.role);
 
       setTimeout(() => {
-        navigate(user.role === "ADMIN" ? "/AdminDashboard" : "/userdashboard");
+        if (user.role === 'ADMIN') navigate('/AdminDashboard');
+        else if (['Trainer', 'Front Office'].includes(user.role)) navigate('/EmployeeDashboard');
+        else navigate('/userdashboard');
         window.location.reload();
       }, 1500);
 

@@ -24,6 +24,7 @@ import ReportsPage from "./ReportsPage";
 import StatsPage from "./StatsPage";
 import Myprofile from "./Myprofile";
 import AdminDashboard from "./AdminDashboard";
+import EmployeeDashboard from "./EmployeeDashboard";
 import Settings from "./Settings";
 
 import "./App.css"; // Import your CSS file here
@@ -33,7 +34,7 @@ function LayoutWrapper() {
   const location = useLocation();
 
   // List all routes that should HIDE Navbar & Footer
-  const hideLayoutRoutes = ["/AdminDashboard"];
+  const hideLayoutRoutes = ["/AdminDashboard", "/EmployeeDashboard"];
 
   const hideLayout = hideLayoutRoutes.includes(location.pathname);
 
@@ -59,6 +60,7 @@ function LayoutWrapper() {
         <Route path="/myprofile" element={<Myprofile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/EmployeeDashboard" element={<EmployeeDashboard />} />
 
       </Routes>
 
