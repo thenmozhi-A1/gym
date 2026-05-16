@@ -133,7 +133,7 @@ const AdminDashboard = () => {
     }, 100);
   };
 
-  const handleAddStaff = (e) => {
+  const handleAddStaff = async (e) => {
     e.preventDefault();
     if (!newStaff.name || !newStaff.role) return;
     if (!newStaff.fingerprintEnrolled) {
