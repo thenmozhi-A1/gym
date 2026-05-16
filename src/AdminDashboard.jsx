@@ -758,8 +758,8 @@ const AdminDashboard = () => {
                           <tr key={s.id}>
                             <td>
                               <div className="u-cell">
-                                <div className="avatar-small bg-primary-light text-primary">{s.name.charAt(0)}</div>
-                                <div className="fw-bold">{s.name}</div>
+                                <div className="avatar-small bg-primary-light text-primary">{(s.fullName || "S").charAt(0).toUpperCase()}</div>
+                                <div className="fw-bold">{s.fullName || "Staff Member"}</div>
                               </div>
                             </td>
                             <td><span className={`badge ${s.role === 'Trainer' ? 'bg-success-light' : 'bg-primary-light'}`}>{s.role}</span></td>
