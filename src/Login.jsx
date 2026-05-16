@@ -477,8 +477,8 @@ const Login = () => {
               <h2>{isNewUser ? "Join the Elite" : "Biometric Access Control"}</h2>
               <p className="subtitle">
                 {isNewUser 
-                  ? "Start your fitness journey with GymDash today." 
-                  : "Please scan your fingerprint to enter the gym."}
+                  ? "Start your fitness journey with SlayFit today." 
+                  : "Please scan your fingerprint to enter the gym or access your staff dashboard."}
               </p>
 
               {!isNewUser && (
@@ -684,9 +684,15 @@ const Login = () => {
                   </a>
                 )}
                 {!isAdminLogin && !isNewUser && (
-                  <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setIsAdminLogin(true); setIsNewUser(false); setError(""); }}>
-                    🔒 Admin Access
-                  </a>
+                  <>
+                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setIsAdminLogin(true); setIsNewUser(false); setError(""); }}>
+                      🔒 Admin Access
+                    </a>
+                    <span className="divider">|</span>
+                    <span className="staff-portal-hint" style={{ fontSize: '0.75rem', color: '#444', border: '1px solid #2a2a2a', padding: '3px 10px', borderRadius: '20px' }}>
+                      👤 Staff Portal Active
+                    </span>
+                  </>
                 )}
               </div>
             </>
