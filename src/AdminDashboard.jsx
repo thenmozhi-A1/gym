@@ -61,11 +61,11 @@ const AdminDashboard = () => {
   const holdTimer = useRef(null);
   const progressTimer = useRef(null);
   const [enrollProgress, setEnrollProgress] = useState(0);
-  const [newStaff, setNewStaff] = useState({ 
-    name: "", specialty: "", salary: "", times: "", email: "", 
-    role: "Trainer", phone: "", address: "", 
-    fingerprintEnrolled: false, 
-    fingerprintHash: "" 
+  const [newStaff, setNewStaff] = useState({
+    name: "", specialty: "", salary: "", times: "", email: "",
+    role: "Trainer", phone: "", address: "",
+    fingerprintEnrolled: false,
+    fingerprintHash: ""
   });
 
   useEffect(() => {
@@ -146,10 +146,10 @@ const AdminDashboard = () => {
       return;
     }
     if (newStaff.fingerprintEnrolled) return;
-    
+
     setIsEnrolling(true);
     setEnrollProgress(0);
-    
+
     let p = 0;
     progressTimer.current = setInterval(() => {
       p = Math.min(p + 2, 100);
@@ -159,7 +159,7 @@ const AdminDashboard = () => {
     holdTimer.current = setTimeout(() => {
       clearInterval(progressTimer.current);
       setEnrollProgress(100);
-      
+
       const mockCredentialId = "fp_" + btoa(newStaff.email + Date.now()).substring(0, 32);
       const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
       stored[newStaff.email] = mockCredentialId;
@@ -188,7 +188,7 @@ const AdminDashboard = () => {
       alert("Please enroll staff fingerprint before adding them to the system.");
       return;
     }
-    const staffToAdd = { 
+    const staffToAdd = {
       fullName: newStaff.name,
       email: newStaff.email,
       password: "staff123",
@@ -202,14 +202,14 @@ const AdminDashboard = () => {
       fingerprintEnrolled: true,
       status: "ACTIVE"
     };
-    
+
     try {
       const response = await fetch(`${API_BASE}/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(staffToAdd)
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         alert(`Failed to add staff: ${errorData.error}`);
@@ -218,10 +218,10 @@ const AdminDashboard = () => {
 
       const savedStaffData = await response.json();
       setStaffs([savedStaffData, ...staffs]);
-      setNewStaff({ 
-        name: "", specialty: "", salary: "", times: "", email: "", 
-        role: "Trainer", phone: "", address: "", 
-        fingerprintEnrolled: false, fingerprintHash: "" 
+      setNewStaff({
+        name: "", specialty: "", salary: "", times: "", email: "",
+        role: "Trainer", phone: "", address: "",
+        fingerprintEnrolled: false, fingerprintHash: ""
       });
       setIsAddStaffModalOpen(false);
       alert("STAFF MEMBER ADDED & BIOMETRICS STORED IN DATABASE!");
@@ -272,7 +272,7 @@ const AdminDashboard = () => {
             <input placeholder="Search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
           <div className="header-actions">
-            <button className="h-btn"><Globe size={18} /></button>
+
             <button className="h-btn"><Settings size={18} /></button>
             <button className="h-btn"><Bell size={18} /><div className="notif-dot"></div></button>
             <div className="profile-chip">
@@ -933,8 +933,8 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>BIOMETRIC ENROLLMENT <span style={{color: '#ffc107', fontSize: '0.7rem', marginLeft: '10px'}}>REQUIRED FOR LOGIN</span></label>
-                  <div 
+                  <label>BIOMETRIC ENROLLMENT <span style={{ color: '#ffc107', fontSize: '0.7rem', marginLeft: '10px' }}>REQUIRED FOR LOGIN</span></label>
+                  <div
                     className={`biometric-enroll-pad ${newStaff.fingerprintEnrolled ? 'success' : isEnrolling ? 'scanning' : ''}`}
                     onTouchStart={!newStaff.fingerprintEnrolled ? startScan : undefined}
                     onTouchEnd={!newStaff.fingerprintEnrolled ? cancelScan : undefined}
@@ -946,14 +946,14 @@ const AdminDashboard = () => {
                     <div className="pad-content">
                       <Fingerprint size={32} />
                       <span>
-                        {newStaff.fingerprintEnrolled 
-                          ? "✓ FINGERPRINT CAPTURED" 
-                          : isEnrolling 
-                            ? `SCANNING... ${enrollProgress}%` 
+                        {newStaff.fingerprintEnrolled
+                          ? "✓ FINGERPRINT CAPTURED"
+                          : isEnrolling
+                            ? `SCANNING... ${enrollProgress}%`
                             : "PRESS & HOLD TO SCAN FINGERPRINT"}
                       </span>
                     </div>
-                    {isEnrolling && <div className="progress-bar"><div className="fill" style={{width: `${enrollProgress}%`}}></div></div>}
+                    {isEnrolling && <div className="progress-bar"><div className="fill" style={{ width: `${enrollProgress}%` }}></div></div>}
                   </div>
                 </div>
               </div>
