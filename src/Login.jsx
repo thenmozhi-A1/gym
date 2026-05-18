@@ -181,11 +181,11 @@ const Login = () => {
         const r = (role || "").toString().trim().toUpperCase();
         console.log("Redirecting user with role:", r);
         if (r === 'ADMIN') {
-          navigate('/AdminDashboard');
+          window.location.href = '/AdminDashboard';
         } else if (r === 'TRAINER' || r === 'FRONT OFFICE' || r === 'STAFF' || r.includes('TRAINER') || r.includes('OFFICE')) {
-          navigate('/EmployeeDashboard');
+          window.location.href = '/EmployeeDashboard';
         } else {
-          navigate('/userdashboard');
+          window.location.href = '/userdashboard';
         }
       };
 
@@ -302,8 +302,7 @@ const Login = () => {
         // Store for biometric recognition simulation
         localStorage.setItem("lastEnrolledEmail", formData.email);
         alert("Account created and Fingerprint Enrolled successfully! Welcome to B&Y Fitness 🎉");
-        navigate(data.role === "ADMIN" ? "/AdminDashboard" : "/subscription");
-        window.location.reload();
+        window.location.href = data.role === "ADMIN" ? "/AdminDashboard" : "/subscription";
 
       } else {
         // ── LOGIN ── POST /api/users/login
@@ -332,10 +331,9 @@ const Login = () => {
 
         console.log("Login Data Detected:", data.role);
         const upperRole = data.role?.toUpperCase();
-        if (upperRole === 'ADMIN') navigate('/AdminDashboard');
-        else if (upperRole === 'TRAINER' || upperRole === 'FRONT OFFICE' || data.role === 'Trainer' || data.role === 'Front Office') navigate('/EmployeeDashboard');
-        else navigate('/userdashboard');
-        window.location.reload();
+        if (upperRole === 'ADMIN') window.location.href = '/AdminDashboard';
+        else if (upperRole === 'TRAINER' || upperRole === 'FRONT OFFICE' || data.role === 'Trainer' || data.role === 'Front Office') window.location.href = '/EmployeeDashboard';
+        else window.location.href = '/userdashboard';
       }
     } catch (err) {
       setError("Cannot connect to server. Please make sure the backend is running.");
@@ -448,11 +446,11 @@ const Login = () => {
       setTimeout(() => {
         const r = (user.role || "").toString().trim().toUpperCase();
         if (r === 'ADMIN') {
-          navigate('/AdminDashboard');
+          window.location.href = '/AdminDashboard';
         } else if (r === 'TRAINER' || r === 'FRONT OFFICE' || r === 'STAFF' || r.includes('TRAINER') || r.includes('OFFICE')) {
-          navigate('/EmployeeDashboard');
+          window.location.href = '/EmployeeDashboard';
         } else {
-          navigate('/userdashboard');
+          window.location.href = '/userdashboard';
         }
       }, 1500);
 
