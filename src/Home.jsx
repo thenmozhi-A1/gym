@@ -71,7 +71,7 @@ const Home = () => {
       <HeroSection className="reveal">
         <div className="content">
           <Badge>ESTABLISHED 2024</Badge>
-          <h1>Redefining Fitness at <span className="text-warning">SlayFit</span></h1>
+          <h1>Redefining Fitness at <span className="text-warning">B&Y Fitness</span></h1>
           <p className="tagline">Train Hard. Stay Consistent. Slay Every Goal.</p>
           <div className="cta-row">
             <button className="btn-arena" onClick={() => navigate("/login")}>
@@ -169,29 +169,29 @@ const Home = () => {
               <Phone size={28} className="back-icon" />
               <h4>Get In Touch</h4>
               <p>📞 +91 84891 02133</p>
-              <p>✉️ slayfit@gmail.com</p>
+              <p>✉️ byfitness@gmail.com</p>
             </div>
           </div>
         </FlipCard>
       </InfoCardsRow>
 
-      {/* ── ABOUT SLAYFIT ── */}
+      {/* ── ABOUT B&Y FITNESS ── */}
       <AboutSection className="reveal">
         <div className="container">
           <div className="about-grid">
             <div className="about-content">
               <SectionTitle style={{ textAlign: 'left' }}>
-                <span className="text-warning">SLAYFIT</span> STUDIO
+                <span className="text-warning">B&Y FITNESS</span> STUDIO
               </SectionTitle>
               <p style={{ color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
-                SlayFit Fitness Studio is a modern training space built to help individuals improve strength, endurance, body composition, and overall fitness performance. Designed for beginners, working professionals, fitness enthusiasts, and athletes, SlayFit provides a motivating environment focused on discipline, consistency, and transformation.
+                B&Y Fitness Fitness Studio is a modern training space built to help individuals improve strength, endurance, body composition, and overall fitness performance. Designed for beginners, working professionals, fitness enthusiasts, and athletes, B&Y Fitness provides a motivating environment focused on discipline, consistency, and transformation.
               </p>
               <p style={{ color: "white", textShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
-                Our studio combines expert guidance, advanced workout methods, and modern equipment to create personalized fitness experiences for every member. Whether your goal is weight loss, muscle gain, improved stamina, or a healthier lifestyle, SlayFit offers structured programs tailored to your fitness level and goals.
+                Our studio combines expert guidance, advanced workout methods, and modern equipment to create personalized fitness experiences for every member. Whether your goal is weight loss, muscle gain, improved stamina, or a healthier lifestyle, B&Y Fitness offers structured programs tailored to your fitness level and goals.
               </p>
             </div>
             <div className="about-image-wrapper">
-              <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000&auto=format&fit=crop" alt="SlayFit Studio" />
+              <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000&auto=format&fit=crop" alt="B&Y Fitness Studio" />
             </div>
           </div>
         </div>
@@ -346,7 +346,7 @@ const Home = () => {
             <TransformationCard>
               <div className="trans-image" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=600&auto=format&fit=crop")' }}></div>
               <div className="trans-content">
-                <p>"SlayFit changed my life. I've never felt more confident and strong."</p>
+                <p>"B&Y Fitness changed my life. I've never felt more confident and strong."</p>
                 <h5>- JAMES K. (Lost 20kg)</h5>
               </div>
             </TransformationCard>
@@ -361,11 +361,11 @@ const Home = () => {
         </div>
       </TransformationsSection>
 
-      {/* ── WHY CHOOSE SLAYFIT ── */}
+      {/* ── WHY CHOOSE B&Y FITNESS ── */}
       <WhyChooseSection>
         <div className="container">
           <SectionTitle>
-            WHY CHOOSE <span className="text-warning">SLAYFIT</span>?
+            WHY CHOOSE <span className="text-warning">B&Y FITNESS</span>?
           </SectionTitle>
           <div className="features-grid">
             <FeatureCard>

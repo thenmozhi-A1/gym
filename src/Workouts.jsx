@@ -109,7 +109,7 @@ const Workouts = () => {
   return (
     <PageWrapper>
       <PageHeader>
-        <span className="sub">SLAYFIT TRAINING PROGRAMS</span>
+        <span className="sub">B&Y FITNESS TRAINING PROGRAMS</span>
         <h1>CHOOSE YOUR <span>WEAPON</span></h1>
         <p>Every exercise, engineered for results.</p>
       </PageHeader>

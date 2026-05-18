@@ -155,12 +155,12 @@ const Subscription = () => {
       key: "rzp_test_SoL1lxm6LzPqie",
       amount: amount * 100,
       currency: "INR",
-      name: "SlayFit Arena",
+      name: "B&Y Fitness Arena",
       description: `Membership: ${planName}`,
       handler: function (response) {
         alert("Payment Successful! ID: " + response.razorpay_payment_id);
       },
-      prefill: { name: "Warrior", email: "warrior@slayfit.com", contact: "9999999999" },
+      prefill: { name: "Warrior", email: "warrior@byfitness.com", contact: "9999999999" },
       theme: { color: "#ffc107" },
     };
 
@@ -268,7 +268,7 @@ const Subscription = () => {
               { q: "Can I upgrade my plan?", a: "Yes, you can upgrade anytime. We will adjust the remaining balance automatically." },
               { q: "Is there a joining fee?", a: "Zero hidden fees. You only pay for your membership and nothing else." },
               { q: "Can I freeze my account?", a: "Elite and VIP members can freeze their membership for up to 30 days per year." },
-              { q: "Do you have trial plans?", a: "We offer a 3-day guest pass for new members to experience the SlayFit Arena." }
+              { q: "Do you have trial plans?", a: "We offer a 3-day guest pass for new members to experience the B&Y Fitness Arena." }
             ].map((faq, i) => (
               <div className="col-md-6" key={i}>
                 <FaqBox>
@@ -288,7 +288,7 @@ const Subscription = () => {
             <div className="cta-content">
               <h2 className="display-4 fw-black italic">CORPORATE <span className="text-warning">SLAY</span></h2>
               <p className="lead">Tailored fitness solutions for elite teams and organizations.</p>
-              <button onClick={() => window.location.href = "mailto:custom@slayfit.com"}>ENQUIRE NOW</button>
+              <button onClick={() => window.location.href = "mailto:custom@byfitness.com"}>ENQUIRE NOW</button>
             </div>
           </CTASection>
         </div>

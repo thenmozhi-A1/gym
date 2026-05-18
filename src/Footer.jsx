@@ -10,7 +10,7 @@ const Footer = () => {
         
         {/* Left Side: Brand Trapezoid */}
         <div className="m5-brand-section">
-          <h2>SLAYFIT</h2>
+          <img src="/logo.png" alt="B&Y Fitness Logo" style={{ height: '60px', marginBottom: '10px', objectFit: 'contain' }} />
           <div className="m5-tagline">— TRAIN. FUEL. CONQUER. —</div>
         </div>
 
@@ -58,7 +58,7 @@ const Footer = () => {
           </div>
           <div className="m5-contact-item">
             <Mail size={16} />
-            <span>info@slayfit.com</span>
+            <span>info@byfitness.com</span>
           </div>
           <div className="m5-contact-item">
             <Phone size={16} />
@@ -77,7 +77,7 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="m5-bottom-bar">
-        <div>&copy; {new Date().getFullYear()} SlayFit Global. All rights reserved.</div>
+        <div>&copy; {new Date().getFullYear()} B&Y Fitness Global. All rights reserved.</div>
         <div className="m5-slogan">TRAIN TODAY. TRANSFORM TOMORROW.</div>
       </div>
 

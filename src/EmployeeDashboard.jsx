@@ -126,7 +126,7 @@ const EmployeeDashboard = () => {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
-    doc.text("SLAYFIT GYM", 105, 20, { align: "center" });
+    doc.text("B&Y FITNESS GYM", 105, 20, { align: "center" });
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text(`PAYSLIP FOR ${currentMonth.toUpperCase()} ${currentYear}`, 105, 30, { align: "center" });
@@ -171,7 +171,7 @@ const EmployeeDashboard = () => {
     doc.setFontSize(9);
     doc.setFont("helvetica", "italic");
     doc.text("This is a computer generated payslip and does not require a signature.", 105, 280, { align: "center" });
-    doc.text("SlayFit Gym - Elite Fitness Operations Center", 105, 285, { align: "center" });
+    doc.text("B&Y Fitness Gym - Elite Fitness Operations Center", 105, 285, { align: "center" });
 
     doc.save(`Payslip_${employeeData.fullName || 'Employee'}_${currentMonth}.pdf`);
   };
@@ -182,9 +182,8 @@ const EmployeeDashboard = () => {
   return (
     <DashboardContainer>
       <div className="sidebar">
-        <div className="sidebar-header">
-          <Zap size={24} color="#007bff" />
-          <span>SLAYFIT</span>
+        <div className="sidebar-header" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <img src="/logo.png" alt="B&Y Fitness" style={{ height: '60px', objectFit: 'contain' }} />
         </div>
         <nav>
           <button className={activeView === 'home' ? 'active' : ''} onClick={() => setActiveView('home')}>

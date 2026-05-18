@@ -66,7 +66,7 @@ const About = () => {
               <span className="accent-text">OUR GENESIS</span>
               <h2 className="section-title">BUILT FOR <span className="text-warning">STRENGTH</span>, DRIVEN BY RESULTS</h2>
               <p className="lead-text">
-                SlayFit was born from a simple idea: that fitness should be
+                B&Y Fitness was born from a simple idea: that fitness should be
                 empowering, not intimidating. We've built a community that
                 celebrates every milestone, from the first push-up to the
                 latest personal record.
@@ -155,7 +155,7 @@ const About = () => {
           <div className="mission-box">
             <h2 className="section-title">THE <span className="text-warning">MISSION</span></h2>
             <p>"To create an environment where human potential is recognized, challenged, and ultimately exceeded through the relentless pursuit of physical and mental excellence."</p>
-            <div className="signature">SLAYFIT LEADERSHIP</div>
+            <div className="signature">B&Y FITNESS LEADERSHIP</div>
           </div>
         </div>
       </MissionSection>

@@ -113,7 +113,7 @@ const BMICalculator = () => {
           <div className="hint-pill" style={{ background: status === "Healthy" ? "#fef3c7" : "#fee2e2", color: status === "Healthy" ? "#92400e" : "#991b1b" }}>
             {status === "Healthy"
               ? "✅ You're in the ideal BMI range. Keep it up!"
-              : "💡 Speak to a SlayFit coach for a personalised plan."}
+              : "💡 Speak to a B&Y Fitness coach for a personalised plan."}
           </div>
         </div>
       </div>

@@ -47,7 +47,7 @@ const ContactGym = () => {
               <div className="icon-box"><Mail size={20} /></div>
               <div className="details">
                 <label>ENCRYPTED MAIL</label>
-                <p>slayfit@gmail.com</p>
+                <p>byfitness@gmail.com</p>
               </div>
             </InfoRow>
             <ActionButton>

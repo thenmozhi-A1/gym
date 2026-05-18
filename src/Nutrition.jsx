@@ -146,7 +146,7 @@ const Nutrition = () => {
       key: "rzp_test_SoL1lxm6LzPqie",
       amount: amount * 100,
       currency: "INR",
-      name: "SlayFit Shop",
+      name: "B&Y Fitness Shop",
       description: `Purchase: ${productName}`,
       handler: function (response) {
         alert(`Payment Successful! ID: ${response.razorpay_payment_id}`);

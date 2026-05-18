@@ -55,7 +55,7 @@ const AdminDashboard = () => {
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
   const [isGlobalConfigOpen, setIsGlobalConfigOpen] = useState(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-  const [globalConfig, setGlobalConfig] = useState({ gymName: "SlayFit Arena", contactEmail: "admin@slayfit.com", maxCapacity: "500", currency: "USD" });
+  const [globalConfig, setGlobalConfig] = useState({ gymName: "B&Y Fitness Arena", contactEmail: "admin@byfitness.com", maxCapacity: "500", currency: "USD" });
   const [isPayrollDetailOpen, setIsPayrollDetailOpen] = useState(false);
   const [payrollTab, setPayrollTab] = useState("overview"); // overview, payruns, attendance, tax
   const [selectedStaffForSlip, setSelectedStaffForSlip] = useState(null);
@@ -250,9 +250,8 @@ const AdminDashboard = () => {
       {/* ── SIDEBAR ── */}
       <Sidebar isOpen={isSidebarOpen}>
         <div className="sidebar-header">
-          <div className="logo">
-            <div className="logo-icon"><Zap size={24} /></div>
-            <span>SLAYFIT</span>
+          <div className="logo" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <img src="/logo.png" alt="B&Y Fitness" style={{ height: '60px', objectFit: 'contain' }} />
           </div>
         </div>
 
@@ -870,7 +869,7 @@ const AdminDashboard = () => {
                 <div className="icon-wrap"><Plus size={24} /></div>
                 <div>
                   <h3>ADD NEW STAFF</h3>
-                  <p>Register a new member to the SlayFit operations team.</p>
+                  <p>Register a new member to the B&Y Fitness operations team.</p>
                 </div>
               </div>
               <button className="close-btn" onClick={() => setIsAddStaffModalOpen(false)}><X size={20} /></button>
@@ -906,7 +905,7 @@ const AdminDashboard = () => {
                   <label>EMAIL ADDRESS</label>
                   <div className="input-wrap">
                     <Globe size={18} />
-                    <input type="email" placeholder="staff@slayfit.com" value={newStaff.email} onChange={e => setNewStaff({ ...newStaff, email: e.target.value })} required />
+                    <input type="email" placeholder="staff@byfitness.com" value={newStaff.email} onChange={e => setNewStaff({ ...newStaff, email: e.target.value })} required />
                   </div>
                 </div>
 
