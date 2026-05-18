@@ -41,9 +41,9 @@ const EmployeeDashboard = () => {
       }
       
       try {
-        const res = await fetch(`${API_BASE}/users`);
-        const users = await res.json();
-        const me = users.find(u => u.email === email);
+        const res = await fetch(`${API_BASE}/staffs`);
+        const staffs = await res.json();
+        const me = staffs.find(u => u.email === email);
         
         if (me) {
           // Parse salary from string if needed (e.g., "₹45,000" -> 45000)

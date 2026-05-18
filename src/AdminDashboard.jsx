@@ -87,8 +87,8 @@ const AdminDashboard = () => {
         return;
       }
 
-      const endpoints = activeTab === "dashboard" || activeTab === "users"
-        ? ["users", "payments", "attendance", "consultations"]
+      const endpoints = activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs"
+        ? ["users", "payments", "attendance", "consultations", "staffs"]
         : [activeTab];
 
       const results = await Promise.all(
@@ -97,9 +97,7 @@ const AdminDashboard = () => {
 
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs") {
         setUsers(results[0]); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
-        // Extract staffs from users list based on role
-        const staffMembers = results[0].filter(u => ['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office'].includes(u.role));
-        setStaffs(staffMembers);
+        setStaffs(results[4] || []);
       } else {
         const data = results[0];
         if (activeTab === "payments") setPayments(data);
@@ -129,10 +127,9 @@ const AdminDashboard = () => {
   const handleDeleteStaff = async (id) => {
     if (!window.confirm("Remove this staff member from the system?")) return;
     try {
-      const res = await fetch(`${API_BASE}/users/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE}/staffs/${id}`, { method: "DELETE" });
       if (res.ok) {
         setStaffs(staffs.filter(s => s.id !== id));
-        setUsers(users.filter(u => u.id !== id));
       } else {
         alert("Failed to remove staff.");
       }
@@ -209,7 +206,7 @@ const AdminDashboard = () => {
     };
 
     try {
-      const response = await fetch(`${API_BASE}/users/register`, {
+      const response = await fetch(`${API_BASE}/staffs/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(staffToAdd)

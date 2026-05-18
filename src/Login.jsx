@@ -155,9 +155,14 @@ const Login = () => {
       return;
     }
     try {
-      const res  = await fetch(`${API_BASE}/users`);
-      const users = await res.json();
-      const user  = users.find(u => u.email === email);
+      const [resUsers, resStaffs] = await Promise.all([
+        fetch(`${API_BASE}/users`),
+        fetch(`${API_BASE}/staffs`)
+      ]);
+      const users = await resUsers.json();
+      const staffs = await resStaffs.json();
+      const allPeople = [...users, ...staffs];
+      const user  = allPeople.find(u => u.email === email);
       if (!user) { setBiometricState('error'); setError('No account linked to this fingerprint.'); return; }
       // Removed the user.fingerprintEnrolled check because the User entity doesn't have this field,
       // and we already verified the credential exists in the device's local storage.
@@ -389,9 +394,14 @@ const Login = () => {
         return;
       }
 
-      const checkRes = await fetch(`${API_BASE}/users`);
-      const users = await checkRes.json();
-      const user = users.find(u => u.email === matchedEmail);
+      const [resUsers, resStaffs] = await Promise.all([
+        fetch(`${API_BASE}/users`),
+        fetch(`${API_BASE}/staffs`)
+      ]);
+      const users = await resUsers.json();
+      const staffs = await resStaffs.json();
+      const allPeople = [...users, ...staffs];
+      const user = allPeople.find(u => u.email === matchedEmail);
 
       if (!user) {
         setBiometricState("error");
