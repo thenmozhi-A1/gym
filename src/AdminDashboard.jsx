@@ -303,7 +303,7 @@ const AdminDashboard = () => {
                 </div>
               </SettingsDropdown>
             )}
-            <button className="h-btn"><Bell size={18} /><div className="notif-dot"></div></button>
+            <button className="h-btn" onClick={() => setActiveTab('consultations')}><Bell size={18} /><div className="notif-dot"></div></button>
             <div className="profile-chip">
               <div className="avatar">AD</div>
             </div>
