@@ -16,6 +16,9 @@ body {
   font-family: 'Inter', 'Segoe UI', sans-serif;
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
+}
+
+.navbar-layout {
   padding-top: 90px; /* Space for the bold industrial navbar */
 }
 

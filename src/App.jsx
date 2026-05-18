@@ -36,10 +36,13 @@ function LayoutWrapper() {
   // List all routes that should HIDE Navbar & Footer
   const hideLayoutRoutes = ["/AdminDashboard", "/EmployeeDashboard"];
 
-  const hideLayout = hideLayoutRoutes.includes(location.pathname);
+  // Case-insensitive match to be ultra-robust
+  const hideLayout = hideLayoutRoutes.some(
+    (route) => route.toLowerCase() === location.pathname.toLowerCase()
+  );
 
   return (
-    <>
+    <div className={hideLayout ? "no-navbar-layout" : "navbar-layout"}>
       {!hideLayout && <Nav />}
 
       <Routes>
@@ -65,7 +68,7 @@ function LayoutWrapper() {
       </Routes>
 
       {!hideLayout && <Footer />}
-    </>
+    </div>
   );
 }
 
