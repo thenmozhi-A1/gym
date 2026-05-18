@@ -121,6 +121,15 @@ const PageWrapper = styled.div`
   min-height: 100vh;
   color: #fff;
 
+  @media (max-width: 768px) {
+    padding: 100px 20px 30px;
+    .stats-header {
+      margin-bottom: 30px;
+      h1 { font-size: 1.8rem; }
+      p { font-size: 0.95rem; }
+    }
+  }
+
   .stats-header {
     margin-bottom: 50px;
     h1 { font-size: 2.8rem; font-weight: 800; margin-bottom: 10px; }
@@ -143,12 +152,33 @@ const StatSection = styled.section`
   padding: 40px;
   border: 1px solid rgba(255,255,255,0.05);
 
+  @media (max-width: 768px) {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
   .section-header {
     display: flex;
     align-items: center;
     gap: 15px;
     margin-bottom: 30px;
     h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+  }
+
+  .goals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+
+  .badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
   }
 `;
 

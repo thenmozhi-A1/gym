@@ -393,10 +393,17 @@ const DashboardContainer = styled.div`
 
 const MainArea = styled.div`
   flex: 1; padding: 40px;
+  min-width: 0;
   @media (max-width: 768px) { padding: 20px; }
   .main-header {
     display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;
     @media (max-width: 768px) { margin-bottom: 25px; }
+    @media (max-width: 576px) {
+      flex-direction: column-reverse;
+      align-items: flex-start;
+      gap: 15px;
+      .avatar { width: 40px; height: 40px; }
+    }
     h1 { font-size: 1.8rem; font-weight: 900; color: #1e293b; margin: 0; @media (max-width: 768px) { font-size: 1.4rem; } }
     p { color: #64748b; margin-top: 5px; @media (max-width: 768px) { font-size: 0.85rem; } }
     .avatar { width: 48px; height: 48px; background: #1e293b; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; }
@@ -415,7 +422,31 @@ const MainArea = styled.div`
     h3 { font-weight: 800; font-size: 1rem; margin-bottom: 25px; color: #1e293b; }
     .view-all { background: none; border: none; color: #007bff; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px; margin-top: 20px; }
   }
-  .log-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; &:last-child { border: none; } .date { font-weight: 700; font-size: 0.9rem; } .status { font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; &.present { background: #d1fae5; color: #065f46; } &.leave { background: #fee2e2; color: #991b1b; } &.permission { background: #fef3c7; color: #92400e; } } .times { font-size: 0.85rem; color: #64748b; } }
+  .card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    h3 { margin-bottom: 0 !important; }
+    @media (max-width: 576px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+  .log-item { 
+    display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; 
+    &:last-child { border: none; } 
+    @media (max-width: 480px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      .times { font-size: 0.8rem; }
+    }
+    .date { font-weight: 700; font-size: 0.9rem; } 
+    .status { font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; &.present { background: #d1fae5; color: #065f46; } &.leave { background: #fee2e2; color: #991b1b; } &.permission { background: #fef3c7; color: #92400e; } } 
+    .times { font-size: 0.85rem; color: #64748b; } 
+  }
   .salary-mini { .row { display: flex; justify-content: space-between; margin-bottom: 15px; span { color: #64748b; font-weight: 600; } &.total { font-size: 1.2rem; margin-top: 20px; } } .divider { height: 1px; background: #e2e8f0; margin: 15px 0; } }
   .salary-header-card { 
     background: #1e293b; color: #fff; border-radius: 24px; padding: 40px; display: flex; justify-content: space-between; align-items: center; 

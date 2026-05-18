@@ -389,7 +389,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               ) : activeTab === "payroll" ? (
-                <PayrollContainer className="animate-in" style={{ position: 'relative', overflow: 'hidden', flexDirection: 'column' }}>
+                <PayrollContainer className="animate-in">
                   {/* ── PAYROLL SUB-NAV ── */}
                   <PayrollSubNav>
                     <div className="nav-items">
@@ -400,7 +400,7 @@ const AdminDashboard = () => {
                     </div>
                   </PayrollSubNav>
 
-                  <div className="payroll-content-wrapper" style={{ display: 'flex', gap: '30px' }}>
+                  <div className="payroll-content-wrapper">
                     {payrollTab === "overview" && (
                       <>
                         {!isPayrollDetailOpen ? (
@@ -1162,6 +1162,13 @@ const Header = styled.header`
   display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 400;
   transition: all 0.3s ease;
   @media (max-width: 768px) { padding: 15px 20px; }
+  @media (max-width: 576px) {
+    padding: 10px 15px;
+    .header-actions {
+      gap: 10px;
+      .profile-chip .avatar { width: 32px; height: 32px; font-size: 0.8rem; }
+    }
+  }
 
   .search-bar {
     background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 20px;
@@ -1181,7 +1188,18 @@ const Header = styled.header`
   }
 `;
 
-const ContentContainer = styled.div` padding: 40px; @media (max-width: 768px) { padding: 20px; } `;
+const ContentContainer = styled.div`
+  padding: 40px;
+  @media (max-width: 768px) { padding: 20px; }
+
+  .charts-row {
+    display: flex;
+    gap: 30px;
+    @media (max-width: 1024px) {
+      flex-direction: column;
+    }
+  }
+`;
 
 const StatsRow = styled.div` display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); } @media (max-width: 768px) { grid-template-columns: 1fr; } `;
 
@@ -1229,10 +1247,22 @@ const ChartCard = styled.div`
 
 const PayrollContainer = styled.div`
   display: flex; gap: 30px; animation: fadeIn 0.5s ease;
-  @media (max-width: 1200px) { flex-direction: column; }
+  position: relative;
+  overflow: hidden;
+  flex-direction: column;
+  width: 100%;
+
+  .payroll-content-wrapper {
+    display: flex;
+    gap: 30px;
+    width: 100%;
+    @media (max-width: 1200px) {
+      flex-direction: column;
+    }
+  }
 
   .payroll-main {
-    flex: 1; display: flex; flex-direction: column; gap: 30px;
+    flex: 1; display: flex; flex-direction: column; gap: 30px; min-width: 0;
     .payroll-header {
       display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
       @media (max-width: 768px) { flex-direction: column; align-items: flex-start; gap: 15px; }
@@ -1293,7 +1323,7 @@ const PayrollContainer = styled.div`
     }
     .deduction-row {
       display: flex; justify-content: space-between; margin-top: 20px;
-      @media (max-width: 768px) { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      @media (max-width: 768px) { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 20px; }
       .deduction-item {
         text-align: center; flex: 1;
         .icon-circle { 
@@ -1353,6 +1383,13 @@ const PayrollContainer = styled.div`
 
   .request-item {
     background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 15px; display: flex; justify-content: space-between; align-items: center;
+    @media (max-width: 576px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+      .req-details { text-align: left; }
+      .req-actions { width: 100%; display: flex; justify-content: flex-end; gap: 10px; }
+    }
     .req-profile { display: flex; align-items: center; gap: 12px; strong { font-size: 0.85rem; color: var(--text-color); } p { font-size: 0.7rem; color: var(--text-muted); margin: 0; } }
     .req-details { text-align: right; .type { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-color); } .dates { font-size: 0.7rem; color: var(--text-muted); } }
   }
@@ -1369,6 +1406,29 @@ const PayrollContainer = styled.div`
   }
 
   .btn-link { background: none; border: none; color: var(--accent-color); font-weight: 800; font-size: 0.75rem; cursor: pointer; &.disabled { color: var(--text-muted); cursor: default; } }
+
+  .detail-header {
+    display: flex; justify-content: space-between; align-items: center;
+    @media (max-width: 992px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      width: 100%;
+      .d-flex {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 10px !important;
+      }
+    }
+  }
+
+  .pay-slip-drawer {
+    @media (max-width: 768px) {
+      width: 100% !important;
+      padding: 20px !important;
+      gap: 20px !important;
+    }
+  }
 `;
 
 const PayrollSubNav = styled.div`

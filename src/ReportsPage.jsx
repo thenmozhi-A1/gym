@@ -191,6 +191,36 @@ const PageWrapper = styled.div`
   min-height: 100vh;
   color: #333;
 
+  @media (max-width: 768px) {
+    padding: 100px 20px 30px;
+    .report-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      .user-profile {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+    }
+    .header-actions {
+      width: 100%;
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  .reports-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+    @media (min-width: 1200px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
   .report-header {
     display: flex;
     justify-content: space-between;
