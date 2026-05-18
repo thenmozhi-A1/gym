@@ -1,24 +1,25 @@
 import React, { useEffect } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Timer, Target, Dumbbell, Zap } from "lucide-react";
+import { ArrowLeft, Timer, Target, Dumbbell, Zap, Activity, Info, CheckCircle2, Play } from "lucide-react";
 
 const workoutData = {
   "bench-press": {
-    name: "Bench Press",
-    target: "Chest, Shoulders, Triceps",
-    difficulty: "Intermediate",
+    name: "Barbell Bench Press",
+    target: "Pectorals, Deltoids, Triceps",
+    difficulty: "Advanced",
     time: "45-60 mins",
-    image: "https://img.freepik.com/premium-photo/muscles-metal-bodybuilder-pushing-his-limits-with-powerful-bench-press_908344-51738.jpg",
-    description: "The bench press is a classic compound exercise that targets the pectoral muscles, anterior deltoids, and triceps. It is the gold standard for building upper body pushing strength.",
+    modelUrl: "https://sketchfab.com/models/fef75a019e7948e5ac8de6faf534890b/embed?autostart=1&preload=1&transparent=1&ui_infos=0&ui_watermark=0&ui_controls=1&ui_theme=dark",
+    description: "The ultimate upper body compound movement. Build massive pressing power, thick dense chest muscles, and bulletproof shoulders with proper form and progressive overload.",
     instructions: [
-      "Lie flat on your back on a bench.",
-      "Grip the bar with hands slightly wider than shoulder-width apart.",
-      "Lower the bar slowly to your mid-chest.",
-      "Push the bar back up until your arms are fully extended.",
-      "Keep your feet flat on the floor for stability."
+      "Set your foundation: Lie back, plant feet firmly, and retract shoulder blades.",
+      "Grip the barbell slightly wider than shoulder-width.",
+      "Unrack and stabilize the weight directly over your shoulders.",
+      "Lower the bar with control to your mid-chest (sternum).",
+      "Explode upwards, driving your back into the bench and feet into the floor."
     ],
-    proTips: "Maintain a slight arch in your lower back and keep your shoulder blades retracted for maximum stability and power."
+    proTips: "Create full-body tension. Squeeze the bar as hard as possible and imagine trying to bend it in half to engage your lats.",
+    benefits: ["Hypertrophy Catalyst", "Core Stabilization", "Hormonal Response"]
   },
   "squats": {
     name: "Barbell Squats",
@@ -172,374 +173,640 @@ const WorkoutDetail = () => {
   const workout = workoutData[type] || workoutData["bench-press"];
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [type]);
 
   return (
     <PageContainer>
-      <BackButton onClick={() => navigate("/workouts")}>
-        <ArrowLeft size={20} /> Back to Workouts
-      </BackButton>
+      <BackgroundGlow />
+      <ContentWrapper>
+        <TopNav>
+          <BackButton onClick={() => navigate("/workouts")}>
+            <ArrowLeft size={20} />
+            <span>Back to Workouts</span>
+          </BackButton>
+        </TopNav>
 
-      <HeroSection>
-        <div className="hero-grid">
-          <div className="image-wrapper">
-            <img src={workout.image} alt={workout.name} />
-          </div>
-          <div className="text-wrapper">
-            <Badge>WORKOUT GUIDE</Badge>
-            <h1>{workout.name}</h1>
-            <p className="desc">{workout.description}</p>
-
-            <div className="stat-grid">
-              <div className="stat-item">
-                <Target className="icon" size={24} />
-                <div>
-                  <small>Target Areas</small>
-                  <p>{workout.target}</p>
+        <HeroSection>
+          <div className="hero-grid">
+            <ModelContainer>
+              {workout.modelUrl ? (
+                <div className="iframe-wrapper">
+                  <iframe 
+                    title={workout.name} 
+                    src={workout.modelUrl} 
+                    frameBorder="0" 
+                    allow="autoplay; fullscreen; xr-spatial-tracking" 
+                    xr-spatial-tracking="true" 
+                    allowFullScreen>
+                  </iframe>
+                  <div className="model-overlay-hint">
+                    <Play size={14} className="play-icon" /> <span>Interactive 3D Model - Drag to Rotate</span>
+                  </div>
                 </div>
-              </div>
-              <div className="stat-item">
-                <Zap className="icon" size={24} />
-                <div>
-                  <small>Difficulty</small>
-                  <p>{workout.difficulty}</p>
+              ) : (
+                <div className="image-wrapper">
+                  <img src={workout.image} alt={workout.name} />
                 </div>
-              </div>
-              <div className="stat-item">
-                <Timer className="icon" size={24} />
-                <div>
-                  <small>Duration</small>
-                  <p>{workout.time}</p>
+              )}
+            </ModelContainer>
+
+            <TextContainer>
+              <Badge>
+                <Zap size={14} /> ELITE TRAINING
+              </Badge>
+              <Title>{workout.name}</Title>
+              <Description>{workout.description}</Description>
+
+              <StatsGrid>
+                <StatCard>
+                  <div className="icon-wrapper target-icon">
+                    <Target size={22} />
+                  </div>
+                  <div className="stat-info">
+                    <small>Target Muscles</small>
+                    <p>{workout.target}</p>
+                  </div>
+                </StatCard>
+                <StatCard>
+                  <div className="icon-wrapper diff-icon">
+                    <Activity size={22} />
+                  </div>
+                  <div className="stat-info">
+                    <small>Difficulty</small>
+                    <p>{workout.difficulty}</p>
+                  </div>
+                </StatCard>
+                <StatCard>
+                  <div className="icon-wrapper time-icon">
+                    <Timer size={22} />
+                  </div>
+                  <div className="stat-info">
+                    <small>Duration</small>
+                    <p>{workout.time}</p>
+                  </div>
+                </StatCard>
+              </StatsGrid>
+              
+              {workout.benefits && (
+                <BenefitsList>
+                  {workout.benefits.map((benefit, i) => (
+                    <BenefitItem key={i}>
+                      <CheckCircle2 size={18} className="check-icon" />
+                      {benefit}
+                    </BenefitItem>
+                  ))}
+                </BenefitsList>
+              )}
+            </TextContainer>
+          </div>
+        </HeroSection>
+
+        <DetailsGrid>
+          <MainContent>
+            <SectionCard>
+              <SectionHeader>
+                <div className="header-icon">
+                  <Dumbbell size={24} />
                 </div>
+                <h3>Execution Protocol</h3>
+              </SectionHeader>
+              <InstructionsList>
+                {workout.instructions.map((step, i) => (
+                  <InstructionStep key={i} style={{ animationDelay: `${i * 0.1}s` }}>
+                    <div className="step-number">{i + 1}</div>
+                    <div className="step-text">{step}</div>
+                  </InstructionStep>
+                ))}
+              </InstructionsList>
+            </SectionCard>
+
+            <ProTipCard>
+              <div className="tip-header">
+                <Info size={24} />
+                <h4>Coach's Insight</h4>
               </div>
-            </div>
-          </div>
-        </div>
-      </HeroSection>
+              <p>{workout.proTips}</p>
+              <div className="glow-effect"></div>
+            </ProTipCard>
+          </MainContent>
 
-      <ContentSection>
-        <div className="main-content">
-          <div className="instruction-card">
-            <h3><Dumbbell size={24} style={{ marginRight: '10px' }} /> Proper Technique</h3>
-            <ol className="step-list">
-              {workout.instructions.map((step, i) => (
-                <li key={i}>{step}</li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="pro-tip-box">
-            <h4>💡 Professional Coaching Tip</h4>
-            <p>{workout.proTips}</p>
-          </div>
-        </div>
-
-        <Sidebar>
-          <div className="sticky-box">
-            <h3>Start Your Training</h3>
-            <p>Ready to master this exercise? Log your progress in the dashboard.</p>
-            <button onClick={() => navigate("/dashboard")} className="cta-btn">Open Dashboard</button>
-            <div className="divider"></div>
-            <p className="small text-muted">Consult with a trainer before attempting heavy weights.</p>
-          </div>
-        </Sidebar>
-      </ContentSection>
+          <Sidebar>
+            <ActionCard>
+              <div className="pulse-ring"></div>
+              <h3>Ready to Dominate?</h3>
+              <p>Track your sets, reps, and PRs in your personal dashboard.</p>
+              <PrimaryButton onClick={() => navigate("/dashboard")}>
+                Launch Dashboard
+              </PrimaryButton>
+              <Divider />
+              <Disclaimer>
+                ⚠️ Always prioritize form over weight. Consult a trainer if unsure.
+              </Disclaimer>
+            </ActionCard>
+          </Sidebar>
+        </DetailsGrid>
+      </ContentWrapper>
     </PageContainer>
   );
 };
 
+// --- STYLED COMPONENTS --- //
+
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
 const PageContainer = styled.div`
-  background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), 
-              url("https://images.unsplash.com/photo-1571902943202-507ec2618e8f?q=80&w=2075&auto=format&fit=crop");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background-color: #0f172a;
   min-height: 100vh;
-  padding-top: 100px;
-  color: #1a1a1a;
+  padding-top: 90px;
+  color: #f8fafc;
+  position: relative;
+  overflow: hidden;
+`;
+
+const BackgroundGlow = styled.div`
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    right: -50%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(15, 23, 42, 0) 70%);
+    border-radius: 50%;
+  }
+`;
+
+const ContentWrapper = styled.div`
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+`;
+
+const TopNav = styled.div`
+  margin-bottom: 30px;
 `;
 
 const BackButton = styled.button`
-  background: transparent;
-  border: none;
-  color: #1a1a1a;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 1200px;
   cursor: pointer;
-  transition: all 0.3s;
-  padding: 0 20px 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 10px 20px;
+  border-radius: 30px;
+  backdrop-filter: blur(10px);
 
   &:hover {
-    color: #ffc107;
+    background: rgba(255, 255, 255, 0.1);
     transform: translateX(-5px);
+    border-color: rgba(56, 189, 248, 0.5);
+    color: #38bdf8;
   }
 `;
 
 const HeroSection = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  margin-bottom: 50px;
+  animation: ${fadeIn} 0.6s ease-out forwards;
 
   .hero-grid {
     display: grid;
-    grid-template-columns: 1fr 1.2fr;
-    gap: 50px;
-    background: transparent;
-    backdrop-filter: none;
-    border-radius: 30px;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 40px;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(20px);
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-    border: none;
-    background: white; /* Base background */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     
-    @media (max-width: 992px) {
+    @media (max-width: 1024px) {
       grid-template-columns: 1fr;
+    }
+  }
+`;
+
+const ModelContainer = styled.div`
+  position: relative;
+  width: 100%;
+  min-height: 450px;
+  background: radial-gradient(circle at center, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .iframe-wrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .model-overlay-hint {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      pointer-events: none;
+      
+      .play-icon {
+        color: #38bdf8;
+      }
     }
   }
 
   .image-wrapper {
+    width: 100%;
     height: 100%;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Changed to contain to see the full illustration */
-      padding: 20px;
-      min-height: 400px;
+      object-fit: cover;
     }
   }
+`;
 
-  .text-wrapper {
-    padding: 60px;
-    background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), 
-               
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    
-    @media (max-width: 768px) {
-      padding: 30px;
-    }
-
-    h1 {
-      font-size: 3rem;
-      font-weight: 800;
-      margin-bottom: 20px;
-      color: #000000;
-      
-      @media (max-width: 768px) {
-        font-size: 2rem;
-      }
-    }
-
-    .desc {
-      font-size: 1.1rem;
-      color: #000000;
-      line-height: 1.7;
-      margin-bottom: 40px;
-      
-      @media (max-width: 768px) {
-        font-size: 1rem;
-        margin-bottom: 20px;
-      }
-    }
-  }
-
-  .stat-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 30px;
-    
-    .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      
-      .icon {
-        color: #008bf8;
-        background: rgba(0, 139, 248, 0.1);
-        padding: 10px;
-        border-radius: 12px;
-        box-sizing: content-box;
-      }
-      
-      small {
-        color: #000000;
-        display: block;
-        text-transform: uppercase;
-        font-weight: 700;
-        font-size: 0.7rem;
-        letter-spacing: 1px;
-      }
-      
-      p {
-        margin: 0;
-        font-weight: 700;
-        font-size: 0.95rem;
-      }
-    }
+const TextContainer = styled.div`
+  padding: 50px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  
+  @media (max-width: 768px) {
+    padding: 30px 20px;
   }
 `;
 
 const Badge = styled.span`
-  background: #008bf8;
-  color: #fff;
-  padding: 6px 15px;
-  border-radius: 6px;
-  font-weight: 800;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(139, 92, 246, 0.2));
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 700;
   font-size: 0.75rem;
-  letter-spacing: 1px;
-  margin-bottom: 15px;
-  display: inline-block;
+  letter-spacing: 1.5px;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
 `;
 
-const ContentSection = styled.div`
-  max-width: 1200px;
-  margin: 50px auto;
-  padding: 0 20px 100px;
+const Title = styled.h1`
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 15px;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+`;
+
+const Description = styled.p`
+  font-size: 1.15rem;
+  color: #cbd5e1;
+  line-height: 1.7;
+  margin-bottom: 35px;
+  font-weight: 400;
+`;
+
+const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+`;
 
-  @media (max-width: 992px) {
-    grid-template-columns: 1fr;
+const StatCard = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 16px;
+  transition: transform 0.3s ease, background 0.3s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    background: rgba(30, 41, 59, 0.8);
   }
-
-  .instruction-card {
-    background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), 
-                url("https://images.unsplash.com/photo-1518310383802-640c2de311b2?q=80&w=2070&auto=format&fit=crop");
-    background-size: cover;
-    background-position: center;
-    padding: 50px;
-    border-radius: 25px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-    margin-bottom: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-
-    h3 {
-      font-size: 1.8rem;
-      font-weight: 800;
-      margin-bottom: 30px;
-      display: flex;
-      align-items: center;
-      color: #1a1a1a;
-    }
-  }
-
-  .step-list {
-    list-style: none;
-    counter-reset: my-counter;
-    padding: 0;
+  
+  .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     
-    li {
-      counter-increment: my-counter;
-      position: relative;
-      padding-left: 60px;
-      margin-bottom: 30px;
-      font-size: 1.1rem;
-      color: #000000;
-      line-height: 1.6;
-
-      &::before {
-        content: counter(my-counter);
-        position: absolute;
-        left: 0;
-        top: -5px;
-        width: 40px;
-        height: 40px;
-        background: #008bf8;
-        color: #fff;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 800;
-      }
-    }
+    &.target-icon { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    &.diff-icon { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    &.time-icon { background: rgba(16, 185, 129, 0.1); color: #10b981; }
   }
-
-  .pro-tip-box {
-    background: #008bf8;
-    color: #fff;
-    padding: 40px;
-    border-radius: 25px;
-    box-shadow: 0 10px 20px rgba(0, 139, 248, 0.2);
-    
-    h4 {
-      color: #fff;
-      margin-bottom: 15px;
+  
+  .stat-info {
+    small {
+      color: #94a3b8;
+      display: block;
+      text-transform: uppercase;
       font-weight: 700;
+      font-size: 0.7rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
     }
     
     p {
       margin: 0;
-      font-size: 1.05rem;
-      line-height: 1.6;
-      opacity: 0.95;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #f8fafc;
     }
   }
 `;
 
-const Sidebar = styled.div`
-  .sticky-box {
-    position: sticky;
-    top: 120px;
-    background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), 
-                url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop");
-    background-size: cover;
-    background-position: center;
-    padding: 40px;
-    border-radius: 25px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    text-align: center;
-    color: #1a1a1a;
+const BenefitsList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 25px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+`;
 
-    h3 {
-      font-size: 1.5rem;
+const BenefitItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+
+  .check-icon {
+    color: #38bdf8;
+  }
+`;
+
+const DetailsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  padding-bottom: 100px;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const MainContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+`;
+
+const SectionCard = styled.div`
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(20px);
+  padding: 40px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  animation: ${fadeIn} 0.8s ease-out forwards;
+`;
+
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+
+  .header-icon {
+    background: linear-gradient(135deg, #38bdf8, #2563eb);
+    padding: 12px;
+    border-radius: 14px;
+    color: white;
+    box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4);
+  }
+
+  h3 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+  }
+`;
+
+const InstructionsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+const InstructionStep = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  background: rgba(15, 23, 42, 0.4);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: transform 0.2s, background 0.2s;
+
+  &:hover {
+    transform: translateX(10px);
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(56, 189, 248, 0.2);
+  }
+
+  .step-number {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+
+  .step-text {
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+    padding-top: 4px;
+  }
+`;
+
+const ProTipCard = styled.div`
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  padding: 35px;
+  border-radius: 24px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -10px rgba(30, 58, 138, 0.4);
+  animation: ${fadeIn} 1s ease-out forwards;
+
+  .glow-effect {
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+  }
+
+  .tip-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #38bdf8;
+    margin-bottom: 15px;
+    
+    h4 {
+      margin: 0;
+      font-size: 1.3rem;
       font-weight: 800;
-      margin-bottom: 20px;
-    }
-
-    p {
-  color: #000000;
-      margin-bottom: 30px;
-    }
-
-    .cta-btn {
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 12px;
-      background: #008bf8;
-      color: #fff;
-      font-weight: 800;
-      cursor: pointer;
-      transition: all 0.3s;
-
-      &:hover {
-        background: #0076d1;
-        transform: translateY(-2px);
-      }
-    }
-
-    .divider {
-      height: 1px;
-      background: #eee;
-      margin: 30px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
   }
+
+  p {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: #e2e8f0;
+    position: relative;
+    z-index: 1;
+  }
+`;
+
+const Sidebar = styled.div`
+  animation: ${fadeIn} 1.2s ease-out forwards;
+`;
+
+const ActionCard = styled.div`
+  position: sticky;
+  top: 120px;
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(20px);
+  padding: 40px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  .pulse-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #38bdf8, #8b5cf6);
+  }
+
+  h3 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    color: #fff;
+  }
+
+  p {
+    color: #94a3b8;
+    margin-bottom: 30px;
+    line-height: 1.6;
+    font-size: 1.05rem;
+  }
+`;
+
+const PrimaryButton = styled.button`
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px -5px rgba(56, 189, 248, 0.5);
+    filter: brightness(1.1);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const Divider = styled.div`
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 30px 0;
+`;
+
+const Disclaimer = styled.div`
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
 `;
 
 export default WorkoutDetail;

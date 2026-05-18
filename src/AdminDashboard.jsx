@@ -1099,7 +1099,8 @@ const PayrollContainer = styled.div`
     flex: 1; display: flex; flex-direction: column; gap: 30px;
     .payroll-header {
       display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-      .welcome { font-size: 1.8rem; font-weight: 900; margin: 0; color: #1e293b; }
+      @media (max-width: 768px) { flex-direction: column; align-items: flex-start; gap: 15px; }
+      .welcome { font-size: 1.8rem; font-weight: 900; margin: 0; color: #1e293b; @media (max-width: 768px) { font-size: 1.4rem; } }
       .pay-run-status { 
         display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px 20px; border-radius: 12px; border: 1px solid #e2e8f0;
         span { font-size: 0.85rem; font-weight: 700; color: #64748b; }
@@ -1109,8 +1110,9 @@ const PayrollContainer = styled.div`
 
     .payroll-stepper {
       display: flex; align-items: center; gap: 15px; margin-bottom: 40px; background: #f8fafc; padding: 15px 30px; border-radius: 20px;
+      @media (max-width: 768px) { overflow-x: auto; padding: 15px; &::-webkit-scrollbar { display: none; } }
       .step { 
-        display: flex; align-items: center; gap: 10px; opacity: 0.4;
+        @media (max-width: 768px) { white-space: nowrap; }        display: flex; align-items: center; gap: 10px; opacity: 0.4;
         &.active { opacity: 1; .dot { background: #1e293b; color: #fff; border-color: #1e293b; } span { color: #1e293b; font-weight: 800; } }
         .dot { width: 24px; height: 24px; border: 2px solid #cbd5e1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 900; }
         span { font-size: 0.75rem; font-weight: 700; color: #64748b; }
