@@ -53,6 +53,9 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
+  const [isGlobalConfigOpen, setIsGlobalConfigOpen] = useState(false);
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+  const [globalConfig, setGlobalConfig] = useState({ gymName: "SlayFit Arena", contactEmail: "admin@slayfit.com", maxCapacity: "500", currency: "USD" });
   const [isPayrollDetailOpen, setIsPayrollDetailOpen] = useState(false);
   const [payrollTab, setPayrollTab] = useState("overview"); // overview, payruns, attendance, tax
   const [selectedStaffForSlip, setSelectedStaffForSlip] = useState(null);
@@ -231,6 +234,17 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleExportData = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ users, payments, attendance, staffs }, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "gym_data_export.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    setIsSettingsOpen(false);
+  };
+
   return (
     <AuroraWrapper>
       {/* ── SIDEBAR ── */}
@@ -281,9 +295,9 @@ const AdminDashboard = () => {
                   <button className="close-btn" onClick={() => setIsSettingsOpen(false)}><X size={16} /></button>
                 </div>
                 <div className="sd-body">
-                  <button className="sd-item"><Globe size={16} /> Global Config</button>
-                  <button className="sd-item"><Layout size={16} /> Theme Customization</button>
-                  <button className="sd-item"><CheckSquare size={16} /> Export Data</button>
+                  <button className="sd-item" onClick={() => { setIsGlobalConfigOpen(true); setIsSettingsOpen(false); }}><Globe size={16} /> Global Config</button>
+                  <button className="sd-item" onClick={() => { setIsThemeModalOpen(true); setIsSettingsOpen(false); }}><Layout size={16} /> Theme Customization</button>
+                  <button className="sd-item" onClick={handleExportData}><CheckSquare size={16} /> Export Data</button>
                   <div className="sd-divider"></div>
                   <button className="sd-item danger" onClick={handleLogout}><LogOut size={16} /> Logout</button>
                 </div>
@@ -978,6 +992,70 @@ const AdminDashboard = () => {
                 <button type="submit" className="submit-btn">ENLIST STAFF</button>
               </div>
             </form>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {/* ── SETTINGS MODALS ── */}
+      {isGlobalConfigOpen && (
+        <ModalOverlay>
+          <ModalContent className="animate-in" style={{ maxWidth: '500px' }}>
+            <div className="modal-header">
+              <div className="title-area">
+                <div className="icon-wrap"><Globe size={24} /></div>
+                <div>
+                  <h3>GLOBAL CONFIGURATION</h3>
+                  <p>Manage system-wide gym parameters.</p>
+                </div>
+              </div>
+              <button className="close-btn" onClick={() => setIsGlobalConfigOpen(false)}><X size={20} /></button>
+            </div>
+            <div className="form-grid" style={{ padding: '20px' }}>
+              <div className="form-group">
+                <label>GYM NAME</label>
+                <div className="input-wrap">
+                  <input type="text" value={globalConfig.gymName} onChange={e => setGlobalConfig({ ...globalConfig, gymName: e.target.value })} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>ADMIN EMAIL</label>
+                <div className="input-wrap">
+                  <input type="email" value={globalConfig.contactEmail} onChange={e => setGlobalConfig({ ...globalConfig, contactEmail: e.target.value })} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>MAXIMUM CAPACITY</label>
+                <div className="input-wrap">
+                  <input type="number" value={globalConfig.maxCapacity} onChange={e => setGlobalConfig({ ...globalConfig, maxCapacity: e.target.value })} />
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="cancel-btn" onClick={() => setIsGlobalConfigOpen(false)}>DISCARD</button>
+              <button className="submit-btn" onClick={() => { alert("Configuration saved successfully!"); setIsGlobalConfigOpen(false); }}>SAVE CHANGES</button>
+            </div>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {isThemeModalOpen && (
+        <ModalOverlay>
+          <ModalContent className="animate-in" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <div className="title-area">
+                <div className="icon-wrap"><Layout size={24} /></div>
+                <div>
+                  <h3>THEME CUSTOMIZATION</h3>
+                  <p>Select your dashboard aesthetic.</p>
+                </div>
+              </div>
+              <button className="close-btn" onClick={() => setIsThemeModalOpen(false)}><X size={20} /></button>
+            </div>
+            <div style={{ padding: '30px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <button className="submit-btn" style={{ background: '#0f172a' }} onClick={() => { alert('Midnight Slate applied!'); setIsThemeModalOpen(false); }}>MIDNIGHT SLATE</button>
+              <button className="submit-btn" style={{ background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1' }} onClick={() => { alert('Aurora Light applied!'); setIsThemeModalOpen(false); }}>AURORA LIGHT</button>
+              <button className="submit-btn" style={{ background: '#38bdf8' }} onClick={() => { alert('Neon Blue applied!'); setIsThemeModalOpen(false); }}>NEON BLUE</button>
+            </div>
           </ModalContent>
         </ModalOverlay>
       )}
