@@ -1404,6 +1404,9 @@ const TableCard = styled.div`
   .table-wrapper { overflow-x: auto; &::-webkit-scrollbar { height: 6px; } &::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; } }
   .table { 
     width: 100%; 
+    --bs-table-bg: transparent !important;
+    --bs-table-color: var(--text-color) !important;
+    background: transparent !important;
     @media (max-width: 992px) { min-width: 800px; } 
     th { background: var(--card-bg); color: var(--text-muted); font-size: 0.75rem; font-weight: 800; padding: 15px; border: none; } 
     td { padding: 20px 15px; border-bottom: 1px solid var(--border-color); color: var(--text-color); vertical-align: middle; } 
