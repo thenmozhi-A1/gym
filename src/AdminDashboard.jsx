@@ -351,8 +351,7 @@ const AdminDashboard = () => {
                       <div className="chart-header">
                         <div className="tabs">
                           <button className="active">New Warriors</button>
-                          <button>Avg. Session</button>
-                          <button>Inquiries</button>
+
                         </div>
                         <div className="legend">
                           <span className="actual">Actual Value</span>
