@@ -146,53 +146,53 @@ const Login = () => {
   };
 
   const completeMobileLogin = async (samples) => {
-    const store = JSON.parse(localStorage.getItem('webauthnCredentials') || '{}');
-    const last  = localStorage.getItem('lastEnrolledEmail');
-    const email = formData.email || last;
-    if (!email || !store[email]) {
-      setBiometricState('error');
-      setError('No fingerprint found. Enter your email or re-register.');
-      return;
-    }
+    const hash = buildMobileHash(samples);
+    setBiometricState('scanning');
+    setError("");
+
     try {
-      const [resUsers, resStaffs] = await Promise.all([
-        fetch(`${API_BASE}/users`),
-        fetch(`${API_BASE}/staffs`)
-      ]);
-      const users = await resUsers.json();
-      const staffs = await resStaffs.json();
-      const allPeople = [...users, ...staffs];
-      const user  = allPeople.find(u => u.email === email);
-      if (!user) { setBiometricState('error'); setError('No account linked to this fingerprint.'); return; }
-      // Removed the user.fingerprintEnrolled check because the User entity doesn't have this field,
-      // and we already verified the credential exists in the device's local storage.
-      if (user.status !== 'ACTIVE') { setBiometricState('error'); setError('ACCESS DENIED: Membership expired.'); return; }
+      const res = await fetch(`${API_BASE}/users/biometric-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fingerprintHash: hash })
+      });
+
+      const user = await res.json();
+
+      if (!res.ok) {
+        setBiometricState('error');
+        setError(user.error || "Fingerprint not recognized on database.");
+        return;
+      }
+
       const now = new Date(); const ts = now.toLocaleTimeString(); const dk = now.toLocaleDateString();
       const att = JSON.parse(localStorage.getItem('attendance') || '{}');
-      if (!att[dk]) { att[dk] = { entry: ts, exit: null }; setAttendanceLog(`Entry at ${ts}`); }
-      else if (!att[dk].exit) { att[dk].exit = ts; setAttendanceLog(`Exit at ${ts}`); }
+      if (!att[dk]) { att[dk] = { entry: ts, exit: null }; setAttendanceLog(`Entry recorded at ${ts}`); }
+      else if (!att[dk].exit) { att[dk].exit = ts; setAttendanceLog(`Exit recorded at ${ts}`); }
       else setAttendanceLog('Session complete for today.');
       localStorage.setItem('attendance', JSON.stringify(att));
+
       setBiometricState('success');
-      localStorage.setItem('isLoggedIn','true'); localStorage.setItem('userId', user.id);
-      localStorage.setItem('userName', user.fullName); localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('isLoggedIn','true'); 
+      localStorage.setItem('userId', user.id);
+      localStorage.setItem('userName', user.fullName); 
+      localStorage.setItem('userEmail', user.email);
       localStorage.setItem('userRole', user.role);
+
       const redirectUser = (role) => {
         const r = (role || "").toString().trim().toUpperCase();
-        console.log("Redirecting user with role:", r);
-        if (r === 'ADMIN') {
-          window.location.href = '/AdminDashboard';
-        } else if (r === 'TRAINER' || r === 'FRONT OFFICE' || r === 'STAFF' || r.includes('TRAINER') || r.includes('OFFICE')) {
-          window.location.href = '/EmployeeDashboard';
-        } else {
-          window.location.href = '/userdashboard';
-        }
+        if (r === 'ADMIN') window.location.href = '/AdminDashboard';
+        else if (r === 'TRAINER' || r === 'FRONT OFFICE' || r === 'STAFF' || r.includes('TRAINER') || r.includes('OFFICE')) window.location.href = '/EmployeeDashboard';
+        else window.location.href = '/userdashboard';
       };
 
       setTimeout(() => { 
         redirectUser(user.role);
       }, 1500);
-    } catch { setBiometricState('error'); setError('Cannot connect to server.'); }
+    } catch { 
+      setBiometricState('error'); 
+      setError('Cannot connect to server.'); 
+    }
   };
 
   // ── Desktop WebAuthn enroll ───────────────────────────────────
@@ -271,6 +271,9 @@ const Login = () => {
     setLoading(true);
     try {
       if (isNewUser) {
+        const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
+        const activeHash = stored[formData.email] || `fp_${formData.email.replace(/[^a-zA-Z0-9]/g, "")}`;
+
         // ── CREATE ACCOUNT ── POST /api/users/register
         const res = await fetch(`${API_BASE}/users/register`, {
           method: "POST",
@@ -281,7 +284,8 @@ const Login = () => {
             password: formData.password,
             membershipType: "Monthly",
             status: "ACTIVE",
-            fingerprintEnrolled: true
+            fingerprintEnrolled: true,
+            fingerprintHash: activeHash
           })
         });
 
@@ -381,45 +385,25 @@ const Login = () => {
         },
       });
 
-      // ── Step 3: Match credential to a user in the backend ─────
+      // ── Step 3: Match scanned credential ID ────────────────────
       const assertedCredId = bufferToBase64(assertion.rawId);
-      let matchedEmail = Object.keys(stored).find(email => stored[email] === assertedCredId);
-      if (!matchedEmail && targetEmail) matchedEmail = targetEmail;
 
-      if (!matchedEmail) {
+      // ── Step 4: Verify directly against database ──────────────
+      const res = await fetch(`${API_BASE}/users/biometric-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fingerprintHash: assertedCredId })
+      });
+
+      const user = await res.json();
+
+      if (!res.ok) {
         setBiometricState("error");
-        setError("Fingerprint not recognized. Please enter your email to identify yourself.");
+        setError(user.error || "Biometric hash not matched in database.");
         return;
       }
 
-      const [resUsers, resStaffs] = await Promise.all([
-        fetch(`${API_BASE}/users`),
-        fetch(`${API_BASE}/staffs`)
-      ]);
-      const users = await resUsers.json();
-      const staffs = await resStaffs.json();
-      const allPeople = [...users, ...staffs];
-      const user = allPeople.find(u => u.email === matchedEmail);
-
-      if (!user) {
-        setBiometricState("error");
-        setError("No account found linked to this fingerprint.");
-        return;
-      }
-
-      if (!user.fingerprintEnrolled && user.role !== "ADMIN") {
-        setBiometricState("error");
-        setError("No biometric record found for this account. Please re-register.");
-        return;
-      }
-
-      if (user.status !== "ACTIVE") {
-        setBiometricState("error");
-        setError("ACCESS DENIED: Membership expired or payment pending.");
-        return;
-      }
-
-      // ── Step 4: Record attendance ──────────────────────────────
+      // ── Step 5: Record attendance ──────────────────────────────
       const now = new Date();
       const timestamp = now.toLocaleTimeString();
       const dateKey = now.toLocaleDateString();
@@ -435,7 +419,7 @@ const Login = () => {
       }
       localStorage.setItem("attendance", JSON.stringify(currentAttendance));
 
-      // ── Step 5: Login ──────────────────────────────────────────
+      // ── Step 6: Login ──────────────────────────────────────────
       setBiometricState("success");
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userId", user.id);
