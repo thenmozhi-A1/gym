@@ -538,7 +538,7 @@ const AdminDashboard = () => {
                                     <tr><th>EMPLOYEE</th><th>ROLE</th><th>GROSS PAY</th><th>LEAVES/PERM</th><th>DEDUCTIONS</th><th>NET PAY</th><th>STATUS</th></tr>
                                   </thead>
                                   <tbody>
-                                    {staffs.filter(s => (payrollRoleFilter === "ALL" || s.role === payrollRoleFilter) && (s.name.toLowerCase().includes(payrollSearchTerm.toLowerCase()))).map(s => {
+                                    {staffs.filter(s => (payrollRoleFilter === "ALL" || s.role === payrollRoleFilter) && ((s.fullName || s.name || "").toLowerCase().includes(payrollSearchTerm.toLowerCase()))).map(s => {
                                       const gross = parseInt(s.salary.replace(/[^\d]/g, ''));
                                       const daily = gross / 30;
                                       const leaveDed = daily * (s.leaves || 0);
@@ -547,7 +547,7 @@ const AdminDashboard = () => {
 
                                       return (
                                         <tr key={s.id} onClick={() => setSelectedStaffForSlip(s)}>
-                                          <td><div className="u-cell"><div className="avatar-small">{s.name.charAt(0)}</div><div className="fw-bold">{s.name}</div></div></td>
+                                          <td><div className="u-cell"><div className="avatar-small">{(s.fullName || s.name || "S").charAt(0)}</div><div className="fw-bold">{s.fullName || s.name || "Staff Member"}</div></div></td>
                                           <td><span className="badge bg-primary-light">{s.role}</span></td>
                                           <td className="fw-bold">{s.salary}</td>
                                           <td>
@@ -575,7 +575,7 @@ const AdminDashboard = () => {
                                 <div className="drawer-overlay" onClick={() => setSelectedStaffForSlip(null)} />
                                 <div className="pay-slip-drawer animate-slide-left">
                                   <div className="drawer-header"><h3>Employee Pay Slip</h3><button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button></div>
-                                  <div className="slip-profile"><div className="big-avatar">{selectedStaffForSlip.name.charAt(0)}</div><div className="info"><h4>{selectedStaffForSlip.name}</h4><p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000}</p></div></div>
+                                  <div className="slip-profile"><div className="big-avatar">{(selectedStaffForSlip.fullName || selectedStaffForSlip.name || "S").charAt(0)}</div><div className="info"><h4>{selectedStaffForSlip.fullName || selectedStaffForSlip.name || "Staff Member"}</h4><p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000}</p></div></div>
                                   <div className="slip-summary-cards">
                                     <div className="s-card green"><label>EARNINGS</label><div className="val">{selectedStaffForSlip.salary}</div></div>
                                     <div className="s-card red">
