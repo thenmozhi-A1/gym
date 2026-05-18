@@ -51,6 +51,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
   const [isPayrollDetailOpen, setIsPayrollDetailOpen] = useState(false);
   const [payrollTab, setPayrollTab] = useState("overview"); // overview, payruns, attendance, tax
@@ -271,9 +272,23 @@ const AdminDashboard = () => {
             <Search size={18} />
             <input placeholder="Search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
-          <div className="header-actions">
-
-            <button className="h-btn"><Settings size={18} /></button>
+          <div className="header-actions" style={{ position: 'relative' }}>
+            <button className="h-btn" onClick={() => setIsSettingsOpen(!isSettingsOpen)}><Settings size={18} /></button>
+            {isSettingsOpen && (
+              <SettingsDropdown>
+                <div className="sd-header">
+                  <h4>Admin Settings</h4>
+                  <button className="close-btn" onClick={() => setIsSettingsOpen(false)}><X size={16} /></button>
+                </div>
+                <div className="sd-body">
+                  <button className="sd-item"><Globe size={16} /> Global Config</button>
+                  <button className="sd-item"><Layout size={16} /> Theme Customization</button>
+                  <button className="sd-item"><CheckSquare size={16} /> Export Data</button>
+                  <div className="sd-divider"></div>
+                  <button className="sd-item danger" onClick={handleLogout}><LogOut size={16} /> Logout</button>
+                </div>
+              </SettingsDropdown>
+            )}
             <button className="h-btn"><Bell size={18} /><div className="notif-dot"></div></button>
             <div className="profile-chip">
               <div className="avatar">AD</div>
@@ -1418,5 +1433,85 @@ const ModalContent = styled.div`
 `;
 
 const Overlay = styled.div` position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 450; `;
+
+const SettingsDropdown = styled.div`
+  position: absolute;
+  top: 50px;
+  right: 120px;
+  width: 260px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+
+  @media (max-width: 768px) {
+    right: 20px;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .sd-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    background: rgba(248, 250, 252, 0.8);
+    
+    h4 { margin: 0; font-size: 0.95rem; font-weight: 800; color: #1e293b; }
+    .close-btn { 
+      background: none; border: none; cursor: pointer; color: #64748b; padding: 4px; border-radius: 50%;
+      &:hover { background: rgba(0,0,0,0.05); color: #0f172a; }
+    }
+  }
+
+  .sd-body {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .sd-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      text-align: left;
+      padding: 12px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+        transform: translateX(4px);
+      }
+
+      &.danger {
+        color: #ef4444;
+        &:hover { background: #fef2f2; }
+      }
+    }
+
+    .sd-divider {
+      height: 1px;
+      background: rgba(0,0,0,0.05);
+      margin: 6px 0;
+    }
+  }
+`;
 
 export default AdminDashboard;
