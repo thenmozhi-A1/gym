@@ -36,7 +36,8 @@ const Navbar = () => {
       <div className="container">
 
         <Link className="navbar-brand d-flex align-items-center" to="/" onClick={handleNavClick}>
-          <img src="/logo.png" alt="B&Y Fitness Logo" style={{ height: '50px', objectFit: 'contain' }} />
+          <img src="/logo.png" alt="B&Y Fitness Logo" style={{ height: '45px', objectFit: 'contain', marginRight: '10px' }} />
+          <span className="ms-2 brand-text">B&Y FITNESS</span>
         </Link>
 
         <button className="navbar-toggler border-0" type="button" onClick={() => setIsOpen(!isOpen)}>
