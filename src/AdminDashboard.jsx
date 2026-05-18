@@ -96,7 +96,8 @@ const AdminDashboard = () => {
       );
 
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs") {
-        setUsers(results[0]); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
+        const standardUsers = (results[0] || []).filter(u => !['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office', 'admin', 'ADMIN'].includes(u.role));
+        setUsers(standardUsers); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
         setStaffs(results[4] || []);
       } else {
         const data = results[0];
