@@ -47,6 +47,7 @@ const AdminDashboard = () => {
   const [payments, setPayments] = useState([]);
   const [attendance, setAttendance] = useState([]);
   const [consultations, setConsultations] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,29 +88,45 @@ const AdminDashboard = () => {
         return;
       }
 
-      const endpoints = activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs"
-        ? ["users", "payments", "attendance", "consultations", "staffs"]
+      const endpoints = activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks"
+        ? ["users", "payments", "attendance", "consultations", "staffs", "feedbacks"]
         : [activeTab];
 
       const results = await Promise.all(
         endpoints.map(ep => fetch(`${API_BASE}/${ep}`).then(r => r.json()))
       );
 
-      if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs") {
+      if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
         const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => !['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office', 'admin', 'ADMIN'].includes(u.role));
         setUsers(standardUsers); 
         setPayments(Array.isArray(results[1]) ? results[1] : []); 
         setAttendance(Array.isArray(results[2]) ? results[2] : []); 
         setConsultations(Array.isArray(results[3]) ? results[3] : []);
         setStaffs(Array.isArray(results[4]) ? results[4] : []);
+        setFeedbacks(Array.isArray(results[5]) ? results[5] : []);
       } else {
         const data = Array.isArray(results[0]) ? results[0] : [];
         if (activeTab === "payments") setPayments(data);
         else if (activeTab === "attendance") setAttendance(data);
+        else if (activeTab === "feedbacks") setFeedbacks(data);
         else setConsultations(data);
       }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  };
+
+  const handleDeleteFeedback = async (id) => {
+    if (!window.confirm("Remove this feedback?")) return;
+    try {
+      const res = await fetch(`${API_BASE}/feedbacks/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setFeedbacks(feedbacks.filter(f => f.id !== id));
+      } else {
+        alert("Failed to delete feedback.");
+      }
+    } catch (err) {
+      alert("Error deleting feedback.");
+    }
   };
 
   const handleLogout = () => { localStorage.clear(); navigate("/login"); };
@@ -271,7 +288,8 @@ const AdminDashboard = () => {
             { id: "attendance", icon: <Clock size={18} />, label: "Arena Logs" },
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
             { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },
-            { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" }
+            { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" },
+            { id: "feedbacks", icon: <MessageSquare size={18} />, label: "Feedbacks" }
           ].map(item => (
             <NavItem
               key={item.id}
@@ -798,6 +816,7 @@ const AdminDashboard = () => {
                           {activeTab === "payments" && <><th>WARRIOR</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
                           {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
                           {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
+                          {activeTab === "feedbacks" && <><th>WARRIOR</th><th>RATING</th><th>FEEDBACK MESSAGE</th><th>DATE</th><th>ACTIONS</th></>}
                           {activeTab === "staffs" && <><th>STAFF NAME</th><th>ROLE</th><th>SPECIALTY / TASK</th><th>SHIFT TIME</th><th>SALARY</th><th>ACTIONS</th></>}
                         </tr>
                       </thead>
@@ -846,6 +865,26 @@ const AdminDashboard = () => {
                             </td>
                             <td style={{ maxWidth: '400px' }}><p className="mb-0 text-secondary">{msg.goals}</p></td>
                             <td className="sub-text">{msg.createdAt ? new Date(msg.createdAt).toLocaleDateString() : "Recent"}</td>
+                          </tr>
+                        ))}
+                        {activeTab === "feedbacks" && feedbacks.map(fb => (
+                          <tr key={fb.id}>
+                            <td>
+                              <div className="fw-bold">{fb.userName || "Anonymous"}</div>
+                              <div className="sub-text">{fb.userEmail || "Anonymous"}</div>
+                            </td>
+                            <td>
+                              <span style={{ color: '#ffc107', fontSize: '1.1rem', letterSpacing: '2px' }}>
+                                {"★".repeat(fb.rating || 0)}{"☆".repeat(Math.max(0, 5 - (fb.rating || 0)))}
+                              </span>
+                            </td>
+                            <td style={{ maxWidth: '400px' }}><p className="mb-0 text-secondary">{fb.message}</p></td>
+                            <td className="sub-text">{fb.createdAt ? new Date(fb.createdAt).toLocaleDateString() : "Recent"}</td>
+                            <td>
+                              <button className="btn-icon text-danger" onClick={() => handleDeleteFeedback(fb.id)} title="Delete Feedback">
+                                <Trash2 size={16} />
+                              </button>
+                            </td>
                           </tr>
                         ))}
                         {activeTab === "staffs" && staffs.map(s => (
