@@ -38,7 +38,7 @@ import {
   FileCheck
 } from "lucide-react";
 
-const API_BASE = "https://gymj-9.onrender.com/api";
+const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-9.onrender.com/api";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -217,7 +217,12 @@ const AdminDashboard = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData = { error: "Unknown error" };
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          errorData = { error: `Server error: ${response.status} ${response.statusText}` };
+        }
         alert(`Failed to add staff: ${errorData.error}`);
         return;
       }

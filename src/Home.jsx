@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { MapPin, Clock, Phone, Mail, Award, Shield, Zap, UserCircle, Send, Users, Target, Trophy, Dumbbell } from "lucide-react";
 
-const API_BASE = "https://gymj-9.onrender.com/api";
+const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-9.onrender.com/api";
 
 import BMICalculator from "./BMICalculator";
 

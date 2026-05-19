@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
 import { Send, Award, Target, Users, Shield, Zap, Trophy, TrendingUp, Heart } from "lucide-react";
 
-const API_BASE = "https://gymj-9.onrender.com/api";
+const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-9.onrender.com/api";
 
 const About = () => {
   const [formData, setFormData] = useState({
