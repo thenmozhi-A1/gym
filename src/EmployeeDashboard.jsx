@@ -21,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-9.onrender.com/api";
+const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
 
 const EmployeeDashboard = () => {
   const navigate = useNavigate();

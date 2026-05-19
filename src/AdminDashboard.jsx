@@ -38,7 +38,7 @@ import {
   FileCheck
 } from "lucide-react";
 
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-9.onrender.com/api";
+const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
