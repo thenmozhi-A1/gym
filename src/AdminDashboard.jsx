@@ -237,7 +237,8 @@ const AdminDashboard = () => {
       setIsAddStaffModalOpen(false);
       alert("STAFF MEMBER ADDED & BIOMETRICS STORED IN DATABASE!");
     } catch (error) {
-      alert("Cannot connect to server to save staff.");
+      console.error(error);
+      alert(`Cannot connect to server to save staff. (Network/CORS error): ${error.message}`);
     }
   };
 
