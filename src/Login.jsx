@@ -155,7 +155,10 @@ const Login = () => {
       const res = await fetch(`${API_BASE}/users/biometric-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fingerprintHash: hash })
+        body: JSON.stringify({ 
+          email: formData.email || localStorage.getItem("lastEnrolledEmail"),
+          fingerprintHash: hash 
+        })
       });
 
       const user = await res.json();
@@ -248,37 +251,6 @@ const Login = () => {
     finally   { setLoading(false); }
   };
 
-  // ── Employee password login ──────────────────────────────────
-  const handleEmployeeLogin = async (e) => {
-    e.preventDefault();
-    setError(""); setLoading(true);
-    try {
-      const res  = await fetch(`${API_BASE}/users/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email, password: formData.password }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error || "Invalid credentials."); return; }
-      
-      const upperRole = (data.role || "").toString().trim().toUpperCase();
-      if (!['TRAINER', 'FRONT OFFICE', 'STAFF'].some(role => upperRole.includes(role))) {
-        setError("Access denied. This login is for employees only.");
-        return;
-      }
-      
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userId",    data.id);
-      localStorage.setItem("userName",  data.fullName);
-      localStorage.setItem("userEmail", data.email);
-      localStorage.setItem("userRole",  data.role);
-      
-      window.location.href = '/EmployeeDashboard';
-    } catch { 
-      setError("Cannot connect to server. Please make sure the backend is running."); 
-    }
-    finally { setLoading(false); }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -429,7 +401,10 @@ const Login = () => {
       const res = await fetch(`${API_BASE}/users/biometric-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fingerprintHash: assertedCredId })
+        body: JSON.stringify({ 
+          email: targetEmail,
+          fingerprintHash: assertedCredId 
+        })
       });
 
       const user = await res.json();
@@ -524,11 +499,11 @@ const Login = () => {
                 {isNewUser 
                   ? "Start your fitness journey with B&Y Fitness today." 
                   : isEmployeeLogin
-                    ? "Enter your staff email and password below."
+                    ? "Scan your staff fingerprint to access the B&Y Fitness operations dashboard."
                     : "Please scan your fingerprint to enter the gym."}
               </p>
 
-              {!isNewUser && !isAdminLogin && !isEmployeeLogin && (
+              {!isNewUser && !isAdminLogin && (
                 <BiometricSection>
                   {IS_MOBILE ? (
                     /* ── MOBILE LOGIN: touch pad ── */
@@ -716,31 +691,7 @@ const Login = () => {
                 </AdminLoginBox>
               )}
 
-              {isEmployeeLogin && (
-                <AdminLoginBox>
-                  <div className="admin-badge" style={{ borderColor: 'rgba(56, 189, 248, 0.2)' }}>
-                    <span className="lock">👤</span>
-                    <div>
-                      <span className="title">Employee Secure Access</span>
-                      <span className="sub">Enter your staff credentials below</span>
-                    </div>
-                  </div>
-                  <form onSubmit={handleEmployeeLogin}>
-                    <InputGroup>
-                      <label><Mail size={16} /> Staff Email</label>
-                      <input type="email" name="email" placeholder="staff@byfitness.com" required onChange={handleInputChange} />
-                    </InputGroup>
-                    <InputGroup>
-                      <label><Lock size={16} /> Password</label>
-                      <input type="password" name="password" placeholder="••••••••" required onChange={handleInputChange} />
-                    </InputGroup>
-                    {error && <ErrorBox>{error}</ErrorBox>}
-                    <SubmitButton type="submit" disabled={loading}>
-                      {loading ? 'Authenticating…' : '👤 Login as Employee'}
-                    </SubmitButton>
-                  </form>
-                </AdminLoginBox>
-              )}
+
 
               <div className="auth-footer">
                 {!isNewUser && !isAdminLogin && !isEmployeeLogin ? (
