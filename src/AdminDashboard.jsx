@@ -327,28 +327,40 @@ const AdminDashboard = () => {
               {activeTab === "dashboard" ? (
                 <div className="dashboard-view">
                   <StatsRow>
-                    <StatBox color="#007bff">
+                    <StatBox color="#38bdf8">
+                      <div className="card-glow" />
                       <div className="lab">Total Warriors</div>
-                      <div className="icon-row"><Users size={24} /></div>
-                      <div className="val">{users.length}</div>
+                      <div className="val-row">
+                        <div className="val">{users.length}</div>
+                        <div className="icon-badge"><Users size={24} /></div>
+                      </div>
                       <div className="footer-text">See in-depth <span>Warrior source</span></div>
                     </StatBox>
                     <StatBox color="#fd7e14">
+                      <div className="card-glow" />
                       <div className="lab">Retention Rate</div>
-                      <div className="icon-row"><TrendingUp size={24} /></div>
-                      <div className="val">84.22%</div>
+                      <div className="val-row">
+                        <div className="val">84.22%</div>
+                        <div className="icon-badge"><TrendingUp size={24} /></div>
+                      </div>
                       <div className="footer-text">See page-wise <span>Performance</span></div>
                     </StatBox>
-                    <StatBox color="#28a745">
+                    <StatBox color="#22c55e">
+                      <div className="card-glow" />
                       <div className="lab">Growth</div>
-                      <div className="icon-row"><CreditCard size={24} /></div>
-                      <div className="val">₹{payments.reduce((acc, p) => acc + (p.amount || 0), 0).toLocaleString()}</div>
+                      <div className="val-row">
+                        <div className="val">₹{payments.reduce((acc, p) => acc + (p.amount || 0), 0).toLocaleString()}</div>
+                        <div className="icon-badge"><CreditCard size={24} /></div>
+                      </div>
                       <div className="footer-text">See last week's <span>Revenue</span></div>
                     </StatBox>
-                    <StatBox color="#17a2b8">
+                    <StatBox color="#06b6d4">
+                      <div className="card-glow" />
                       <div className="lab">Active Logs</div>
-                      <div className="icon-row"><Zap size={24} /></div>
-                      <div className="val">{attendance.length}</div>
+                      <div className="val-row">
+                        <div className="val">{attendance.length}</div>
+                        <div className="icon-badge"><Zap size={24} /></div>
+                      </div>
                       <div className="footer-text">See all inbound <span>Logs</span></div>
                     </StatBox>
                   </StatsRow>
@@ -1211,45 +1223,300 @@ const ContentContainer = styled.div`
 const StatsRow = styled.div` display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; @media (max-width: 1200px) { grid-template-columns: repeat(2, 1fr); } @media (max-width: 768px) { grid-template-columns: 1fr; } `;
 
 const StatBox = styled.div`
-  background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 28px;
   backdrop-filter: var(--backdrop);
   box-shadow: var(--shadow);
-  position: relative; overflow: hidden;
-  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   
-  .lab { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 20px; }
-  .icon-row { color: ${props => props.color || "var(--accent-color)"}; margin-bottom: 15px; }
-  .val { font-size: 2rem; font-weight: 800; color: var(--text-color); margin-bottom: 15px; }
-  .footer-text { font-size: 0.75rem; color: var(--text-muted); span { color: var(--accent-color); font-weight: 600; cursor: pointer; } }
+  &:hover {
+    transform: translateY(-6px);
+    border-color: ${props => props.color || "var(--accent-color)"}4d;
+    box-shadow: 0 20px 40px -15px ${props => props.color || "var(--accent-color)"}25, var(--shadow);
+    
+    .icon-badge {
+      background: ${props => props.color || "var(--accent-color)"};
+      color: #000;
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 0 20px ${props => props.color || "var(--accent-color)"}80;
+    }
+    
+    .card-glow {
+      opacity: 0.15;
+    }
+  }
 
-  &::after { content: ''; position: absolute; right: -20px; top: -20px; width: 80px; height: 80px; background: ${props => props.color || "var(--accent-color)"}; opacity: 0.03; border-radius: 50%; }
+  .card-glow {
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, ${props => props.color || "var(--accent-color)"} 0%, transparent 70%);
+    opacity: 0.05;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .lab {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+  }
+
+  .val-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .val {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--text-color);
+    letter-spacing: -1px;
+  }
+
+  .icon-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${props => props.color || "var(--accent-color)"}18;
+    border: 1px solid ${props => props.color || "var(--accent-color)"}33;
+    color: ${props => props.color || "var(--accent-color)"};
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  .footer-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    
+    span {
+      color: var(--text-color);
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 1.5px;
+        background: ${props => props.color || "var(--accent-color)"};
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
+      
+      &:hover::after {
+        transform: scaleX(1);
+      }
+    }
+  }
 `;
 
 const ChartCard = styled.div`
-  background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 30px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 28px;
+  padding: 30px;
   backdrop-filter: var(--backdrop);
   box-shadow: var(--shadow);
-  transition: all 0.3s ease;
-  &.flex-2 { flex: 2; } &.flex-1 { flex: 1; }
-  @media (max-width: 768px) { padding: 20px; border-radius: 16px; }
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
+  overflow: hidden;
+  
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 30px 60px -25px rgba(0, 0, 0, 0.4), var(--shadow);
+  }
+
+  &.flex-2 { flex: 2; }
+  &.flex-1 { flex: 1; }
+  @media (max-width: 768px) { padding: 24px; border-radius: 20px; }
 
   .chart-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
     @media (max-width: 768px) { flex-direction: column; align-items: flex-start; gap: 15px; }
-    h5 { font-weight: 800; color: var(--text-color); margin: 0; }
-    .tabs { display: flex; gap: 20px; button { background: none; border: none; color: var(--text-muted); font-weight: 700; font-size: 0.85rem; padding-bottom: 10px; &.active { color: var(--accent-color); border-bottom: 2px solid var(--accent-color); } } }
-    .legend { display: flex; gap: 20px; span { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; &::before { content: ''; width: 15px; height: 3px; border-radius: 2px; } &.actual::before { background: var(--accent-color); } &.projected::before { background: #28a745; border-top: 1px dashed #28a745; } } }
-    .dropdown { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    
+    h5 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-color);
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 20px;
+      button {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding-bottom: 10px;
+        position: relative;
+        cursor: pointer;
+        
+        &.active {
+          color: var(--accent-color);
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2.5px;
+            background: var(--accent-color);
+            border-radius: 2px;
+          }
+        }
+      }
+    }
+    
+    .legend {
+      display: flex;
+      gap: 20px;
+      span {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        
+        &::before {
+          content: '';
+          width: 12px;
+          height: 3px;
+          border-radius: 2px;
+        }
+        &.actual::before { background: var(--accent-color); }
+        &.projected::before { background: #28a745; border-top: 1.5px dashed #28a745; }
+      }
+    }
+    
+    .dropdown {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      
+      &:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: var(--accent-color);
+      }
+    }
   }
 
-  .main-chart { position: relative; overflow-x: auto; .recharts-responsive-container { min-width: 600px; } }
+  .main-chart {
+    position: relative;
+    overflow-x: auto;
+    
+    svg path {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawPath 2.5s ease-in-out forwards;
+    }
+    
+    @keyframes drawPath {
+      to { stroke-dashoffset: 0; }
+    }
+  }
+  
   .chart-footer { 
-    display: flex; justify-content: space-between; margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
     @media (max-width: 768px) { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .f-stat { span { display: block; font-size: 1.2rem; font-weight: 800; color: var(--text-color); } small { color: var(--text-muted); font-size: 0.75rem; } }
+    
+    .f-stat {
+      span {
+        display: block;
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: var(--text-color);
+      }
+      small {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+    }
   }
 
-  .bar-chart { height: 200px; display: flex; align-items: flex-end; justify-content: space-between; .bar-group { width: 12%; height: 100%; display: flex; align-items: flex-end; .bar { width: 100%; background: var(--accent-color); border-radius: 6px; } } }
+  .bar-chart {
+    height: 200px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    
+    .bar-group {
+      width: 11%;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      
+      .bar {
+        width: 100%;
+        background: linear-gradient(180deg, var(--accent-color) 0%, rgba(255,193,7,0.15) 100%);
+        border-radius: 8px 8px 0 0;
+        animation: scaleUpBar 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        transform-origin: bottom;
+        transform: scaleY(0);
+        transition: all 0.3s ease;
+        
+        &:hover {
+          filter: brightness(1.2) drop-shadow(0 0 10px var(--accent-color));
+          transform: scaleY(1.05);
+        }
+      }
+      
+      &:nth-child(1) .bar { animation-delay: 0.05s; }
+      &:nth-child(2) .bar { animation-delay: 0.1s; }
+      &:nth-child(3) .bar { animation-delay: 0.15s; }
+      &:nth-child(4) .bar { animation-delay: 0.2s; }
+      &:nth-child(5) .bar { animation-delay: 0.25s; }
+      &:nth-child(6) .bar { animation-delay: 0.3s; }
+    }
+  }
+  
+  @keyframes scaleUpBar {
+    to { transform: scaleY(1); }
+  }
 `;
 
 const PayrollContainer = styled.div`
