@@ -334,10 +334,14 @@ const Login = () => {
         localStorage.setItem("userRole", data.role); // Store role
 
         console.log("Login Data Detected:", data.role);
-        const upperRole = data.role?.toUpperCase();
-        if (upperRole === 'ADMIN') window.location.href = '/AdminDashboard';
-        else if (upperRole === 'TRAINER' || upperRole === 'FRONT OFFICE' || data.role === 'Trainer' || data.role === 'Front Office') window.location.href = '/EmployeeDashboard';
-        else window.location.href = '/userdashboard';
+        const upperRole = (data.role || "").toString().trim().toUpperCase();
+        if (upperRole === 'ADMIN') {
+          window.location.href = '/AdminDashboard';
+        } else if (['TRAINER', 'FRONT OFFICE', 'STAFF'].some(role => upperRole.includes(role))) {
+          window.location.href = '/EmployeeDashboard';
+        } else {
+          window.location.href = '/userdashboard';
+        }
       }
     } catch (err) {
       setError("Cannot connect to server. Please make sure the backend is running.");
