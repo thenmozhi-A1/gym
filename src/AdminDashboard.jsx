@@ -96,11 +96,14 @@ const AdminDashboard = () => {
       );
 
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs") {
-        const standardUsers = (results[0] || []).filter(u => !['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office', 'admin', 'ADMIN'].includes(u.role));
-        setUsers(standardUsers); setPayments(results[1]); setAttendance(results[2]); setConsultations(results[3]);
-        setStaffs(results[4] || []);
+        const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => !['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office', 'admin', 'ADMIN'].includes(u.role));
+        setUsers(standardUsers); 
+        setPayments(Array.isArray(results[1]) ? results[1] : []); 
+        setAttendance(Array.isArray(results[2]) ? results[2] : []); 
+        setConsultations(Array.isArray(results[3]) ? results[3] : []);
+        setStaffs(Array.isArray(results[4]) ? results[4] : []);
       } else {
-        const data = results[0];
+        const data = Array.isArray(results[0]) ? results[0] : [];
         if (activeTab === "payments") setPayments(data);
         else if (activeTab === "attendance") setAttendance(data);
         else setConsultations(data);
@@ -429,7 +432,7 @@ const AdminDashboard = () => {
                                     <div className="amount-row">
                                       <div className="amount">
                                         ₹{staffs.reduce((acc, s) => {
-                                          const gross = parseInt(s.salary.replace(/[^\d]/g, ''));
+                                          const gross = parseInt(String(s.salary || '0').replace(/[^\d]/g, '')) || 0;
                                           const daily = gross / 30;
                                           const leaveDed = daily * (s.leaves || 0);
                                           const permDed = (daily / 8) * (s.permissions || 0);
@@ -539,7 +542,7 @@ const AdminDashboard = () => {
                                   </thead>
                                   <tbody>
                                     {staffs.filter(s => (payrollRoleFilter === "ALL" || s.role === payrollRoleFilter) && ((s.fullName || s.name || "").toLowerCase().includes(payrollSearchTerm.toLowerCase()))).map(s => {
-                                      const gross = parseInt(s.salary.replace(/[^\d]/g, ''));
+                                      const gross = parseInt(String(s.salary || '0').replace(/[^\d]/g, '')) || 0;
                                       const daily = gross / 30;
                                       const leaveDed = daily * (s.leaves || 0);
                                       const permDed = (daily / 8) * (s.permissions || 0);
@@ -581,7 +584,7 @@ const AdminDashboard = () => {
                                     <div className="s-card red">
                                       <label>TOTAL DEDUCTIONS</label>
                                       <div className="val">
-                                        ₹{Math.floor(2450 + (parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) + ((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0))).toLocaleString()}
+                                        ₹{Math.floor(2450 + (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) + ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0))).toLocaleString()}
                                       </div>
                                     </div>
                                   </div>
@@ -594,11 +597,11 @@ const AdminDashboard = () => {
                                     <h5>ATTENDANCE DEDUCTIONS</h5>
                                     <div className="line-item">
                                       <span>Leaves ({selectedStaffForSlip.leaves || 0} days)</span>
-                                      <span className="text-danger">-₹{Math.floor((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
+                                      <span className="text-danger">-₹{Math.floor((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
                                     </div>
                                     <div className="line-item">
                                       <span>Permissions ({selectedStaffForSlip.permissions || 0} hrs)</span>
-                                      <span className="text-danger">-₹{Math.floor(((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30) / 8) * (selectedStaffForSlip.permissions || 0)).toLocaleString()}</span>
+                                      <span className="text-danger">-₹{Math.floor(((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) / 8) * (selectedStaffForSlip.permissions || 0)).toLocaleString()}</span>
                                     </div>
                                   </div>
                                   <div className="slip-section">
@@ -611,9 +614,9 @@ const AdminDashboard = () => {
                                       <span>NET PAYABLE</span>
                                       <span className="final-val">
                                         ₹{Math.floor(
-                                          parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) -
-                                          (parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) -
-                                          ((parseInt(selectedStaffForSlip.salary.replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0)) -
+                                          parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) -
+                                          (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) -
+                                          ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0)) -
                                           2450
                                         ).toLocaleString()}
                                       </span>
@@ -785,8 +788,8 @@ const AdminDashboard = () => {
                           <tr key={u.id}>
                             <td>
                               <div className="u-cell">
-                                <div className="avatar-small">{u.fullName.charAt(0)}</div>
-                                <div><div className="u-name">{u.fullName}</div><div className="u-email">{u.email}</div></div>
+                                <div className="avatar-small">{(u.fullName || "U").charAt(0)}</div>
+                                <div><div className="u-name">{u.fullName || "User"}</div><div className="u-email">{u.email}</div></div>
                               </div>
                             </td>
                             <td><span className={`badge ${u.status === 'ACTIVE' ? 'bg-success-light' : 'bg-danger-light'}`}>{u.status}</span></td>
