@@ -89,29 +89,7 @@ const Home = () => {
           <Badge>ESTABLISHED 2024</Badge>
           <h1>Redefining Fitness at <span className="text-warning">B&Y Fitness</span></h1>
           <p className="tagline">Train Hard. Stay Consistent. Slay Every Goal.</p>
-          
-          <FeedbackMarquee>
-            <marquee behavior="scroll" direction="left" scrollamount="6" onMouseOver={(e) => e.currentTarget.stop()} onMouseOut={(e) => e.currentTarget.start()}>
-              {feedbacks.length > 0 ? (
-                feedbacks.map((fb, idx) => (
-                  <span className="feedback-item" key={fb.id || idx}>
-                    <span className="user">★ {fb.userName || "Warrior"}:</span>
-                    <span className="msg">"{fb.message}"</span>
-                    <span className="rating">
-                      {Array.from({ length: fb.rating || 5 }).map((_, i) => "⭐")}
-                    </span>
-                    {idx < feedbacks.length - 1 && <span className="separator">🔥</span>}
-                  </span>
-                ))
-              ) : (
-                <span className="feedback-item">
-                  <span className="user">★ B&Y Fitness:</span>
-                  <span className="msg">"Transform your mind, body, and soul. Start your ultimate fitness journey with us today!"</span>
-                  <span className="rating">⭐⭐⭐⭐⭐</span>
-                </span>
-              )}
-            </marquee>
-          </FeedbackMarquee>
+
 
           <div className="cta-row">
             <button className="btn-arena" onClick={() => navigate("/login")}>
@@ -236,6 +214,23 @@ const Home = () => {
           </div>
         </div>
       </AboutSection>
+      {feedbacks.length > 0 && (
+        <FeedbackMarquee>
+          <marquee behavior="scroll" direction="left" scrollamount="6" loop="infinite" onMouseOver={(e) => e.currentTarget.stop()} onMouseOut={(e) => e.currentTarget.start()}>
+            {/* Repeat the feedbacks array 4 times to ensure a dense, endless stream with no gaps */}
+            {[...feedbacks, ...feedbacks, ...feedbacks, ...feedbacks].map((fb, idx) => (
+              <span className="feedback-item" key={idx}>
+                <span className="user">★ {fb.userName || "Warrior"}:</span>
+                <span className="msg">"{fb.message}"</span>
+                <span className="rating">
+                  {Array.from({ length: fb.rating || 5 }).map((_, i) => "⭐")}
+                </span>
+                <span className="separator">🔥</span>
+              </span>
+            ))}
+          </marquee>
+        </FeedbackMarquee>
+      )}
 
       <EliteServicesSection className="reveal">
         <div className="container">
