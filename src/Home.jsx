@@ -17,6 +17,22 @@ const Home = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const observerRef = useRef(null);
+  const [feedbacks, setFeedbacks] = useState([]);
+
+  useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/feedbacks`);
+        if (response.ok) {
+          const data = await response.json();
+          setFeedbacks(data);
+        }
+      } catch (error) {
+        console.error("Error fetching feedbacks:", error);
+      }
+    };
+    fetchFeedbacks();
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -73,6 +89,30 @@ const Home = () => {
           <Badge>ESTABLISHED 2024</Badge>
           <h1>Redefining Fitness at <span className="text-warning">B&Y Fitness</span></h1>
           <p className="tagline">Train Hard. Stay Consistent. Slay Every Goal.</p>
+          
+          <FeedbackMarquee>
+            <marquee behavior="scroll" direction="left" scrollamount="6" onMouseOver={(e) => e.currentTarget.stop()} onMouseOut={(e) => e.currentTarget.start()}>
+              {feedbacks.length > 0 ? (
+                feedbacks.map((fb, idx) => (
+                  <span className="feedback-item" key={fb.id || idx}>
+                    <span className="user">★ {fb.userName || "Warrior"}:</span>
+                    <span className="msg">"{fb.message}"</span>
+                    <span className="rating">
+                      {Array.from({ length: fb.rating || 5 }).map((_, i) => "⭐")}
+                    </span>
+                    {idx < feedbacks.length - 1 && <span className="separator">🔥</span>}
+                  </span>
+                ))
+              ) : (
+                <span className="feedback-item">
+                  <span className="user">★ B&Y Fitness:</span>
+                  <span className="msg">"Transform your mind, body, and soul. Start your ultimate fitness journey with us today!"</span>
+                  <span className="rating">⭐⭐⭐⭐⭐</span>
+                </span>
+              )}
+            </marquee>
+          </FeedbackMarquee>
+
           <div className="cta-row">
             <button className="btn-arena" onClick={() => navigate("/login")}>
               ENTER ARENA <Zap size={20} />
@@ -1346,6 +1386,61 @@ const ServiceCard = styled.div`
     height: 400px;
     .card-overlay { padding: 30px; }
     ul { opacity: 1; transform: translateY(0); }
+  }
+`;
+
+
+const FeedbackMarquee = styled.div`
+  width: 100%;
+  max-width: 900px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  border-radius: 50px;
+  padding: 12px 25px;
+  margin: 25px auto 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 193, 7, 0.05);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  z-index: 25;
+
+  marquee {
+    width: 100%;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .feedback-item {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 50px;
+    white-space: nowrap;
+    
+    .user {
+      color: #ffc107;
+      font-weight: 800;
+      margin-right: 8px;
+    }
+
+    .msg {
+      font-style: italic;
+      color: #ffffff;
+    }
+
+    .rating {
+      color: #ffc107;
+      margin-left: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .separator {
+      color: rgba(255, 193, 7, 0.3);
+      margin-left: 40px;
+    }
   }
 `;
 
