@@ -220,7 +220,7 @@ const Home = () => {
             {/* Repeat the feedbacks array 4 times to ensure a dense, endless stream with no gaps */}
             {[...feedbacks, ...feedbacks, ...feedbacks, ...feedbacks].map((fb, idx) => (
               <span className="feedback-item" key={idx}>
-                <span className="user">★ {fb.userName || "Warrior"}:</span>
+                <span className="user">★ {fb.userName || "User"}:</span>
                 <span className="msg">"{fb.message}"</span>
                 <span className="rating">
                   {Array.from({ length: fb.rating || 5 }).map((_, i) => "⭐")}
@@ -1392,8 +1392,12 @@ const FeedbackMarquee = styled.div`
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 193, 7, 0.2);
   border-radius: 50px;
+  position: relative;
   padding: 12px 25px;
-  margin: 25px auto 10px;
+  margin: -55px auto 35px;
+  @media (max-width: 768px) {
+    margin: -35px auto 25px;
+  }
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(255, 193, 7, 0.05);
   display: flex;
   align-items: center;

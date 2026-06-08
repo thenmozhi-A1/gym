@@ -10,18 +10,18 @@ import {
 } from "recharts";
 
 const monthlyData = [
-  { name: "Jan", revenue: 4000 },
-  { name: "Feb", revenue: 5000 },
-  { name: "Mar", revenue: 4500 },
-  { name: "Apr", revenue: 6000 },
-  { name: "May", revenue: 7500 },
-  { name: "Jun", revenue: 8500 },
-  { name: "Jul", revenue: 9000 },
-  { name: "Aug", revenue: 8000 },
-  { name: "Sep", revenue: 8600 },
-  { name: "Oct", revenue: 9200 },
-  { name: "Nov", revenue: 9800 },
-  { name: "Dec", revenue: 10500 },
+  { name: "Jan", revenue: 45000 },
+  { name: "Feb", revenue: 52000 },
+  { name: "Mar", revenue: 48000 },
+  { name: "Apr", revenue: 61000 },
+  { name: "May", revenue: 75000 },
+  { name: "Jun", revenue: 82000 },
+  { name: "Jul", revenue: 88000 },
+  { name: "Aug", revenue: 79000 },
+  { name: "Sep", revenue: 85000 },
+  { name: "Oct", revenue: 91000 },
+  { name: "Nov", revenue: 97000 },
+  { name: "Dec", revenue: 105000 },
 ];
 
 const weeklyData = [

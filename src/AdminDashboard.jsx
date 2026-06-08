@@ -138,7 +138,7 @@ const AdminDashboard = () => {
       if (res.ok) {
         setUsers(users.filter(u => u.id !== id));
       } else {
-        alert("Failed to delete warrior.");
+        alert("Failed to delete user.");
       }
     } catch (err) {
       alert("Error processing deletion.");
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
         <NavSection>
           {[
             { id: "dashboard", icon: <Layout size={18} />, label: "Dashboard" },
-            { id: "users", icon: <Users size={18} />, label: "Warriors" },
+            { id: "users", icon: <Users size={18} />, label: "Users" },
             { id: "payments", icon: <CreditCard size={18} />, label: "Revenue" },
             { id: "attendance", icon: <Clock size={18} />, label: "Arena Logs" },
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
@@ -347,12 +347,12 @@ const AdminDashboard = () => {
                   <StatsRow>
                     <StatBox color="#38bdf8">
                       <div className="card-glow" />
-                      <div className="lab">Total Warriors</div>
+                      <div className="lab">Total Users</div>
                       <div className="val-row">
                         <div className="val">{users.length}</div>
                         <div className="icon-badge"><Users size={24} /></div>
                       </div>
-                      <div className="footer-text">See in-depth <span>Warrior source</span></div>
+                      <div className="footer-text">See in-depth <span>User source</span></div>
                     </StatBox>
                     <StatBox color="#fd7e14">
                       <div className="card-glow" />
@@ -387,7 +387,7 @@ const AdminDashboard = () => {
                     <ChartCard className="flex-2">
                       <div className="chart-header">
                         <div className="tabs">
-                          <button className="active">New Warriors</button>
+                          <button className="active">New Users</button>
 
                         </div>
                         <div className="legend">
@@ -812,11 +812,11 @@ const AdminDashboard = () => {
                     <table className="table">
                       <thead>
                         <tr>
-                          {activeTab === "users" && <><th>WARRIOR</th><th>STATUS</th><th>TYPE</th><th>ACTIONS</th></>}
-                          {activeTab === "payments" && <><th>WARRIOR</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
-                          {activeTab === "attendance" && <><th>WARRIOR</th><th>DATE</th><th>IN</th><th>STATE</th></>}
-                          {activeTab === "consultations" && <><th>WARRIOR INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
-                          {activeTab === "feedbacks" && <><th>WARRIOR</th><th>RATING</th><th>FEEDBACK MESSAGE</th><th>DATE</th><th>ACTIONS</th></>}
+                          {activeTab === "users" && <><th>USER</th><th>STATUS</th><th>TYPE</th><th>ACTIONS</th></>}
+                          {activeTab === "payments" && <><th>USER</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
+                          {activeTab === "attendance" && <><th>USER</th><th>DATE</th><th>IN</th><th>STATE</th></>}
+                          {activeTab === "consultations" && <><th>USER INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
+                          {activeTab === "feedbacks" && <><th>USER</th><th>RATING</th><th>FEEDBACK MESSAGE</th><th>DATE</th><th>ACTIONS</th></>}
                           {activeTab === "staffs" && <><th>STAFF NAME</th><th>ROLE</th><th>SPECIALTY / TASK</th><th>SHIFT TIME</th><th>SALARY</th><th>ACTIONS</th></>}
                         </tr>
                       </thead>
@@ -833,7 +833,7 @@ const AdminDashboard = () => {
                             <td>{u.membershipType || "Standard"}</td>
                             <td>
                               <div className="d-flex gap-2">
-                                <button className="btn-icon text-danger" onClick={() => handleDeleteUser(u.id)} title="Delete Warrior">
+                                <button className="btn-icon text-danger" onClick={() => handleDeleteUser(u.id)} title="Delete User">
                                   <Trash2 size={16} />
                                 </button>
                                 <button className="btn-icon"><MoreVertical size={16} /></button>
@@ -843,7 +843,7 @@ const AdminDashboard = () => {
                         ))}
                         {activeTab === "payments" && payments.map(p => (
                           <tr key={p.id}>
-                            <td className="fw-bold">{p.user?.fullName || p.fullName || "Warrior"}</td>
+                            <td className="fw-bold">{p.user?.fullName || p.fullName || "User"}</td>
                             <td className="text-primary fw-bold">₹{p.amount}</td>
                             <td><span className="badge bg-primary-light">{p.paymentStatus}</span></td>
                             <td className="sub-text">{p.paymentDate}</td>
@@ -851,7 +851,7 @@ const AdminDashboard = () => {
                         ))}
                         {activeTab === "attendance" && attendance.map(log => (
                           <tr key={log.id}>
-                            <td className="fw-bold">{log.user?.fullName || log.fullName || "Warrior"}</td>
+                            <td className="fw-bold">{log.user?.fullName || log.fullName || "User"}</td>
                             <td>{log.attendanceDate}</td>
                             <td className="text-success fw-bold">{log.checkInTime}</td>
                             <td><span className="sync-badge">PRESENT</span></td>

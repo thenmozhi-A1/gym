@@ -160,7 +160,7 @@ const Subscription = () => {
       handler: function (response) {
         alert("Payment Successful! ID: " + response.razorpay_payment_id);
       },
-      prefill: { name: "Warrior", email: "warrior@byfitness.com", contact: "9999999999" },
+      prefill: { name: "User", email: "user@byfitness.com", contact: "9999999999" },
       theme: { color: "#ffc107" },
     };
 
@@ -190,7 +190,7 @@ const Subscription = () => {
             <Clock size={40} className="text-warning" />
             <div>
               <h2 className="fw-black italic">MONTHLY <span className="text-warning">ACCESS</span></h2>
-              <p className="text-secondary">Flexible training for the modern warrior.</p>
+              <p className="text-secondary">Flexible training for the modern user.</p>
             </div>
           </SectionHeader>
           <div className="row g-4 mt-2">
