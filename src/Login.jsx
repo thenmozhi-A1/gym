@@ -55,7 +55,6 @@ const Login = () => {
   const progressTimer = React.useRef(null);
   const IS_MOBILE = React.useMemo(() => isMobileDevice(), []);
   const [isAdminLogin, setIsAdminLogin] = useState(false);
-  const [isEmployeeLogin, setIsEmployeeLogin] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -70,12 +69,43 @@ const Login = () => {
     setError("");
     setAttendanceLog(null);
     setIsAdminLogin(false);
-    setIsEmployeeLogin(false);
   }, [isNewUser, isForgotPassword]);
 
   const handleInputChange = (e) => {
     setError("");
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const recordAttendance = (user) => {
+    const now = new Date();
+    const timestamp = now.toLocaleTimeString();
+    const dateKey = now.toLocaleDateString();
+    const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords') || '{}');
+    const recordKey = `${user.id}-${dateKey}`;
+    const existing = attendanceRecords[recordKey] || {
+      id: recordKey,
+      userId: user.id,
+      fullName: user.fullName || user.email || "Unknown",
+      email: user.email || "unknown@byfitness.com",
+      role: user.role || "USER",
+      date: dateKey,
+      entry: null,
+      exit: null,
+      loginDetails: user.role ? `${user.role} login` : "Member login"
+    };
+
+    if (!existing.entry) {
+      existing.entry = timestamp;
+      setAttendanceLog(`Entry recorded at ${timestamp}`);
+    } else if (!existing.exit) {
+      existing.exit = timestamp;
+      setAttendanceLog(`Exit recorded at ${timestamp}`);
+    } else {
+      setAttendanceLog("Session for today already completed.");
+    }
+
+    attendanceRecords[recordKey] = existing;
+    localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
   };
 
   // ── Mobile touch handlers (no PIN, pure touch) ───────────────
@@ -169,12 +199,7 @@ const Login = () => {
         return;
       }
 
-      const now = new Date(); const ts = now.toLocaleTimeString(); const dk = now.toLocaleDateString();
-      const att = JSON.parse(localStorage.getItem('attendance') || '{}');
-      if (!att[dk]) { att[dk] = { entry: ts, exit: null }; setAttendanceLog(`Entry recorded at ${ts}`); }
-      else if (!att[dk].exit) { att[dk].exit = ts; setAttendanceLog(`Exit recorded at ${ts}`); }
-      else setAttendanceLog('Session complete for today.');
-      localStorage.setItem('attendance', JSON.stringify(att));
+      recordAttendance(user);
 
       setBiometricState('success');
       localStorage.setItem('isLoggedIn','true'); 
@@ -416,20 +441,7 @@ const Login = () => {
       }
 
       // ── Step 5: Record attendance ──────────────────────────────
-      const now = new Date();
-      const timestamp = now.toLocaleTimeString();
-      const dateKey = now.toLocaleDateString();
-      const currentAttendance = JSON.parse(localStorage.getItem("attendance") || "{}");
-      if (!currentAttendance[dateKey]) {
-        currentAttendance[dateKey] = { entry: timestamp, exit: null };
-        setAttendanceLog(`Entry recorded at ${timestamp}`);
-      } else if (!currentAttendance[dateKey].exit) {
-        currentAttendance[dateKey].exit = timestamp;
-        setAttendanceLog(`Exit recorded at ${timestamp}`);
-      } else {
-        setAttendanceLog("Session for today already completed.");
-      }
-      localStorage.setItem("attendance", JSON.stringify(currentAttendance));
+      recordAttendance(user);
 
       // ── Step 6: Login ──────────────────────────────────────────
       setBiometricState("success");
@@ -494,13 +506,11 @@ const Login = () => {
             </>
           ) : (
             <>
-              <h2>{isNewUser ? "Join the Elite" : isAdminLogin ? "Admin Secure Access" : isEmployeeLogin ? "Employee Secure Access" : "Biometric Access Control"}</h2>
+              <h2>{isNewUser ? "Join the Elite" : isAdminLogin ? "Admin Secure Access" : "Biometric Access Control"}</h2>
               <p className="subtitle">
                 {isNewUser 
                   ? "Start your fitness journey with B&Y Fitness today." 
-                  : isEmployeeLogin
-                    ? "Scan your staff fingerprint to access the B&Y Fitness operations dashboard."
-                    : "Please scan your fingerprint to enter the gym."}
+                  : "Please scan your fingerprint to enter the gym."}
               </p>
 
               {!isNewUser && !isAdminLogin && (
@@ -694,12 +704,12 @@ const Login = () => {
 
 
               <div className="auth-footer">
-                {!isNewUser && !isAdminLogin && !isEmployeeLogin ? (
+                {!isNewUser && !isAdminLogin ? (
                   <a href="#" onClick={(e) => { e.preventDefault(); setIsNewUser(true); }}>
                     New User? Create Account
                   </a>
-                ) : isAdminLogin || isEmployeeLogin ? (
-                  <a href="#" onClick={(e) => { e.preventDefault(); setIsAdminLogin(false); setIsEmployeeLogin(false); }}>
+                ) : isAdminLogin ? (
+                  <a href="#" onClick={(e) => { e.preventDefault(); setIsAdminLogin(false); }}>
                     ← Back to Member Login
                   </a>
                 ) : (
@@ -707,14 +717,10 @@ const Login = () => {
                     Already have an account? Login
                   </a>
                 )}
-                {!isAdminLogin && !isNewUser && !isEmployeeLogin && (
+                {!isAdminLogin && !isNewUser && (
                   <>
-                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setIsAdminLogin(true); setIsNewUser(false); setIsEmployeeLogin(false); setError(""); }}>
+                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setIsAdminLogin(true); setIsNewUser(false); setError(""); }}>
                       🔒 Admin Access
-                    </a>
-                    <span className="divider">|</span>
-                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setIsEmployeeLogin(true); setIsAdminLogin(false); setIsNewUser(false); setError(""); }}>
-                      👤 Employee Login
                     </a>
                   </>
                 )}

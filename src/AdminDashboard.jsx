@@ -91,17 +91,19 @@ const AdminDashboard = () => {
   ];
 
   // Sample attendance data for users and staff
-  const SAMPLE_USER_ATTENDANCE = [
-    { id: "ATT-U001", fullName: "Aisha Khan", attendanceDate: "2026-06-08", checkInTime: "06:30 AM", loginDetails: "Member #1001" },
-    { id: "ATT-U002", fullName: "Rohit Verma", attendanceDate: "2026-06-08", checkInTime: "07:15 AM", loginDetails: "Member #1002" },
-    { id: "ATT-U003", fullName: "Emily Stone", attendanceDate: "2026-06-08", checkInTime: "08:00 AM", loginDetails: "Member #1003" }
+  const SAMPLE_ATTENDANCE = [
+    { id: "ATT-U001", fullName: "Aisha Khan", date: "2026-06-08", entry: "06:30 AM", role: "USER", loginDetails: "Member #1001" },
+    { id: "ATT-U002", fullName: "Rohit Verma", date: "2026-06-08", entry: "07:15 AM", role: "USER", loginDetails: "Member #1002" },
+    { id: "ATT-U003", fullName: "Emily Stone", date: "2026-06-08", entry: "08:00 AM", role: "USER", loginDetails: "Member #1003" },
+    { id: "ATT-S001", fullName: "Marcus Aurelius", date: "2026-06-08", entry: "06:00 AM", exit: "02:00 PM", role: "Trainer" },
+    { id: "ATT-S002", fullName: "David Miller", date: "2026-06-08", entry: "08:00 AM", exit: "04:00 PM", role: "Front Office" },
+    { id: "ATT-S003", fullName: "Sarah Johnson", date: "2026-06-08", entry: "10:00 AM", exit: "06:00 PM", role: "Trainer" }
   ];
 
-  const SAMPLE_STAFF_ATTENDANCE = [
-    { id: "ATT-S001", fullName: "Marcus Aurelius", attendanceDate: "2026-06-08", checkInTime: "06:00 AM", checkOutTime: "02:00 PM", role: "Trainer" },
-    { id: "ATT-S002", fullName: "David Miller", attendanceDate: "2026-06-08", checkInTime: "08:00 AM", checkOutTime: "04:00 PM", role: "Front Office" },
-    { id: "ATT-S003", fullName: "Sarah Johnson", attendanceDate: "2026-06-08", checkInTime: "10:00 AM", checkOutTime: "06:00 PM", role: "Trainer" }
-  ];
+  const loadLocalAttendance = () => {
+    const stored = JSON.parse(localStorage.getItem('attendanceRecords') || '{}');
+    return Array.isArray(stored) ? stored : Object.values(stored);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -123,16 +125,21 @@ const AdminDashboard = () => {
         const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => !['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office', 'admin', 'ADMIN'].includes(u.role));
         const paymentsData = Array.isArray(results[1]) ? results[1] : [];
         const attendanceData = Array.isArray(results[2]) ? results[2] : [];
+        const localAttendance = loadLocalAttendance();
+        const mergedAttendance = attendanceData.length || localAttendance.length
+          ? [...attendanceData, ...localAttendance]
+          : SAMPLE_ATTENDANCE;
         setUsers(standardUsers);
         setPayments(paymentsData.length ? paymentsData : SAMPLE_PAYMENTS);
-        setAttendance(attendanceData.length ? attendanceData : SAMPLE_USER_ATTENDANCE);
+        setAttendance(mergedAttendance);
         setConsultations(Array.isArray(results[3]) ? results[3] : []);
         setStaffs(Array.isArray(results[4]) ? results[4] : []);
         setFeedbacks(Array.isArray(results[5]) ? results[5] : []);
       } else {
         const data = Array.isArray(results[0]) ? results[0] : [];
+        const localAttendance = loadLocalAttendance();
         if (activeTab === "payments") setPayments(data.length ? data : SAMPLE_PAYMENTS);
-        else if (activeTab === "attendance") setAttendance(data.length ? data : SAMPLE_USER_ATTENDANCE);
+        else if (activeTab === "attendance") setAttendance(data.length ? [...data, ...localAttendance] : (localAttendance.length ? localAttendance : SAMPLE_ATTENDANCE));
         else if (activeTab === "feedbacks") setFeedbacks(data);
         else setConsultations(data);
       }
@@ -828,13 +835,13 @@ const AdminDashboard = () => {
                       {activeTab === "attendance" && (
                         <div className="d-flex gap-2">
                           <button 
-                            onClick={() => { setAttendanceType("users"); setAttendance(SAMPLE_USER_ATTENDANCE); }} 
+                            onClick={() => setAttendanceType("users")} 
                             className={`filter-btn ${attendanceType === "users" ? "active" : ""}`}
                           >
                             Users
                           </button>
                           <button 
-                            onClick={() => { setAttendanceType("staff"); setAttendance(SAMPLE_STAFF_ATTENDANCE); }} 
+                            onClick={() => setAttendanceType("staff")} 
                             className={`filter-btn ${attendanceType === "staff" ? "active" : ""}`}
                           >
                             Staff
@@ -891,19 +898,19 @@ const AdminDashboard = () => {
                             <td className="sub-text">{p.paymentDate}</td>
                           </tr>
                         ))}
-                        {activeTab === "attendance" && attendanceType === "users" && attendance.map(log => (
+                        {activeTab === "attendance" && attendanceType === "users" && attendance.filter(log => !["TRAINER", "FRONT OFFICE", "STAFF"].some(role => (log.role || "").toString().toUpperCase().includes(role))).map(log => (
                           <tr key={log.id}>
                             <td className="fw-bold">{log.fullName || "User"}</td>
-                            <td className="text-success fw-bold">{log.checkInTime}</td>
-                            <td>{log.attendanceDate}</td>
+                            <td className="text-success fw-bold">{log.entry || log.checkInTime}</td>
+                            <td>{log.date || log.attendanceDate}</td>
                             <td className="sub-text">{log.loginDetails || "Member Login"}</td>
                           </tr>
                         ))}
-                        {activeTab === "attendance" && attendanceType === "staff" && attendance.map(log => (
+                        {activeTab === "attendance" && attendanceType === "staff" && attendance.filter(log => ["TRAINER", "FRONT OFFICE", "STAFF"].some(role => (log.role || "").toString().toUpperCase().includes(role))).map(log => (
                           <tr key={log.id}>
                             <td className="fw-bold">{log.fullName || "Staff"}</td>
-                            <td className="text-info fw-bold">{log.checkInTime}</td>
-                            <td className="text-danger fw-bold">{log.checkOutTime}</td>
+                            <td className="text-info fw-bold">{log.entry || log.checkInTime}</td>
+                            <td className="text-danger fw-bold">{log.exit || log.checkOutTime || "-"}</td>
                             <td><span className="badge bg-primary-light">{log.role}</span></td>
                           </tr>
                         ))}
