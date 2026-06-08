@@ -80,6 +80,15 @@ const AdminDashboard = () => {
     fetchData();
   }, [activeTab]);
 
+  // Sample revenue data to show in the admin UI when backend has no payments
+  const SAMPLE_PAYMENTS = [
+    { id: "PAY-10001", fullName: "Aisha Khan", amount: 1200, paymentStatus: "SUCCESS", paymentDate: "2026-05-01" },
+    { id: "PAY-10002", fullName: "Rohit Verma", amount: 5500, paymentStatus: "SUCCESS", paymentDate: "2026-05-03" },
+    { id: "PAY-10003", fullName: "Emily Stone", amount: 3000, paymentStatus: "FAILED", paymentDate: "2026-05-05" },
+    { id: "PAY-10004", fullName: "Carlos Ruiz", amount: 4500, paymentStatus: "SUCCESS", paymentDate: "2026-05-08" },
+    { id: "PAY-10005", fullName: "Maya Patel", amount: 2500, paymentStatus: "SUCCESS", paymentDate: "2026-05-12" }
+  ];
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -98,15 +107,16 @@ const AdminDashboard = () => {
 
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
         const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => !['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office', 'admin', 'ADMIN'].includes(u.role));
-        setUsers(standardUsers); 
-        setPayments(Array.isArray(results[1]) ? results[1] : []); 
-        setAttendance(Array.isArray(results[2]) ? results[2] : []); 
+        const paymentsData = Array.isArray(results[1]) ? results[1] : [];
+        setUsers(standardUsers);
+        setPayments(paymentsData.length ? paymentsData : SAMPLE_PAYMENTS);
+        setAttendance(Array.isArray(results[2]) ? results[2] : []);
         setConsultations(Array.isArray(results[3]) ? results[3] : []);
         setStaffs(Array.isArray(results[4]) ? results[4] : []);
         setFeedbacks(Array.isArray(results[5]) ? results[5] : []);
       } else {
         const data = Array.isArray(results[0]) ? results[0] : [];
-        if (activeTab === "payments") setPayments(data);
+        if (activeTab === "payments") setPayments(data.length ? data : SAMPLE_PAYMENTS);
         else if (activeTab === "attendance") setAttendance(data);
         else if (activeTab === "feedbacks") setFeedbacks(data);
         else setConsultations(data);
