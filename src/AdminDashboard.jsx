@@ -73,6 +73,7 @@ const AdminDashboard = () => {
     fingerprintEnrolled: false,
     fingerprintHash: ""
   });
+  const [attendanceType, setAttendanceType] = useState("users"); // "users" or "staff"
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -87,6 +88,19 @@ const AdminDashboard = () => {
     { id: "PAY-10003", fullName: "Emily Stone", amount: 3000, paymentStatus: "FAILED", paymentDate: "2026-05-05" },
     { id: "PAY-10004", fullName: "Carlos Ruiz", amount: 4500, paymentStatus: "SUCCESS", paymentDate: "2026-05-08" },
     { id: "PAY-10005", fullName: "Maya Patel", amount: 2500, paymentStatus: "SUCCESS", paymentDate: "2026-05-12" }
+  ];
+
+  // Sample attendance data for users and staff
+  const SAMPLE_USER_ATTENDANCE = [
+    { id: "ATT-U001", fullName: "Aisha Khan", attendanceDate: "2026-06-08", checkInTime: "06:30 AM", loginDetails: "Member #1001" },
+    { id: "ATT-U002", fullName: "Rohit Verma", attendanceDate: "2026-06-08", checkInTime: "07:15 AM", loginDetails: "Member #1002" },
+    { id: "ATT-U003", fullName: "Emily Stone", attendanceDate: "2026-06-08", checkInTime: "08:00 AM", loginDetails: "Member #1003" }
+  ];
+
+  const SAMPLE_STAFF_ATTENDANCE = [
+    { id: "ATT-S001", fullName: "Marcus Aurelius", attendanceDate: "2026-06-08", checkInTime: "06:00 AM", checkOutTime: "02:00 PM", role: "Trainer" },
+    { id: "ATT-S002", fullName: "David Miller", attendanceDate: "2026-06-08", checkInTime: "08:00 AM", checkOutTime: "04:00 PM", role: "Front Office" },
+    { id: "ATT-S003", fullName: "Sarah Johnson", attendanceDate: "2026-06-08", checkInTime: "10:00 AM", checkOutTime: "06:00 PM", role: "Trainer" }
   ];
 
   const fetchData = async () => {
@@ -108,16 +122,17 @@ const AdminDashboard = () => {
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
         const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => !['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office', 'admin', 'ADMIN'].includes(u.role));
         const paymentsData = Array.isArray(results[1]) ? results[1] : [];
+        const attendanceData = Array.isArray(results[2]) ? results[2] : [];
         setUsers(standardUsers);
         setPayments(paymentsData.length ? paymentsData : SAMPLE_PAYMENTS);
-        setAttendance(Array.isArray(results[2]) ? results[2] : []);
+        setAttendance(attendanceData.length ? attendanceData : SAMPLE_USER_ATTENDANCE);
         setConsultations(Array.isArray(results[3]) ? results[3] : []);
         setStaffs(Array.isArray(results[4]) ? results[4] : []);
         setFeedbacks(Array.isArray(results[5]) ? results[5] : []);
       } else {
         const data = Array.isArray(results[0]) ? results[0] : [];
         if (activeTab === "payments") setPayments(data.length ? data : SAMPLE_PAYMENTS);
-        else if (activeTab === "attendance") setAttendance(data);
+        else if (activeTab === "attendance") setAttendance(data.length ? data : SAMPLE_USER_ATTENDANCE);
         else if (activeTab === "feedbacks") setFeedbacks(data);
         else setConsultations(data);
       }
@@ -295,7 +310,7 @@ const AdminDashboard = () => {
             { id: "dashboard", icon: <Layout size={18} />, label: "Dashboard" },
             { id: "users", icon: <Users size={18} />, label: "Users" },
             { id: "payments", icon: <CreditCard size={18} />, label: "Revenue" },
-            { id: "attendance", icon: <Clock size={18} />, label: "Arena Logs" },
+            { id: "attendance", icon: <Clock size={18} />, label: "Attendence" },
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
             { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },
             { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" },
@@ -810,6 +825,22 @@ const AdminDashboard = () => {
                   <div className="table-header">
                     <h2>{activeTab.toUpperCase()} <small>MANAGEMENT</small></h2>
                     <div className="d-flex gap-3">
+                      {activeTab === "attendance" && (
+                        <div className="d-flex gap-2">
+                          <button 
+                            onClick={() => { setAttendanceType("users"); setAttendance(SAMPLE_USER_ATTENDANCE); }} 
+                            className={`filter-btn ${attendanceType === "users" ? "active" : ""}`}
+                          >
+                            Users
+                          </button>
+                          <button 
+                            onClick={() => { setAttendanceType("staff"); setAttendance(SAMPLE_STAFF_ATTENDANCE); }} 
+                            className={`filter-btn ${attendanceType === "staff" ? "active" : ""}`}
+                          >
+                            Staff
+                          </button>
+                        </div>
+                      )}
                       {activeTab === "staffs" && (
                         <button onClick={() => setIsAddStaffModalOpen(true)} className="add-btn">
                           <Plus size={18} /> ADD STAFF
@@ -824,7 +855,8 @@ const AdminDashboard = () => {
                         <tr>
                           {activeTab === "users" && <><th>USER</th><th>STATUS</th><th>TYPE</th><th>ACTIONS</th></>}
                           {activeTab === "payments" && <><th>USER</th><th>AMOUNT</th><th>STATUS</th><th>DATE</th></>}
-                          {activeTab === "attendance" && <><th>USER</th><th>DATE</th><th>IN</th><th>STATE</th></>}
+                          {activeTab === "attendance" && attendanceType === "users" && <><th>USER</th><th>LOGIN TIME</th><th>DATE</th><th>DETAILS</th></>}
+                          {activeTab === "attendance" && attendanceType === "staff" && <><th>STAFF NAME</th><th>LOGIN TIME</th><th>LOGOUT TIME</th><th>ROLE</th></>}
                           {activeTab === "consultations" && <><th>USER INFO</th><th>MESSAGE / GOALS</th><th>DATE</th></>}
                           {activeTab === "feedbacks" && <><th>USER</th><th>RATING</th><th>FEEDBACK MESSAGE</th><th>DATE</th><th>ACTIONS</th></>}
                           {activeTab === "staffs" && <><th>STAFF NAME</th><th>ROLE</th><th>SPECIALTY / TASK</th><th>SHIFT TIME</th><th>SALARY</th><th>ACTIONS</th></>}
@@ -859,12 +891,20 @@ const AdminDashboard = () => {
                             <td className="sub-text">{p.paymentDate}</td>
                           </tr>
                         ))}
-                        {activeTab === "attendance" && attendance.map(log => (
+                        {activeTab === "attendance" && attendanceType === "users" && attendance.map(log => (
                           <tr key={log.id}>
-                            <td className="fw-bold">{log.user?.fullName || log.fullName || "User"}</td>
-                            <td>{log.attendanceDate}</td>
+                            <td className="fw-bold">{log.fullName || "User"}</td>
                             <td className="text-success fw-bold">{log.checkInTime}</td>
-                            <td><span className="sync-badge">PRESENT</span></td>
+                            <td>{log.attendanceDate}</td>
+                            <td className="sub-text">{log.loginDetails || "Member Login"}</td>
+                          </tr>
+                        ))}
+                        {activeTab === "attendance" && attendanceType === "staff" && attendance.map(log => (
+                          <tr key={log.id}>
+                            <td className="fw-bold">{log.fullName || "Staff"}</td>
+                            <td className="text-info fw-bold">{log.checkInTime}</td>
+                            <td className="text-danger fw-bold">{log.checkOutTime}</td>
+                            <td><span className="badge bg-primary-light">{log.role}</span></td>
                           </tr>
                         ))}
                         {activeTab === "consultations" && consultations.map(msg => (
@@ -1783,6 +1823,7 @@ const TableCard = styled.div`
     h2 { font-weight: 900; color: var(--text-color); margin: 0; small { font-size: 0.6rem; color: var(--accent-color); letter-spacing: 2px; display: block; } } 
     .refresh-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px 20px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; &:hover { color: var(--text-color); } }
     .add-btn { background: var(--accent-color); color: #000; border: none; padding: 10px 20px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer; @media (max-width: 768px) { width: 100%; justify-content: center; } }
+    .filter-btn { background: var(--card-bg); border: 2px solid var(--border-color); color: var(--text-muted); padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; &:hover { color: var(--text-color); border-color: var(--accent-color); } &.active { background: var(--accent-glow); border-color: var(--accent-color); color: var(--accent-color); font-weight: 700; } }
   }
   .table-wrapper { overflow-x: auto; &::-webkit-scrollbar { height: 6px; } &::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; } }
   .table { 
