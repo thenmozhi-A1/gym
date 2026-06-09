@@ -1,12 +1,11 @@
 package com.example.gym.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "staffs")
+public class Staff {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,12 +22,7 @@ public class User {
 
     private String phone;
     private String address;
-    private String gender;
-    private String membershipType;
-    private String status;
     private String role;
-
-    // Staff-specific fields
     private String salary;
     private String times;
     private String specialty;
@@ -37,28 +31,20 @@ public class User {
     @Column(unique = true)
     private String fingerprintHash;
     private Boolean fingerprintEnrolled = false;
+    private String status = "ACTIVE";
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private java.util.List<Payment> payments;
+    public Staff() {}
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private java.util.List<Attendance> attendances;
-
-    public User() {}
-
-    public User(Long id, String fullName, String email, String password, String phone, String address, String gender, String membershipType, String status, String role, String salary, String times, String specialty, Integer leaves, Integer permissions, String fingerprintHash, Boolean fingerprintEnrolled, LocalDateTime createdAt) {
+    public Staff(Long id, String fullName, String email, String password, String phone, String address, String role, String salary, String times, String specialty, Integer leaves, Integer permissions, String fingerprintHash, Boolean fingerprintEnrolled, String status, LocalDateTime createdAt) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.password = password;
         this.phone = phone;
         this.address = address;
-        this.gender = gender;
-        this.membershipType = membershipType;
-        this.status = status;
         this.role = role;
         this.salary = salary;
         this.times = times;
@@ -67,6 +53,7 @@ public class User {
         this.permissions = permissions;
         this.fingerprintHash = fingerprintHash;
         this.fingerprintEnrolled = fingerprintEnrolled;
+        this.status = status;
         this.createdAt = createdAt;
     }
 
@@ -74,13 +61,11 @@ public class User {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         if (this.status == null) this.status = "ACTIVE";
-        if (this.role == null) this.role = "USER";
         if (this.leaves == null) this.leaves = 0;
         if (this.permissions == null) this.permissions = 0;
         if (this.fingerprintEnrolled == null) this.fingerprintEnrolled = false;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getFullName() { return fullName; }
@@ -93,12 +78,6 @@ public class User {
     public void setPhone(String phone) { this.phone = phone; }
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
-    public String getGender() { return gender; }
-    public void setGender(String gender) { this.gender = gender; }
-    public String getMembershipType() { return membershipType; }
-    public void setMembershipType(String membershipType) { this.membershipType = membershipType; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
     public String getSalary() { return salary; }
@@ -115,6 +94,8 @@ public class User {
     public void setFingerprintHash(String fingerprintHash) { this.fingerprintHash = fingerprintHash; }
     public Boolean getFingerprintEnrolled() { return fingerprintEnrolled; }
     public void setFingerprintEnrolled(Boolean fingerprintEnrolled) { this.fingerprintEnrolled = fingerprintEnrolled; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

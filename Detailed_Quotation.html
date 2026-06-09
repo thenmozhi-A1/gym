@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailed Gym Project Quotation</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px auto; max-width: 900px; line-height: 1.6; color: #333; }
+        h1, h2, h3 { color: #2c3e50; }
+        h1 { border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; color: #2c3e50; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .highlight { background-color: #e8f4f8; padding: 15px; border-left: 4px solid #3498db; margin: 20px 0; }
+        .print-btn { display: block; margin: 30px auto; padding: 15px 30px; background-color: #3498db; color: white; border: none; font-size: 16px; border-radius: 5px; cursor: pointer; text-align: center; width: 250px; }
+        .print-btn:hover { background-color: #2980b9; }
+        @media print { .print-btn { display: none; } body { margin: 0; } }
+    </style>
+</head>
+<body>
+
+    <h1>Gym Management System - Detailed Quotation</h1>
+    
+    <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+
+    <div class="highlight">
+        <strong>Overview:</strong> This quotation provides a detailed breakdown of the development costs for a comprehensive Gym Management System, encompassing a React-based frontend and a Java Spring Boot backend.
+    </div>
+
+    <h2>1. System Architecture & Tech Stack</h2>
+    <ul>
+        <li><strong>Frontend:</strong> React.js (built with Vite), using modern functional components and hooks.</li>
+        <li><strong>Backend:</strong> Java Spring Boot for robust, scalable RESTful APIs.</li>
+        <li><strong>Security & Auth:</strong> Custom dual-authentication system (Standard + Biometric WebAuthn).</li>
+    </ul>
+
+    <h2>2. Detailed Feature Breakdown</h2>
+    
+    <h3>A. Authentication & Security Module</h3>
+    <p>The system implements an advanced, highly secure authentication flow:</p>
+    <ul>
+        <li><strong>Standard Login:</strong> Traditional Email and Password authentication handled by the <code>UserController</code>.</li>
+        <li><strong>Biometric / WebAuthn Login:</strong> Integration with device-level biometrics (fingerprint/FaceID) using <code>webauthnCredentials</code> for a passwordless experience.</li>
+        <li><strong>Session Management:</strong> The frontend securely stores user sessions in the browser's <code>localStorage</code> (storing <code>isLoggedIn</code>, <code>userId</code>, <code>userName</code>, <code>userRole</code>), enabling fast client-side role validation and routing without heavy server-side session overhead.</li>
+    </ul>
+
+    <h3>B. Frontend Development (React Dashboards)</h3>
+    <p>The application is split into three distinct role-based portals:</p>
+    <ul>
+        <li><strong>Admin Dashboard:</strong> Full system oversight, analytics (StatsPage, ReportsPage), and overall management.</li>
+        <li><strong>Employee/Staff Dashboard:</strong> Tools for trainers to manage clients, track attendance, and handle consultations.</li>
+        <li><strong>User Dashboard:</strong> 
+            <ul>
+                <li><strong>Health Tracking:</strong> Built-in BMI Calculator, visual Progress Charts, and personalized Stats Panels.</li>
+                <li><strong>Fitness & Nutrition:</strong> Dedicated interfaces for Workouts, Workout Details, Plan Details, and Nutrition.</li>
+                <li><strong>Finances:</strong> Subscription plan selection and Pay integration.</li>
+                <li><strong>Communication:</strong> Interactive Chat Section and Feedback forms.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>C. Backend API Development (Spring Boot)</h3>
+    <p>The backend logic is modularized into specific REST Controllers:</p>
+    <ul>
+        <li><code>UserController.java</code>: Manages standard/biometric logins and user data.</li>
+        <li><code>AttendanceController.java</code>: Handles gym check-ins and check-outs for users.</li>
+        <li><code>HealthController.java</code>: Processes BMI calculations and health metrics.</li>
+        <li><code>PaymentController.java</code>: Securely processes subscription and service payments.</li>
+        <li><code>ConsultationRequestController.java</code>: Manages booking requests between users and trainers.</li>
+        <li><code>StaffController.java</code> & <code>FeedbackController.java</code>: Administrative and reporting data endpoints.</li>
+    </ul>
+
+    <h2>3. Detailed Cost Estimation (INR)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Module / Phase</th>
+                <th>Details</th>
+                <th>Estimated Hours</th>
+                <th>Rate/Hr (₹)</th>
+                <th>Total Cost (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Authentication System</td>
+                <td>Standard & Biometric (WebAuthn) login, Role-based routing</td>
+                <td>25 hrs</td>
+                <td>1,200</td>
+                <td>30,000</td>
+            </tr>
+            <tr>
+                <td>Frontend - User Portal</td>
+                <td>Dashboards, BMI, Nutrition, Workouts, Progress Charts</td>
+                <td>45 hrs</td>
+                <td>1,000</td>
+                <td>45,000</td>
+            </tr>
+            <tr>
+                <td>Frontend - Admin/Staff</td>
+                <td>Admin Dashboard, Employee Dashboard, Reporting UI</td>
+                <td>30 hrs</td>
+                <td>1,000</td>
+                <td>30,000</td>
+            </tr>
+            <tr>
+                <td>Backend API Core</td>
+                <td>Spring Boot Setup, Health, Attendance, and Staff controllers</td>
+                <td>50 hrs</td>
+                <td>1,200</td>
+                <td>60,000</td>
+            </tr>
+            <tr>
+                <td>Payments & Subs</td>
+                <td>Subscription logic, Payment controller, UI integration</td>
+                <td>20 hrs</td>
+                <td>1,200</td>
+                <td>24,000</td>
+            </tr>
+            <tr>
+                <td>Database Design</td>
+                <td>Relational schema for Users, Workouts, Attendance, Payments</td>
+                <td>20 hrs</td>
+                <td>1,200</td>
+                <td>24,000</td>
+            </tr>
+            <tr>
+                <td>UI/UX & Styling</td>
+                <td>Custom CSS (App.css, Navbar.css), Responsive Layouts</td>
+                <td>30 hrs</td>
+                <td>800</td>
+                <td>24,000</td>
+            </tr>
+            <tr>
+                <td>Testing & Deployment</td>
+                <td>E2E Testing, API validation, Deployment setup</td>
+                <td>30 hrs</td>
+                <td>1,000</td>
+                <td>30,000</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align: right; font-weight: bold;">Total Estimated Cost:</td>
+                <td style="font-weight: bold; color: #27ae60; font-size: 1.1em;">₹2,67,000</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 40px; font-size: 14px; color: #666;">
+        <p><strong>Terms and Conditions:</strong></p>
+        <ul>
+            <li>30% advance payment required to commence work.</li>
+            <li>Estimated timeline: 6-8 weeks for full delivery.</li>
+            <li>Includes 1 month of free bug fixing post-deployment.</li>
+        </ul>
+    </div>
+
+</body>
+</html>
