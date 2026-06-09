@@ -91,7 +91,12 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       return;
     }
     setIsEnrolling(true);
-    setEnrollProgress(50);
+
+    let p = 0;
+    progressTimer.current = setInterval(() => {
+      p = (p + 5) % 100;
+      setEnrollProgress(p);
+    }, 100);
 
     try {
       const challenge = new Uint8Array(32);
@@ -117,6 +122,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
       localStorage.setItem("lastEnrolledEmail", formData.email);
 
+      clearInterval(progressTimer.current);
       setEnrollProgress(100);
       setTimeout(() => {
         setFormData(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: credentialId }));
@@ -124,9 +130,12 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       }, 500);
     } catch (err) {
       console.error(err);
+      clearInterval(progressTimer.current);
       setIsEnrolling(false);
       setEnrollProgress(0);
-      alert(`Biometric capture failed: ${err.message || err.name}`);
+      if (err.name !== "NotAllowedError") {
+        alert(`Biometric capture failed: ${err.message || err.name}`);
+      }
     }
   };
 

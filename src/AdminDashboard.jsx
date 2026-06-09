@@ -167,11 +167,16 @@ const AdminDashboard = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData)
       });
-      let savedUser = { ...userData, id: `u_${Date.now()}` };
-      if (res.ok) {
-        savedUser = await res.json();
+      
+      if (!res.ok) {
+        let errData = {};
+        try { errData = await res.json(); } catch(e){}
+        throw new Error(errData.error || `Server error ${res.status}`);
       }
+      
+      const savedUser = await res.json();
       setUsers([savedUser, ...users]);
+      
       if (userData.paymentAmount) {
         setPayments([{
           id: `PAY-${Math.floor(Math.random() * 10000)}`,
@@ -182,10 +187,9 @@ const AdminDashboard = () => {
           paymentMode: userData.paymentMode
         }, ...payments]);
       }
-      alert("MEMBER ENLISTED SUCCESSFULLY!");
+      alert("MEMBER ENLISTED AND SAVED TO DATABASE SUCCESSFULLY!");
     } catch (err) {
-      setUsers([{ ...userData, id: `u_${Date.now()}` }, ...users]);
-      alert("Added locally (backend error).");
+      alert(`Failed to save to database: ${err.message}`);
     }
   };
 
@@ -275,7 +279,11 @@ const AdminDashboard = () => {
     if (newStaff.fingerprintEnrolled) return;
 
     setIsEnrolling(true);
-    setEnrollProgress(50);
+    let p = 0;
+    progressTimer.current = setInterval(() => {
+      p = (p + 5) % 100;
+      setEnrollProgress(p);
+    }, 100);
 
     try {
       const challenge = new Uint8Array(32);
@@ -305,6 +313,7 @@ const AdminDashboard = () => {
       localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
       localStorage.setItem("lastEnrolledEmail", newStaff.email);
 
+      clearInterval(progressTimer.current);
       setEnrollProgress(100);
       setTimeout(() => {
         setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: credIdBase64 }));
@@ -312,9 +321,12 @@ const AdminDashboard = () => {
       }, 500);
     } catch (err) {
       console.error(err);
+      clearInterval(progressTimer.current);
       setIsEnrolling(false);
       setEnrollProgress(0);
-      alert(`Biometric capture failed: ${err.message || err.name}`);
+      if (err.name !== "NotAllowedError") {
+        alert(`Biometric capture failed: ${err.message || err.name}`);
+      }
     }
   };
 
