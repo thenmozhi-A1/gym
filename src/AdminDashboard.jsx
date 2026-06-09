@@ -38,7 +38,19 @@ import {
   FileCheck
 } from "lucide-react";
 
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
+import AddUserModal from "./Components/AddUserModal";
+import MemberManagement from "./Components/MemberManagement";
+import MembershipModule from "./Components/MembershipModule";
+import PaymentModule from "./Components/PaymentModule";
+import AttendanceModule from "./Components/AttendanceModule";
+import TrainerModule from "./Components/TrainerModule";
+import WorkoutModule from "./Components/WorkoutModule";
+import DietModule from "./Components/DietModule";
+import LeadModule from "./Components/LeadModule";
+import CommunicationModule from "./Components/CommunicationModule";
+import ReportsModule from "./Components/ReportsModule";
+
+const API_BASE = "http://localhost:8080/api"; // Changed to local backend
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -54,9 +66,10 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [isGlobalConfigOpen, setIsGlobalConfigOpen] = useState(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-  const [themeName, setThemeName] = useState("midnight");
+  const [themeName, setThemeName] = useState("aurora");
   const [globalConfig, setGlobalConfig] = useState({ gymName: "B&Y Fitness Arena", contactEmail: "admin@byfitness.com", maxCapacity: "500", currency: "USD" });
   const [isPayrollDetailOpen, setIsPayrollDetailOpen] = useState(false);
   const [payrollTab, setPayrollTab] = useState("overview"); // overview, payruns, attendance, tax
@@ -147,6 +160,35 @@ const AdminDashboard = () => {
     finally { setLoading(false); }
   };
 
+  const handleAddUser = async (userData) => {
+    try {
+      const res = await fetch(`${API_BASE}/users/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData)
+      });
+      let savedUser = { ...userData, id: `u_${Date.now()}` };
+      if (res.ok) {
+        savedUser = await res.json();
+      }
+      setUsers([savedUser, ...users]);
+      if (userData.paymentAmount) {
+        setPayments([{
+          id: `PAY-${Math.floor(Math.random() * 10000)}`,
+          user: { fullName: userData.fullName },
+          amount: parseFloat(userData.paymentAmount),
+          paymentStatus: "SUCCESS",
+          paymentDate: new Date().toISOString().split('T')[0],
+          paymentMode: userData.paymentMode
+        }, ...payments]);
+      }
+      alert("MEMBER ENLISTED SUCCESSFULLY!");
+    } catch (err) {
+      setUsers([{ ...userData, id: `u_${Date.now()}` }, ...users]);
+      alert("Added locally (backend error).");
+    }
+  };
+
   const handleDeleteFeedback = async (id) => {
     if (!window.confirm("Remove this feedback?")) return;
     try {
@@ -168,15 +210,45 @@ const AdminDashboard = () => {
     try {
       const res = await fetch(`${API_BASE}/users/${id}`, { method: "DELETE" });
       if (res.ok) {
-        setUsers(users.filter(u => u.id !== id));
+        setUsers(users.filter(u => u.id !== id && u.memberId !== id));
+        alert("User completely deleted from the database.");
       } else {
-        alert("Failed to delete user.");
+        // Fallback for locally added users that aren't in the DB yet
+        if (id.toString().startsWith("u_")) {
+          setUsers(users.filter(u => u.id !== id && u.memberId !== id));
+        } else {
+          alert("Failed to delete user from the database. The server responded with an error.");
+        }
       }
     } catch (err) {
-      alert("Error processing deletion.");
+      if (id.toString().startsWith("u_")) {
+        setUsers(users.filter(u => u.id !== id && u.memberId !== id));
+      } else {
+        alert("Network error: Could not reach the database to delete the user.");
+      }
     }
   };
 
+  const handleEditUser = async (id, updatedData) => {
+    try {
+      const res = await fetch(`${API_BASE}/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData)
+      });
+      if (res.ok) {
+        const updatedUser = await res.json();
+        setUsers(users.map(u => (u.id === id || u.memberId === id) ? updatedUser : u));
+        return true;
+      } else {
+        setUsers(users.map(u => (u.id === id || u.memberId === id) ? { ...u, ...updatedData } : u));
+        return true;
+      }
+    } catch (err) {
+      setUsers(users.map(u => (u.id === id || u.memberId === id) ? { ...u, ...updatedData } : u));
+      return true;
+    }
+  };
   const handleDeleteStaff = async (id) => {
     if (!window.confirm("Remove this staff member from the system?")) return;
     try {
@@ -316,9 +388,13 @@ const AdminDashboard = () => {
           {[
             { id: "dashboard", icon: <Layout size={18} />, label: "Dashboard" },
             { id: "users", icon: <Users size={18} />, label: "Users" },
+            { id: "memberships", icon: <Award size={18} />, label: "Memberships" },
             { id: "payments", icon: <CreditCard size={18} />, label: "Revenue" },
-            { id: "attendance", icon: <Clock size={18} />, label: "Attendence" },
+            { id: "attendance", icon: <Clock size={18} />, label: "Attendance" },
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
+            { id: "trainers", icon: <Users size={18} />, label: "Trainers" },
+            { id: "workouts", icon: <Activity size={18} />, label: "Workouts" },
+            { id: "leads", icon: <Target size={18} />, label: "Leads" },
             { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },
             { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" },
             { id: "feedbacks", icon: <MessageSquare size={18} />, label: "Feedbacks" }
@@ -827,27 +903,38 @@ const AdminDashboard = () => {
                     )}
                   </div>
                 </PayrollContainer>
+              ) : activeTab === "users" ? (
+                <MemberManagement 
+                  users={users} 
+                  setUsers={setUsers} 
+                  onAddUser={() => setIsAddUserModalOpen(true)} 
+                  onDeleteUser={handleDeleteUser} 
+                  onEditUser={handleEditUser}
+                  payments={payments}
+                />
+              ) : activeTab === "memberships" ? (
+                <MembershipModule users={users} onAddUser={() => setIsAddUserModalOpen(true)} />
+              ) : activeTab === "payments" ? (
+                <PaymentModule payments={payments} />
+              ) : activeTab === "attendance" ? (
+                <AttendanceModule attendanceData={attendance} />
+              ) : activeTab === "trainers" ? (
+                <TrainerModule staffs={staffs} onAddUser={() => setIsAddUserModalOpen(true)} />
+              ) : activeTab === "workouts" ? (
+                <WorkoutModule />
+              ) : activeTab === "diet" ? (
+                <DietModule />
+              ) : activeTab === "leads" ? (
+                <LeadModule />
+              ) : activeTab === "communications" ? (
+                <CommunicationModule />
+              ) : activeTab === "reports" ? (
+                <ReportsModule />
               ) : (
                 <TableCard className="animate-in">
                   <div className="table-header">
                     <h2>{activeTab.toUpperCase()} <small>MANAGEMENT</small></h2>
                     <div className="d-flex gap-3">
-                      {activeTab === "attendance" && (
-                        <div className="d-flex gap-2">
-                          <button 
-                            onClick={() => setAttendanceType("users")} 
-                            className={`filter-btn ${attendanceType === "users" ? "active" : ""}`}
-                          >
-                            Users
-                          </button>
-                          <button 
-                            onClick={() => setAttendanceType("staff")} 
-                            className={`filter-btn ${attendanceType === "staff" ? "active" : ""}`}
-                          >
-                            Staff
-                          </button>
-                        </div>
-                      )}
                       {activeTab === "staffs" && (
                         <button onClick={() => setIsAddStaffModalOpen(true)} className="add-btn">
                           <Plus size={18} /> ADD STAFF
@@ -870,50 +957,6 @@ const AdminDashboard = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {activeTab === "users" && users.map(u => (
-                          <tr key={u.id}>
-                            <td>
-                              <div className="u-cell">
-                                <div className="avatar-small">{(u.fullName || "U").charAt(0)}</div>
-                                <div><div className="u-name">{u.fullName || "User"}</div><div className="u-email">{u.email}</div></div>
-                              </div>
-                            </td>
-                            <td><span className={`badge ${u.status === 'ACTIVE' ? 'bg-success-light' : 'bg-danger-light'}`}>{u.status}</span></td>
-                            <td>{u.membershipType || "Standard"}</td>
-                            <td>
-                              <div className="d-flex gap-2">
-                                <button className="btn-icon text-danger" onClick={() => handleDeleteUser(u.id)} title="Delete User">
-                                  <Trash2 size={16} />
-                                </button>
-                                <button className="btn-icon"><MoreVertical size={16} /></button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                        {activeTab === "payments" && payments.map(p => (
-                          <tr key={p.id}>
-                            <td className="fw-bold">{p.user?.fullName || p.fullName || "User"}</td>
-                            <td className="text-primary fw-bold">₹{p.amount}</td>
-                            <td><span className="badge bg-primary-light">{p.paymentStatus}</span></td>
-                            <td className="sub-text">{p.paymentDate}</td>
-                          </tr>
-                        ))}
-                        {activeTab === "attendance" && attendanceType === "users" && attendance.filter(log => !["TRAINER", "FRONT OFFICE", "STAFF"].some(role => (log.role || "").toString().toUpperCase().includes(role))).map(log => (
-                          <tr key={log.id}>
-                            <td className="fw-bold">{log.fullName || "User"}</td>
-                            <td className="text-success fw-bold">{log.entry || log.checkInTime}</td>
-                            <td>{log.date || log.attendanceDate}</td>
-                            <td className="sub-text">{log.loginDetails || "Member Login"}</td>
-                          </tr>
-                        ))}
-                        {activeTab === "attendance" && attendanceType === "staff" && attendance.filter(log => ["TRAINER", "FRONT OFFICE", "STAFF"].some(role => (log.role || "").toString().toUpperCase().includes(role))).map(log => (
-                          <tr key={log.id}>
-                            <td className="fw-bold">{log.fullName || "Staff"}</td>
-                            <td className="text-info fw-bold">{log.entry || log.checkInTime}</td>
-                            <td className="text-danger fw-bold">{log.exit || log.checkOutTime || "-"}</td>
-                            <td><span className="badge bg-primary-light">{log.role}</span></td>
-                          </tr>
-                        ))}
                         {activeTab === "consultations" && consultations.map(msg => (
                           <tr key={msg.id}>
                             <td>
@@ -1175,6 +1218,7 @@ const AdminDashboard = () => {
       )}
 
       {isSidebarOpen && <Overlay onClick={() => setIsSidebarOpen(false)} />}
+      <AddUserModal isOpen={isAddUserModalOpen} onClose={() => setIsAddUserModalOpen(false)} onAddUser={handleAddUser} />
     </AuroraWrapper>
   );
 };

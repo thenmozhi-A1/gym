@@ -87,39 +87,9 @@ const Navbar = () => {
                 Enter Arena
               </button>
             ) : (
-              <div className="nav-item dropdown">
-                <button className="btn-tech dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
-                  <UserCircle size={20} className="me-2" />
-                  {displayName}
-                </button>
-                <ul className="dropdown-menu dropdown-menu-end">
-                  <li>
-                    <Link 
-                      className="dropdown-item d-flex align-items-center" 
-                      to={
-                        userRole?.toUpperCase() === 'ADMIN' 
-                          ? "/AdminDashboard" 
-                          : (['TRAINER', 'FRONT OFFICE', 'STAFF'].some(r => userRole?.toUpperCase().includes(r)) 
-                            ? "/EmployeeDashboard" 
-                            : "/userdashboard")
-                      } 
-                      onClick={handleNavClick}
-                    >
-                      <LayoutDashboard size={16} className="me-2" /> Dashboard
-                    </Link>
-                  </li>
-                  <li>
-                    <button className="dropdown-item d-flex align-items-center" onClick={() => { navigate("/myprofile"); handleNavClick(); }}>
-                      <Settings size={16} className="me-2" /> Profile
-                    </button>
-                  </li>
-                  <li>
-                    <button className="dropdown-item d-flex align-items-center text-danger" onClick={handleLogout}>
-                      <LogOut size={16} className="me-2" /> Shutdown
-                    </button>
-                  </li>
-                </ul>
-              </div>
+              <button className="btn-tech" onClick={handleLogout}>
+                Logout
+              </button>
             )}
           </div>
         </div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { User, Mail, Lock, Fingerprint, ShieldCheck, ShieldAlert } from "lucide-react";
 
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
+const API_BASE = "https://gymj-10.onrender.com/api"; // Forced to remote due to local backend DB password missing
 
 // ── WebAuthn helpers ──────────────────────────────────────────
 const bufferToBase64 = (buffer) => {
