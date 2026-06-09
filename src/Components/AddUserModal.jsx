@@ -77,16 +77,6 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     }
   }, [formData.height, formData.weight]);
 
-  const startScan = (e) => {
-    if (e) e.preventDefault();
-    if (!formData.email) {
-      alert("Please enter the user's email before scanning fingerprint.");
-      return;
-    }
-    if (formData.fingerprintEnrolled) return;
-
-    setIsEnrolling(true);
-    setEnrollProgress(0);
 
   const bufferToBase64 = (buffer) => {
     return btoa(String.fromCharCode(...new Uint8Array(buffer)))
