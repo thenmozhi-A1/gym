@@ -88,26 +88,56 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     setIsEnrolling(true);
     setEnrollProgress(0);
 
-    let p = 0;
-    progressTimer.current = setInterval(() => {
-      p = Math.min(p + 2, 100);
-      setEnrollProgress(p);
-    }, 50);
+  const bufferToBase64 = (buffer) => {
+    return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  };
 
-    holdTimer.current = setTimeout(() => {
-      clearInterval(progressTimer.current);
-      setEnrollProgress(100);
+  const startScan = async () => {
+    if (!formData.email) {
+      alert("Please enter email address before scanning fingerprint");
+      return;
+    }
+    setIsEnrolling(true);
+    setEnrollProgress(50);
 
-      const mockCredentialId = "fp_" + btoa(formData.email + Date.now()).substring(0, 32);
+    try {
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+      const userId = new TextEncoder().encode(formData.email);
+      
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: { name: "B&Y Fitness Gym", id: window.location.hostname },
+          user: { id: userId, name: formData.email, displayName: formData.fullName || formData.email },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+          authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", requireResidentKey: false },
+          timeout: 60000,
+          attestation: "none",
+        }
+      });
+
+      const credentialId = bufferToBase64(credential.rawId);
+      
       const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
-      stored[formData.email] = mockCredentialId;
+      stored[formData.email] = credentialId;
       localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
+      localStorage.setItem("lastEnrolledEmail", formData.email);
 
+      setEnrollProgress(100);
       setTimeout(() => {
-        setFormData(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: mockCredentialId }));
+        setFormData(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: credentialId }));
         setIsEnrolling(false);
       }, 500);
-    }, 2500);
+    } catch (err) {
+      console.error(err);
+      setIsEnrolling(false);
+      setEnrollProgress(0);
+      alert(`Biometric capture failed: ${err.message || err.name}`);
+    }
   };
 
   const cancelScan = () => {

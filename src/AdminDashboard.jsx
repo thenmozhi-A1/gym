@@ -266,7 +266,7 @@ const AdminDashboard = () => {
   const isWebAuthnSupported = () => window.PublicKeyCredential !== undefined && typeof window.PublicKeyCredential === 'function';
   const bufferToBase64 = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
 
-  const startScan = (e) => {
+  const startScan = async (e) => {
     if (e) e.preventDefault();
     if (!newStaff.email) {
       alert("Please enter the staff email before scanning fingerprint.");
@@ -275,28 +275,47 @@ const AdminDashboard = () => {
     if (newStaff.fingerprintEnrolled) return;
 
     setIsEnrolling(true);
-    setEnrollProgress(0);
+    setEnrollProgress(50);
 
-    let p = 0;
-    progressTimer.current = setInterval(() => {
-      p = Math.min(p + 2, 100);
-      setEnrollProgress(p);
-    }, 50);
+    try {
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+      const userId = new TextEncoder().encode(newStaff.email);
+      
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: { name: "B&Y Fitness Gym", id: window.location.hostname },
+          user: { id: userId, name: newStaff.email, displayName: newStaff.name || newStaff.email },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+          authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", requireResidentKey: false },
+          timeout: 60000,
+          attestation: "none",
+        }
+      });
 
-    holdTimer.current = setTimeout(() => {
-      clearInterval(progressTimer.current);
-      setEnrollProgress(100);
-
-      const mockCredentialId = "fp_" + btoa(newStaff.email + Date.now()).substring(0, 32);
+      // Need to use URL-safe base64 encoding to match Login.jsx exactly
+      const credIdBase64 = btoa(String.fromCharCode(...new Uint8Array(credential.rawId)))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+      
       const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
-      stored[newStaff.email] = mockCredentialId;
+      stored[newStaff.email] = credIdBase64;
       localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
+      localStorage.setItem("lastEnrolledEmail", newStaff.email);
 
+      setEnrollProgress(100);
       setTimeout(() => {
-        setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: mockCredentialId }));
+        setNewStaff(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: credIdBase64 }));
         setIsEnrolling(false);
       }, 500);
-    }, 2500);
+    } catch (err) {
+      console.error(err);
+      setIsEnrolling(false);
+      setEnrollProgress(0);
+      alert(`Biometric capture failed: ${err.message || err.name}`);
+    }
   };
 
   const cancelScan = () => {
