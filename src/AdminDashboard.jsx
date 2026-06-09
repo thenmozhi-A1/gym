@@ -1958,6 +1958,7 @@ const ModalContent = styled.div`
 
   .modal-footer {
     display: flex; gap: 20px; margin-top: 40px;
+    @media (max-width: 600px) { flex-direction: column-reverse; gap: 10px; }
     button { flex: 1; padding: 16px; border-radius: 16px; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
     .cancel-btn { background: var(--card-bg); color: var(--text-muted); border: 1px solid var(--border-color); &:hover { background: var(--border-color); color: var(--text-color); } }
     .submit-btn { background: var(--accent-color); color: #000; border: none; font-weight: 800; &:hover { transform: translateY(-3px); box-shadow: 0 15px 30px var(--accent-glow); } }

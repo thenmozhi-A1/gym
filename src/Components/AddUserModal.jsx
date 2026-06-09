@@ -381,14 +381,18 @@ const ModalContent = styled.div`
     padding: 20px 24px;
     border-bottom: 1px solid var(--border-color, #334155);
     display: flex; justify-content: space-between; alignItems: center;
-    h3 { margin: 0; font-size: 1.25rem; font-weight: 600; }
-    .close-btn { background: none; border: none; color: var(--text-muted, #94a3b8); cursor: pointer; }
+    h3 { margin: 0; font-size: 1.25rem; font-weight: 600; @media (max-width: 600px) { font-size: 1rem; } }
+    .close-btn { background: none; border: none; color: var(--text-muted, #94a3b8); cursor: pointer; padding: 4px; }
   }
 
   .stepper {
     display: flex; justify-content: space-between;
     padding: 20px 40px;
     background: rgba(0,0,0,0.1);
+    
+    @media (max-width: 600px) {
+      padding: 15px;
+    }
     
     .step {
       display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -402,7 +406,10 @@ const ModalContent = styled.div`
         display: flex; align-items: center; justify-content: center;
         font-weight: bold; transition: all 0.3s;
       }
-      .step-label { font-size: 0.8rem; font-weight: 500; }
+      .step-label { 
+        font-size: 0.8rem; font-weight: 500; 
+        @media (max-width: 600px) { display: none; }
+      }
     }
   }
 
@@ -410,12 +417,18 @@ const ModalContent = styled.div`
     padding: 24px;
     overflow-y: auto;
     flex: 1;
+    @media (max-width: 600px) { padding: 16px; }
     
     h4 { display: flex; alignItems: center; gap: 8px; margin-top: 0; margin-bottom: 20px; color: var(--accent-color, #38bdf8); }
     
     .form-grid {
       display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
       .full-width { grid-column: span 2; }
+      
+      @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+        .full-width { grid-column: span 1; }
+      }
     }
     
     .form-group {
@@ -438,6 +451,12 @@ const ModalContent = styled.div`
     margin-top: 30px;
     display: flex; justify-content: flex-end; gap: 12px;
     padding-top: 20px; border-top: 1px solid var(--border-color, #334155);
+    
+    @media (max-width: 600px) {
+      flex-direction: column-reverse;
+      gap: 10px;
+      button { width: 100%; }
+    }
     
     button {
       padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none;
