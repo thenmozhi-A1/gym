@@ -50,7 +50,7 @@ import LeadModule from "./Components/LeadModule";
 import CommunicationModule from "./Components/CommunicationModule";
 import ReportsModule from "./Components/ReportsModule";
 
-const API_BASE = "http://localhost:8080/api"; // Changed to local backend
+const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
