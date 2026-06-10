@@ -279,9 +279,12 @@ const Navbar = () => {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
   const handleNavClick = () => {
-    setIsOpen(false);
-    setWorkoutsOpen(false);
-    setNutritionOpen(false);
+    // Add a small delay to prevent ghost clicks on underlying elements in mobile view
+    setTimeout(() => {
+      setIsOpen(false);
+      setWorkoutsOpen(false);
+      setNutritionOpen(false);
+    }, 150);
   };
 
   const handleLogout = () => {
