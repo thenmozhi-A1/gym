@@ -1,8 +1,10 @@
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
 
-// Assuming Spring Boot backend is on 8080 during dev
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+let API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+if (!API_BASE.endsWith('/api')) {
+  API_BASE = API_BASE.endsWith('/') ? API_BASE + 'api' : API_BASE + '/api';
+}
 
 const axiosInstance = axios.create({
   baseURL: API_BASE,
