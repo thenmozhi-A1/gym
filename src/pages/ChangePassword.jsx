@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
-import PasswordStrength from '../components/PasswordStrength';
+import PasswordStrength from '../Components/PasswordStrength';
 import useAuthStore from '../store/authStore';
 
 const ChangePassword = () => {

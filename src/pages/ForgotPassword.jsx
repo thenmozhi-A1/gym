@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { Mail, KeyRound, Lock, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
 import axiosInstance from '../api/axiosInstance';
-import PasswordStrength from '../components/PasswordStrength';
+import PasswordStrength from '../Components/PasswordStrength';
 
 // ── Animations ────────────────────────────────────────────────────────────────
 const fadeIn = keyframes`

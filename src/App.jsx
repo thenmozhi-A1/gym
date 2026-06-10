@@ -29,8 +29,8 @@ import Myprofile from "./Myprofile";
 import AdminDashboard from "./AdminDashboard";
 import EmployeeDashboard from "./EmployeeDashboard";
 import Settings from "./Settings";
-import ProtectedRoute from "./components/ProtectedRoute";
-import ErrorBoundary from "./components/ErrorBoundary";
+import ProtectedRoute from "./Components/ProtectedRoute";
+import ErrorBoundary from "./Components/ErrorBoundary";
 import NotFound from "./NotFound";
 
 import "./App.css"; // Import your CSS file here
