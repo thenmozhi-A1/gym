@@ -35,7 +35,8 @@ axiosInstance.interceptors.response.use(
       
       const refreshToken = useAuthStore.getState().refreshToken;
       if (!refreshToken) {
-        useAuthStore.getState().logout();
+        // If there's no refresh token, the user is already considered logged out.
+        // Don't call logout() here, as it forces a window redirect and breaks public pages.
         return Promise.reject(error);
       }
       

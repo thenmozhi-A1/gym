@@ -284,7 +284,7 @@ const Navbar = () => {
       setIsOpen(false);
       setWorkoutsOpen(false);
       setNutritionOpen(false);
-    }, 150);
+    }, 400);
   };
 
   const handleLogout = () => {
