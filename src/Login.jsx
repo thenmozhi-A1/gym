@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { User, Mail, Lock, Fingerprint, ShieldCheck, ShieldAlert } from "lucide-react";
-
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
+import useAuthStore from "./store/authStore";
+import axiosInstance from "./api/axiosInstance";
+import log from "./utils/logger";
+import { redirectAfterLogin } from "./utils/authRoutes";
 
 // ── WebAuthn helpers ──────────────────────────────────────────
 const bufferToBase64 = (buffer) => {
@@ -76,36 +78,28 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const recordAttendance = (user) => {
-    const now = new Date();
-    const timestamp = now.toLocaleTimeString();
-    const dateKey = now.toLocaleDateString();
-    const attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords') || '{}');
-    const recordKey = `${user.id}-${dateKey}`;
-    const existing = attendanceRecords[recordKey] || {
-      id: recordKey,
-      userId: user.id,
-      fullName: user.fullName || user.email || "Unknown",
-      email: user.email || "unknown@byfitness.com",
-      role: user.role || "USER",
-      date: dateKey,
-      entry: null,
-      exit: null,
-      loginDetails: user.role ? `${user.role} login` : "Member login"
-    };
+  const recordAttendance = async (user) => {
+    try {
+      const now = new Date();
+      const timestamp = now.toLocaleTimeString();
+      const dateKey = now.toLocaleDateString();
+      
+      const payload = {
+        userId: user.id,
+        fullName: user.fullName || user.email || "Unknown",
+        email: user.email || "unknown@byfitness.com",
+        role: user.role || "USER",
+        date: dateKey,
+        time: timestamp,
+        loginDetails: user.role ? `${user.role} login` : "Member login"
+      };
 
-    if (!existing.entry) {
-      existing.entry = timestamp;
-      setAttendanceLog(`Entry recorded at ${timestamp}`);
-    } else if (!existing.exit) {
-      existing.exit = timestamp;
-      setAttendanceLog(`Exit recorded at ${timestamp}`);
-    } else {
-      setAttendanceLog("Session for today already completed.");
+      await axiosInstance.post('/attendance', payload);
+      setAttendanceLog(`Attendance recorded at ${timestamp}`);
+    } catch (error) {
+      log.error("Failed to record attendance:", error);
+      setAttendanceLog("Failed to record attendance.");
     }
-
-    attendanceRecords[recordKey] = existing;
-    localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
   };
 
   // ── Mobile touch handlers (no PIN, pure touch) ───────────────
@@ -169,9 +163,6 @@ const Login = () => {
 
   const completeMobileEnroll = (samples) => {
     const hash = buildMobileHash(samples);
-    const store = JSON.parse(localStorage.getItem('webauthnCredentials') || '{}');
-    store[formData.email] = hash;
-    localStorage.setItem('webauthnCredentials', JSON.stringify(store));
     localStorage.setItem('lastEnrolledEmail', formData.email);
     setBiometricState('success'); setIsEnrolled(true);
   };
@@ -182,45 +173,21 @@ const Login = () => {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/users/biometric-login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: formData.email || localStorage.getItem("lastEnrolledEmail"),
-          fingerprintHash: hash 
-        })
+      const res = await axiosInstance.post("/users/biometric-login", {
+        email: formData.email || localStorage.getItem("lastEnrolledEmail"),
+        fingerprintHash: hash 
       });
 
-      const user = await res.json();
+      const data = res.data;
 
-      if (!res.ok) {
-        setBiometricState('error');
-        setError(user.error || "Fingerprint not recognized on database.");
-        return;
-      }
-
-      recordAttendance(user);
+      useAuthStore.getState().login(data.accessToken, data.refreshToken, data.user);
+      recordAttendance(data.user);
 
       setBiometricState('success');
-      localStorage.setItem('isLoggedIn','true'); 
-      localStorage.setItem('userId', user.id);
-      localStorage.setItem('userName', user.fullName); 
-      localStorage.setItem('userEmail', user.email);
-      localStorage.setItem('userRole', user.role);
-
-      const redirectUser = (role) => {
-        const r = (role || "").toString().trim().toUpperCase();
-        if (r === 'ADMIN') window.location.href = '/AdminDashboard';
-        else if (r === 'TRAINER' || r === 'FRONT OFFICE' || r === 'STAFF' || r.includes('TRAINER') || r.includes('OFFICE')) window.location.href = '/EmployeeDashboard';
-        else window.location.href = '/userdashboard';
-      };
-
-      setTimeout(() => { 
-        redirectUser(user.role);
-      }, 1500);
-    } catch { 
+      setTimeout(() => redirectAfterLogin(data.user), 1500);
+    } catch (err) { 
       setBiometricState('error'); 
-      setError('Cannot connect to server.'); 
+      setError(err.response?.data?.error || 'Cannot connect to server.'); 
     }
   };
 
@@ -241,9 +208,6 @@ const Login = () => {
         timeout: 60000, attestation: "none",
       }});
       const credentialId = bufferToBase64(credential.rawId);
-      const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
-      stored[formData.email] = credentialId;
-      localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
       localStorage.setItem("lastEnrolledEmail", formData.email);
       setBiometricState("success"); setIsEnrolled(true);
     } catch (err) {
@@ -258,13 +222,10 @@ const Login = () => {
     e.preventDefault();
     setError(""); setLoading(true);
     try {
-      const res  = await fetch(`${API_BASE}/users/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email, password: formData.password }),
+      const res = await axiosInstance.post("/users/login", {
+        email: formData.email, password: formData.password
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error || "Invalid credentials."); return; }
+      const data = res.data;
       if (data.role !== "ADMIN") { setError("Access denied. This login is for admins only."); return; }
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userId",    data.id);
@@ -272,7 +233,7 @@ const Login = () => {
       localStorage.setItem("userEmail", data.email);
       localStorage.setItem("userRole",  data.role);
       navigate("/AdminDashboard");
-    } catch { setError("Cannot connect to server."); }
+    } catch (err) { setError(err.response?.data?.error || "Cannot connect to server."); }
     finally   { setLoading(false); }
   };
 
@@ -301,30 +262,22 @@ const Login = () => {
     setLoading(true);
     try {
       if (isNewUser) {
-        const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
-        const activeHash = stored[formData.email] || `fp_${formData.email.replace(/[^a-zA-Z0-9]/g, "")}`;
+        // We do not store the active hash in localStorage anymore, instead we must 
+        // generate the dummy hash if enrollment didn't happen (though it's blocked by validation above)
+        const activeHash = isEnrolled ? `fp_${formData.email.replace(/[^a-zA-Z0-9]/g, "")}` : "";
 
         // ── CREATE ACCOUNT ── POST /api/users/register
-        const res = await fetch(`${API_BASE}/users/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fullName: formData.name,
-            email: formData.email,
-            password: formData.password,
-            membershipType: "Monthly",
-            status: "ACTIVE",
-            fingerprintEnrolled: true,
-            fingerprintHash: activeHash
-          })
+        const res = await axiosInstance.post("/users/register", {
+          fullName: formData.name,
+          email: formData.email,
+          password: formData.password,
+          membershipType: "Monthly",
+          status: "ACTIVE",
+          fingerprintEnrolled: true,
+          fingerprintHash: activeHash
         });
 
-        const data = await res.json();
-
-        if (!res.ok) {
-          setError(data.error || "Registration failed. Please try again.");
-          return;
-        }
+        const data = res.data;
 
         // Store user info in localStorage
         localStorage.setItem("isLoggedIn", "true");
@@ -339,42 +292,25 @@ const Login = () => {
         window.location.href = data.role === "ADMIN" ? "/AdminDashboard" : "/subscription";
 
       } else {
-        // ── LOGIN ── POST /api/users/login
-        const res = await fetch(`${API_BASE}/users/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password
-          })
+        // ── LOGIN ── POST /api/auth/login
+        const res = await axiosInstance.post("/auth/login", {
+          email: formData.email,
+          password: formData.password
         });
 
-        const data = await res.json();
+        const data = res.data;
 
-        if (!res.ok) {
-          setError(data.error || "Invalid email or password.");
-          return;
-        }
+        // Use Zustand store for authentication state
+        useAuthStore.getState().login(data.accessToken, data.refreshToken, data.user);
+        recordAttendance(data.user);
 
-        // Store user info in localStorage
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userId", data.id);
-        localStorage.setItem("userName", data.fullName);
-        localStorage.setItem("userEmail", data.email);
-        localStorage.setItem("userRole", data.role); // Store role
+        log.debug("Login Data Detected:", data.user.role);
 
-        console.log("Login Data Detected:", data.role);
-        const upperRole = (data.role || "").toString().trim().toUpperCase();
-        if (upperRole === 'ADMIN') {
-          window.location.href = '/AdminDashboard';
-        } else if (['TRAINER', 'FRONT OFFICE', 'STAFF'].some(role => upperRole.includes(role))) {
-          window.location.href = '/EmployeeDashboard';
-        } else {
-          window.location.href = '/userdashboard';
-        }
+        // Handle mandatory password change + role redirect via central utility
+        redirectAfterLogin(data.user);
       }
     } catch (err) {
-      setError("Cannot connect to server. Please make sure the backend is running.");
+      setError(err.response?.data?.error || "Cannot connect to server. Please make sure the backend is running.");
     } finally {
       setLoading(false);
     }
@@ -392,17 +328,23 @@ const Login = () => {
 
     try {
       // ── Step 1: Determine which credential to use ──────────────
-      const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
       const lastEnrolled = localStorage.getItem("lastEnrolledEmail");
       const targetEmail = formData.email || lastEnrolled;
 
       let allowCredentials = [];
-      if (targetEmail && stored[targetEmail]) {
-        allowCredentials = [{
-          type: "public-key",
-          id: base64ToBuffer(stored[targetEmail]),
-          transports: ["internal"],
-        }];
+      if (targetEmail) {
+        try {
+          const res = await axiosInstance.get(`/users/credential?email=${encodeURIComponent(targetEmail)}`);
+          if (res.data && res.data.credentialId) {
+            allowCredentials = [{
+              type: "public-key",
+              id: base64ToBuffer(res.data.credentialId),
+              transports: ["internal"],
+            }];
+          }
+        } catch (err) {
+          log.warn("Could not fetch credential ID, proceeding without allowCredentials");
+        }
       }
 
       // ── Step 2: Trigger real device biometric ──────────────────
@@ -422,48 +364,27 @@ const Login = () => {
       // ── Step 3: Match scanned credential ID ────────────────────
       const assertedCredId = bufferToBase64(assertion.rawId);
 
-      // ── Step 4: Verify directly against database ──────────────
-      const res = await fetch(`${API_BASE}/users/biometric-login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: targetEmail,
-          fingerprintHash: assertedCredId 
-        })
+      const res = await axiosInstance.post("/users/biometric-login", {
+        email: targetEmail,
+        fingerprintHash: assertedCredId 
       });
 
-      const user = await res.json();
-
-      if (!res.ok) {
-        setBiometricState("error");
-        setError(user.error || "Biometric hash not matched in database.");
-        return;
-      }
+      const data = res.data;
 
       // ── Step 5: Record attendance ──────────────────────────────
-      recordAttendance(user);
+      recordAttendance(data.user);
 
       // ── Step 6: Login ──────────────────────────────────────────
       setBiometricState("success");
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userId", user.id);
-      localStorage.setItem("userName", user.fullName);
-      localStorage.setItem("userEmail", user.email);
-      localStorage.setItem("userRole", user.role);
+      useAuthStore.getState().login(data.accessToken, data.refreshToken, data.user);
 
-      setTimeout(() => {
-        const r = (user.role || "").toString().trim().toUpperCase();
-        if (r === 'ADMIN') {
-          window.location.href = '/AdminDashboard';
-        } else if (r === 'TRAINER' || r === 'FRONT OFFICE' || r === 'STAFF' || r.includes('TRAINER') || r.includes('OFFICE')) {
-          window.location.href = '/EmployeeDashboard';
-        } else {
-          window.location.href = '/userdashboard';
-        }
-      }, 1500);
+      setTimeout(() => redirectAfterLogin(data.user), 1500);
 
     } catch (err) {
-      if (err.name === "NotAllowedError") {
+      if (err.response) {
+        setBiometricState("error");
+        setError(err.response.data?.error || "Biometric hash not matched in database.");
+      } else if (err.name === "NotAllowedError") {
         setBiometricState("error");
         setError("Fingerprint scan was cancelled or timed out. Please try again.");
       } else if (err.name === "SecurityError") {
@@ -481,29 +402,8 @@ const Login = () => {
       <AuthCard>
         {/* Tabs removed to mandate Biometric Access */}
         <FormContent>
-          {isForgotPassword ? (
-            <>
-              <h2>Reset Password</h2>
-              <p className="subtitle">Enter your email and we'll send you a link to reset your password.</p>
-              <form onSubmit={handleSubmit}>
-                <InputGroup>
-                  <label><Mail size={16} /> Email Address</label>
-                  <input 
-                    type="email" 
-                    name="email" 
-                    placeholder="john@example.com" 
-                    required 
-                    onChange={handleInputChange}
-                  />
-                </InputGroup>
-                <SubmitButton type="submit">Send Reset Link</SubmitButton>
-                <div className="forgot-password">
-                  <a href="#" onClick={(e) => { e.preventDefault(); setIsForgotPassword(false); }}>
-                    Back to Login
-                  </a>
-                </div>
-              </form>
-            </>
+          {false ? (
+            <></>
           ) : (
             <>
               <h2>{isNewUser ? "Join the Elite" : isAdminLogin ? "Admin Secure Access" : "Biometric Access Control"}</h2>
@@ -599,9 +499,13 @@ const Login = () => {
                   <InputGroup>
                     <div className="label-row">
                       <label><Lock size={16} /> Password</label>
-                      <a href="#" className="forgot-link" onClick={(e) => { e.preventDefault(); setIsForgotPassword(true); }}>
-                        Forgot?
-                      </a>
+                      {!isNewUser && (
+                        <div className="forgot-password">
+                          <a href="/forgot-password" onClick={(e) => { e.preventDefault(); window.location.href = '/forgot-password'; }}>
+                            Forgot password?
+                          </a>
+                        </div>
+                      )}
                     </div>
                     <input 
                       type="password" 

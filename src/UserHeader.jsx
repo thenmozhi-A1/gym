@@ -1,6 +1,81 @@
 import React from 'react';
 import { Bell, Settings } from 'lucide-react';
-import { Button, Image } from 'react-bootstrap';
+import styled from 'styled-components';
+
+const HeaderContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+`;
+
+const ProfileSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const AvatarContainer = styled.div`
+  border-radius: 50%;
+  border: 3px solid #0dcaf0;
+  overflow: hidden;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+`;
+
+const AvatarImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+`;
+
+const AvatarFallback = styled.div`
+  background-color: #6c757d;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  font-weight: bold;
+`;
+
+const Greeting = styled.h4`
+  margin-bottom: 4px;
+  font-weight: bold;
+  color: #212529;
+  font-size: 1.5rem;
+`;
+
+const Subtitle = styled.p`
+  color: #6c757d;
+  margin-bottom: 0;
+`;
+
+const Actions = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const IconButton = styled.button`
+  background-color: transparent;
+  color: #6c757d;
+  border: 1px solid #6c757d;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    color: #fff;
+    background-color: #6c757d;
+  }
+`;
 
 const UserHeader = () => {
   const userName = "Dinesh";
@@ -15,42 +90,30 @@ const UserHeader = () => {
   };
 
   return (
-    <div className="d-flex align-items-center justify-content-between mb-4">
-      <div className="d-flex align-items-center gap-3">
-        <div
-          className="rounded-circle border border-3 border-info overflow-hidden"
-          style={{ width: "64px", height: "64px" }}
-        >
+    <HeaderContainer>
+      <ProfileSection>
+        <AvatarContainer>
           {avatarUrl ? (
-            <Image
-              src={avatarUrl}
-              alt={userName}
-              roundedCircle
-              width="100%"
-              height="100%"
-              style={{ objectFit: 'cover' }}
-            />
+            <AvatarImg src={avatarUrl} alt={userName} />
           ) : (
-            <div className="bg-secondary text-white d-flex align-items-center justify-content-center h-100 w-100 fw-bold">
-              {getInitials(userName)}
-            </div>
+            <AvatarFallback>{getInitials(userName)}</AvatarFallback>
           )}
-        </div>
+        </AvatarContainer>
         <div>
-          <h4 className="mb-1 fw-bold text-dark">Welcome back, {userName}!</h4>
-          <p className="text-muted mb-0">Ready for today's workout challenge?</p>
+          <Greeting>Welcome back, {userName}!</Greeting>
+          <Subtitle>Ready for today's workout challenge?</Subtitle>
         </div>
-      </div>
+      </ProfileSection>
 
-      <div className="d-flex gap-2">
-        <Button variant="outline-secondary">
+      <Actions>
+        <IconButton>
           <Bell size={18} />
-        </Button>
-        <Button variant="outline-secondary">
+        </IconButton>
+        <IconButton>
           <Settings size={18} />
-        </Button>
-      </div>
-    </div>
+        </IconButton>
+      </Actions>
+    </HeaderContainer>
   );
 };
 

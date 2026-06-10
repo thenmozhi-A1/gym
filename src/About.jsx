@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
 import { Send, Award, Target, Users, Shield, Zap, Trophy, TrendingUp, Heart } from "lucide-react";
 
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
+import axiosInstance from "./api/axiosInstance";
+import log from "./utils/logger";
 
 const About = () => {
   const [formData, setFormData] = useState({
@@ -26,21 +27,13 @@ const About = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${API_BASE}/consultations`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
+      await axiosInstance.post("/consultations", formData);
 
-      if (response.ok) {
-        alert("Enquiry submitted successfully! We will contact you soon.");
-        setFormData({ fullName: "", email: "", phone: "", goals: "" });
-      } else {
-        alert("Failed to submit enquiry. Please try again.");
-      }
+      alert("Enquiry submitted successfully! We will contact you soon.");
+      setFormData({ fullName: "", email: "", phone: "", goals: "" });
     } catch (error) {
-      console.error("Error submitting enquiry:", error);
-      alert("Something went wrong. Please check your connection.");
+      log.error("Error submitting enquiry:", error);
+      alert("Failed to submit enquiry. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

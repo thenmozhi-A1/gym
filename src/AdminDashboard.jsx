@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 import styled from "styled-components";
 import {
   Users,
@@ -49,8 +50,9 @@ import DietModule from "./Components/DietModule";
 import LeadModule from "./Components/LeadModule";
 import CommunicationModule from "./Components/CommunicationModule";
 import ReportsModule from "./Components/ReportsModule";
-
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
+import axiosInstance from "./api/axiosInstance";
+import log from "./utils/logger";
+import { useAdminNotifications } from "./hooks/useAdminNotifications";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -77,6 +79,9 @@ const AdminDashboard = () => {
   const [payrollSearchTerm, setPayrollSearchTerm] = useState("");
   const [payrollRoleFilter, setPayrollRoleFilter] = useState("ALL");
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const holdTimer = useRef(null);
   const progressTimer = useRef(null);
   const [enrollProgress, setEnrollProgress] = useState(0);
@@ -87,6 +92,12 @@ const AdminDashboard = () => {
     fingerprintHash: ""
   });
   const [attendanceType, setAttendanceType] = useState("users"); // "users" or "staff"
+
+  // Subscribe to real-time admin notifications via SSE
+  useAdminNotifications((event) => {
+    setNotifications(prev => [event, ...prev].slice(0, 50));
+    setUnreadCount(prev => prev + 1);
+  });
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -113,11 +124,6 @@ const AdminDashboard = () => {
     { id: "ATT-S003", fullName: "Sarah Johnson", date: "2026-06-08", entry: "10:00 AM", exit: "06:00 PM", role: "Trainer" }
   ];
 
-  const loadLocalAttendance = () => {
-    const stored = JSON.parse(localStorage.getItem('attendanceRecords') || '{}');
-    return Array.isArray(stored) ? stored : Object.values(stored);
-  };
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -131,16 +137,15 @@ const AdminDashboard = () => {
         : [activeTab];
 
       const results = await Promise.all(
-        endpoints.map(ep => fetch(`${API_BASE}/${ep}`).then(r => r.json()))
+        endpoints.map(ep => axiosInstance.get(`/${ep}`).then(r => r.data))
       );
 
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
         const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => !['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office', 'admin', 'ADMIN'].includes(u.role));
         const paymentsData = Array.isArray(results[1]) ? results[1] : [];
         const attendanceData = Array.isArray(results[2]) ? results[2] : [];
-        const localAttendance = loadLocalAttendance();
-        const mergedAttendance = attendanceData.length || localAttendance.length
-          ? [...attendanceData, ...localAttendance]
+        const mergedAttendance = attendanceData.length
+          ? attendanceData
           : SAMPLE_ATTENDANCE;
         setUsers(standardUsers);
         setPayments(paymentsData.length ? paymentsData : SAMPLE_PAYMENTS);
@@ -150,31 +155,20 @@ const AdminDashboard = () => {
         setFeedbacks(Array.isArray(results[5]) ? results[5] : []);
       } else {
         const data = Array.isArray(results[0]) ? results[0] : [];
-        const localAttendance = loadLocalAttendance();
         if (activeTab === "payments") setPayments(data.length ? data : SAMPLE_PAYMENTS);
-        else if (activeTab === "attendance") setAttendance(data.length ? [...data, ...localAttendance] : (localAttendance.length ? localAttendance : SAMPLE_ATTENDANCE));
+        else if (activeTab === "attendance") setAttendance(data.length ? data : SAMPLE_ATTENDANCE);
         else if (activeTab === "feedbacks") setFeedbacks(data);
         else setConsultations(data);
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { log.error(e); }
     finally { setLoading(false); }
   };
 
   const handleAddUser = async (userData) => {
     try {
-      const res = await fetch(`${API_BASE}/users/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData)
-      });
+      const res = await axiosInstance.post("/users/register", userData);
       
-      if (!res.ok) {
-        let errData = {};
-        try { errData = await res.json(); } catch(e){}
-        throw new Error(errData.error || `Server error ${res.status}`);
-      }
-      
-      const savedUser = await res.json();
+      const savedUser = res.data;
       setUsers([savedUser, ...users]);
       
       if (userData.paymentAmount) {
@@ -187,23 +181,21 @@ const AdminDashboard = () => {
           paymentMode: userData.paymentMode
         }, ...payments]);
       }
-      alert("MEMBER ENLISTED AND SAVED TO DATABASE SUCCESSFULLY!");
+      toast.success("MEMBER ENLISTED AND SAVED TO DATABASE SUCCESSFULLY!");
     } catch (err) {
-      alert(`Failed to save to database: ${err.message}`);
+      toast.error(`Failed to save to database: ${err.response?.data?.error || err.message}`);
     }
   };
 
   const handleDeleteFeedback = async (id) => {
     if (!window.confirm("Remove this feedback?")) return;
     try {
-      const res = await fetch(`${API_BASE}/feedbacks/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setFeedbacks(feedbacks.filter(f => f.id !== id));
-      } else {
-        alert("Failed to delete feedback.");
-      }
+      await axiosInstance.delete(`/feedbacks/${id}`);
+      setFeedbacks(feedbacks.filter(f => f.id !== id));
+      toast.success("Feedback deleted successfully.");
     } catch (err) {
-      alert("Error deleting feedback.");
+      log.error(err);
+      toast.error("Error deleting feedback.");
     }
   };
 
@@ -212,42 +204,24 @@ const AdminDashboard = () => {
   const handleDeleteUser = async (id) => {
     if (!window.confirm("Permanent deletion cannot be undone. Proceed?")) return;
     try {
-      const res = await fetch(`${API_BASE}/users/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setUsers(users.filter(u => u.id !== id && u.memberId !== id));
-        alert("User completely deleted from the database.");
-      } else {
-        // Fallback for locally added users that aren't in the DB yet
-        if (id.toString().startsWith("u_")) {
-          setUsers(users.filter(u => u.id !== id && u.memberId !== id));
-        } else {
-          alert("Failed to delete user from the database. The server responded with an error.");
-        }
-      }
+      await axiosInstance.delete(`/users/${id}`);
+      setUsers(users.filter(u => u.id !== id && u.memberId !== id));
+      toast.success("User completely deleted from the database.");
     } catch (err) {
       if (id.toString().startsWith("u_")) {
         setUsers(users.filter(u => u.id !== id && u.memberId !== id));
       } else {
-        alert("Network error: Could not reach the database to delete the user.");
+        toast.error("Failed to delete user from the database.");
       }
     }
   };
 
   const handleEditUser = async (id, updatedData) => {
     try {
-      const res = await fetch(`${API_BASE}/users/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedData)
-      });
-      if (res.ok) {
-        const updatedUser = await res.json();
-        setUsers(users.map(u => (u.id === id || u.memberId === id) ? updatedUser : u));
-        return true;
-      } else {
-        setUsers(users.map(u => (u.id === id || u.memberId === id) ? { ...u, ...updatedData } : u));
-        return true;
-      }
+      const res = await axiosInstance.put(`/users/${id}`, updatedData);
+      const updatedUser = res.data;
+      setUsers(users.map(u => (u.id === id || u.memberId === id) ? updatedUser : u));
+      return true;
     } catch (err) {
       setUsers(users.map(u => (u.id === id || u.memberId === id) ? { ...u, ...updatedData } : u));
       return true;
@@ -256,14 +230,12 @@ const AdminDashboard = () => {
   const handleDeleteStaff = async (id) => {
     if (!window.confirm("Remove this staff member from the system?")) return;
     try {
-      const res = await fetch(`${API_BASE}/staffs/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setStaffs(staffs.filter(s => s.id !== id));
-      } else {
-        alert("Failed to remove staff.");
-      }
+      await axiosInstance.delete(`/staffs/${id}`);
+      setStaffs(staffs.filter(s => s.id !== id));
+      toast.success("Staff removed successfully.");
     } catch (err) {
-      alert("Error processing staff removal.");
+      log.error(err);
+      toast.error("Error processing staff removal.");
     }
   };
 
@@ -273,7 +245,7 @@ const AdminDashboard = () => {
   const startScan = async (e) => {
     if (e) e.preventDefault();
     if (!newStaff.email) {
-      alert("Please enter the staff email before scanning fingerprint.");
+      toast.error("Please enter the staff email before scanning fingerprint.");
       return;
     }
     if (newStaff.fingerprintEnrolled) return;
@@ -308,9 +280,6 @@ const AdminDashboard = () => {
         .replace(/\//g, "_")
         .replace(/=+$/, "");
       
-      const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
-      stored[newStaff.email] = credIdBase64;
-      localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
       localStorage.setItem("lastEnrolledEmail", newStaff.email);
 
       clearInterval(progressTimer.current);
@@ -320,12 +289,12 @@ const AdminDashboard = () => {
         setIsEnrolling(false);
       }, 500);
     } catch (err) {
-      console.error(err);
+      log.error(err);
       clearInterval(progressTimer.current);
       setIsEnrolling(false);
       setEnrollProgress(0);
       if (err.name !== "NotAllowedError") {
-        alert(`Biometric capture failed: ${err.message || err.name}`);
+        toast.error(`Biometric capture failed: ${err.message || err.name}`);
       }
     }
   };
@@ -343,7 +312,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     if (!newStaff.name || !newStaff.role) return;
     if (!newStaff.fingerprintEnrolled) {
-      alert("Please enroll staff fingerprint before adding them to the system.");
+      toast.error("Please enroll staff fingerprint before adding them to the system.");
       return;
     }
     const staffToAdd = {
@@ -362,24 +331,9 @@ const AdminDashboard = () => {
     };
 
     try {
-      const response = await fetch(`${API_BASE}/staffs/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(staffToAdd)
-      });
+      const response = await axiosInstance.post("/staffs/register", staffToAdd);
 
-      if (!response.ok) {
-        let errorData = { error: "Unknown error" };
-        try {
-          errorData = await response.json();
-        } catch (e) {
-          errorData = { error: `Server error: ${response.status} ${response.statusText}` };
-        }
-        alert(`Failed to add staff: ${errorData.error}`);
-        return;
-      }
-
-      const savedStaffData = await response.json();
+      const savedStaffData = response.data;
       setStaffs([savedStaffData, ...staffs]);
       setNewStaff({
         name: "", specialty: "", salary: "", times: "", email: "",
@@ -387,10 +341,10 @@ const AdminDashboard = () => {
         fingerprintEnrolled: false, fingerprintHash: ""
       });
       setIsAddStaffModalOpen(false);
-      alert("STAFF MEMBER ADDED & BIOMETRICS STORED IN DATABASE!");
+      toast.success("Staff member added successfully!");
     } catch (error) {
-      console.error(error);
-      alert(`Cannot connect to server to save staff. (Network/CORS error): ${error.message}`);
+      log.error(error);
+      toast.error(`Cannot connect to server to save staff. (Network/CORS error): ${error.message}`);
     }
   };
 
@@ -407,6 +361,7 @@ const AdminDashboard = () => {
 
   return (
     <AuroraWrapper themeName={themeName}>
+      <Toaster position="top-right" />
       {/* ── SIDEBAR ── */}
       <Sidebar isOpen={isSidebarOpen}>
         <div className="sidebar-header">
@@ -467,7 +422,63 @@ const AdminDashboard = () => {
                 </div>
               </SettingsDropdown>
             )}
-            <button className="h-btn" onClick={() => setActiveTab('consultations')}><Bell size={18} /><div className="notif-dot"></div></button>
+            <button
+              className="h-btn"
+              style={{ position: 'relative' }}
+              onClick={() => { setIsNotifOpen(o => !o); setUnreadCount(0); }}
+            >
+              <Bell size={18} />
+              {unreadCount > 0 && (
+                <div className="notif-dot" style={{
+                  position: 'absolute', top: 2, right: 2,
+                  background: '#ef4444', color: '#fff',
+                  borderRadius: '50%', fontSize: 10, fontWeight: 700,
+                  minWidth: 16, height: 16, display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', padding: '0 2px'
+                }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </div>
+              )}
+            </button>
+            {isNotifOpen && (
+              <div style={{
+                position: 'absolute', top: 56, right: 16, width: 320,
+                background: '#1e293b', border: '1px solid #334155',
+                borderRadius: 12, boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+                zIndex: 1000, maxHeight: 420, display: 'flex', flexDirection: 'column'
+              }}>
+                <div style={{ padding: '14px 16px', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 700, fontSize: 14 }}>Live Notifications</span>
+                  <button onClick={() => setIsNotifOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}><X size={14} /></button>
+                </div>
+                <div style={{ overflowY: 'auto', flex: 1 }}>
+                  {notifications.length === 0 ? (
+                    <div style={{ padding: 24, textAlign: 'center', color: '#64748b', fontSize: 13 }}>No notifications yet</div>
+                  ) : (
+                    notifications.map((n, i) => (
+                      <div key={i} style={{
+                        padding: '10px 16px', borderBottom: '1px solid #0f172a',
+                        display: 'flex', gap: 10, alignItems: 'flex-start'
+                      }}>
+                        <span style={{ fontSize: 18 }}>
+                          {n.type === 'NEW_MEMBER' ? '👤' : n.type === 'PAYMENT_FAILED' ? '❌' : '🏋️'}
+                        </span>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
+                            {n.type === 'NEW_MEMBER' && `New member: ${n.payload?.name}`}
+                            {n.type === 'PAYMENT_FAILED' && `Payment failed — ₹${n.payload?.amount}`}
+                            {n.type === 'ATTENDANCE' && `${n.payload?.name} checked in`}
+                          </div>
+                          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                            {new Date(n.timestamp).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
             <div className="profile-chip">
               <div className="avatar">AD</div>
             </div>
@@ -1220,7 +1231,7 @@ const AdminDashboard = () => {
             </div>
             <div className="modal-footer">
               <button className="cancel-btn" onClick={() => setIsGlobalConfigOpen(false)}>DISCARD</button>
-              <button className="submit-btn" onClick={() => { alert("Configuration saved successfully!"); setIsGlobalConfigOpen(false); }}>SAVE CHANGES</button>
+              <button className="submit-btn" onClick={() => { toast.success("Configuration saved successfully!"); setIsGlobalConfigOpen(false); }}>SAVE CHANGES</button>
             </div>
           </ModalContent>
         </ModalOverlay>

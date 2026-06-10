@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Clock, QrCode, Smartphone, Zap, Fingerprint } from "lucide-react";
+import { verifyFingerprint } from "../api/webauthnApi";
 
 const AttendanceModule = ({ attendanceData }) => {
   const [activeTab, setActiveTab] = useState("members"); // members or staff
@@ -22,66 +23,34 @@ const AttendanceModule = ({ attendanceData }) => {
 
   const logs = filterLogs(activeTab);
 
-  const handleSimulateScan = async () => {
+  const handleFingerprintScan = async () => {
     if (!scanEmail) {
-      setScanMessage("Please enter email to simulate scan");
+      setScanMessage("Please enter email first");
       setScanStatus("error");
       return;
     }
 
     setScanStatus("scanning");
-    setScanMessage("Scanning...");
+    setScanMessage("Prompting fingerprint scan...");
 
-    setTimeout(async () => {
-      try {
-        const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
-        const hash = stored[scanEmail];
-
-        if (!hash) {
-           setScanStatus("error");
-           setScanMessage("No fingerprint found for this email");
-           return;
-        }
-
-        // 1. Verify fingerprint hash
-        const res = await fetch(`http://localhost:8080/api/users/biometric-login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: scanEmail, fingerprintHash: hash })
-        });
-
-        if (!res.ok) {
-          setScanStatus("error");
-          setScanMessage("Biometric verification failed!");
-          return;
-        }
-
-        const user = await res.json();
-
-        // Determine if Staff or Member based on role
-        const isStaff = ["TRAINER", "FRONT OFFICE", "STAFF"].some(r => (user.role || "").toString().toUpperCase().includes(r));
-        const endpoint = isStaff ? `staff/${user.id}` : `user/${user.id}`;
-
-        // 2. Mark attendance
-        const attRes = await fetch(`http://localhost:8080/api/attendance/${endpoint}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "PRESENT" })
-        });
-
-        if (attRes.ok) {
-          setScanStatus("success");
-          setScanMessage(`Check-in successful: ${user.fullName}`);
-          setTimeout(() => window.location.reload(), 1500);
-        } else {
-          setScanStatus("error");
-          setScanMessage("Failed to mark attendance.");
-        }
-      } catch (err) {
-        setScanStatus("error");
-        setScanMessage("Server Error");
+    try {
+      const result = await verifyFingerprint(scanEmail);
+      
+      setScanStatus("success");
+      setScanMessage(`${result.action === 'CHECK_IN' ? 'Check-in' : 'Check-out'} successful: ${result.userName}`);
+      setTimeout(() => window.location.reload(), 3000);
+    } catch (err) {
+      setScanStatus("error");
+      if (err.message.includes("cancelled")) {
+        setScanMessage("Scan cancelled. Please try again.");
+      } else if (err.message.includes("registered")) {
+        setScanMessage("Please enrol your fingerprint first. Visit the front desk.");
+      } else if (err.message.includes("FingerprintNotEnrolledException")) {
+        setScanMessage("No fingerprint found. Contact admin.");
+      } else {
+        setScanMessage("Connection error or scan failed.");
       }
-    }, 1500);
+    }
   };
 
   return (
@@ -122,7 +91,7 @@ const AttendanceModule = ({ attendanceData }) => {
                 style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #334155', background: 'rgba(0,0,0,0.2)', color: '#fff' }}
               />
               <button 
-                onClick={handleSimulateScan}
+                onClick={handleFingerprintScan}
                 disabled={scanStatus === 'scanning'}
                 style={{ padding: '8px 12px', background: '#38bdf8', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
               >

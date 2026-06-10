@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Download, Search, CreditCard, DollarSign, PieChart } from "lucide-react";
+import { generateInvoicePDF } from "../utils/pdfTemplates";
 
 const PaymentModule = ({ payments }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,7 +25,14 @@ const PaymentModule = ({ payments }) => {
             <Search size={16} />
             <input type="text" placeholder="Search invoices..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
-          <button className="btn-primary">Generate Invoice</button>
+          <button
+            className="btn-primary"
+            onClick={() => filteredPayments.forEach(p => generateInvoicePDF(p))}
+            title="Download all filtered invoices as PDFs"
+          >
+            <Download size={14} style={{ marginRight: 6 }} />
+            Export All
+          </button>
         </div>
       </div>
 
@@ -79,7 +87,13 @@ const PaymentModule = ({ payments }) => {
                   </span>
                 </td>
                 <td>
-                  <button className="btn-icon" title="Download Invoice"><Download size={16} /></button>
+                  <button
+                    className="btn-icon"
+                    title="Download Invoice"
+                    onClick={() => generateInvoicePDF(p)}
+                  >
+                    <Download size={16} />
+                  </button>
                 </td>
               </tr>
             ))}

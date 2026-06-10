@@ -1,166 +1,792 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import styled, { keyframes, css } from "styled-components";
+import {
+  User, CreditCard, Clock, Dumbbell, Star, LogOut,
+  Download, ChevronRight, CheckCircle, AlertCircle,
+  Calendar, Zap, TrendingUp, FileText, MessageSquare
+} from "lucide-react";
+import axiosInstance from "./api/axiosInstance";
+import useAuthStore from "./store/authStore";
+import { generateInvoicePDF } from "./utils/pdfTemplates";
+import log from "./utils/logger";
 
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
+// ── Animations ────────────────────────────────────────────────────────────────
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
+
+const shimmer = keyframes`
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+`;
+
+const pulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+`;
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+const Page = styled.div`
+  min-height: 100vh;
+  background: #0f172a;
+  background-image:
+    radial-gradient(ellipse at 10% 30%, rgba(251,191,36,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 70%, rgba(59,130,246,0.06) 0%, transparent 50%);
+  color: #f1f5f9;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  padding-bottom: 40px;
+`;
+
+// ── Top nav bar ───────────────────────────────────────────────────────────────
+const NavBar = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(15,23,42,0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #1e293b;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+`;
+
+const NavBrand = styled.div`
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #facc15;
+  letter-spacing: 0.5px;
+`;
+
+const NavActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const IconBtn = styled.button`
+  background: rgba(255,255,255,0.06);
+  border: 1px solid #334155;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255,255,255,0.1);
+    color: #f1f5f9;
+  }
+`;
+
+// ── Hero section ──────────────────────────────────────────────────────────────
+const Hero = styled.div`
+  padding: 28px 20px 0;
+  max-width: 900px;
+  margin: 0 auto;
+  animation: ${fadeUp} 0.4s ease;
+`;
+
+const HeroGreeting = styled.p`
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+`;
+
+const HeroName = styled.h1`
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 800;
+  margin: 0 0 20px 0;
+  color: #f8fafc;
+  span { color: #facc15; }
+`;
+
+// ── Tab navigation ────────────────────────────────────────────────────────────
+const TabBar = styled.nav`
+  display: flex;
+  gap: 4px;
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar { display: none; }
+`;
+
+const Tab = styled.button`
+  flex: 1;
+  min-width: 80px;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+  background: ${p => p.$active ? '#facc15' : 'transparent'};
+  color: ${p => p.$active ? '#000' : '#64748b'};
+
+  svg { flex-shrink: 0; }
+
+  &:hover:not([data-active="true"]) {
+    background: rgba(255,255,255,0.05);
+    color: #cbd5e1;
+  }
+`;
+
+// ── Content area ──────────────────────────────────────────────────────────────
+const Content = styled.div`
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+  animation: ${fadeUp} 0.3s ease;
+`;
+
+// ── Cards ─────────────────────────────────────────────────────────────────────
+const Card = styled.div`
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+`;
+
+const CardTitle = styled.h3`
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+// ── Plan badge ────────────────────────────────────────────────────────────────
+const PlanBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #000;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const StatusBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: ${p => p.$ok
+    ? 'rgba(16,185,129,0.12)'
+    : 'rgba(239,68,68,0.12)'};
+  color: ${p => p.$ok ? '#34d399' : '#f87171'};
+  border: 1px solid ${p => p.$ok ? 'rgba(52,211,153,0.3)' : 'rgba(248,113,113,0.3)'};
+`;
+
+// ── Stats grid ────────────────────────────────────────────────────────────────
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+`;
+
+const StatBox = styled.div`
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 14px 12px;
+  text-align: center;
+`;
+
+const StatValue = styled.div`
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: ${p => p.$color || '#f1f5f9'};
+`;
+
+const StatLabel = styled.div`
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: 3px;
+  font-weight: 500;
+`;
+
+// ── Check-in list ─────────────────────────────────────────────────────────────
+const CheckInItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #0f172a;
+
+  &:last-child { border-bottom: none; }
+`;
+
+const CheckInDate = styled.div`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #e2e8f0;
+`;
+
+const CheckInTime = styled.div`
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 2px;
+`;
+
+// ── Payment row ───────────────────────────────────────────────────────────────
+const PaymentRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #0f172a;
+
+  &:last-child { border-bottom: none; }
+`;
+
+const PayAmount = styled.div`
+  font-size: 1rem;
+  font-weight: 700;
+  color: #facc15;
+`;
+
+const DownloadBtn = styled.button`
+  background: rgba(250,204,21,0.08);
+  border: 1px solid rgba(250,204,21,0.2);
+  border-radius: 8px;
+  color: #facc15;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(250,204,21,0.15);
+    transform: translateY(-1px);
+  }
+`;
+
+// ── Workout plan ──────────────────────────────────────────────────────────────
+const WorkoutDay = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid #0f172a;
+
+  &:last-child { border-bottom: none; }
+`;
+
+const DayTag = styled.div`
+  min-width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: ${p => p.$active ? 'rgba(250,204,21,0.15)' : '#0f172a'};
+  border: 1px solid ${p => p.$active ? 'rgba(250,204,21,0.4)' : '#1e293b'};
+  color: ${p => p.$active ? '#facc15' : '#475569'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  flex-shrink: 0;
+`;
+
+const WorkoutInfo = styled.div`
+  flex: 1;
+`;
+
+const WorkoutTitle = styled.div`
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #e2e8f0;
+`;
+
+const WorkoutDetail = styled.div`
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 3px;
+`;
+
+// ── Feedback form ─────────────────────────────────────────────────────────────
+const StarRow = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const StarBtn = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: ${p => p.$on ? '#facc15' : '#334155'};
+  padding: 0;
+  transition: color 0.15s, transform 0.1s;
+  text-shadow: ${p => p.$on ? '0 0 8px rgba(250,204,21,0.4)' : 'none'};
+  &:hover { transform: scale(1.1); }
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  min-height: 100px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #f1f5f9;
+  padding: 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  margin-bottom: 14px;
+
+  &:focus {
+    outline: none;
+    border-color: #facc15;
+    box-shadow: 0 0 0 3px rgba(250,204,21,0.1);
+  }
+
+  &::placeholder { color: #475569; }
+`;
+
+const SubmitBtn = styled.button`
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #000;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 10px;
+  cursor: ${p => p.disabled ? 'not-allowed' : 'pointer'};
+  opacity: ${p => p.disabled ? 0.6 : 1};
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(250,204,21,0.25);
+  }
+`;
+
+const AlertBox = styled.div`
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 14px;
+  background: ${p => p.$ok ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)'};
+  border: 1px solid ${p => p.$ok ? 'rgba(52,211,153,0.3)' : 'rgba(248,113,113,0.3)'};
+  color: ${p => p.$ok ? '#34d399' : '#f87171'};
+`;
+
+// ── Skeleton loader ───────────────────────────────────────────────────────────
+const SkeletonBlock = styled.div`
+  height: ${p => p.$h || 16}px;
+  border-radius: ${p => p.$r || 6}px;
+  width: ${p => p.$w || '100%'};
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 600px 100%;
+  animation: ${shimmer} 1.4s infinite;
+  margin-bottom: ${p => p.$mb || 10}px;
+`;
+
+// ── Default workout plan ───────────────────────────────────────────────────────
+const DEFAULT_PLAN = [
+  { day: 'MON', label: 'Push Day', detail: 'Chest · Shoulders · Triceps', active: true },
+  { day: 'TUE', label: 'Pull Day', detail: 'Back · Biceps · Rear Delts', active: false },
+  { day: 'WED', label: 'Leg Day', detail: 'Quads · Hamstrings · Calves', active: false },
+  { day: 'THU', label: 'Active Recovery', detail: 'Yoga · Stretching · Foam Roll', active: false },
+  { day: 'FRI', label: 'Upper Body', detail: 'Compound lifts + Isolation', active: false },
+  { day: 'SAT', label: 'Cardio', detail: 'HIIT · Treadmill · Cycling', active: false },
+  { day: 'SUN', label: 'Rest Day', detail: 'Full recovery', active: false },
+];
+
+// ── Component ─────────────────────────────────────────────────────────────────
+const TABS = [
+  { id: 'home',      label: 'Home',     icon: Zap },
+  { id: 'checkins',  label: 'Check-ins',icon: Clock },
+  { id: 'payments',  label: 'Payments', icon: CreditCard },
+  { id: 'workout',   label: 'Workout',  icon: Dumbbell },
+  { id: 'feedback',  label: 'Feedback', icon: MessageSquare },
+];
 
 const Userdashboard = () => {
   const navigate = useNavigate();
-  const [rating, setRating] = useState(5);
-  const [hoveredRating, setHoveredRating] = useState(0);
-  const [feedbackMsg, setFeedbackMsg] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState({ type: "", msg: "" });
+  const { user, logout } = useAuthStore();
 
-  const handleFeedbackSubmit = async (e) => {
+  const [activeTab, setActiveTab]   = useState('home');
+  const [profile,   setProfile]     = useState(null);
+  const [checkins,  setCheckins]    = useState([]);
+  const [payments,  setPayments]    = useState([]);
+  const [loading,   setLoading]     = useState(true);
+
+  // Feedback state
+  const [rating,       setRating]       = useState(5);
+  const [hovered,      setHovered]      = useState(0);
+  const [feedbackMsg,  setFeedbackMsg]  = useState('');
+  const [submitting,   setSubmitting]   = useState(false);
+  const [fbStatus,     setFbStatus]     = useState(null);
+
+  const userId = user?.id;
+
+  // ── Fetch member data ────────────────────────────────────────────────────────
+  const fetchData = useCallback(async () => {
+    if (!userId) return;
+    setLoading(true);
+    try {
+      const [profileRes, checkinsRes, paymentsRes] = await Promise.allSettled([
+        axiosInstance.get(`/users/${userId}`),
+        axiosInstance.get(`/attendance/user/${userId}`),
+        axiosInstance.get(`/payments/user/${userId}`),
+      ]);
+
+      if (profileRes.status === 'fulfilled')  setProfile(profileRes.value.data);
+      if (checkinsRes.status === 'fulfilled') setCheckins(checkinsRes.value.data || []);
+      if (paymentsRes.status === 'fulfilled') setPayments(paymentsRes.value.data || []);
+    } catch (e) {
+      log.error('Failed to fetch member data', e);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // ── Derived values ────────────────────────────────────────────────────────────
+  const displayName   = profile?.fullName || user?.name || user?.fullName || 'Champion';
+  const firstName     = displayName.split(' ')[0];
+  const plan          = profile?.membershipType || 'Standard';
+  const memberStatus  = (profile?.status || 'ACTIVE').toUpperCase();
+  const isActive      = memberStatus === 'ACTIVE';
+
+  const recentCheckins  = [...checkins].reverse().slice(0, 5);
+  const recentPayments  = [...payments].reverse().slice(0, 5);
+  const totalCheckins   = checkins.length;
+  const successPay      = payments.filter(p => p.paymentStatus === 'SUCCESS').length;
+
+  // Next payment date: last payment date + 30 days
+  const lastPay     = payments.length ? [...payments].sort((a,b) => new Date(b.paymentDate) - new Date(a.paymentDate))[0] : null;
+  const nextPayDate = lastPay
+    ? new Date(new Date(lastPay.paymentDate).getTime() + 30 * 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    : 'N/A';
+
+  // ── Feedback submit ───────────────────────────────────────────────────────────
+  const handleFeedback = async (e) => {
     e.preventDefault();
     if (!feedbackMsg.trim()) return;
-
     setSubmitting(true);
-    setSubmitStatus({ type: "", msg: "" });
-
-    const userEmail = localStorage.getItem("userEmail") || "Anonymous";
-    const userName = localStorage.getItem("userName") || "Anonymous";
-
+    setFbStatus(null);
     try {
-      const res = await fetch(`${API_BASE}/feedbacks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail,
-          userName,
-          message: feedbackMsg,
-          rating
-        })
+      await axiosInstance.post('/feedbacks', {
+        userEmail: user?.email || 'anonymous',
+        userName: displayName,
+        message: feedbackMsg,
+        rating,
       });
-
-      if (res.ok) {
-        setSubmitStatus({ type: "success", msg: "Thank you! Your feedback has been sent directly to our administration team." });
-        setFeedbackMsg("");
-        setRating(5);
-      } else {
-        const errData = await res.json();
-        setSubmitStatus({ type: "danger", msg: errData.error || "Failed to submit feedback. Please try again." });
-      }
+      setFbStatus({ ok: true, msg: 'Thank you! Your feedback has been sent to our team.' });
+      setFeedbackMsg('');
+      setRating(5);
     } catch (err) {
-      setSubmitStatus({ type: "danger", msg: "Connection error. Failed to reach server." });
+      setFbStatus({ ok: false, msg: err.response?.data?.error || 'Failed to send feedback.' });
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    logout();
+    navigate('/login');
+  };
+
+  // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div
-      className="userdashboard-container text-white min-vh-100 d-flex flex-column align-items-center justify-content-start w-100 px-3 py-5"
-      style={{ 
-        background: '#0a0a0a', 
-        backgroundImage: 'radial-gradient(circle at 50% 50%, #161616 0%, #0a0a0a 100%)',
-        paddingTop: '100px !important'
-      }}
-    >
-      {/* Hero Welcome Section */}
-      <div className="container text-center mt-5 mb-4">
-        <div
-          className="mx-auto p-4 p-md-5 rounded-4 shadow-lg border border-warning border-opacity-25"
-          style={{ maxWidth: '800px', background: 'rgba(20, 20, 20, 0.8)', backdropFilter: 'blur(10px)' }}
-        >
-          <h1 className="display-4 fw-bold mb-3" style={{ fontSize: 'clamp(1.8rem, 5vw, 3.5rem)' }}>
-            Welcome Back, <span className="text-warning">{localStorage.getItem("userName")?.split(" ")[0] || "Champion"}</span>
-          </h1>
-          <p className="lead text-secondary mb-4" style={{ fontSize: 'clamp(0.95rem, 2.5vw, 1.25rem)' }}>
-            Your fitness journey is progressing beautifully. Ready to crush today's goals and reach new heights?
-          </p>
-          <div className="d-flex flex-wrap justify-content-center gap-3">
-            <button
-              className="btn btn-warning btn-lg fw-bold px-4 py-3 rounded-pill shadow-sm"
-              style={{ minWidth: '200px' }}
-              onClick={() => navigate("/workouts")}
-            >
-              Start Today's Workout
-            </button>
-            <button
-              className="btn btn-outline-warning btn-lg fw-bold px-4 py-3 rounded-pill"
-              style={{ minWidth: '200px' }}
-              onClick={() => navigate("/dashboard/stats")}
-            >
-              View Performance
-            </button>
-          </div>
-        </div>
-      </div>
+    <Page>
+      {/* ── Nav bar ── */}
+      <NavBar>
+        <NavBrand>B&Y FITNESS</NavBrand>
+        <NavActions>
+          <IconBtn onClick={() => navigate('/myprofile')} title="Profile"><User size={16} /></IconBtn>
+          <IconBtn onClick={handleLogout} title="Logout"><LogOut size={16} /></IconBtn>
+        </NavActions>
+      </NavBar>
 
-      {/* Feedback Section */}
-      <div className="container py-4" style={{ maxWidth: '600px' }}>
-        <div
-          className="p-4 rounded-4 shadow-lg border border-warning border-opacity-25"
-          style={{ background: 'rgba(20, 20, 20, 0.8)', backdropFilter: 'blur(10px)' }}
-        >
-          <h3 className="h5 text-warning mb-3 fw-bold d-flex align-items-center justify-content-between">
-            <span>Share Your Experience</span>
-            <small className="text-secondary" style={{ fontSize: '0.75rem' }}>Direct Line to Management</small>
-          </h3>
-          <p className="text-secondary small mb-3">Tell us how we are doing! Your thoughts are displayed on the administration board instantly.</p>
+      <Hero>
+        <HeroGreeting>Good day</HeroGreeting>
+        <HeroName>Hey, <span>{firstName}</span> 👋</HeroName>
 
-          <form onSubmit={handleFeedbackSubmit}>
-            <div className="mb-3">
-              <label className="text-secondary small mb-2 d-block fw-bold" style={{ letterSpacing: '0.5px' }}>YOUR RATING</label>
-              <div className="d-flex gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    className="border-0 bg-transparent p-0"
-                    onClick={() => setRating(star)}
-                    onMouseEnter={() => setHoveredRating(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
+        {/* Tab bar */}
+        <TabBar>
+          {TABS.map(t => {
+            const Icon = t.icon;
+            return (
+              <Tab key={t.id} $active={activeTab === t.id} onClick={() => setActiveTab(t.id)}>
+                <Icon size={14} />
+                {t.label}
+              </Tab>
+            );
+          })}
+        </TabBar>
+      </Hero>
+
+      <Content>
+        {/* ══════════ HOME TAB ══════════ */}
+        {activeTab === 'home' && (
+          <>
+            {/* Membership card */}
+            <Card>
+              <CardTitle><CreditCard size={13} /> Membership</CardTitle>
+              {loading ? (
+                <><SkeletonBlock $h={24} $w="60%" /><SkeletonBlock $h={16} $w="40%" /></>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <PlanBadge><Star size={12} /> {plan} Plan</PlanBadge>
+                    <div style={{ marginTop: 10, fontSize: '0.8rem', color: '#64748b' }}>
+                      Next renewal: <strong style={{ color: '#e2e8f0' }}>{nextPayDate}</strong>
+                    </div>
+                  </div>
+                  <StatusBadge $ok={isActive}>
+                    {isActive ? <CheckCircle size={11} /> : <AlertCircle size={11} />}
+                    {memberStatus}
+                  </StatusBadge>
+                </div>
+              )}
+            </Card>
+
+            {/* Stats */}
+            <StatsGrid>
+              <StatBox>
+                <StatValue $color="#facc15">{loading ? '—' : totalCheckins}</StatValue>
+                <StatLabel>Check-ins</StatLabel>
+              </StatBox>
+              <StatBox>
+                <StatValue $color="#34d399">{loading ? '—' : successPay}</StatValue>
+                <StatLabel>Payments</StatLabel>
+              </StatBox>
+              <StatBox>
+                <StatValue $color="#60a5fa">{loading ? '—' : plan.charAt(0)}</StatValue>
+                <StatLabel>Plan Tier</StatLabel>
+              </StatBox>
+            </StatsGrid>
+
+            {/* Quick actions */}
+            <Card>
+              <CardTitle><Zap size={13} /> Quick Actions</CardTitle>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { label: 'Start Today\'s Workout', icon: Dumbbell, action: () => navigate('/workouts') },
+                  { label: 'View My Stats',          icon: TrendingUp, action: () => navigate('/dashboard/stats') },
+                  { label: 'Browse Nutrition Plans', icon: FileText, action: () => navigate('/nutrition') },
+                ].map(({ label, icon: Icon, action }) => (
+                  <button key={label} onClick={action} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    background: '#0f172a', border: '1px solid #1e293b', borderRadius: 10,
+                    padding: '12px 14px', color: '#e2e8f0', cursor: 'pointer', fontSize: '0.875rem',
+                    fontWeight: 600, transition: 'border-color 0.2s, background 0.2s'
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = '#facc15'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = '#1e293b'}
                   >
-                    <span 
-                      style={{ 
-                        fontSize: '2rem', 
-                        color: star <= (hoveredRating || rating) ? '#ffc107' : '#333',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        textShadow: star <= (hoveredRating || rating) ? '0 0 8px rgba(255, 193, 7, 0.5)' : 'none'
-                      }}
-                    >
-                      ★
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <Icon size={16} color="#facc15" /> {label}
                     </span>
+                    <ChevronRight size={16} color="#475569" />
                   </button>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            <div className="mb-3">
-              <label className="text-secondary small mb-2 d-block fw-bold" style={{ letterSpacing: '0.5px' }}>FEEDBACK / SUGGESTION</label>
-              <textarea
-                className="form-control bg-dark border-secondary text-white rounded-3 p-3"
-                rows="3"
-                placeholder="What can we do to improve? Tell us your experience..."
-                value={feedbackMsg}
-                onChange={(e) => setFeedbackMsg(e.target.value)}
-                required
-                style={{ resize: 'none', border: '1px solid rgba(255,255,255,0.15)' }}
-              />
-            </div>
-
-            {submitStatus.msg && (
-              <div className={`alert py-2 px-3 rounded-3 small mb-3 ${submitStatus.type === 'success' ? 'alert-success border-success bg-success bg-opacity-10 text-success' : 'alert-danger border-danger bg-danger bg-opacity-10 text-danger'}`}>
-                {submitStatus.msg}
-              </div>
+            {/* Last check-in preview */}
+            {recentCheckins.length > 0 && (
+              <Card>
+                <CardTitle><Clock size={13} /> Last Check-in</CardTitle>
+                <CheckInDate>{recentCheckins[0].date || 'Today'}</CheckInDate>
+                <CheckInTime>Entry: {recentCheckins[0].entry || recentCheckins[0].checkInTime || '—'}</CheckInTime>
+                <button onClick={() => setActiveTab('checkins')} style={{
+                  background: 'none', border: 'none', color: '#facc15', fontSize: '0.8rem',
+                  fontWeight: 600, cursor: 'pointer', padding: 0, marginTop: 10,
+                  display: 'flex', alignItems: 'center', gap: 4
+                }}>View all <ChevronRight size={13} /></button>
+              </Card>
             )}
+          </>
+        )}
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn btn-warning w-100 fw-bold rounded-pill py-2 shadow-sm"
-              style={{ transition: 'all 0.3s ease' }}
-            >
-              {submitting ? 'Submitting Feedback...' : 'Send Feedback'}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+        {/* ══════════ CHECK-INS TAB ══════════ */}
+        {activeTab === 'checkins' && (
+          <Card>
+            <CardTitle><Clock size={13} /> Recent Check-ins</CardTitle>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <SkeletonBlock key={i} $h={36} $mb={8} />
+              ))
+            ) : recentCheckins.length === 0 ? (
+              <p style={{ color: '#64748b', fontSize: '0.875rem', textAlign: 'center', padding: '20px 0' }}>
+                No check-in records found.
+              </p>
+            ) : (
+              recentCheckins.map((c, i) => (
+                <CheckInItem key={i}>
+                  <div>
+                    <CheckInDate>{c.date || 'Unknown date'}</CheckInDate>
+                    <CheckInTime>
+                      Entry: {c.entry || c.checkInTime || '—'}
+                      {c.exit && ` · Exit: ${c.exit}`}
+                    </CheckInTime>
+                  </div>
+                  <StatusBadge $ok>
+                    <CheckCircle size={10} /> Present
+                  </StatusBadge>
+                </CheckInItem>
+              ))
+            )}
+          </Card>
+        )}
+
+        {/* ══════════ PAYMENTS TAB ══════════ */}
+        {activeTab === 'payments' && (
+          <Card>
+            <CardTitle><CreditCard size={13} /> Payment History</CardTitle>
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => <SkeletonBlock key={i} $h={44} $mb={8} />)
+            ) : recentPayments.length === 0 ? (
+              <p style={{ color: '#64748b', fontSize: '0.875rem', textAlign: 'center', padding: '20px 0' }}>
+                No payment records found.
+              </p>
+            ) : (
+              recentPayments.map((p, i) => (
+                <PaymentRow key={i}>
+                  <div>
+                    <PayAmount>₹{(p.amount || 0).toLocaleString()}</PayAmount>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: 3 }}>
+                      {p.paymentDate} · {p.paymentMode || 'Card'}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <StatusBadge $ok={p.paymentStatus === 'SUCCESS'}>
+                      {p.paymentStatus === 'SUCCESS'
+                        ? <><CheckCircle size={10} /> Paid</>
+                        : <><AlertCircle size={10} /> {p.paymentStatus || 'Pending'}</>
+                      }
+                    </StatusBadge>
+                    <DownloadBtn onClick={() => generateInvoicePDF({ ...p, fullName: displayName })}>
+                      <Download size={12} /> PDF
+                    </DownloadBtn>
+                  </div>
+                </PaymentRow>
+              ))
+            )}
+          </Card>
+        )}
+
+        {/* ══════════ WORKOUT TAB ══════════ */}
+        {activeTab === 'workout' && (
+          <>
+            <Card>
+              <CardTitle><Dumbbell size={13} /> Your Weekly Plan</CardTitle>
+              <div style={{ marginBottom: 14, padding: '10px 14px', background: '#0f172a', borderRadius: 10, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>
+                📋 <strong style={{ color: '#facc15' }}>{plan}</strong> membership plan • Standard 6-day programme assigned by your trainer.
+              </div>
+              {DEFAULT_PLAN.map((d, i) => (
+                <WorkoutDay key={i}>
+                  <DayTag $active={d.active}>{d.day}</DayTag>
+                  <WorkoutInfo>
+                    <WorkoutTitle>{d.label}</WorkoutTitle>
+                    <WorkoutDetail>{d.detail}</WorkoutDetail>
+                  </WorkoutInfo>
+                  {d.active && <StatusBadge $ok><Zap size={10} /> Today</StatusBadge>}
+                </WorkoutDay>
+              ))}
+              <button onClick={() => navigate('/workouts')} style={{
+                marginTop: 16, width: '100%', padding: '11px',
+                background: 'rgba(250,204,21,0.08)', border: '1px solid rgba(250,204,21,0.2)',
+                borderRadius: 10, color: '#facc15', fontWeight: 700, fontSize: '0.875rem',
+                cursor: 'pointer', transition: 'background 0.2s'
+              }}>
+                Browse Full Workout Library →
+              </button>
+            </Card>
+          </>
+        )}
+
+        {/* ══════════ FEEDBACK TAB ══════════ */}
+        {activeTab === 'feedback' && (
+          <Card>
+            <CardTitle><MessageSquare size={13} /> Share Your Experience</CardTitle>
+            <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: 16, lineHeight: 1.5 }}>
+              Your feedback goes straight to our management board and helps us improve every day.
+            </p>
+            <form onSubmit={handleFeedback}>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rating</div>
+                <StarRow>
+                  {[1,2,3,4,5].map(s => (
+                    <StarBtn
+                      key={s}
+                      type="button"
+                      $on={s <= (hovered || rating)}
+                      onClick={() => setRating(s)}
+                      onMouseEnter={() => setHovered(s)}
+                      onMouseLeave={() => setHovered(0)}
+                    >★</StarBtn>
+                  ))}
+                </StarRow>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Your Message</div>
+              <TextArea
+                value={feedbackMsg}
+                onChange={e => setFeedbackMsg(e.target.value)}
+                placeholder="Tell us what you love or what we can improve…"
+                required
+              />
+              {fbStatus && <AlertBox $ok={fbStatus.ok}>{fbStatus.msg}</AlertBox>}
+              <SubmitBtn type="submit" disabled={submitting}>
+                {submitting ? 'Sending…' : 'Send Feedback'}
+              </SubmitBtn>
+            </form>
+          </Card>
+        )}
+      </Content>
+    </Page>
   );
 };
 

@@ -12,6 +12,9 @@ import Home from "./Home";
 import About from "./About";
 import Nav from "./Nav";
 import Footer from "./Footer";
+import ChangePassword from "./pages/ChangePassword";
+import ForgotPassword from "./pages/ForgotPassword";
+import EnrolFingerprint from "./pages/EnrolFingerprint";
 import Dashboard from "./Dashboard";
 import Userdashboard from "./Userdashboard";
 import Subscription from "./Subscription";
@@ -26,6 +29,9 @@ import Myprofile from "./Myprofile";
 import AdminDashboard from "./AdminDashboard";
 import EmployeeDashboard from "./EmployeeDashboard";
 import Settings from "./Settings";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ErrorBoundary from "./components/ErrorBoundary";
+import NotFound from "./NotFound";
 
 import "./App.css"; // Import your CSS file here
 
@@ -50,20 +56,32 @@ function LayoutWrapper() {
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/userdashboard" element={<Userdashboard />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/enrol-fingerprint" element={<ProtectedRoute><EnrolFingerprint /></ProtectedRoute>} />
+        
+        {/* Public Marketing/Info Routes */}
         <Route path="/subscription" element={<Subscription />} />
         <Route path="/membership/:type" element={<PlanDetail />} />
-        <Route path="/pay" element={<Pay />} />
         <Route path="/nutrition" element={<Nutrition />} />
         <Route path="/workouts" element={<Workouts />} />
         <Route path="/workout/:type" element={<WorkoutDetail />} />
-        <Route path="/dashboard/reports" element={<ReportsPage />} />
-        <Route path="/dashboard/stats" element={<StatsPage />} />
-        <Route path="/myprofile" element={<Myprofile />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/AdminDashboard" element={<AdminDashboard />} />
-        <Route path="/EmployeeDashboard" element={<EmployeeDashboard />} />
+
+        {/* Protected User Routes */}
+        <Route path="/userdashboard" element={<ProtectedRoute><ErrorBoundary fallbackMessage="The user dashboard encountered an error."><Userdashboard /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/pay" element={<ProtectedRoute><Pay /></ProtectedRoute>} />
+        <Route path="/dashboard/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
+        <Route path="/dashboard/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+        <Route path="/myprofile" element={<ProtectedRoute><Myprofile /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        
+        {/* Role-Based Protected Routes */}
+        <Route path="/AdminDashboard" element={<ProtectedRoute allowedRoles={['ADMIN']}><ErrorBoundary fallbackMessage="The admin dashboard encountered an error."><AdminDashboard /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/EmployeeDashboard" element={<ProtectedRoute allowedRoles={['TRAINER', 'STAFF', 'FRONT OFFICE']}><ErrorBoundary fallbackMessage="The employee dashboard encountered an error."><EmployeeDashboard /></ErrorBoundary></ProtectedRoute>} />
+        
+        {/* Catch-all 404 Route */}
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
 

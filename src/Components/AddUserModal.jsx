@@ -1,82 +1,121 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { X, User, Heart, CreditCard, Calendar, Fingerprint } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axiosInstance from "../api/axiosInstance";
+import log from "../utils/logger";
+import toast from "react-hot-toast";
 
+// ── Validation Schema ─────────────────────────────────────────────────────────
+const userSchema = z.object({
+  fullName: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .regex(/^[a-zA-Z\s'-]+$/, "Name can only contain letters, spaces, hyphens and apostrophes"),
+  gender: z.string().min(1, "Select a gender"),
+  dob: z.string().min(1, "Date of birth is required"),
+  age: z.string().optional(),
+  mobileNumber: z
+    .string()
+    .regex(/^\+?[0-9\s\-().]{7,15}$/, "Enter a valid phone number (7–15 digits)"),
+  email: z.string().min(1, "Email is required").email("Enter a valid email address"),
+  city: z.string().optional(),
+  
+  height: z.string().optional(),
+  weight: z.string().optional(),
+  bmi: z.string().optional(),
+  bloodGroup: z.string().optional(),
+  fitnessGoal: z.string().optional(),
+
+  membershipPlan: z.string().min(1, "Select a plan"),
+  startDate: z.string().min(1, "Start date is required"),
+  expiryDate: z.string().min(1, "Expiry date is required"),
+  referralSource: z.string().optional(),
+
+  paymentAmount: z
+    .string()
+    .min(1, "Payment amount is required")
+    .refine((v) => !isNaN(parseFloat(v)), "Must be a valid number"),
+  paymentMode: z.string().min(1, "Select payment mode"),
+  transactionRef: z.string().optional(),
+});
+
+// ── Component ─────────────────────────────────────────────────────────────────
 const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [enrollProgress, setEnrollProgress] = useState(0);
+  const [fingerprintEnrolled, setFingerprintEnrolled] = useState(false);
+  const [fingerprintHash, setFingerprintHash] = useState("");
   const holdTimer = useRef(null);
   const progressTimer = useRef(null);
   
-  const [formData, setFormData] = useState({
-    // Personal Details
-    memberId: `MBR-${Math.floor(Math.random() * 90000) + 10000}`,
-    fingerprintEnrolled: false,
-    fingerprintHash: "",
-    fullName: "",
-    gender: "",
-    dob: "",
-    age: "",
-    mobileNumber: "",
-    email: "",
-    address: "",
-    city: "",
-    state: "",
-    emergencyContactName: "",
-    emergencyContactNumber: "",
-    
-    // Health Information
-    height: "",
-    weight: "",
-    bmi: "",
-    bloodGroup: "",
-    medicalConditions: "",
-    allergies: "",
-    fitnessGoal: "General Fitness",
-    previousInjuries: "",
-    doctorAdvice: "",
+  const generatedId = useRef(`MBR-${Math.floor(Math.random() * 90000) + 10000}`);
 
-    // Membership Details
-    membershipPlan: "Monthly",
-    startDate: new Date().toISOString().split('T')[0],
-    expiryDate: "",
-    membershipStatus: "Active",
-    discountApplied: "0",
-    referralSource: "Walk-In",
-
-    // Payment Management
-    paymentAmount: "",
-    paymentMode: "Cash",
-    transactionRef: "",
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    trigger,
+    formState: { errors, touchedFields },
+  } = useForm({
+    resolver: zodResolver(userSchema),
+    mode: "onTouched",
+    defaultValues: {
+      fullName: "",
+      gender: "",
+      dob: "",
+      age: "",
+      mobileNumber: "",
+      email: "",
+      city: "",
+      height: "",
+      weight: "",
+      bmi: "",
+      bloodGroup: "",
+      fitnessGoal: "General Fitness",
+      membershipPlan: "Monthly",
+      startDate: new Date().toISOString().split('T')[0],
+      expiryDate: "",
+      referralSource: "Walk-In",
+      paymentAmount: "",
+      paymentMode: "Cash",
+      transactionRef: "",
+    }
   });
 
+  const dob = watch("dob");
+  const height = watch("height");
+  const weight = watch("weight");
+  const email = watch("email");
+  const fullName = watch("fullName");
+
   useEffect(() => {
-    // Auto-calculate age from dob
-    if (formData.dob) {
-      const birthDate = new Date(formData.dob);
+    if (dob) {
+      const birthDate = new Date(dob);
       const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
+      let ageNum = today.getFullYear() - birthDate.getFullYear();
       const m = today.getMonth() - birthDate.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
+        ageNum--;
       }
-      setFormData(prev => ({ ...prev, age: age.toString() }));
+      setValue("age", ageNum.toString(), { shouldValidate: true });
     }
-  }, [formData.dob]);
+  }, [dob, setValue]);
 
   useEffect(() => {
-    // Auto-calculate BMI
-    if (formData.height && formData.weight) {
-      const heightInMeters = parseFloat(formData.height) / 100;
-      const weightInKg = parseFloat(formData.weight);
+    if (height && weight) {
+      const heightInMeters = parseFloat(height) / 100;
+      const weightInKg = parseFloat(weight);
       if (heightInMeters > 0 && weightInKg > 0) {
-        const bmi = (weightInKg / (heightInMeters * heightInMeters)).toFixed(1);
-        setFormData(prev => ({ ...prev, bmi: bmi.toString() }));
+        const calculatedBmi = (weightInKg / (heightInMeters * heightInMeters)).toFixed(1);
+        setValue("bmi", calculatedBmi.toString(), { shouldValidate: true });
       }
     }
-  }, [formData.height, formData.weight]);
-
+  }, [height, weight, setValue]);
 
   const bufferToBase64 = (buffer) => {
     return btoa(String.fromCharCode(...new Uint8Array(buffer)))
@@ -86,8 +125,9 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   };
 
   const startScan = async () => {
-    if (!formData.email) {
-      alert("Please enter email address before scanning fingerprint");
+    if (!email) {
+      toast.error("Please enter email address before scanning fingerprint");
+      trigger("email");
       return;
     }
     setIsEnrolling(true);
@@ -101,13 +141,13 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     try {
       const challenge = new Uint8Array(32);
       window.crypto.getRandomValues(challenge);
-      const userId = new TextEncoder().encode(formData.email);
+      const userId = new TextEncoder().encode(email);
       
       const credential = await navigator.credentials.create({
         publicKey: {
           challenge,
           rp: { name: "B&Y Fitness Gym", id: window.location.hostname },
-          user: { id: userId, name: formData.email, displayName: formData.fullName || formData.email },
+          user: { id: userId, name: email, displayName: fullName || email },
           pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
           authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", requireResidentKey: false },
           timeout: 60000,
@@ -117,24 +157,23 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
 
       const credentialId = bufferToBase64(credential.rawId);
       
-      const stored = JSON.parse(localStorage.getItem("webauthnCredentials") || "{}");
-      stored[formData.email] = credentialId;
-      localStorage.setItem("webauthnCredentials", JSON.stringify(stored));
-      localStorage.setItem("lastEnrolledEmail", formData.email);
+      localStorage.setItem("lastEnrolledEmail", email);
 
       clearInterval(progressTimer.current);
       setEnrollProgress(100);
       setTimeout(() => {
-        setFormData(prev => ({ ...prev, fingerprintEnrolled: true, fingerprintHash: credentialId }));
+        setFingerprintEnrolled(true);
+        setFingerprintHash(credentialId);
         setIsEnrolling(false);
+        toast.success("Biometric enrolled successfully");
       }, 500);
     } catch (err) {
-      console.error(err);
+      log.error(err);
       clearInterval(progressTimer.current);
       setIsEnrolling(false);
       setEnrollProgress(0);
       if (err.name !== "NotAllowedError") {
-        alert(`Biometric capture failed: ${err.message || err.name}`);
+        toast.error(`Biometric capture failed: ${err.message || err.name}`);
       }
     }
   };
@@ -148,18 +187,36 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleNext = async () => {
+    let fieldsToValidate = [];
+    if (currentStep === 1) fieldsToValidate = ["fullName", "gender", "dob", "mobileNumber", "email", "city"];
+    else if (currentStep === 2) fieldsToValidate = ["height", "weight", "bloodGroup", "fitnessGoal"];
+    else if (currentStep === 3) fieldsToValidate = ["membershipPlan", "startDate", "expiryDate", "referralSource"];
+
+    const isStepValid = await trigger(fieldsToValidate);
+    if (isStepValid) {
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      toast.error("Please fix the errors before proceeding.");
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.fingerprintEnrolled) {
-      alert("Biometric enrollment is required. Please capture the member's fingerprint.");
+  const onSubmit = (data) => {
+    if (!fingerprintEnrolled) {
+      toast.error("Biometric enrollment is required. Please capture the member's fingerprint on Step 1.");
       return;
     }
-    onAddUser(formData);
+
+    const completeData = {
+      ...data,
+      memberId: generatedId.current,
+      fingerprintEnrolled,
+      fingerprintHash,
+      membershipStatus: "Active",
+      discountApplied: "0",
+    };
+
+    onAddUser(completeData);
     onClose();
   };
 
@@ -174,57 +231,63 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
             <div className="form-grid">
               <div className="form-group">
                 <label>Member ID (Auto Generated)</label>
-                <input type="text" value={formData.memberId} readOnly className="read-only" />
+                <input type="text" value={generatedId.current} readOnly className="read-only" />
               </div>
               <div className="form-group">
                 <label>Full Name</label>
-                <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
+                <input type="text" placeholder="John Doe" $hasError={!!errors.fullName} {...register("fullName")} />
+                {errors.fullName && <p className="error-text">⚠ {errors.fullName.message}</p>}
               </div>
               <div className="form-group">
                 <label>Gender</label>
-                <select name="gender" value={formData.gender} onChange={handleChange} required>
+                <select $hasError={!!errors.gender} {...register("gender")}>
                   <option value="">Select Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
                 </select>
+                {errors.gender && <p className="error-text">⚠ {errors.gender.message}</p>}
               </div>
               <div className="form-group">
                 <label>Date of Birth</label>
-                <input type="date" name="dob" value={formData.dob} onChange={handleChange} required />
+                <input type="date" $hasError={!!errors.dob} {...register("dob")} />
+                {errors.dob && <p className="error-text">⚠ {errors.dob.message}</p>}
               </div>
               <div className="form-group">
                 <label>Age</label>
-                <input type="text" name="age" value={formData.age} readOnly className="read-only" />
+                <input type="text" {...register("age")} readOnly className="read-only" />
               </div>
               <div className="form-group">
                 <label>Mobile Number</label>
-                <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange} required />
+                <input type="tel" placeholder="+91 98765 43210" $hasError={!!errors.mobileNumber} {...register("mobileNumber")} />
+                {errors.mobileNumber && <p className="error-text">⚠ {errors.mobileNumber.message}</p>}
               </div>
               <div className="form-group">
                 <label>Email Address</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                <input type="email" placeholder="john@example.com" $hasError={!!errors.email} {...register("email")} />
+                {errors.email && <p className="error-text">⚠ {errors.email.message}</p>}
               </div>
               <div className="form-group">
                 <label>City</label>
-                <input type="text" name="city" value={formData.city} onChange={handleChange} />
+                <input type="text" placeholder="New York" $hasError={!!errors.city} {...register("city")} />
+                {errors.city && <p className="error-text">⚠ {errors.city.message}</p>}
               </div>
               
               <div className="form-group full-width" style={{ marginTop: '10px' }}>
                 <label>BIOMETRIC ENROLLMENT <span style={{ color: '#ffc107', fontSize: '0.7rem', marginLeft: '10px' }}>REQUIRED FOR REGISTRATION</span></label>
                 <div
-                  className={`biometric-enroll-pad ${formData.fingerprintEnrolled ? 'success' : isEnrolling ? 'scanning' : ''}`}
-                  onTouchStart={!formData.fingerprintEnrolled ? startScan : undefined}
-                  onTouchEnd={!formData.fingerprintEnrolled ? cancelScan : undefined}
-                  onMouseDown={!formData.fingerprintEnrolled ? startScan : undefined}
-                  onMouseUp={!formData.fingerprintEnrolled ? cancelScan : undefined}
-                  onMouseLeave={!formData.fingerprintEnrolled ? cancelScan : undefined}
-                  style={{ userSelect: 'none', cursor: formData.fingerprintEnrolled ? 'default' : 'pointer', WebkitUserSelect: 'none' }}
+                  className={`biometric-enroll-pad ${fingerprintEnrolled ? 'success' : isEnrolling ? 'scanning' : ''}`}
+                  onTouchStart={!fingerprintEnrolled ? startScan : undefined}
+                  onTouchEnd={!fingerprintEnrolled ? cancelScan : undefined}
+                  onMouseDown={!fingerprintEnrolled ? startScan : undefined}
+                  onMouseUp={!fingerprintEnrolled ? cancelScan : undefined}
+                  onMouseLeave={!fingerprintEnrolled ? cancelScan : undefined}
+                  style={{ userSelect: 'none', cursor: fingerprintEnrolled ? 'default' : 'pointer', WebkitUserSelect: 'none' }}
                 >
                   <div className="pad-content">
                     <Fingerprint size={32} />
                     <span>
-                      {formData.fingerprintEnrolled
+                      {fingerprintEnrolled
                         ? "✓ FINGERPRINT CAPTURED"
                         : isEnrolling
                           ? `SCANNING... ${enrollProgress}%`
@@ -244,19 +307,21 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
             <div className="form-grid">
               <div className="form-group">
                 <label>Height (cm)</label>
-                <input type="number" name="height" value={formData.height} onChange={handleChange} />
+                <input type="number" placeholder="175" $hasError={!!errors.height} {...register("height")} />
+                {errors.height && <p className="error-text">⚠ {errors.height.message}</p>}
               </div>
               <div className="form-group">
                 <label>Weight (kg)</label>
-                <input type="number" name="weight" value={formData.weight} onChange={handleChange} />
+                <input type="number" placeholder="70" $hasError={!!errors.weight} {...register("weight")} />
+                {errors.weight && <p className="error-text">⚠ {errors.weight.message}</p>}
               </div>
               <div className="form-group">
                 <label>BMI</label>
-                <input type="text" name="bmi" value={formData.bmi} readOnly className="read-only" />
+                <input type="text" {...register("bmi")} readOnly className="read-only" />
               </div>
               <div className="form-group">
                 <label>Blood Group</label>
-                <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange}>
+                <select $hasError={!!errors.bloodGroup} {...register("bloodGroup")}>
                   <option value="">Select</option>
                   <option value="A+">A+</option>
                   <option value="A-">A-</option>
@@ -267,15 +332,17 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                   <option value="AB+">AB+</option>
                   <option value="AB-">AB-</option>
                 </select>
+                {errors.bloodGroup && <p className="error-text">⚠ {errors.bloodGroup.message}</p>}
               </div>
               <div className="form-group full-width">
                 <label>Fitness Goal</label>
-                <select name="fitnessGoal" value={formData.fitnessGoal} onChange={handleChange}>
+                <select $hasError={!!errors.fitnessGoal} {...register("fitnessGoal")}>
                   <option value="Weight Loss">Weight Loss</option>
                   <option value="Weight Gain">Weight Gain</option>
                   <option value="Muscle Building">Muscle Building</option>
                   <option value="General Fitness">General Fitness</option>
                 </select>
+                {errors.fitnessGoal && <p className="error-text">⚠ {errors.fitnessGoal.message}</p>}
               </div>
             </div>
           </div>
@@ -287,30 +354,34 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
             <div className="form-grid">
               <div className="form-group">
                 <label>Membership Plan</label>
-                <select name="membershipPlan" value={formData.membershipPlan} onChange={handleChange}>
+                <select $hasError={!!errors.membershipPlan} {...register("membershipPlan")}>
                   <option value="Monthly">Monthly</option>
                   <option value="Quarterly">Quarterly</option>
                   <option value="Half-Yearly">Half-Yearly</option>
                   <option value="Annual">Annual</option>
                 </select>
+                {errors.membershipPlan && <p className="error-text">⚠ {errors.membershipPlan.message}</p>}
               </div>
               <div className="form-group">
                 <label>Start Date</label>
-                <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
+                <input type="date" $hasError={!!errors.startDate} {...register("startDate")} />
+                {errors.startDate && <p className="error-text">⚠ {errors.startDate.message}</p>}
               </div>
               <div className="form-group">
                 <label>Expiry Date</label>
-                <input type="date" name="expiryDate" value={formData.expiryDate} onChange={handleChange} required />
+                <input type="date" $hasError={!!errors.expiryDate} {...register("expiryDate")} />
+                {errors.expiryDate && <p className="error-text">⚠ {errors.expiryDate.message}</p>}
               </div>
               <div className="form-group">
                 <label>Referral Source</label>
-                <select name="referralSource" value={formData.referralSource} onChange={handleChange}>
+                <select $hasError={!!errors.referralSource} {...register("referralSource")}>
                   <option value="Walk-In">Walk-In</option>
                   <option value="Facebook">Facebook</option>
                   <option value="Instagram">Instagram</option>
                   <option value="Google Ads">Google Ads</option>
                   <option value="Referral">Referral</option>
                 </select>
+                {errors.referralSource && <p className="error-text">⚠ {errors.referralSource.message}</p>}
               </div>
             </div>
           </div>
@@ -322,20 +393,23 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
             <div className="form-grid">
               <div className="form-group">
                 <label>Payment Amount (₹)</label>
-                <input type="number" name="paymentAmount" value={formData.paymentAmount} onChange={handleChange} required />
+                <input type="number" placeholder="5000" $hasError={!!errors.paymentAmount} {...register("paymentAmount")} />
+                {errors.paymentAmount && <p className="error-text">⚠ {errors.paymentAmount.message}</p>}
               </div>
               <div className="form-group">
                 <label>Payment Mode</label>
-                <select name="paymentMode" value={formData.paymentMode} onChange={handleChange}>
+                <select $hasError={!!errors.paymentMode} {...register("paymentMode")}>
                   <option value="Cash">Cash</option>
                   <option value="UPI">UPI</option>
                   <option value="Card">Card</option>
                   <option value="Net Banking">Net Banking</option>
                 </select>
+                {errors.paymentMode && <p className="error-text">⚠ {errors.paymentMode.message}</p>}
               </div>
               <div className="form-group full-width">
                 <label>Transaction Reference Number (If applicable)</label>
-                <input type="text" name="transactionRef" value={formData.transactionRef} onChange={handleChange} />
+                <input type="text" placeholder="TXN123456789" $hasError={!!errors.transactionRef} {...register("transactionRef")} />
+                {errors.transactionRef && <p className="error-text">⚠ {errors.transactionRef.message}</p>}
               </div>
             </div>
           </div>
@@ -350,7 +424,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       <ModalContent className="modal-large">
         <div className="modal-header">
           <h3>Enlist New Member</h3>
-          <button className="close-btn" onClick={onClose}><X size={20} /></button>
+          <button type="button" className="close-btn" onClick={onClose}><X size={20} /></button>
         </div>
         
         <div className="stepper">
@@ -364,7 +438,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-body scrollable">
+        <form onSubmit={handleSubmit(onSubmit)} className="modal-body scrollable">
           {renderStepContent()}
           
           <div className="modal-footer-actions">
@@ -372,7 +446,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               <button type="button" className="btn-outline" onClick={() => setCurrentStep(prev => prev - 1)}>Back</button>
             )}
             {currentStep < 4 ? (
-              <button type="button" className="btn-primary" onClick={() => setCurrentStep(prev => prev + 1)}>Next</button>
+              <button type="button" className="btn-primary" onClick={handleNext}>Next</button>
             ) : (
               <button type="submit" className="btn-success">Complete Registration</button>
             )}
@@ -383,7 +457,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   );
 };
 
-// Reusing styles from AdminDashboard theme or local styled components
+// ── Styled Components ────────────────────────────────────────────────────────
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -472,6 +546,17 @@ const ModalContent = styled.div`
         font-family: inherit;
         &:focus { outline: none; border-color: var(--accent-color, #38bdf8); }
         &.read-only { opacity: 0.7; background: rgba(0,0,0,0.2); cursor: not-allowed; }
+      }
+      input[aria-invalid="true"], select[aria-invalid="true"] {
+        border-color: #ef4444;
+      }
+      .error-text {
+        color: #ef4444;
+        font-size: 0.75rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
       }
     }
   }

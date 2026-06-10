@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { MapPin, Clock, Phone, Mail, Award, Shield, Zap, UserCircle, Send, Users, Target, Trophy, Dumbbell } from "lucide-react";
+import Footer from "./Footer";
 
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
+import axiosInstance from "./api/axiosInstance";
+import log from "./utils/logger";
 
 import BMICalculator from "./BMICalculator";
 
@@ -16,19 +18,17 @@ const Home = () => {
     goals: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState("idle");
   const observerRef = useRef(null);
   const [feedbacks, setFeedbacks] = useState([]);
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const response = await fetch(`${API_BASE}/feedbacks`);
-        if (response.ok) {
-          const data = await response.json();
-          setFeedbacks(data);
-        }
+        const response = await axiosInstance.get("/feedbacks");
+        setFeedbacks(response.data);
       } catch (error) {
-        console.error("Error fetching feedbacks:", error);
+        log.error("Error fetching feedbacks:", error);
       }
     };
     fetchFeedbacks();
@@ -61,21 +61,17 @@ const Home = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${API_BASE}/consultations`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
+      await axiosInstance.post("/consultations", formData);
 
-      if (response.ok) {
-        alert("Enquiry submitted successfully! We will contact you soon.");
-        setFormData({ fullName: "", email: "", phone: "", goals: "" });
-      } else {
-        alert("Failed to submit enquiry. Please try again.");
-      }
+      alert("Enquiry submitted successfully! We will contact you soon.");
+      setFormData({ fullName: "", email: "", phone: "", goals: "" });
+      setSubmitStatus("success");
+      setTimeout(() => setSubmitStatus("idle"), 3000);
     } catch (error) {
-      console.error("Error submitting enquiry:", error);
-      alert("Something went wrong. Please check your connection.");
+      log.error("Error submitting enquiry:", error);
+      setSubmitStatus("error");
+      setTimeout(() => setSubmitStatus("idle"), 3000);
+      alert("Failed to submit enquiry. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

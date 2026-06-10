@@ -9,7 +9,33 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
-import { Form } from 'react-bootstrap';
+import styled from 'styled-components';
+
+const SelectWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+`;
+
+const StyledSelect = styled.select`
+  width: auto;
+  padding: 6px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: #fff;
+  cursor: pointer;
+  outline: none;
+
+  &:focus {
+    border-color: #38aecc;
+    box-shadow: 0 0 0 2px rgba(56, 174, 204, 0.15);
+  }
+`;
+
+const ChartWrapper = styled.div`
+  height: 300px;
+`;
 
 const ProgressChart = () => {
   const [metricType, setMetricType] = useState("weight");
@@ -52,19 +78,18 @@ const ProgressChart = () => {
 
   return (
     <div>
-      <div className="d-flex justify-content-end mb-3">
-        <Form.Select
-          className="w-auto"
+      <SelectWrapper>
+        <StyledSelect
           value={metricType}
           onChange={(e) => setMetricType(e.target.value)}
         >
           <option value="weight">Weight</option>
           <option value="strength">Strength</option>
           <option value="endurance">Endurance</option>
-        </Form.Select>
-      </div>
+        </StyledSelect>
+      </SelectWrapper>
 
-      <div style={{   height: 300 }}>
+      <ChartWrapper>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data[metricType]}
@@ -106,7 +131,7 @@ const ProgressChart = () => {
             />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
+      </ChartWrapper>
     </div>
   );
 };

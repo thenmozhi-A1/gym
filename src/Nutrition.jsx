@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import axiosInstance from "./api/axiosInstance";
+
+
 import { 
   TrendingDown, Zap, CheckCircle, Flame, Leaf, Apple, Activity, 
   Droplets, Info, Target, Award, ShieldCheck, HeartPulse, Clock 
@@ -44,26 +46,17 @@ const Nutrition = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const API_BASE = window.location.hostname === "localhost" ? "http://localhost:8080/api" : "https://gymj-10.onrender.com/api";
-      const res = await fetch(`${API_BASE}/consultations`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: formData.name,
-          phone: formData.phone,
-          email: formData.email,
-          goals: formData.goals
-        })
+      await axiosInstance.post("/consultations", {
+        fullName: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        goals: formData.goals
       });
 
-      if (res.ok) {
-        alert("Request submitted successfully! Our nutritionist will contact you soon.");
-        setFormData({ name: "", phone: "", email: "", goals: "" });
-      } else {
-        alert("Failed to submit request. Please try again.");
-      }
+      alert("Request submitted successfully! Our nutritionist will contact you soon.");
+      setFormData({ name: "", phone: "", email: "", goals: "" });
     } catch (err) {
-      alert("Cannot connect to server. Please try again later.");
+      alert("Failed to submit request. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -508,6 +501,85 @@ const Nutrition = () => {
 // ── STYLED COMPONENTS ──
 
 const PageWrapper = styled.div`
+  .container {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+    max-width: 1300px;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+  }
+  .row > * {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+  .col-lg-3 { width: 100%; }
+  .col-lg-4 { width: 100%; }
+  .col-lg-5 { width: 100%; }
+  .col-lg-7 { width: 100%; }
+  .col-lg-8 { width: 100%; }
+  .col-md-3 { width: 100%; }
+  .col-md-4 { width: 100%; }
+  .col-md-6 { width: 100%; }
+  .col-6 { width: 50%; }
+  .col-12 { width: 100%; }
+  @media (min-width: 768px) {
+    .col-md-3 { flex: 0 0 25%; max-width: 25%; }
+    .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+    .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+  }
+  @media (min-width: 992px) {
+    .col-lg-3 { flex: 0 0 25%; max-width: 25%; }
+    .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+    .col-lg-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+    .col-lg-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+    .col-lg-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+    .d-lg-block { display: block !important; }
+  }
+  .d-none { display: none !important; }
+  .d-flex { display: flex !important; }
+  .justify-content-center { justify-content: center !important; }
+  .justify-content-between { justify-content: space-between !important; }
+  .align-items-center { align-items: center !important; }
+  .text-center { text-align: center !important; }
+  .text-warning { color: #ffc107 !important; }
+  .text-secondary { color: #6c757d !important; }
+  .text-white-50 { color: rgba(255, 255, 255, 0.5) !important; }
+  .fw-black { font-weight: 900 !important; }
+  .fw-bold { font-weight: 700 !important; }
+  .mb-0 { margin-bottom: 0 !important; }
+  .mb-4 { margin-bottom: 1.5rem !important; }
+  .mb-5 { margin-bottom: 3rem !important; }
+  .mt-4 { margin-top: 1.5rem !important; }
+  .mt-5 { margin-top: 3rem !important; }
+  .py-5 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+  .p-4 { padding: 1.5rem !important; }
+  .p-md-5 { padding: 3rem !important; }
+  .gap-3 { gap: 1rem !important; }
+  .g-4 { --bs-gutter-y: 1.5rem; --bs-gutter-x: 1.5rem; margin-top: calc(-1 * var(--bs-gutter-y)); margin-right: calc(-.5 * var(--bs-gutter-x)); margin-left: calc(-.5 * var(--bs-gutter-x)); }
+  .g-4 > * { margin-top: var(--bs-gutter-y); padding-right: calc(var(--bs-gutter-x) * .5); padding-left: calc(var(--bs-gutter-x) * .5); }
+  .g-3 { --bs-gutter-y: 1rem; --bs-gutter-x: 1rem; margin-top: calc(-1 * var(--bs-gutter-y)); margin-right: calc(-.5 * var(--bs-gutter-x)); margin-left: calc(-.5 * var(--bs-gutter-x)); }
+  .g-3 > * { margin-top: var(--bs-gutter-y); padding-right: calc(var(--bs-gutter-x) * .5); padding-left: calc(var(--bs-gutter-x) * .5); }
+  .g-0 { --bs-gutter-y: 0; --bs-gutter-x: 0; margin-top: calc(-1 * var(--bs-gutter-y)); margin-right: calc(-.5 * var(--bs-gutter-x)); margin-left: calc(-.5 * var(--bs-gutter-x)); }
+  .g-0 > * { margin-top: var(--bs-gutter-y); padding-right: calc(var(--bs-gutter-x) * .5); padding-left: calc(var(--bs-gutter-x) * .5); }
+  .mx-auto { margin-right: auto !important; margin-left: auto !important; }
+  .display-1 { font-size: 5rem; font-weight: 300; line-height: 1.2; }
+  .display-4 { font-size: 3.5rem; font-weight: 300; line-height: 1.2; }
+  .display-6 { font-size: 2.5rem; font-weight: 300; line-height: 1.2; }
+  .lead { font-size: 1.25rem; font-weight: 300; }
+  .small { font-size: 0.875em; }
+  .fs-5 { font-size: 1.25rem !important; }
+  .position-relative { position: relative !important; }
+  .z-2 { z-index: 2 !important; }
+  .bg-black { background-color: #000 !important; }
+  .bg-darker { background-color: #050505 !important; }
+
   background: #0a0a0a;
   color: white;
   min-height: 100vh;
