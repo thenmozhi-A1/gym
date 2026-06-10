@@ -222,17 +222,16 @@ const Login = () => {
     e.preventDefault();
     setError(""); setLoading(true);
     try {
-      const res = await axiosInstance.post("/users/login", {
+      const res = await axiosInstance.post("/auth/login", {
         email: formData.email, password: formData.password
       });
       const data = res.data;
-      if (data.role !== "ADMIN") { setError("Access denied. This login is for admins only."); return; }
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userId",    data.id);
-      localStorage.setItem("userName",  data.fullName);
-      localStorage.setItem("userEmail", data.email);
-      localStorage.setItem("userRole",  data.role);
-      navigate("/AdminDashboard");
+      if (data.user.role !== "ADMIN") { setError("Access denied. This login is for admins only."); return; }
+      
+      // Use the Zustand auth store
+      useAuthStore.getState().login(data.accessToken, data.refreshToken, data.user);
+      
+      setTimeout(() => redirectAfterLogin(data.user), 500);
     } catch (err) { setError(err.response?.data?.error || "Cannot connect to server."); }
     finally   { setLoading(false); }
   };
@@ -277,19 +276,22 @@ const Login = () => {
           fingerprintHash: activeHash
         });
 
-        const data = res.data;
+        // Login immediately after to get tokens
+        const loginRes = await axiosInstance.post("/auth/login", {
+          email: formData.email,
+          password: formData.password
+        });
+        const loginData = loginRes.data;
 
-        // Store user info in localStorage
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userId", data.id);
-        localStorage.setItem("userName", data.fullName);
-        localStorage.setItem("userEmail", data.email);
-        localStorage.setItem("userRole", data.role); // Store role
+        // Use the Zustand auth store
+        useAuthStore.getState().login(loginData.accessToken, loginData.refreshToken, loginData.user);
 
         // Store for biometric recognition simulation
         localStorage.setItem("lastEnrolledEmail", formData.email);
         alert("Account created and Fingerprint Enrolled successfully! Welcome to B&Y Fitness 🎉");
-        window.location.href = data.role === "ADMIN" ? "/AdminDashboard" : "/subscription";
+        
+        // Handle redirect via central utility
+        redirectAfterLogin(loginData.user);
 
       } else {
         // ── LOGIN ── POST /api/auth/login
