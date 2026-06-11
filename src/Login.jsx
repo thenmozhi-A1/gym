@@ -237,6 +237,7 @@ const Login = () => {
 
     setLoading(true);
     try {
+      if (isNewUser) {
         const res = await axiosInstance.post("/users/register", {
           fullName: formData.name,
           email: formData.email,
@@ -375,8 +376,6 @@ const Login = () => {
             <></>
           ) : (
             <>
-              <h2>{isNewUser ? "Join the Elite" : "Login to B&Y Fitness"}</h2>
-              <p className="subtitle">
               {isNewUser ? (
                 <>
                   <h2>Join the Elite</h2>
