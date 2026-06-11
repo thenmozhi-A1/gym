@@ -291,7 +291,7 @@ const AdminDashboard = () => {
     const staffToAdd = {
       fullName: newStaff.name,
       email: newStaff.email,
-      password: "staff123",
+      password: newStaff.password,
       role: newStaff.role,
       salary: newStaff.salary,
       times: newStaff.times,
@@ -308,7 +308,7 @@ const AdminDashboard = () => {
       setStaffs([savedStaffData, ...staffs]);
       setNewStaff({
         name: "", specialty: "", salary: "", times: "", email: "",
-        role: "Trainer", phone: "", address: ""
+        role: "Trainer", phone: "", address: "", password: ""
       });
       setIsAddStaffModalOpen(false);
       toast.success("Staff member added successfully!");
@@ -1076,6 +1076,14 @@ const AdminDashboard = () => {
                   <div className="input-wrap">
                     <Globe size={18} />
                     <input type="email" placeholder="staff@byfitness.com" value={newStaff.email} onChange={e => setNewStaff({ ...newStaff, email: e.target.value })} required />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>LOGIN PASSWORD</label>
+                  <div className="input-wrap">
+                    <Globe size={18} />
+                    <input type="text" placeholder="Initial Password" value={newStaff.password} onChange={e => setNewStaff({ ...newStaff, password: e.target.value })} required />
                   </div>
                 </div>
 

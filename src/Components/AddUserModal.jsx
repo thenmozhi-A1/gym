@@ -21,6 +21,7 @@ const userSchema = z.object({
     .string()
     .regex(/^\+?[0-9\s\-().]{7,15}$/, "Enter a valid phone number (7–15 digits)"),
   email: z.string().min(1, "Email is required").email("Enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
   city: z.string().optional(),
   
   height: z.string().optional(),
@@ -66,6 +67,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       age: "",
       mobileNumber: "",
       email: "",
+      password: "",
       city: "",
       height: "",
       weight: "",
@@ -116,7 +118,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
 
   const handleNext = async () => {
     let fieldsToValidate = [];
-    if (currentStep === 1) fieldsToValidate = ["fullName", "gender", "dob", "mobileNumber", "email", "city"];
+    if (currentStep === 1) fieldsToValidate = ["fullName", "gender", "dob", "mobileNumber", "email", "password", "city"];
     else if (currentStep === 2) fieldsToValidate = ["height", "weight", "bloodGroup", "fitnessGoal"];
     else if (currentStep === 3) fieldsToValidate = ["membershipPlan", "startDate", "expiryDate", "referralSource"];
 
@@ -186,6 +188,11 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                 <label>Email Address</label>
                 <input type="email" placeholder="john@example.com" $hasError={!!errors.email} {...register("email")} />
                 {errors.email && <p className="error-text">⚠ {errors.email.message}</p>}
+              </div>
+              <div className="form-group">
+                <label>Login Password</label>
+                <input type="text" placeholder="Initial Password" $hasError={!!errors.password} {...register("password")} />
+                {errors.password && <p className="error-text">⚠ {errors.password.message}</p>}
               </div>
               <div className="form-group">
                 <label>City</label>
