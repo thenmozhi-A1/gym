@@ -117,71 +117,73 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     }
   }, [height, weight, setValue]);
 
-  const buildMobileHash = (samples) => {
-    if (!samples.length) return `fp_${Date.now()}`;
-    const n = samples.length;
-    const rx = Math.round(samples.reduce((s, t) => s + t.rx, 0) / n);
-    const ry = Math.round(samples.reduce((s, t) => s + t.ry, 0) / n);
-    const f  = Math.round(samples.reduce((s, t) => s + t.f,  0) / n * 20);
-    const key = `${rx}:${ry}:${f}`;
-    let h = 0x811c9dc5;
-    for (let i = 0; i < key.length; i++) { h ^= key.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
-    return `M${h.toString(16)}`;
+  const bufferToBase64 = (buffer) => {
+    return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
   };
 
-  const startScan = (e) => {
-    if (fingerprintEnrolled) return;
+  const startScan = async () => {
     if (!email) {
       toast.error("Please enter email address before scanning fingerprint");
       trigger("email");
       return;
     }
-
-    touchSamples.current = [];
-    if (e && e.touches) {
-      const t = e.touches[0];
-      touchSamples.current.push({ rx: t.radiusX || 14, ry: t.radiusY || 14, f: t.force || 0.5 });
-    } else {
-      touchSamples.current.push({ rx: 14, ry: 14, f: 0.5 });
-    }
-
     setIsEnrolling(true);
-    setEnrollProgress(0);
 
     let p = 0;
     progressTimer.current = setInterval(() => {
-      p = Math.min(p + 4, 100);
+      p = (p + 5) % 100;
       setEnrollProgress(p);
     }, 100);
 
-    holdTimer.current = setTimeout(() => {
+    try {
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+      const userId = new TextEncoder().encode(email);
+      
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: { name: "B&Y Fitness Gym", id: window.location.hostname },
+          user: { id: userId, name: email, displayName: fullName || email },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+          authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", requireResidentKey: false },
+          timeout: 60000,
+          attestation: "none",
+        }
+      });
+
+      const credentialId = bufferToBase64(credential.rawId);
+      
+      localStorage.setItem("lastEnrolledEmail", email);
+
       clearInterval(progressTimer.current);
       setEnrollProgress(100);
-      completeEnroll(touchSamples.current);
-    }, 2500);
-  };
-
-  const moveScan = (e) => {
-    if (!isEnrolling || !e.touches) return;
-    const t = e.touches[0];
-    touchSamples.current.push({ rx: t.radiusX || 14, ry: t.radiusY || 14, f: t.force || 0.5 });
-  };
-
-  const completeEnroll = (samples) => {
-    const hash = buildMobileHash(samples);
-    setFingerprintHash(hash);
-    setFingerprintEnrolled(true);
-    setIsEnrolling(false);
-    toast.success("Biometric enrolled successfully");
+      setTimeout(() => {
+        setFingerprintEnrolled(true);
+        setFingerprintHash(credentialId);
+        setIsEnrolling(false);
+        toast.success("Biometric enrolled successfully");
+      }, 500);
+    } catch (err) {
+      log.error(err);
+      clearInterval(progressTimer.current);
+      setIsEnrolling(false);
+      setEnrollProgress(0);
+      if (err.name !== "NotAllowedError") {
+        toast.error(`Biometric capture failed: ${err.message || err.name}`);
+      }
+    }
   };
 
   const cancelScan = () => {
     clearTimeout(holdTimer.current);
     clearInterval(progressTimer.current);
-    if (isEnrolling && !fingerprintEnrolled) {
+    if (isEnrolling) {
       setIsEnrolling(false);
       setEnrollProgress(0);
-      toast.error("Hold your finger steady for the full 2.5 seconds.");
     }
   };
 
@@ -276,7 +278,6 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                 <div
                   className={`biometric-enroll-pad ${fingerprintEnrolled ? 'success' : isEnrolling ? 'scanning' : ''}`}
                   onTouchStart={!fingerprintEnrolled ? startScan : undefined}
-                  onTouchMove={moveScan}
                   onTouchEnd={!fingerprintEnrolled ? cancelScan : undefined}
                   onMouseDown={!fingerprintEnrolled ? startScan : undefined}
                   onMouseUp={!fingerprintEnrolled ? cancelScan : undefined}
