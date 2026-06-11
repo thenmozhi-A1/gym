@@ -46,11 +46,6 @@ const userSchema = z.object({
 const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isEnrolling, setIsEnrolling] = useState(false);
-  const [enrollProgress, setEnrollProgress] = useState(0);
-  const [fingerprintEnrolled, setFingerprintEnrolled] = useState(false);
-  const [fingerprintHash, setFingerprintHash] = useState("");
-  const holdTimer = useRef(null);
-  const progressTimer = useRef(null);
   
   const generatedId = useRef(`MBR-${Math.floor(Math.random() * 90000) + 10000}`);
 
@@ -117,73 +112,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     }
   }, [height, weight, setValue]);
 
-  const buildMobileHash = (samples) => {
-    if (!samples.length) return `fp_${Date.now()}`;
-    const n = samples.length;
-    const rx = Math.round(samples.reduce((s, t) => s + t.rx, 0) / n);
-    const ry = Math.round(samples.reduce((s, t) => s + t.ry, 0) / n);
-    const f  = Math.round(samples.reduce((s, t) => s + t.f,  0) / n * 20);
-    const key = `${rx}:${ry}:${f}`;
-    let h = 0x811c9dc5;
-    for (let i = 0; i < key.length; i++) { h ^= key.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
-    return `M${h.toString(16)}`;
-  };
 
-  const startScan = (e) => {
-    if (fingerprintEnrolled) return;
-    if (!email) {
-      toast.error("Please enter email address before scanning fingerprint");
-      trigger("email");
-      return;
-    }
-
-    touchSamples.current = [];
-    if (e && e.touches) {
-      const t = e.touches[0];
-      touchSamples.current.push({ rx: t.radiusX || 14, ry: t.radiusY || 14, f: t.force || 0.5 });
-    } else {
-      touchSamples.current.push({ rx: 14, ry: 14, f: 0.5 });
-    }
-
-    setIsEnrolling(true);
-    setEnrollProgress(0);
-
-    let p = 0;
-    progressTimer.current = setInterval(() => {
-      p = Math.min(p + 4, 100);
-      setEnrollProgress(p);
-    }, 100);
-
-    holdTimer.current = setTimeout(() => {
-      clearInterval(progressTimer.current);
-      setEnrollProgress(100);
-      completeEnroll(touchSamples.current);
-    }, 2500);
-  };
-
-  const moveScan = (e) => {
-    if (!isEnrolling || !e.touches) return;
-    const t = e.touches[0];
-    touchSamples.current.push({ rx: t.radiusX || 14, ry: t.radiusY || 14, f: t.force || 0.5 });
-  };
-
-  const completeEnroll = (samples) => {
-    const hash = buildMobileHash(samples);
-    setFingerprintHash(hash);
-    setFingerprintEnrolled(true);
-    setIsEnrolling(false);
-    toast.success("Biometric enrolled successfully");
-  };
-
-  const cancelScan = () => {
-    clearTimeout(holdTimer.current);
-    clearInterval(progressTimer.current);
-    if (isEnrolling && !fingerprintEnrolled) {
-      setIsEnrolling(false);
-      setEnrollProgress(0);
-      toast.error("Hold your finger steady for the full 2.5 seconds.");
-    }
-  };
 
   const handleNext = async () => {
     let fieldsToValidate = [];
@@ -200,16 +129,9 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   };
 
   const onSubmit = (data) => {
-    if (!fingerprintEnrolled) {
-      toast.error("Biometric enrollment is required. Please capture the member's fingerprint on Step 1.");
-      return;
-    }
-
     const completeData = {
       ...data,
       memberId: generatedId.current,
-      fingerprintEnrolled,
-      fingerprintHash,
       membershipStatus: "Active",
       discountApplied: "0",
     };
@@ -270,32 +192,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                 <input type="text" placeholder="New York" $hasError={!!errors.city} {...register("city")} />
                 {errors.city && <p className="error-text">⚠ {errors.city.message}</p>}
               </div>
-              
-              <div className="form-group full-width" style={{ marginTop: '10px' }}>
-                <label>BIOMETRIC ENROLLMENT <span style={{ color: '#ffc107', fontSize: '0.7rem', marginLeft: '10px' }}>REQUIRED FOR REGISTRATION</span></label>
-                <div
-                  className={`biometric-enroll-pad ${fingerprintEnrolled ? 'success' : isEnrolling ? 'scanning' : ''}`}
-                  onTouchStart={!fingerprintEnrolled ? startScan : undefined}
-                  onTouchMove={moveScan}
-                  onTouchEnd={!fingerprintEnrolled ? cancelScan : undefined}
-                  onMouseDown={!fingerprintEnrolled ? startScan : undefined}
-                  onMouseUp={!fingerprintEnrolled ? cancelScan : undefined}
-                  onMouseLeave={!fingerprintEnrolled ? cancelScan : undefined}
-                  style={{ userSelect: 'none', cursor: fingerprintEnrolled ? 'default' : 'pointer', WebkitUserSelect: 'none' }}
-                >
-                  <div className="pad-content">
-                    <Fingerprint size={32} />
-                    <span>
-                      {fingerprintEnrolled
-                        ? "✓ FINGERPRINT CAPTURED"
-                        : isEnrolling
-                          ? `SCANNING... ${enrollProgress}%`
-                          : "PRESS & HOLD TO SCAN FINGERPRINT"}
-                    </span>
-                  </div>
-                  {isEnrolling && <div className="progress-bar"><div className="fill" style={{ width: `${enrollProgress}%` }}></div></div>}
-                </div>
-              </div>
+
             </div>
           </div>
         );

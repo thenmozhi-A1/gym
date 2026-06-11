@@ -56,7 +56,6 @@ const Login = () => {
   const holdTimer    = React.useRef(null);
   const progressTimer = React.useRef(null);
   const IS_MOBILE = React.useMemo(() => isMobileDevice(), []);
-  const [isAdminLogin, setIsAdminLogin] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -70,7 +69,6 @@ const Login = () => {
     setIsEnrolled(false);
     setError("");
     setAttendanceLog(null);
-    setIsAdminLogin(false);
   }, [isNewUser, isForgotPassword]);
 
   const handleInputChange = (e) => {
@@ -217,32 +215,11 @@ const Login = () => {
     }
   };
 
-  // ── Admin password login (no fingerprint required) ──────────
-  const handleAdminLogin = async (e) => {
-    e.preventDefault();
-    setError(""); setLoading(true);
-    try {
-      const res = await axiosInstance.post("/auth/login", {
-        email: formData.email, password: formData.password
-      });
-      const data = res.data;
-      if (data.user.role !== "ADMIN") { setError("Access denied. This login is for admins only."); return; }
-      
-      // Use the Zustand auth store
-      useAuthStore.getState().login(data.accessToken, data.refreshToken, data.user);
-      
-      setTimeout(() => redirectAfterLogin(data.user), 500);
-    } catch (err) { setError(err.response?.data?.error || "Cannot connect to server."); }
-    finally   { setLoading(false); }
-  };
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isNewUser && !isEnrolled) {
-      setError("Please scan your fingerprint to enroll before creating an account.");
-      return;
-    }
+    setError("");
     setError("");
 
     // Forgot password flow (no API yet)
@@ -260,20 +237,12 @@ const Login = () => {
 
     setLoading(true);
     try {
-      if (isNewUser) {
-        // We do not store the active hash in localStorage anymore, instead we must 
-        // generate the dummy hash if enrollment didn't happen (though it's blocked by validation above)
-        const activeHash = isEnrolled ? `fp_${formData.email.replace(/[^a-zA-Z0-9]/g, "")}` : "";
-
-        // ── CREATE ACCOUNT ── POST /api/users/register
         const res = await axiosInstance.post("/users/register", {
           fullName: formData.name,
           email: formData.email,
           password: formData.password,
           membershipType: "Monthly",
-          status: "ACTIVE",
-          fingerprintEnrolled: true,
-          fingerprintHash: activeHash
+          status: "ACTIVE"
         });
 
         // Login immediately after to get tokens
@@ -286,9 +255,7 @@ const Login = () => {
         // Use the Zustand auth store
         useAuthStore.getState().login(loginData.accessToken, loginData.refreshToken, loginData.user);
 
-        // Store for biometric recognition simulation
-        localStorage.setItem("lastEnrolledEmail", formData.email);
-        alert("Account created and Fingerprint Enrolled successfully! Welcome to B&Y Fitness 🎉");
+        alert("Account created successfully! Welcome to B&Y Fitness 🎉");
         
         // Handle redirect via central utility
         redirectAfterLogin(loginData.user);
@@ -408,71 +375,14 @@ const Login = () => {
             <></>
           ) : (
             <>
-              <h2>{isNewUser ? "Join the Elite" : isAdminLogin ? "Admin Secure Access" : "Biometric Access Control"}</h2>
+              <h2>{isNewUser ? "Join the Elite" : "Login to B&Y Fitness"}</h2>
               <p className="subtitle">
                 {isNewUser 
                   ? "Start your fitness journey with B&Y Fitness today." 
-                  : "Please scan your fingerprint to enter the gym."}
+                  : "Please login with your email and password."}
               </p>
 
-              {!isNewUser && !isAdminLogin && (
-                <BiometricSection>
-                  {IS_MOBILE ? (
-                    /* ── MOBILE LOGIN: touch pad ── */
-                    <>
-                      <MobileTouchPad
-                        state={biometricState}
-                        enrolled={biometricState === 'success'}
-                        onTouchStart={biometricState !== 'success' ? (e) => startMobileScan(e, completeMobileLogin) : undefined}
-                        onTouchMove={moveMobileScan}
-                        onTouchEnd={biometricState !== 'success' ? cancelMobileScan : undefined}
-                        style={{ margin: '0 auto 20px' }}
-                      >
-                        <div className="pad-ring">
-                          <Fingerprint size={62} className="fp-icon" />
-                          {biometricState === 'scanning' && <div className="sweep" />}
-                        </div>
-                        {biometricState === 'scanning' && (
-                          <div className="progress-bar"><div className="progress-fill" style={{ width: `${scanProgress}%` }} /></div>
-                        )}
-                        <p className="pad-label">
-                          {biometricState === 'success' ? `✓ Access Granted — ${attendanceLog || ''}` : biometricState === 'scanning' ? 'Hold still…' : 'Press & hold fingerprint to enter'}
-                        </p>
-                        {biometricState === 'error' && <p className="pad-error"><ShieldAlert size={13} /> {error}</p>}
-                      </MobileTouchPad>
-                      <InputGroup>
-                        <label><Mail size={16} /> Email (if not auto-detected)</label>
-                        <input type="email" name="email" placeholder="your@email.com" onChange={handleInputChange} />
-                      </InputGroup>
-                    </>
-                  ) : (
-                    /* ── DESKTOP LOGIN: WebAuthn ── */
-                    <>
-                      <div className="fingerprint-container">
-                        <div className={`scanner ${biometricState}`}>
-                          <Fingerprint size={80} className="icon" />
-                          <div className="scan-line"></div>
-                        </div>
-                      </div>
-                      <div className="status-info">
-                        {biometricState === 'idle'    && <p>Click below to scan fingerprint</p>}
-                        {biometricState === 'scanning' && <p className="scanning-text">Verifying…</p>}
-                        {biometricState === 'success'  && <div className="success-msg"><ShieldCheck color="#4caf50" size={24} /><p>Access Granted! {attendanceLog}</p></div>}
-                        {biometricState === 'error'    && <div className="error-msg"><ShieldAlert color="#ff5252" size={24} /><p>{error}</p></div>}
-                      </div>
-                      <InputGroup style={{ marginTop: '20px' }}>
-                        <label><Mail size={16} /> Email (optional)</label>
-                        <input type="email" name="email" placeholder="Auto-recognition enabled" onChange={handleInputChange} />
-                      </InputGroup>
-                      <ScanButton onClick={handleBiometricScan} disabled={biometricState === 'scanning'}>
-                        {biometricState === 'scanning' ? 'Verifying…' : 'Scan Fingerprint to Login'}
-                      </ScanButton>
-                    </>
-                  )}
-                </BiometricSection>
-              )}
 
-              {isNewUser && (
                 <form onSubmit={handleSubmit}>
                   {isNewUser && (
                     <InputGroup>
@@ -531,36 +441,7 @@ const Login = () => {
                         />
                       </InputGroup>
 
-                      <InputGroup>
-                      <label><Fingerprint size={16} /> Biometric Enrollment <RequiredBadge>Required</RequiredBadge></label>
-                      {/* Universal fingerprint pad — works for ALL users (touch + mouse) */}
-                      <MobileTouchPad
-                        state={biometricState}
-                        enrolled={isEnrolled}
-                        onTouchStart={isEnrolled ? undefined : (e) => startMobileScan(e, completeMobileEnroll)}
-                        onTouchMove={moveMobileScan}
-                        onTouchEnd={isEnrolled ? undefined : cancelMobileScan}
-                        onMouseDown={isEnrolled ? undefined : (e) => startDesktopScan(e, completeMobileEnroll)}
-                        onMouseUp={isEnrolled ? undefined : cancelScan}
-                        onMouseLeave={isEnrolled ? undefined : cancelScan}
-                      >
-                        <div className="pad-ring">
-                          <Fingerprint size={52} className="fp-icon" />
-                          {biometricState === 'scanning' && <div className="sweep" />}
-                        </div>
-                        {biometricState === 'scanning' && (
-                          <div className="progress-bar"><div className="progress-fill" style={{ width: `${scanProgress}%` }} /></div>
-                        )}
-                        <p className="pad-label">
-                          {isEnrolled
-                            ? '✓ Fingerprint Captured — Ready to Register'
-                            : biometricState === 'scanning'
-                              ? `Scanning… ${scanProgress}%`
-                              : IS_MOBILE ? 'Press & hold finger here (2.5 sec)' : 'Click & hold here (2.5 sec)'}
-                        </p>
-                        {enrollError && <p className="pad-error"><ShieldAlert size={13} /> {enrollError}</p>}
-                      </MobileTouchPad>
-                    </InputGroup>
+
                     </>
                   )}
 
@@ -570,7 +451,7 @@ const Login = () => {
 
                   <SubmitButton 
                     type="submit" 
-                    disabled={loading || (isNewUser && !isEnrolled)}
+                    disabled={loading}
                   >
                     {loading
                       ? (isNewUser ? "Creating Account..." : "Logging in...")
@@ -578,57 +459,20 @@ const Login = () => {
                     }
                   </SubmitButton>
                 </form>
-              )}
 
               
-              {isAdminLogin && (
-                <AdminLoginBox>
-                  <div className="admin-badge">
-                    <span className="lock">🔒</span>
-                    <div>
-                      <span className="title">Admin Secure Access</span>
-                      <span className="sub">Enter your admin credentials below</span>
-                    </div>
-                  </div>
-                  <form onSubmit={handleAdminLogin}>
-                    <InputGroup>
-                      <label><Mail size={16} /> Admin Email</label>
-                      <input type="email" name="email" placeholder="admin@gymhoney.com" required onChange={handleInputChange} />
-                    </InputGroup>
-                    <InputGroup>
-                      <label><Lock size={16} /> Admin Password</label>
-                      <input type="password" name="password" placeholder="••••••••" required onChange={handleInputChange} />
-                    </InputGroup>
-                    {error && <ErrorBox>{error}</ErrorBox>}
-                    <SubmitButton type="submit" disabled={loading}>
-                      {loading ? 'Authenticating…' : '🔒 Login as Admin'}
-                    </SubmitButton>
-                  </form>
-                </AdminLoginBox>
-              )}
 
 
 
               <div className="auth-footer">
-                {!isNewUser && !isAdminLogin ? (
+                {!isNewUser ? (
                   <a href="#" onClick={(e) => { e.preventDefault(); setIsNewUser(true); }}>
                     New User? Create Account
-                  </a>
-                ) : isAdminLogin ? (
-                  <a href="#" onClick={(e) => { e.preventDefault(); setIsAdminLogin(false); }}>
-                    ← Back to Member Login
                   </a>
                 ) : (
                   <a href="#" onClick={(e) => { e.preventDefault(); setIsNewUser(false); }}>
                     Already have an account? Login
                   </a>
-                )}
-                {!isAdminLogin && !isNewUser && (
-                  <>
-                    <a href="#" className="admin-link" onClick={(e) => { e.preventDefault(); setIsAdminLogin(true); setIsNewUser(false); setError(""); }}>
-                      🔒 Admin Access
-                    </a>
-                  </>
                 )}
               </div>
             </>
