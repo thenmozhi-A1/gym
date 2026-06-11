@@ -100,8 +100,6 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
-    const role = localStorage.getItem("userRole");
-    if (role !== "ADMIN") navigate("/login");
     fetchData();
   }, [activeTab]);
 
