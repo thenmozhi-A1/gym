@@ -378,7 +378,7 @@ const AdminDashboard = () => {
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
             { id: "trainers", icon: <Users size={18} />, label: "Trainers" },
             { id: "workouts", icon: <Activity size={18} />, label: "Workouts" },
-            { id: "leads", icon: <Target size={18} />, label: "Leads" },
+
             { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },
             { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" },
             { id: "feedbacks", icon: <MessageSquare size={18} />, label: "Feedbacks" }
@@ -964,8 +964,7 @@ const AdminDashboard = () => {
                 <WorkoutModule />
               ) : activeTab === "diet" ? (
                 <DietModule />
-              ) : activeTab === "leads" ? (
-                <LeadModule />
+
               ) : activeTab === "communications" ? (
                 <CommunicationModule />
               ) : activeTab === "reports" ? (
