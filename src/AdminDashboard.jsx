@@ -103,25 +103,6 @@ const AdminDashboard = () => {
     fetchData();
   }, [activeTab]);
 
-  // Sample revenue data to show in the admin UI when backend has no payments
-  const SAMPLE_PAYMENTS = [
-    { id: "PAY-10001", fullName: "Aisha Khan", amount: 1200, paymentStatus: "SUCCESS", paymentDate: "2026-05-01" },
-    { id: "PAY-10002", fullName: "Rohit Verma", amount: 5500, paymentStatus: "SUCCESS", paymentDate: "2026-05-03" },
-    { id: "PAY-10003", fullName: "Emily Stone", amount: 3000, paymentStatus: "FAILED", paymentDate: "2026-05-05" },
-    { id: "PAY-10004", fullName: "Carlos Ruiz", amount: 4500, paymentStatus: "SUCCESS", paymentDate: "2026-05-08" },
-    { id: "PAY-10005", fullName: "Maya Patel", amount: 2500, paymentStatus: "SUCCESS", paymentDate: "2026-05-12" }
-  ];
-
-  // Sample attendance data for users and staff
-  const SAMPLE_ATTENDANCE = [
-    { id: "ATT-U001", fullName: "Aisha Khan", date: "2026-06-08", entry: "06:30 AM", role: "USER", loginDetails: "Member #1001" },
-    { id: "ATT-U002", fullName: "Rohit Verma", date: "2026-06-08", entry: "07:15 AM", role: "USER", loginDetails: "Member #1002" },
-    { id: "ATT-U003", fullName: "Emily Stone", date: "2026-06-08", entry: "08:00 AM", role: "USER", loginDetails: "Member #1003" },
-    { id: "ATT-S001", fullName: "Marcus Aurelius", date: "2026-06-08", entry: "06:00 AM", exit: "02:00 PM", role: "Trainer" },
-    { id: "ATT-S002", fullName: "David Miller", date: "2026-06-08", entry: "08:00 AM", exit: "04:00 PM", role: "Front Office" },
-    { id: "ATT-S003", fullName: "Sarah Johnson", date: "2026-06-08", entry: "10:00 AM", exit: "06:00 PM", role: "Trainer" }
-  ];
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -139,22 +120,18 @@ const AdminDashboard = () => {
       );
 
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
-        const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => !['Trainer', 'Front Office', 'TRAINER', 'FRONT OFFICE', 'trainer', 'front office', 'admin', 'ADMIN'].includes(u.role));
-        const paymentsData = Array.isArray(results[1]) ? results[1] : [];
-        const attendanceData = Array.isArray(results[2]) ? results[2] : [];
-        const mergedAttendance = attendanceData.length
-          ? attendanceData
-          : SAMPLE_ATTENDANCE;
+        const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => !['admin', 'ADMIN'].includes(u.role));
+        
         setUsers(standardUsers);
-        setPayments(paymentsData.length ? paymentsData : SAMPLE_PAYMENTS);
-        setAttendance(mergedAttendance);
+        setPayments(Array.isArray(results[1]) ? results[1] : []);
+        setAttendance(Array.isArray(results[2]) ? results[2] : []);
         setConsultations(Array.isArray(results[3]) ? results[3] : []);
         setStaffs(Array.isArray(results[4]) ? results[4] : []);
         setFeedbacks(Array.isArray(results[5]) ? results[5] : []);
       } else {
         const data = Array.isArray(results[0]) ? results[0] : [];
-        if (activeTab === "payments") setPayments(data.length ? data : SAMPLE_PAYMENTS);
-        else if (activeTab === "attendance") setAttendance(data.length ? data : SAMPLE_ATTENDANCE);
+        if (activeTab === "payments") setPayments(data);
+        else if (activeTab === "attendance") setAttendance(data);
         else if (activeTab === "feedbacks") setFeedbacks(data);
         else setConsultations(data);
       }
