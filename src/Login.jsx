@@ -377,26 +377,25 @@ const Login = () => {
             <>
               <h2>{isNewUser ? "Join the Elite" : "Login to B&Y Fitness"}</h2>
               <p className="subtitle">
-                {isNewUser 
-                  ? "Start your fitness journey with B&Y Fitness today." 
-                  : "Please login with your email and password."}
-              </p>
+              {isNewUser ? (
+                <>
+                  <h2>Join the Elite</h2>
+                  <p className="subtitle">Start your fitness journey with B&Y Fitness today.</p>
+                </>
+              ) : null}
 
-
+              {isNewUser ? (
                 <form onSubmit={handleSubmit}>
-                  {isNewUser && (
-                    <InputGroup>
-                      <label><User size={16} /> Full Name</label>
-                      <input 
-                        type="text" 
-                        name="name" 
-                        placeholder="John Doe" 
-                        required 
-                        onChange={handleInputChange}
-                      />
-                    </InputGroup>
-                  )}
-
+                  <InputGroup>
+                    <label><User size={16} /> Full Name</label>
+                    <input 
+                      type="text" 
+                      name="name" 
+                      placeholder="John Doe" 
+                      required 
+                      onChange={handleInputChange}
+                    />
+                  </InputGroup>
                   <InputGroup>
                     <label><Mail size={16} /> Email Address</label>
                     <input 
@@ -407,17 +406,9 @@ const Login = () => {
                       onChange={handleInputChange}
                     />
                   </InputGroup>
-
                   <InputGroup>
                     <div className="label-row">
                       <label><Lock size={16} /> Password</label>
-                      {!isNewUser && (
-                        <div className="forgot-password">
-                          <a href="/forgot-password" onClick={(e) => { e.preventDefault(); window.location.href = '/forgot-password'; }}>
-                            Forgot password?
-                          </a>
-                        </div>
-                      )}
                     </div>
                     <input 
                       type="password" 
@@ -427,40 +418,71 @@ const Login = () => {
                       onChange={handleInputChange}
                     />
                   </InputGroup>
-
-                  {isNewUser && (
-                    <>
-                      <InputGroup>
-                        <label><Lock size={16} /> Confirm Password</label>
-                        <input 
-                          type="password" 
-                          name="confirmPassword" 
-                          placeholder="••••••••" 
-                          required 
-                          onChange={handleInputChange}
-                        />
-                      </InputGroup>
-
-
-                    </>
-                  )}
+                  <InputGroup>
+                    <label><Lock size={16} /> Confirm Password</label>
+                    <input 
+                      type="password" 
+                      name="confirmPassword" 
+                      placeholder="••••••••" 
+                      required 
+                      onChange={handleInputChange}
+                    />
+                  </InputGroup>
 
                   {error && loginMethod === "password" && (
                     <ErrorBox>{error}</ErrorBox>
                   )}
 
-                  <SubmitButton 
-                    type="submit" 
-                    disabled={loading}
-                  >
-                    {loading
-                      ? (isNewUser ? "Creating Account..." : "Logging in...")
-                      : (isNewUser ? "Create Account" : "Login to GymDash")
-                    }
+                  <SubmitButton type="submit" disabled={loading}>
+                    {loading ? "Creating Account..." : "Create Account"}
                   </SubmitButton>
                 </form>
-
-              
+              ) : (
+                <AdminLoginBox>
+                  <div className="admin-badge">
+                    <span className="lock">🔒</span>
+                    <div>
+                      <span className="title">B&Y Fitness Secure Access</span>
+                      <span className="sub">Enter your credentials below</span>
+                    </div>
+                  </div>
+                  <form onSubmit={handleSubmit}>
+                    <InputGroup>
+                      <label><Mail size={16} /> Email Address</label>
+                      <input 
+                        type="email" 
+                        name="email" 
+                        placeholder="your@email.com" 
+                        required 
+                        onChange={handleInputChange}
+                      />
+                    </InputGroup>
+                    <InputGroup>
+                      <div className="label-row">
+                        <label><Lock size={16} /> Password</label>
+                        <div className="forgot-password">
+                          <a href="/forgot-password" onClick={(e) => { e.preventDefault(); window.location.href = '/forgot-password'; }}>
+                            Forgot password?
+                          </a>
+                        </div>
+                      </div>
+                      <input 
+                        type="password" 
+                        name="password" 
+                        placeholder="••••••••" 
+                        required 
+                        onChange={handleInputChange}
+                      />
+                    </InputGroup>
+                    {error && loginMethod === "password" && (
+                      <ErrorBox>{error}</ErrorBox>
+                    )}
+                    <SubmitButton type="submit" disabled={loading}>
+                      {loading ? 'Authenticating…' : '🔒 Secure Login'}
+                    </SubmitButton>
+                  </form>
+                </AdminLoginBox>
+              )}
 
 
 
