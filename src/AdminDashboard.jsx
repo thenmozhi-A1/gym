@@ -117,7 +117,7 @@ const AdminDashboard = () => {
 
       const ts = new Date().getTime();
       const results = await Promise.all(
-        endpoints.map(ep => axiosInstance.get(`/${ep}?_t=${ts}`).then(r => r.data))
+        endpoints.map(ep => axiosInstance.get(`/${ep}?_t=${ts}`).then(r => r.data).catch(() => []))
       );
 
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
