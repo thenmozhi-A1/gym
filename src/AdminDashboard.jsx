@@ -287,10 +287,7 @@ const AdminDashboard = () => {
   const handleAddStaff = async (e) => {
     e.preventDefault();
     if (!newStaff.name || !newStaff.role) return;
-    if (!newStaff.fingerprintEnrolled) {
-      toast.error("Please enroll staff fingerprint before adding them to the system.");
-      return;
-    }
+
     const staffToAdd = {
       fullName: newStaff.name,
       email: newStaff.email,
@@ -301,8 +298,6 @@ const AdminDashboard = () => {
       specialty: newStaff.specialty,
       phone: newStaff.phone,
       address: newStaff.address,
-      fingerprintHash: newStaff.fingerprintHash,
-      fingerprintEnrolled: true,
       status: "ACTIVE"
     };
 
@@ -313,8 +308,7 @@ const AdminDashboard = () => {
       setStaffs([savedStaffData, ...staffs]);
       setNewStaff({
         name: "", specialty: "", salary: "", times: "", email: "",
-        role: "Trainer", phone: "", address: "",
-        fingerprintEnrolled: false, fingerprintHash: ""
+        role: "Trainer", phone: "", address: ""
       });
       setIsAddStaffModalOpen(false);
       toast.success("Staff member added successfully!");
