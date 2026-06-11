@@ -1129,30 +1129,6 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label>BIOMETRIC ENROLLMENT <span style={{ color: '#ffc107', fontSize: '0.7rem', marginLeft: '10px' }}>REQUIRED FOR LOGIN</span></label>
-                  <div
-                    className={`biometric-enroll-pad ${newStaff.fingerprintEnrolled ? 'success' : isEnrolling ? 'scanning' : ''}`}
-                    onTouchStart={!newStaff.fingerprintEnrolled ? startScan : undefined}
-                    onTouchEnd={!newStaff.fingerprintEnrolled ? cancelScan : undefined}
-                    onMouseDown={!newStaff.fingerprintEnrolled ? startScan : undefined}
-                    onMouseUp={!newStaff.fingerprintEnrolled ? cancelScan : undefined}
-                    onMouseLeave={!newStaff.fingerprintEnrolled ? cancelScan : undefined}
-                    style={{ userSelect: 'none', cursor: newStaff.fingerprintEnrolled ? 'default' : 'pointer', WebkitUserSelect: 'none' }}
-                  >
-                    <div className="pad-content">
-                      <Fingerprint size={32} />
-                      <span>
-                        {newStaff.fingerprintEnrolled
-                          ? "✓ FINGERPRINT CAPTURED"
-                          : isEnrolling
-                            ? `SCANNING... ${enrollProgress}%`
-                            : "PRESS & HOLD TO SCAN FINGERPRINT"}
-                      </span>
-                    </div>
-                    {isEnrolling && <div className="progress-bar"><div className="fill" style={{ width: `${enrollProgress}%` }}></div></div>}
-                  </div>
-                </div>
               </div>
 
               <div className="modal-footer">
