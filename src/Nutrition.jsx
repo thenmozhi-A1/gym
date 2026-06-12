@@ -12,6 +12,7 @@ import styled from "styled-components";
 const Nutrition = () => {
   const { hash } = useLocation();
   const [activeGoal, setActiveGoal] = useState(null);
+  const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -38,6 +39,10 @@ const Nutrition = () => {
 
     const revealElements = document.querySelectorAll(".reveal");
     revealElements.forEach((el) => observer.observe(el));
+
+    axiosInstance.get("/products")
+      .then(res => setProducts(res.data.data || []))
+      .catch(err => console.error("Failed to fetch products:", err));
 
     return () => observer.disconnect();
   }, []);
@@ -150,6 +155,27 @@ const Nutrition = () => {
 
     const paymentObject = new window.Razorpay(options);
     paymentObject.open();
+  };
+
+  const handleBuyProduct = async (product) => {
+    const userEmail = localStorage.getItem('userEmail');
+    if (!userEmail) {
+      alert("Please login to buy products.");
+      return;
+    }
+    
+    try {
+      await axiosInstance.post("/orders", {
+        productId: product.id,
+        quantity: 1
+      });
+      alert(`Order placed for ${product.name}! Check your dashboard for details.`);
+      
+      axiosInstance.get("/products")
+        .then(res => setProducts(res.data.data || []));
+    } catch (err) {
+      alert("Failed to place order: " + (err.response?.data?.message || err.response?.data?.error || err.message));
+    }
   };
 
   return (
@@ -363,22 +389,36 @@ const Nutrition = () => {
           </div>
 
           <div className="row g-4">
-            {[
-              { title: "WHEY PROTEIN", icon: <Zap />, img: "/whey.png", desc: "Fast-absorbing anabolic recovery." },
-              { title: "CREATINE", icon: <Flame />, img: "/creatine.png", desc: "Max ATP for explosive power." },
-              { title: "MULTIVITAMINS", icon: <Leaf />, img: "/vitamins.png", desc: "Total metabolic support system." }
-            ].map((supp, i) => (
+            {products.filter(p => p.category === 'SUPPLEMENT').map((supp, i) => (
               <div className="col-lg-4" key={i}>
                 <SuppCard>
-                  <div className="supp-bg" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url(${supp.img})` }}></div>
+                  <div className="supp-bg" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url(${supp.imageUrl || '/whey.png'})` }}></div>
                   <div className="supp-content">
-                    <div className="supp-icon">{supp.icon}</div>
-                    <h3 className="fw-black">{supp.title}</h3>
-                    <p className="small mb-0 text-white-50">{supp.desc}</p>
+                    <div className="supp-icon"><Zap /></div>
+                    <h3 className="fw-black" style={{ fontSize: '1.5rem', marginBottom: '5px' }}>{supp.name}</h3>
+                    <p className="small mb-2 text-white-50">{supp.description || 'Premium supplement for elite performance.'}</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px' }}>
+                      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ffc107' }}>₹{supp.price}</span>
+                      <button 
+                        onClick={() => handleBuyProduct(supp)}
+                        style={{ 
+                          background: '#ffc107', color: '#000', border: 'none', 
+                          padding: '6px 12px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' 
+                        }}
+                        disabled={supp.stockQuantity <= 0}
+                      >
+                        {supp.stockQuantity > 0 ? 'BUY NOW' : 'OUT OF STOCK'}
+                      </button>
+                    </div>
                   </div>
                 </SuppCard>
               </div>
             ))}
+            {products.filter(p => p.category === 'SUPPLEMENT').length === 0 && (
+              <div className="col-12 text-center text-secondary py-5">
+                No supplements available at the moment.
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -393,26 +433,32 @@ const Nutrition = () => {
           </div>
 
           <div className="row g-4">
-            {[
-              { name: "Smart BMI Scale", price: 2499, img: "/scale.png", badge: "BEST SELLER" },
-              { name: "Precision Food Scale", price: 999, img: "/scale.png" },
-              { name: "Elite Fitness Band", price: 3999, img: "/app.png" },
-              { name: "90-Day Journal", price: 599, img: "/journal.png" }
-            ].map((prod, i) => (
+            {products.filter(p => p.category === 'ACCESSORY' || p.category === 'EQUIPMENT' || p.category === 'APPAREL').map((prod, i) => (
               <div className="col-lg-3 col-md-6" key={i}>
                 <ProductCard>
-                  {prod.badge && <div className="prod-badge">{prod.badge}</div>}
+                  {prod.stockQuantity < 10 && <div className="prod-badge" style={{ background: '#ef4444' }}>LOW STOCK</div>}
                   <div className="prod-img">
-                    <img src={prod.img} alt={prod.name} />
+                    <img src={prod.imageUrl || '/scale.png'} alt={prod.name} />
                   </div>
                   <div className="prod-info">
                     <h5 className="fw-bold">{prod.name}</h5>
                     <div className="price">₹{prod.price.toLocaleString()}</div>
-                    <button onClick={() => handleProductPayment(prod.price, prod.name)} className="buy-btn">BUY NOW</button>
+                    <button 
+                      onClick={() => handleBuyProduct(prod)} 
+                      className="buy-btn"
+                      disabled={prod.stockQuantity <= 0}
+                    >
+                      {prod.stockQuantity > 0 ? 'BUY NOW' : 'SOLD OUT'}
+                    </button>
                   </div>
                 </ProductCard>
               </div>
             ))}
+            {products.filter(p => p.category === 'ACCESSORY' || p.category === 'EQUIPMENT' || p.category === 'APPAREL').length === 0 && (
+              <div className="col-12 text-center text-secondary py-5">
+                No accessories or equipment available at the moment.
+              </div>
+            )}
           </div>
         </div>
       </section>
