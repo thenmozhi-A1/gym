@@ -20,8 +20,8 @@ export const ROLE_ROUTE_CONFIG = [
   },
   {
     // Staff roles get the employee dashboard
-    exact: ['TRAINER', 'STAFF', 'FRONT OFFICE', 'MANAGER'],
-    includes: ['TRAINER', 'OFFICE', 'STAFF', 'MANAGER'],
+    exact: ['TRAINER', 'STAFF', 'FRONT OFFICE', 'MANAGER', 'EMPLOYEE'],
+    includes: ['TRAINER', 'OFFICE', 'STAFF', 'MANAGER', 'EMPLOYEE'],
     route: '/EmployeeDashboard',
   },
   {

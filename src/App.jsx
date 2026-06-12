@@ -78,7 +78,7 @@ function LayoutWrapper() {
         
         {/* Role-Based Protected Routes */}
         <Route path="/AdminDashboard" element={<ProtectedRoute allowedRoles={['ADMIN']}><ErrorBoundary fallbackMessage="The admin dashboard encountered an error."><AdminDashboard /></ErrorBoundary></ProtectedRoute>} />
-        <Route path="/EmployeeDashboard" element={<ProtectedRoute allowedRoles={['TRAINER', 'STAFF', 'FRONT OFFICE']}><ErrorBoundary fallbackMessage="The employee dashboard encountered an error."><EmployeeDashboard /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/EmployeeDashboard" element={<ProtectedRoute allowedRoles={['TRAINER', 'STAFF', 'FRONT OFFICE', 'MANAGER', 'EMPLOYEE']}><ErrorBoundary fallbackMessage="The employee dashboard encountered an error."><EmployeeDashboard /></ErrorBoundary></ProtectedRoute>} />
         
         {/* Catch-all 404 Route */}
         <Route path="*" element={<NotFound />} />
