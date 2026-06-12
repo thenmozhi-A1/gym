@@ -32,6 +32,9 @@ const useAuthStore = create((set) => ({
   login: (accessToken, refreshToken, user) => {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
+    if (user && user.email) {
+      localStorage.setItem('userEmail', user.email);
+    }
     if (user && user.role) {
       user.role = user.role.toUpperCase();
     }

@@ -35,11 +35,7 @@ const EmployeeDashboard = () => {
   useEffect(() => {
     const fetchEmployeeData = async () => {
       const email = localStorage.getItem('userEmail');
-      if (!email) {
-        navigate('/login');
-        return;
-      }
-      
+      // Relaxed check: ProtectedRoute already verified auth state
       try {
         const res = await axiosInstance.get("/staffs/me");
         const me = res.data;
