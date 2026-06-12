@@ -542,6 +542,19 @@ const Userdashboard = () => {
     }
   };
 
+  const activeCheckin = checkins.find(c => !c.checkOutTime && !c.exit && String(c.attendanceDate || c.date) === new Date().toISOString().split('T')[0]);
+
+  const handleCheckOut = async () => {
+    if (!activeCheckin) return;
+    try {
+      await axiosInstance.put(`/attendance/${activeCheckin.id}/checkout`, {});
+      toast.success('Checked out successfully!');
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to check out');
+    }
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     logout();
@@ -624,7 +637,9 @@ const Userdashboard = () => {
               <CardTitle><Zap size={13} /> Quick Actions</CardTitle>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {[
-                  { label: 'Check-in Now', icon: Clock, action: handleCheckIn },
+                  activeCheckin 
+                    ? { label: 'Check-out Now', icon: Clock, action: handleCheckOut }
+                    : { label: 'Check-in Now', icon: Clock, action: handleCheckIn },
                   { label: 'Start Today\'s Workout', icon: Dumbbell, action: () => navigate('/workouts') },
                   { label: 'View My Stats',          icon: TrendingUp, action: () => navigate('/dashboard/stats') },
                   { label: 'Browse Nutrition Plans', icon: FileText, action: () => navigate('/nutrition') },
@@ -682,7 +697,7 @@ const Userdashboard = () => {
                     <CheckInDate>{c.date || 'Unknown date'}</CheckInDate>
                     <CheckInTime>
                       Entry: {c.entry || c.checkInTime || '—'}
-                      {c.exit && ` · Exit: ${c.exit}`}
+                      {(c.exit || c.checkOutTime) && ` · Exit: ${c.exit || c.checkOutTime}`}
                     </CheckInTime>
                   </div>
                   <StatusBadge $ok>

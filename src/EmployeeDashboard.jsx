@@ -30,6 +30,7 @@ const EmployeeDashboard = () => {
   const [scanState, setScanState] = useState("idle"); // idle, scanning, success, error
   const [scanProgress, setScanProgress] = useState(0);
   const [employeeData, setEmployeeData] = useState(null);
+  const [attendance, setAttendance] = useState([]);
   const [activeView, setActiveView] = useState("home"); // home, salary, attendance
 
   // Fetch real data for the specific staff member from the database
@@ -42,21 +43,21 @@ const EmployeeDashboard = () => {
         const me = res.data;
         
         if (me) {
-          // Parse salary from string if needed (e.g., "₹45,000" -> 45000)
           const cleanSalary = typeof me.salary === 'string' 
             ? parseInt(me.salary.replace(/[^0-9]/g, '')) 
             : (me.salary || 0);
 
-          const attendanceLog = me.attendance || [
-            { date: "May 15", status: "Present", checkIn: "06:05 AM", checkOut: "11:15 AM" },
-            { date: "May 14", status: "Present", checkIn: "05:58 AM", checkOut: "11:05 AM" },
-            { date: "May 13", status: "Leave", checkIn: "-", checkOut: "-" },
-            { date: "May 12", status: "Present", checkIn: "06:00 AM", checkOut: "11:00 AM" },
-            { date: "May 11", status: "Present", checkIn: "05:55 AM", checkOut: "11:10 AM" },
-          ];
+          let attendanceLog = [];
+          try {
+            const attRes = await axiosInstance.get(`/attendance/staff/${me.id}`);
+            attendanceLog = attRes.data || [];
+            setAttendance(attendanceLog);
+          } catch(e) {
+            console.error("Failed to fetch staff attendance", e);
+          }
 
-          const daysWorked = attendanceLog.filter(log => log.status === "Present").length;
-          const leaves = attendanceLog.filter(log => log.status === "Leave").length;
+          const daysWorked = attendanceLog.filter(log => log.status === "PRESENT").length;
+          const leaves = attendanceLog.filter(log => log.status === "LEAVE").length;
 
           setEmployeeData({
             ...me,
@@ -112,14 +113,34 @@ const EmployeeDashboard = () => {
     generatePayslipPDF(employeeData, netPay);
   };
 
+  const fetchAttendance = async () => {
+    if (!employeeData?.id) return;
+    try {
+      const attRes = await axiosInstance.get(`/attendance/staff/${employeeData.id}`);
+      setAttendance(attRes.data || []);
+    } catch(e) {}
+  };
+
   const handleCheckIn = async () => {
     try {
-      // The old attendance logic has /api/attendance/staff/{staffId}
       await axiosInstance.post(`/attendance/staff/${employeeData?.id}`, {});
       toast.success('Checked in successfully!');
-      // Update local attendance logs minimally
+      fetchAttendance();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to check in');
+    }
+  };
+
+  const activeCheckin = attendance.find(c => !c.checkOutTime && !c.exit && String(c.attendanceDate || c.date) === new Date().toISOString().split('T')[0]);
+
+  const handleCheckOut = async () => {
+    if (!activeCheckin) return;
+    try {
+      await axiosInstance.put(`/attendance/${activeCheckin.id}/checkout`, {});
+      toast.success('Checked out successfully!');
+      fetchAttendance();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to check out');
     }
   };
 
@@ -155,9 +176,15 @@ const EmployeeDashboard = () => {
             <p>{employeeData?.role || "Staff Member"} • Elite Fitness Team</p>
           </div>
           <div className="user-profile" style={{ display: 'flex', alignItems: 'center' }}>
-            <button onClick={handleCheckIn} style={{ marginRight: '15px', padding: '8px 16px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Clock size={16} /> Check-in Now
-            </button>
+            {activeCheckin ? (
+              <button onClick={handleCheckOut} style={{ marginRight: '15px', padding: '8px 16px', background: '#dc3545', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Clock size={16} /> Check-out Now
+              </button>
+            ) : (
+              <button onClick={handleCheckIn} style={{ marginRight: '15px', padding: '8px 16px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Clock size={16} /> Check-in Now
+              </button>
+            )}
             <div className="avatar">{(employeeData?.fullName || employeeData?.name || "E").charAt(0).toUpperCase()}</div>
           </div>
         </header>
@@ -186,14 +213,17 @@ const EmployeeDashboard = () => {
               <div className="card">
                 <h3>Recent Attendance</h3>
                 <div className="attendance-list">
-                  {employeeData?.attendance.slice(0, 3).map((log, i) => (
-                    <div key={i} className="log-item">
-                      <div className="date">{log.date}</div>
-                      <div className={`status ${log.status.toLowerCase()}`}>{log.status}</div>
-                      <div className="times">{log.checkIn} - {log.checkOut}</div>
+                {[...attendance].reverse().map((log, i) => (
+                  <div key={i} className="log-item">
+                    <div className="date">{log.attendanceDate || log.date}</div>
+                    <div className="details">
+                      <span className={`status ${(log.status || 'PRESENT').toLowerCase()}`}>{log.status || 'PRESENT'}</span>
+                      <span className="time">{log.checkInTime || log.checkIn || '—'} - {log.checkOutTime || log.checkOut || '—'}</span>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+                {attendance.length === 0 && <p style={{ color: '#64748b' }}>No attendance records found.</p>}
+              </div>
                 <button className="view-all" onClick={() => setActiveView('attendance')}>View Detailed Logs <ChevronRight size={14} /></button>
               </div>
               <div className="card">
