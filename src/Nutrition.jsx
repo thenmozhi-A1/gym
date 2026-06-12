@@ -178,10 +178,12 @@ const Nutrition = () => {
       description: `Purchase: ${product.name} (x${quantity})`,
       handler: async function (response) {
         try {
-          await axiosInstance.post("/orders", {
-            productId: product.id,
-            quantity: quantity
-          });
+          if (typeof product.id === 'number') {
+            await axiosInstance.post("/orders", {
+              productId: product.id,
+              quantity: quantity
+            });
+          }
           alert(`Payment Successful! ID: ${response.razorpay_payment_id}\nOrder placed for ${product.name}!`);
           
           axiosInstance.get("/products")
@@ -480,7 +482,13 @@ const Nutrition = () => {
           </div>
 
           <div className="row g-4">
-            {products.filter(p => p.category === 'ACCESSORY' || p.category === 'EQUIPMENT' || p.category === 'APPAREL').map((prod, i) => {
+            {[
+              { id: "mock-1", name: "Smart BMI Scale", price: 2499, imageUrl: "/scale.png", stockQuantity: 100, isMock: true },
+              { id: "mock-2", name: "Precision Food Scale", price: 999, imageUrl: "/scale.png", stockQuantity: 100, isMock: true },
+              { id: "mock-3", name: "Elite Fitness Band", price: 3999, imageUrl: "/app.png", stockQuantity: 100, isMock: true },
+              { id: "mock-4", name: "90-Day Journal", price: 599, imageUrl: "/journal.png", stockQuantity: 100, isMock: true },
+              ...products.filter(p => p.category === 'ACCESSORY' || p.category === 'EQUIPMENT' || p.category === 'APPAREL')
+            ].map((prod, i) => {
               const qty = quantities[prod.id] || 1;
               return (
               <div className="col-lg-3 col-md-6" key={i}>
@@ -517,11 +525,6 @@ const Nutrition = () => {
                 </ProductCard>
               </div>
             )})}
-            {products.filter(p => p.category === 'ACCESSORY' || p.category === 'EQUIPMENT' || p.category === 'APPAREL').length === 0 && (
-              <div className="col-12 text-center text-secondary py-5">
-                No accessories or equipment available at the moment.
-              </div>
-            )}
           </div>
         </div>
       </section>
