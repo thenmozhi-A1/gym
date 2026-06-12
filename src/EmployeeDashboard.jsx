@@ -18,6 +18,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import { generatePayslipPDF } from "./utils/pdfTemplates";
 
 import axiosInstance from "./api/axiosInstance";
@@ -111,6 +112,17 @@ const EmployeeDashboard = () => {
     generatePayslipPDF(employeeData, netPay);
   };
 
+  const handleCheckIn = async () => {
+    try {
+      // The old attendance logic has /api/attendance/staff/{staffId}
+      await axiosInstance.post(`/attendance/staff/${employeeData?.id}`, {});
+      toast.success('Checked in successfully!');
+      // Update local attendance logs minimally
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to check in');
+    }
+  };
+
   // Removed redundant secondary lock screen to show dashboard content immediately
   // if (!isVerified) { ... }
 
@@ -142,7 +154,10 @@ const EmployeeDashboard = () => {
             <h1>Welcome, {employeeData?.fullName || employeeData?.name || "Employee"}</h1>
             <p>{employeeData?.role || "Staff Member"} • Elite Fitness Team</p>
           </div>
-          <div className="user-profile">
+          <div className="user-profile" style={{ display: 'flex', alignItems: 'center' }}>
+            <button onClick={handleCheckIn} style={{ marginRight: '15px', padding: '8px 16px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Clock size={16} /> Check-in Now
+            </button>
             <div className="avatar">{(employeeData?.fullName || employeeData?.name || "E").charAt(0).toUpperCase()}</div>
           </div>
         </header>

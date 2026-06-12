@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import styled, { keyframes, css } from "styled-components";
 import {
   User, CreditCard, Clock, Dumbbell, Star, LogOut,
@@ -531,6 +532,16 @@ const Userdashboard = () => {
     }
   };
 
+  const handleCheckIn = async () => {
+    try {
+      await axiosInstance.post(`/attendance/user/${userId}`, {});
+      toast.success('Checked in successfully!');
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to check in');
+    }
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     logout();
@@ -613,6 +624,7 @@ const Userdashboard = () => {
               <CardTitle><Zap size={13} /> Quick Actions</CardTitle>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {[
+                  { label: 'Check-in Now', icon: Clock, action: handleCheckIn },
                   { label: 'Start Today\'s Workout', icon: Dumbbell, action: () => navigate('/workouts') },
                   { label: 'View My Stats',          icon: TrendingUp, action: () => navigate('/dashboard/stats') },
                   { label: 'Browse Nutrition Plans', icon: FileText, action: () => navigate('/nutrition') },
