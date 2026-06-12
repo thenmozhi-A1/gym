@@ -13,6 +13,7 @@ const Nutrition = () => {
   const { hash } = useLocation();
   const [activeGoal, setActiveGoal] = useState(null);
   const [products, setProducts] = useState([]);
+  const [quantities, setQuantities] = useState({});
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -157,7 +158,7 @@ const Nutrition = () => {
     paymentObject.open();
   };
 
-  const handleBuyProduct = async (product) => {
+  const handleBuyProduct = async (product, quantity = 1) => {
     const userEmail = localStorage.getItem('userEmail');
     if (!userEmail) {
       alert("Please login to buy products.");
@@ -171,15 +172,15 @@ const Nutrition = () => {
 
     const options = {
       key: "rzp_test_SoL1lxm6LzPqie",
-      amount: product.price * 100,
+      amount: product.price * quantity * 100,
       currency: "INR",
       name: "B&Y Fitness Shop",
-      description: `Purchase: ${product.name}`,
+      description: `Purchase: ${product.name} (x${quantity})`,
       handler: async function (response) {
         try {
           await axiosInstance.post("/orders", {
             productId: product.id,
-            quantity: 1
+            quantity: quantity
           });
           alert(`Payment Successful! ID: ${response.razorpay_payment_id}\nOrder placed for ${product.name}!`);
           
@@ -195,6 +196,16 @@ const Nutrition = () => {
 
     const paymentObject = new window.Razorpay(options);
     paymentObject.open();
+  };
+
+  const updateQuantity = (productId, delta, maxStock) => {
+    setQuantities(prev => {
+      const current = prev[productId] || 1;
+      let next = current + delta;
+      if (next < 1) next = 1;
+      if (next > maxStock) next = maxStock;
+      return { ...prev, [productId]: next };
+    });
   };
 
   return (
@@ -408,7 +419,9 @@ const Nutrition = () => {
           </div>
 
           <div className="row g-4">
-            {products.filter(p => p.category === 'SUPPLEMENT').map((supp, i) => (
+            {products.filter(p => p.category === 'SUPPLEMENT').map((supp, i) => {
+              const qty = quantities[supp.id] || 1;
+              return (
               <div className="col-lg-4" key={i}>
                 <SuppCard>
                   <div className="supp-bg" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url(${supp.imageUrl || '/whey.png'})` }}></div>
@@ -416,13 +429,28 @@ const Nutrition = () => {
                     <div className="supp-icon"><Zap /></div>
                     <h3 className="fw-black" style={{ fontSize: '1.5rem', marginBottom: '5px' }}>{supp.name}</h3>
                     <p className="small mb-2 text-white-50">{supp.description || 'Premium supplement for elite performance.'}</p>
+                    
+                    {/* Quantity Selector */}
+                    {supp.stockQuantity > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Qty:</span>
+                        <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', overflow: 'hidden' }}>
+                          <button onClick={() => updateQuantity(supp.id, -1, supp.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '4px 10px', cursor: 'pointer' }}>-</button>
+                          <span style={{ fontSize: '0.9rem', width: '20px', textAlign: 'center' }}>{qty}</span>
+                          <button onClick={() => updateQuantity(supp.id, 1, supp.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '4px 10px', cursor: 'pointer' }}>+</button>
+                        </div>
+                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>({supp.stockQuantity} available)</span>
+                      </div>
+                    )}
+
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px' }}>
-                      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ffc107' }}>₹{supp.price}</span>
+                      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ffc107' }}>₹{(supp.price * qty).toLocaleString()}</span>
                       <button 
-                        onClick={() => handleBuyProduct(supp)}
+                        onClick={() => handleBuyProduct(supp, qty)}
                         style={{ 
                           background: '#ffc107', color: '#000', border: 'none', 
-                          padding: '6px 12px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' 
+                          padding: '6px 12px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer',
+                          opacity: supp.stockQuantity <= 0 ? 0.5 : 1
                         }}
                         disabled={supp.stockQuantity <= 0}
                       >
@@ -432,7 +460,7 @@ const Nutrition = () => {
                   </div>
                 </SuppCard>
               </div>
-            ))}
+            )})}
             {products.filter(p => p.category === 'SUPPLEMENT').length === 0 && (
               <div className="col-12 text-center text-secondary py-5">
                 No supplements available at the moment.
@@ -452,7 +480,9 @@ const Nutrition = () => {
           </div>
 
           <div className="row g-4">
-            {products.filter(p => p.category === 'ACCESSORY' || p.category === 'EQUIPMENT' || p.category === 'APPAREL').map((prod, i) => (
+            {products.filter(p => p.category === 'ACCESSORY' || p.category === 'EQUIPMENT' || p.category === 'APPAREL').map((prod, i) => {
+              const qty = quantities[prod.id] || 1;
+              return (
               <div className="col-lg-3 col-md-6" key={i}>
                 <ProductCard>
                   {prod.stockQuantity < 10 && <div className="prod-badge" style={{ background: '#ef4444' }}>LOW STOCK</div>}
@@ -461,18 +491,32 @@ const Nutrition = () => {
                   </div>
                   <div className="prod-info">
                     <h5 className="fw-bold">{prod.name}</h5>
-                    <div className="price">₹{prod.price.toLocaleString()}</div>
+                    <div className="price">₹{(prod.price * qty).toLocaleString()}</div>
+                    
+                    {/* Quantity Selector */}
+                    {prod.stockQuantity > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '10px 0' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Qty:</span>
+                        <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', overflow: 'hidden' }}>
+                          <button onClick={() => updateQuantity(prod.id, -1, prod.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '2px 8px', cursor: 'pointer' }}>-</button>
+                          <span style={{ fontSize: '0.85rem', width: '18px', textAlign: 'center' }}>{qty}</span>
+                          <button onClick={() => updateQuantity(prod.id, 1, prod.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '2px 8px', cursor: 'pointer' }}>+</button>
+                        </div>
+                      </div>
+                    )}
+
                     <button 
-                      onClick={() => handleBuyProduct(prod)} 
+                      onClick={() => handleBuyProduct(prod, qty)} 
                       className="buy-btn"
                       disabled={prod.stockQuantity <= 0}
+                      style={{ opacity: prod.stockQuantity <= 0 ? 0.5 : 1, marginTop: '5px' }}
                     >
                       {prod.stockQuantity > 0 ? 'BUY NOW' : 'SOLD OUT'}
                     </button>
                   </div>
                 </ProductCard>
               </div>
-            ))}
+            )})}
             {products.filter(p => p.category === 'ACCESSORY' || p.category === 'EQUIPMENT' || p.category === 'APPAREL').length === 0 && (
               <div className="col-12 text-center text-secondary py-5">
                 No accessories or equipment available at the moment.
