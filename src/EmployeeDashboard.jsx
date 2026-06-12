@@ -131,7 +131,14 @@ const EmployeeDashboard = () => {
     }
   };
 
-  const activeCheckin = attendance.find(c => !c.checkOutTime && !c.exit && String(c.attendanceDate || c.date) === new Date().toISOString().split('T')[0]);
+  const activeCheckin = attendance.find(c => {
+    if (c.checkOutTime || c.exit) return false;
+    let d = c.attendanceDate || c.date;
+    if (Array.isArray(d)) {
+      d = `${d[0]}-${String(d[1]).padStart(2, '0')}-${String(d[2]).padStart(2, '0')}`;
+    }
+    return d === new Date().toISOString().split('T')[0];
+  });
 
   const handleCheckOut = async () => {
     if (!activeCheckin) return;
