@@ -36,7 +36,9 @@ import {
   FileText,
   CheckSquare,
   Briefcase,
-  FileCheck
+  FileCheck,
+  UserCheck,
+  ShoppingBag
 } from "lucide-react";
 
 import AddUserModal from "./Components/AddUserModal";
@@ -44,6 +46,7 @@ import MemberManagement from "./Components/MemberManagement";
 import MembershipModule from "./Components/MembershipModule";
 import PaymentModule from "./Components/PaymentModule";
 import AttendanceModule from "./Components/AttendanceModule";
+import ProductModule from "./Components/ProductModule";
 import TrainerModule from "./Components/TrainerModule";
 import WorkoutModule from "./Components/WorkoutModule";
 import DietModule from "./Components/DietModule";
@@ -60,6 +63,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [payments, setPayments] = useState([]);
   const [attendance, setAttendance] = useState([]);
+  const [products, setProducts] = useState([]);
   const [consultations, setConsultations] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [staffs, setStaffs] = useState([]);
@@ -114,7 +118,7 @@ const AdminDashboard = () => {
       }
 
       const endpoints = activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks"
-        ? ["users", "payments", "attendance", "consultations", "staffs", "feedbacks"]
+        ? ["users", "payments", "attendance", "consultations", "staffs", "feedbacks", "products"]
         : [activeTab];
 
       const ts = new Date().getTime();
@@ -136,6 +140,7 @@ const AdminDashboard = () => {
         if (activeTab === "payments") setPayments(data);
         else if (activeTab === "attendance") setAttendance(data);
         else if (activeTab === "feedbacks") setFeedbacks(data);
+        else if (activeTab === "products") setProducts(data);
         else setConsultations(data);
       }
     } catch (e) { log.error(e); }
@@ -366,9 +371,9 @@ const AdminDashboard = () => {
             { id: "attendance", icon: <Clock size={18} />, label: "Attendance" },
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
             { id: "trainers", icon: <Users size={18} />, label: "Trainers" },
-
             { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },
-            { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" },
+            { id: "consultations", icon: <MessageSquare size={18} />, label: "Consultations" },
+            { id: "products", icon: <ShoppingBag size={18} />, label: "Products" },
             { id: "feedbacks", icon: <MessageSquare size={18} />, label: "Feedbacks" }
           ].map(item => (
             <NavItem
@@ -380,8 +385,6 @@ const AdminDashboard = () => {
             </NavItem>
           ))}
         </NavSection>
-
-
       </Sidebar>
 
       <MainArea>
@@ -524,7 +527,6 @@ const AdminDashboard = () => {
                       <div className="chart-header">
                         <div className="tabs">
                           <button className="active">New Users</button>
-
                         </div>
                         <div className="legend">
                           <span className="actual">Actual Value</span>
@@ -563,7 +565,6 @@ const AdminDashboard = () => {
                 </div>
               ) : activeTab === "payroll" ? (
                 <PayrollContainer className="animate-in">
-                  {/* ── PAYROLL SUB-NAV ── */}
                   <PayrollSubNav>
                     <div className="nav-items">
                       <button className={payrollTab === "overview" ? "active" : ""} onClick={() => setPayrollTab("overview")}>Overview</button>
@@ -946,6 +947,8 @@ const AdminDashboard = () => {
                 <PaymentModule payments={payments} />
               ) : activeTab === "attendance" ? (
                 <AttendanceModule attendanceData={attendance} />
+              ) : activeTab === "products" ? (
+                <ProductModule />
               ) : activeTab === "trainers" ? (
                 <TrainerModule staffs={staffs} onAddUser={() => setIsAddUserModalOpen(true)} />
               ) : activeTab === "workouts" ? (
