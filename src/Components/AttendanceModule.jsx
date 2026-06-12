@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Clock, QrCode, Smartphone, Zap } from "lucide-react";
+import axiosInstance from '../api/axiosInstance';
 
 const AttendanceModule = ({ attendanceData }) => {
   const [activeTab, setActiveTab] = useState("members"); // members or staff
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    axiosInstance.get('/attendance/stats/today')
+      .then(r => setStats(r.data))
+      .catch(() => {});
+  }, []);
 
   const today = new Date().toISOString().split('T')[0];
-  const todayLogs = attendanceData.filter(log => (log.date || log.attendanceDate) === today);
+  const todayLogs = (attendanceData || []).filter(log => (log.date || log.attendanceDate) === today);
 
   const filterLogs = (type) => {
     return attendanceData.filter(log => {
@@ -34,19 +42,19 @@ const AttendanceModule = ({ attendanceData }) => {
 
       <div className="top-row">
         <div className="stats-card">
-          <h3>Today's Overview ({today})</h3>
+          <h3>Today's Overview ({stats?.today ?? today})</h3>
           <div className="stats-grid">
             <div className="stat-item">
               <span className="label">Total Check-ins</span>
-              <span className="value">{todayLogs.length}</span>
+              <span className="value">{stats?.totalCheckIns ?? todayLogs.length}</span>
             </div>
             <div className="stat-item">
               <span className="label">Peak Hour</span>
-              <span className="value text-primary">06:00 AM</span>
+              <span className="value text-primary">{stats?.peakHour ?? '—'}</span>
             </div>
             <div className="stat-item">
               <span className="label">Active Inside</span>
-              <span className="value text-success">42</span>
+              <span className="value text-success">{stats?.activeInside ?? 42}</span>
             </div>
           </div>
         </div>
