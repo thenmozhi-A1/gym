@@ -164,18 +164,37 @@ const Nutrition = () => {
       return;
     }
     
-    try {
-      await axiosInstance.post("/orders", {
-        productId: product.id,
-        quantity: 1
-      });
-      alert(`Order placed for ${product.name}! Check your dashboard for details.`);
-      
-      axiosInstance.get("/products")
-        .then(res => setProducts(res.data.data || []));
-    } catch (err) {
-      alert("Failed to place order: " + (err.response?.data?.message || err.response?.data?.error || err.message));
+    if (!window.Razorpay) {
+      alert("Razorpay SDK not loaded.");
+      return;
     }
+
+    const options = {
+      key: "rzp_test_SoL1lxm6LzPqie",
+      amount: product.price * 100,
+      currency: "INR",
+      name: "B&Y Fitness Shop",
+      description: `Purchase: ${product.name}`,
+      handler: async function (response) {
+        try {
+          await axiosInstance.post("/orders", {
+            productId: product.id,
+            quantity: 1
+          });
+          alert(`Payment Successful! ID: ${response.razorpay_payment_id}\nOrder placed for ${product.name}!`);
+          
+          axiosInstance.get("/products")
+            .then(res => setProducts(res.data.data || []));
+        } catch (err) {
+          alert("Payment succeeded but failed to place order: " + (err.response?.data?.message || err.response?.data?.error || err.message));
+        }
+      },
+      prefill: { name: "User", email: userEmail, contact: "9999999999" },
+      theme: { color: "#ffc107" },
+    };
+
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
   };
 
   return (
