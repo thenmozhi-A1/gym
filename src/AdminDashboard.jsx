@@ -68,6 +68,8 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
+  const [isEditStaffModalOpen, setIsEditStaffModalOpen] = useState(false);
+  const [editStaffData, setEditStaffData] = useState(null);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [isGlobalConfigOpen, setIsGlobalConfigOpen] = useState(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
@@ -315,6 +317,21 @@ const AdminDashboard = () => {
     } catch (error) {
       log.error(error);
       toast.error(`Cannot connect to server to save staff. (Network/CORS error): ${error.message}`);
+    }
+  };
+
+  const handleEditStaffSubmit = async (e) => {
+    e.preventDefault();
+    if (!editStaffData.fullName || !editStaffData.role) return;
+    try {
+      const response = await axiosInstance.put(`/staffs/${editStaffData.id}`, editStaffData);
+      const updatedStaff = response.data;
+      setStaffs(staffs.map(s => s.id === updatedStaff.id ? updatedStaff : s));
+      setIsEditStaffModalOpen(false);
+      toast.success("Staff details updated successfully!");
+    } catch (err) {
+      log.error(err);
+      toast.error(`Error updating staff: ${err.message}`);
     }
   };
 
@@ -1014,7 +1031,7 @@ const AdminDashboard = () => {
                                 <button className="btn-icon text-danger" onClick={() => handleDeleteStaff(s.id)} title="Remove Staff">
                                   <Trash2 size={16} />
                                 </button>
-                                <button className="btn-icon"><MoreVertical size={16} /></button>
+                                <button className="btn-icon" onClick={() => { setEditStaffData(s); setIsEditStaffModalOpen(true); }}><MoreVertical size={16} /></button>
                               </div>
                             </td>
                           </tr>
@@ -1141,6 +1158,117 @@ const AdminDashboard = () => {
               <div className="modal-footer">
                 <button type="button" className="cancel-btn" onClick={() => setIsAddStaffModalOpen(false)}>CANCEL</button>
                 <button type="submit" className="submit-btn">ENLIST STAFF</button>
+              </div>
+            </form>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {/* ── EDIT STAFF MODAL ── */}
+      {isEditStaffModalOpen && editStaffData && (
+        <ModalOverlay>
+          <ModalContent className="animate-in">
+            <div className="modal-header">
+              <div className="title-area">
+                <div className="icon-wrap"><Briefcase size={24} /></div>
+                <div>
+                  <h3>EDIT STAFF DETAILS</h3>
+                  <p>Update information for this staff member.</p>
+                </div>
+              </div>
+              <button className="close-btn" onClick={() => setIsEditStaffModalOpen(false)}><X size={20} /></button>
+            </div>
+
+            <form onSubmit={handleEditStaffSubmit}>
+              <div className="form-grid">
+                <div className="row">
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>STAFF FULL NAME</label>
+                      <div className="input-wrap">
+                        <Users size={18} />
+                        <input type="text" value={editStaffData.fullName || ''} onChange={e => setEditStaffData({ ...editStaffData, fullName: e.target.value })} required />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>STAFF ROLE</label>
+                      <div className="input-wrap">
+                        <Award size={18} />
+                        <select value={editStaffData.role || ''} onChange={e => setEditStaffData({ ...editStaffData, role: e.target.value })} style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontWeight: 600 }}>
+                          <option value="Trainer">Trainer</option>
+                          <option value="Front Office">Front Office</option>
+                          <option value="Admin">Admin</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>EMAIL ADDRESS</label>
+                  <div className="input-wrap">
+                    <Globe size={18} />
+                    <input type="email" value={editStaffData.email || ''} readOnly className="read-only" style={{ opacity: 0.7 }} title="Email cannot be changed" />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>PHONE NUMBER</label>
+                      <div className="input-wrap">
+                        <Phone size={18} />
+                        <input type="text" value={editStaffData.phone || ''} onChange={e => setEditStaffData({ ...editStaffData, phone: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>HOME ADDRESS</label>
+                      <div className="input-wrap">
+                        <MapPin size={18} />
+                        <input type="text" value={editStaffData.address || ''} onChange={e => setEditStaffData({ ...editStaffData, address: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>SPECIALTY / MAIN TASK</label>
+                  <div className="input-wrap">
+                    <Target size={18} />
+                    <input type="text" value={editStaffData.specialty || ''} onChange={e => setEditStaffData({ ...editStaffData, specialty: e.target.value })} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>MONTHLY SALARY</label>
+                      <div className="input-wrap">
+                        <CreditCard size={18} />
+                        <input type="text" value={editStaffData.salary || ''} onChange={e => setEditStaffData({ ...editStaffData, salary: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>SHIFT HOURS</label>
+                      <div className="input-wrap">
+                        <Clock size={18} />
+                        <input type="text" value={editStaffData.times || ''} onChange={e => setEditStaffData({ ...editStaffData, times: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="cancel-btn" onClick={() => setIsEditStaffModalOpen(false)}>CANCEL</button>
+                <button type="submit" className="submit-btn">SAVE CHANGES</button>
               </div>
             </form>
           </ModalContent>
