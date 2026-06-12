@@ -10,7 +10,18 @@ const defaultPlans = [
 ];
 
 const MembershipModule = ({ users = [], onAddUser }) => {
-  const [plans, setPlans] = useState(defaultPlans);
+  const [plans, setPlans] = useState(() => {
+    const saved = localStorage.getItem("gym_membership_plans");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return defaultPlans;
+  });
+  
+  React.useEffect(() => {
+    localStorage.setItem("gym_membership_plans", JSON.stringify(plans));
+  }, [plans]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
   
