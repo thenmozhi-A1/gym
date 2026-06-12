@@ -23,7 +23,7 @@ const userSchema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   city: z.string().optional(),
-  
+
   height: z.string().optional(),
   weight: z.string().optional(),
   bmi: z.string().optional(),
@@ -47,7 +47,7 @@ const userSchema = z.object({
 const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isEnrolling, setIsEnrolling] = useState(false);
-  
+
   const generatedId = useRef(`MBR-${Math.floor(Math.random() * 90000) + 10000}`);
 
   const {
@@ -329,7 +329,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
           <h3>Enlist New Member</h3>
           <button type="button" className="close-btn" onClick={onClose}><X size={20} /></button>
         </div>
-        
+
         <div className="stepper">
           {[1, 2, 3, 4].map(step => (
             <div key={step} className={`step ${currentStep === step ? 'active' : currentStep > step ? 'completed' : ''}`}>
@@ -343,7 +343,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="modal-body scrollable">
           {renderStepContent()}
-          
+
           <div className="modal-footer-actions">
             {currentStep > 1 && (
               <button type="button" className="btn-outline" onClick={() => setCurrentStep(prev => prev - 1)}>Back</button>

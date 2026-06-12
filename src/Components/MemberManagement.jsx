@@ -211,6 +211,16 @@ const MemberManagement = ({ users, onDeleteUser, onAddUser, onEditUser, payments
                       />
                     </div>
                     
+                    <div>
+                      <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>PHONE NUMBER</label>
+                      <input 
+                        type="tel" 
+                        value={editFormData.phone || editFormData.mobileNumber || ''} 
+                        onChange={e => setEditFormData({...editFormData, phone: e.target.value})}
+                        style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                      />
+                    </div>
+                    
                     <div style={{display: 'flex', gap: '16px'}}>
                       <div style={{flex: 1}}>
                         <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>START DATE</label>
