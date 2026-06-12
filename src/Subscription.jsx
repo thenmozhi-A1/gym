@@ -2,112 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { Clock, Award, Users, Check, Zap, Shield, Star, Crown, Info } from "lucide-react";
-
-const plans = [
-  {
-    id: 1,
-    title: "Standard Plan",
-    price: 5000,
-    duration: "Per Month",
-    badge: "Budget Friendly",
-    rating: 4.5,
-    userCount: "5k+ Members",
-    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop",
-    features: [
-      "Access during Peak Hours",
-      "Basic Workout Routines",
-      "Standard Gym Equipment",
-      "Locker Room Access",
-      "Free Hydration Station",
-      "Online Support Community",
-    ],
-    bonus: "7-Day Money Back Guarantee",
-    accent: "#3b82f6",
-  },
-  {
-    id: 2,
-    title: "Pro Membership",
-    price: 9000,
-    duration: "Per 6 Months",
-    badge: "Most Popular",
-    rating: 4.8,
-    userCount: "2.5k+ Members",
-    image: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=1470&auto=format&fit=crop",
-    features: [
-      "Full Access (6 AM - Midnight)",
-      "4 PT Sessions per Month",
-      "Standard Nutritional Guide",
-      "Locker & Shower Facilities",
-      "Access to Yoga & HIIT Classes",
-      "Monthly Body Scan Analysis",
-    ],
-    bonus: "10% Discount on Supplements",
-    accent: "#f97316",
-  },
-  {
-    id: 3,
-    title: "Elite Yearly",
-    price: 12000,
-    duration: "Per Year",
-    badge: "Best Value",
-    rating: 5,
-    userCount: "800+ Members",
-    image: "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?q=80&w=1469&auto=format&fit=crop",
-    features: [
-      "24/7 Access to All Gyms",
-      "Unlimited Personal Training",
-      "Customized Macro Plans",
-      "Spa & Recovery Zone",
-      "Free Supplement Monthly Kit",
-      "Biometric Health Tracking",
-    ],
-    bonus: "Includes Free Gym Apparel",
-    accent: "#ef4444",
-  },
-  {
-    id: 4,
-    title: "VIP Yearly",
-    price: 18000,
-    duration: "Per Year",
-    badge: "Ultimate Experience",
-    rating: 5,
-    userCount: "300+ Members",
-    image: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=1470&auto=format&fit=crop",
-    features: [
-      "Everything in Elite Plan",
-      "Personal Nutritionist",
-      "Home Workout Equipment Hire",
-      "Monthly Massage Therapy",
-      "Guest Pass for Friends",
-      "Private Locker with Name",
-    ],
-    bonus: "VIP Event Invitations",
-    accent: "#ffc107",
-  },
-  {
-    id: 5,
-    title: "Custom Plan",
-    price: "Custom",
-    duration: "Flexible",
-    badge: "For Teams/Groups",
-    rating: 4.9,
-    userCount: "50+ Corporate Teams",
-    image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?q=80&w=1375&auto=format&fit=crop",
-    features: [
-      "Tailored Group Sessions",
-      "Corporate Wellness Programs",
-      "Custom Training Modules",
-      "Flexible Timing Slots",
-      "Team Progress Reports",
-      "Special Event Hosting",
-    ],
-    bonus: "Dedicated Account Manager",
-    accent: "#a855f7",
-  },
-];
+import axiosInstance from "./api/axiosInstance";
 
 const Subscription = () => {
   const { hash } = useLocation();
+  const [plans, setPlans] = useState([]);
+
+  useEffect(() => {
+    axiosInstance.get('/membership-plans')
+      .then(res => setPlans(res.data))
+      .catch(err => console.error("Failed to fetch pricing plans", err));
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

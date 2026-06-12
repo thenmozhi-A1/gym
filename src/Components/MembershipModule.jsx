@@ -1,32 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { CheckCircle, Clock, AlertTriangle, Shield, Plus, Edit2, Trash2, X } from "lucide-react";
-
-const defaultPlans = [
-  { id: 1, name: "Monthly", price: "1,500", duration: "mo", isPopular: false, isPremium: false, features: ["Full Gym Access", "Free Fitness Assessment", "Personal Trainer (Paid)"] },
-  { id: 2, name: "Quarterly", price: "4,000", duration: "3mo", isPopular: true, isPremium: false, features: ["Full Gym Access", "Free Diet Plan", "2 PT Sessions Free"] },
-  { id: 3, name: "Half-Yearly", price: "7,500", duration: "6mo", isPopular: false, isPremium: false, features: ["Full Gym Access", "Advanced Diet Plan", "5 PT Sessions Free"] },
-  { id: 4, name: "Annual VIP", price: "14,000", duration: "yr", isPopular: false, isPremium: true, features: ["VIP Access All Branches", "Free Diet & Supplements Consult", "12 PT Sessions Free"] }
-];
+import axiosInstance from "../api/axiosInstance";
 
 const MembershipModule = ({ users = [], onAddUser }) => {
-  const [plans, setPlans] = useState(() => {
-    const saved = localStorage.getItem("gym_membership_plans");
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
-    }
-    return defaultPlans;
-  });
+  const [plans, setPlans] = useState([]);
   
-  React.useEffect(() => {
-    localStorage.setItem("gym_membership_plans", JSON.stringify(plans));
-  }, [plans]);
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    try {
+      const res = await axiosInstance.get('/membership-plans');
+      setPlans(res.data);
+    } catch (err) {
+      console.error("Failed to fetch plans", err);
+    }
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
   
   const [formData, setFormData] = useState({
-    name: "", price: "", duration: "", isPopular: false, isPremium: false, features: ""
+    title: "", price: "", duration: "", badge: "", isPopular: false, isPremium: false, 
+    features: "", imageUrl: "", accentColor: "#3b82f6", rating: 4.5, userCount: "", bonus: ""
   });
 
   const activeMembers = users.filter(u => (u.membershipStatus || u.status)?.toLowerCase() === 'active').length;
@@ -47,34 +45,44 @@ const MembershipModule = ({ users = [], onAddUser }) => {
       setEditingPlan(plan);
       setFormData({
         ...plan,
-        features: plan.features.join("\n")
+        features: plan.features ? plan.features.join("\n") : ""
       });
     } else {
       setEditingPlan(null);
-      setFormData({ name: "", price: "", duration: "", isPopular: false, isPremium: false, features: "" });
+      setFormData({ 
+        title: "", price: "", duration: "", badge: "", isPopular: false, isPremium: false, 
+        features: "", imageUrl: "", accentColor: "#3b82f6", rating: 4.5, userCount: "", bonus: "" 
+      });
     }
     setIsModalOpen(true);
   };
 
-  const handleSavePlan = () => {
+  const handleSavePlan = async () => {
     const featureList = formData.features.split("\n").filter(f => f.trim() !== "");
-    const planToSave = {
-      ...formData,
-      features: featureList,
-      id: editingPlan ? editingPlan.id : Date.now()
-    };
+    const planToSave = { ...formData, features: featureList };
     
-    if (editingPlan) {
-      setPlans(plans.map(p => p.id === editingPlan.id ? planToSave : p));
-    } else {
-      setPlans([...plans, planToSave]);
+    try {
+      if (editingPlan) {
+        await axiosInstance.put(`/membership-plans/${editingPlan.id}`, planToSave);
+      } else {
+        await axiosInstance.post('/membership-plans', planToSave);
+      }
+      setIsModalOpen(false);
+      fetchPlans();
+    } catch (err) {
+      console.error("Failed to save plan", err);
+      alert("Error saving plan. Check console.");
     }
-    setIsModalOpen(false);
   };
 
-  const handleDeletePlan = (id) => {
+  const handleDeletePlan = async (id) => {
     if (window.confirm("Are you sure you want to delete this plan?")) {
-      setPlans(plans.filter(p => p.id !== id));
+      try {
+        await axiosInstance.delete(`/membership-plans/${id}`);
+        fetchPlans();
+      } catch (err) {
+        console.error("Failed to delete plan", err);
+      }
     }
   };
 
@@ -105,11 +113,11 @@ const MembershipModule = ({ users = [], onAddUser }) => {
             </div>
             
             <div className="plan-header">
-              <h3>{plan.name}</h3>
+              <h3>{plan.title}</h3>
               <div className="price">₹{plan.price}<span>/{plan.duration}</span></div>
             </div>
             <ul className="features">
-              {plan.features.map((feature, i) => (
+              {(plan.features || []).map((feature, i) => (
                 <li key={i}>
                   {plan.isPremium && i === 0 ? <Shield size={14} className="text-warning" /> : <CheckCircle size={14} className="text-success" />} 
                   {feature}
@@ -161,18 +169,46 @@ const MembershipModule = ({ users = [], onAddUser }) => {
             </div>
             <div className="modal-body">
               <div className="form-group">
-                <label>Plan Name</label>
-                <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Monthly" />
+                <label>Plan Title</label>
+                <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="e.g. Monthly" />
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Price (₹)</label>
-                  <input type="text" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="e.g. 1500" />
+                  <label>Price (₹ or Custom)</label>
+                  <input type="text" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="e.g. 1500 or Custom" />
                 </div>
                 <div className="form-group">
                   <label>Duration</label>
-                  <input type="text" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} placeholder="e.g. mo, 3mo, yr" />
+                  <input type="text" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} placeholder="e.g. Per Month" />
                 </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Badge Text</label>
+                  <input type="text" value={formData.badge} onChange={e => setFormData({...formData, badge: e.target.value})} placeholder="e.g. Most Popular" />
+                </div>
+                <div className="form-group">
+                  <label>Accent Color</label>
+                  <input type="color" style={{height: '38px', width: '100%'}} value={formData.accentColor} onChange={e => setFormData({...formData, accentColor: e.target.value})} />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Rating</label>
+                  <input type="number" step="0.1" max="5" value={formData.rating} onChange={e => setFormData({...formData, rating: e.target.value})} placeholder="e.g. 4.5" />
+                </div>
+                <div className="form-group">
+                  <label>User Count Text</label>
+                  <input type="text" value={formData.userCount} onChange={e => setFormData({...formData, userCount: e.target.value})} placeholder="e.g. 5k+ Members" />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Image URL</label>
+                <input type="text" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} placeholder="https://..." />
+              </div>
+              <div className="form-group">
+                <label>Bonus Text</label>
+                <input type="text" value={formData.bonus} onChange={e => setFormData({...formData, bonus: e.target.value})} placeholder="e.g. 7-Day Money Back Guarantee" />
               </div>
               <div className="form-group">
                 <label>Features (One per line)</label>
