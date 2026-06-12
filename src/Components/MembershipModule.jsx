@@ -1,12 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import { CheckCircle, Clock, AlertTriangle, Shield } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, Shield, Plus, Edit2, Trash2, X } from "lucide-react";
 
-const MembershipModule = ({ users, onAddUser }) => {
+const defaultPlans = [
+  { id: 1, name: "Monthly", price: "1,500", duration: "mo", isPopular: false, isPremium: false, features: ["Full Gym Access", "Free Fitness Assessment", "Personal Trainer (Paid)"] },
+  { id: 2, name: "Quarterly", price: "4,000", duration: "3mo", isPopular: true, isPremium: false, features: ["Full Gym Access", "Free Diet Plan", "2 PT Sessions Free"] },
+  { id: 3, name: "Half-Yearly", price: "7,500", duration: "6mo", isPopular: false, isPremium: false, features: ["Full Gym Access", "Advanced Diet Plan", "5 PT Sessions Free"] },
+  { id: 4, name: "Annual VIP", price: "14,000", duration: "yr", isPopular: false, isPremium: true, features: ["VIP Access All Branches", "Free Diet & Supplements Consult", "12 PT Sessions Free"] }
+];
+
+const MembershipModule = ({ users = [], onAddUser }) => {
+  const [plans, setPlans] = useState(defaultPlans);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
+  
+  const [formData, setFormData] = useState({
+    name: "", price: "", duration: "", isPopular: false, isPremium: false, features: ""
+  });
+
   const activeMembers = users.filter(u => (u.membershipStatus || u.status)?.toLowerCase() === 'active').length;
   const expiredMembers = users.filter(u => (u.membershipStatus || u.status)?.toLowerCase() === 'expired').length;
   
-  // Calculate renewals due in 7 days
   const today = new Date();
   const nextWeek = new Date();
   nextWeek.setDate(today.getDate() + 7);
@@ -17,10 +31,51 @@ const MembershipModule = ({ users, onAddUser }) => {
     return expDate >= today && expDate <= nextWeek;
   }).length;
 
+  const handleOpenModal = (plan = null) => {
+    if (plan) {
+      setEditingPlan(plan);
+      setFormData({
+        ...plan,
+        features: plan.features.join("\n")
+      });
+    } else {
+      setEditingPlan(null);
+      setFormData({ name: "", price: "", duration: "", isPopular: false, isPremium: false, features: "" });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSavePlan = () => {
+    const featureList = formData.features.split("\n").filter(f => f.trim() !== "");
+    const planToSave = {
+      ...formData,
+      features: featureList,
+      id: editingPlan ? editingPlan.id : Date.now()
+    };
+    
+    if (editingPlan) {
+      setPlans(plans.map(p => p.id === editingPlan.id ? planToSave : p));
+    } else {
+      setPlans([...plans, planToSave]);
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleDeletePlan = (id) => {
+    if (window.confirm("Are you sure you want to delete this plan?")) {
+      setPlans(plans.filter(p => p.id !== id));
+    }
+  };
+
   return (
     <Container className="animate-in">
       <div className="header-actions">
-        <h2>MEMBERSHIP <small>PLANS</small></h2>
+        <div className="title-area">
+          <h2>MEMBERSHIP <small>PLANS</small></h2>
+          <button className="btn-add-plan" onClick={() => handleOpenModal()}>
+            <Plus size={16} /> Add New Plan
+          </button>
+        </div>
         <div className="stats-row">
           <div className="stat-pill success"><CheckCircle size={14}/> Active: {activeMembers}</div>
           <div className="stat-pill danger"><AlertTriangle size={14}/> Expired: {expiredMembers}</div>
@@ -29,62 +84,32 @@ const MembershipModule = ({ users, onAddUser }) => {
       </div>
 
       <div className="plans-grid">
-        {/* Monthly Plan */}
-        <div className="plan-card">
-          <div className="plan-header">
-            <h3>Monthly</h3>
-            <div className="price">₹1,500<span>/mo</span></div>
+        {plans.map(plan => (
+          <div key={plan.id} className={`plan-card ${plan.isPopular ? 'popular' : ''} ${plan.isPremium ? 'premium' : ''}`}>
+            {plan.isPopular && <div className="popular-badge">MOST POPULAR</div>}
+            
+            <div className="admin-actions">
+              <button className="action-btn edit" onClick={() => handleOpenModal(plan)}><Edit2 size={14} /></button>
+              <button className="action-btn delete" onClick={() => handleDeletePlan(plan.id)}><Trash2 size={14} /></button>
+            </div>
+            
+            <div className="plan-header">
+              <h3>{plan.name}</h3>
+              <div className="price">₹{plan.price}<span>/{plan.duration}</span></div>
+            </div>
+            <ul className="features">
+              {plan.features.map((feature, i) => (
+                <li key={i}>
+                  {plan.isPremium && i === 0 ? <Shield size={14} className="text-warning" /> : <CheckCircle size={14} className="text-success" />} 
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            <button className={`btn-assign ${plan.isPopular ? 'primary' : plan.isPremium ? 'warning' : ''}`} onClick={onAddUser}>
+              Assign to Member
+            </button>
           </div>
-          <ul className="features">
-            <li><CheckCircle size={14} className="text-success" /> Full Gym Access</li>
-            <li><CheckCircle size={14} className="text-success" /> Free Fitness Assessment</li>
-            <li><CheckCircle size={14} className="text-muted" /> Personal Trainer (Paid)</li>
-          </ul>
-          <button className="btn-assign" onClick={onAddUser}>Assign to Member</button>
-        </div>
-
-        {/* Quarterly Plan */}
-        <div className="plan-card popular">
-          <div className="popular-badge">MOST POPULAR</div>
-          <div className="plan-header">
-            <h3>Quarterly</h3>
-            <div className="price">₹4,000<span>/3mo</span></div>
-          </div>
-          <ul className="features">
-            <li><CheckCircle size={14} className="text-success" /> Full Gym Access</li>
-            <li><CheckCircle size={14} className="text-success" /> Free Diet Plan</li>
-            <li><CheckCircle size={14} className="text-success" /> 2 PT Sessions Free</li>
-          </ul>
-          <button className="btn-assign primary" onClick={onAddUser}>Assign to Member</button>
-        </div>
-
-        {/* Half-Yearly Plan */}
-        <div className="plan-card">
-          <div className="plan-header">
-            <h3>Half-Yearly</h3>
-            <div className="price">₹7,500<span>/6mo</span></div>
-          </div>
-          <ul className="features">
-            <li><CheckCircle size={14} className="text-success" /> Full Gym Access</li>
-            <li><CheckCircle size={14} className="text-success" /> Advanced Diet Plan</li>
-            <li><CheckCircle size={14} className="text-success" /> 5 PT Sessions Free</li>
-          </ul>
-          <button className="btn-assign" onClick={onAddUser}>Assign to Member</button>
-        </div>
-
-        {/* Annual Plan */}
-        <div className="plan-card premium">
-          <div className="plan-header">
-            <h3>Annual VIP</h3>
-            <div className="price">₹14,000<span>/yr</span></div>
-          </div>
-          <ul className="features">
-            <li><Shield size={14} className="text-warning" /> VIP Access All Branches</li>
-            <li><CheckCircle size={14} className="text-success" /> Free Diet & Supplements Consult</li>
-            <li><CheckCircle size={14} className="text-success" /> 12 PT Sessions Free</li>
-          </ul>
-          <button className="btn-assign warning" onClick={onAddUser}>Assign to Member</button>
-        </div>
+        ))}
       </div>
 
       <div className="renewal-section">
@@ -115,6 +140,51 @@ const MembershipModule = ({ users, onAddUser }) => {
           </table>
         </div>
       </div>
+
+      {isModalOpen && (
+        <ModalOverlay>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>{editingPlan ? "Edit Plan" : "Add New Plan"}</h3>
+              <button className="close-btn" onClick={() => setIsModalOpen(false)}><X size={20} /></button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label>Plan Name</label>
+                <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Monthly" />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Price (₹)</label>
+                  <input type="text" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} placeholder="e.g. 1500" />
+                </div>
+                <div className="form-group">
+                  <label>Duration</label>
+                  <input type="text" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} placeholder="e.g. mo, 3mo, yr" />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Features (One per line)</label>
+                <textarea rows="4" value={formData.features} onChange={e => setFormData({...formData, features: e.target.value})} placeholder="Full Gym Access&#10;Free Diet Plan"></textarea>
+              </div>
+              <div className="form-row checkboxes">
+                <label className="check-label">
+                  <input type="checkbox" checked={formData.isPopular} onChange={e => setFormData({...formData, isPopular: e.target.checked})} />
+                  Mark as Most Popular
+                </label>
+                <label className="check-label">
+                  <input type="checkbox" checked={formData.isPremium} onChange={e => setFormData({...formData, isPremium: e.target.checked})} />
+                  Mark as Premium (VIP)
+                </label>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
+              <button className="btn-save" onClick={handleSavePlan}>Save Plan</button>
+            </div>
+          </div>
+        </ModalOverlay>
+      )}
     </Container>
   );
 };
@@ -124,8 +194,17 @@ const Container = styled.div`
   
   .header-actions {
     display: flex; justify-content: space-between; align-items: center;
+    .title-area {
+      display: flex; align-items: center; gap: 16px;
+    }
     h2 { margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text-color); display: flex; align-items: center; gap: 8px; }
     small { font-weight: 400; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 1px; }
+    
+    .btn-add-plan {
+      display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--accent-color, #38bdf8);
+      color: #fff; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      &:hover { opacity: 0.9; }
+    }
   }
 
   .stats-row {
@@ -149,7 +228,17 @@ const Container = styled.div`
     &.popular { border-color: var(--accent-color, #38bdf8); }
     &.premium { border-color: #f59e0b; }
     
-    .popular-badge { position: absolute; top: 0; right: 0; background: var(--accent-color, #38bdf8); color: #fff; font-size: 0.6rem; font-weight: bold; padding: 4px 12px; border-bottom-left-radius: 12px; letter-spacing: 1px; }
+    .popular-badge { position: absolute; top: 0; right: 0; background: var(--accent-color, #38bdf8); color: #fff; font-size: 0.6rem; font-weight: bold; padding: 4px 12px; border-bottom-left-radius: 12px; letter-spacing: 1px; z-index: 1; }
+    
+    .admin-actions {
+      position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 2;
+      .action-btn {
+        background: rgba(0,0,0,0.2); border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+        &:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        &.edit:hover { color: #38bdf8; }
+        &.delete:hover { color: #ef4444; }
+      }
+    }
     
     .plan-header {
       margin-bottom: 20px; border-bottom: 1px dashed var(--border-color); padding-bottom: 20px;
@@ -184,6 +273,59 @@ const Container = styled.div`
       td { padding: 12px; font-size: 0.9rem; border-bottom: 1px solid var(--border-color); }
       .text-danger { color: #ef4444; }
       .btn-renew { background: rgba(56, 189, 248, 0.1); color: var(--accent-color, #38bdf8); border: 1px solid var(--accent-color, #38bdf8); padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+    }
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+  display: flex; justify-content: center; align-items: center; z-index: 1000;
+
+  .modal-content {
+    background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155);
+    border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    
+    .modal-header {
+      padding: 16px 24px; border-bottom: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+      h3 { margin: 0; color: var(--text-color); font-size: 1.1rem; }
+      .close-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; }
+    }
+    
+    .modal-body {
+      padding: 24px; display: flex; flex-direction: column; gap: 16px;
+      .form-row { display: flex; gap: 16px; }
+      .form-group {
+        display: flex; flex-direction: column; gap: 6px; flex: 1;
+        label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+        input, textarea {
+          background: rgba(0,0,0,0.1); border: 1px solid var(--border-color);
+          padding: 10px; border-radius: 6px; color: var(--text-color); font-size: 0.9rem;
+          &:focus { outline: none; border-color: var(--accent-color, #38bdf8); }
+        }
+        textarea { resize: vertical; }
+      }
+      .checkboxes {
+        flex-direction: column; gap: 8px; margin-top: 8px;
+        .check-label {
+          display: flex; align-items: center; gap: 8px; color: var(--text-color); font-size: 0.9rem; cursor: pointer;
+        }
+      }
+    }
+    
+    .modal-footer {
+      padding: 16px 24px; border-top: 1px solid var(--border-color);
+      display: flex; justify-content: flex-end; gap: 12px;
+      
+      .btn-cancel {
+        padding: 8px 16px; background: transparent; border: 1px solid var(--border-color);
+        color: var(--text-color); border-radius: 6px; cursor: pointer;
+      }
+      .btn-save {
+        padding: 8px 16px; background: var(--accent-color, #38bdf8); border: none;
+        color: #fff; border-radius: 6px; cursor: pointer; font-weight: 600;
+      }
     }
   }
 `;
