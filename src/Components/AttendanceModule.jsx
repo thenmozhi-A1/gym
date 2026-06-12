@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Clock, QrCode, Smartphone, Zap, Fingerprint } from "lucide-react";
-import { verifyFingerprint } from "../api/webauthnApi";
+import { Clock, QrCode, Smartphone, Zap } from "lucide-react";
 
 const AttendanceModule = ({ attendanceData }) => {
   const [activeTab, setActiveTab] = useState("members"); // members or staff
-  const [checkInMethod] = useState("Fingerprint");
-  const [scanEmail, setScanEmail] = useState("");
-  const [scanStatus, setScanStatus] = useState("idle");
-  const [scanMessage, setScanMessage] = useState("Ready to scan Fingerprint");
 
   const today = new Date().toISOString().split('T')[0];
   const todayLogs = attendanceData.filter(log => (log.date || log.attendanceDate) === today);
@@ -23,35 +18,7 @@ const AttendanceModule = ({ attendanceData }) => {
 
   const logs = filterLogs(activeTab);
 
-  const handleFingerprintScan = async () => {
-    if (!scanEmail) {
-      setScanMessage("Please enter email first");
-      setScanStatus("error");
-      return;
-    }
 
-    setScanStatus("scanning");
-    setScanMessage("Prompting fingerprint scan...");
-
-    try {
-      const result = await verifyFingerprint(scanEmail);
-      
-      setScanStatus("success");
-      setScanMessage(`${result.action === 'CHECK_IN' ? 'Check-in' : 'Check-out'} successful: ${result.userName}`);
-      setTimeout(() => window.location.reload(), 3000);
-    } catch (err) {
-      setScanStatus("error");
-      if (err.message.includes("cancelled")) {
-        setScanMessage("Scan cancelled. Please try again.");
-      } else if (err.message.includes("registered")) {
-        setScanMessage("Please enrol your fingerprint first. Visit the front desk.");
-      } else if (err.message.includes("FingerprintNotEnrolledException")) {
-        setScanMessage("No fingerprint found. Contact admin.");
-      } else {
-        setScanMessage("Connection error or scan failed.");
-      }
-    }
-  };
 
   return (
     <Container className="animate-in">
@@ -66,41 +33,6 @@ const AttendanceModule = ({ attendanceData }) => {
       </div>
 
       <div className="top-row">
-        <div className="scanner-card">
-          <div className="scanner-header">
-            <h3>Check-In Terminal</h3>
-            <span className="method-select" style={{background: 'rgba(56, 189, 248, 0.1)', color: 'var(--accent-color)'}}>
-              Biometric Required
-            </span>
-          </div>
-          
-          <div className="scanner-display" style={{ padding: '20px' }}>
-            <Fingerprint size={64} className="method-icon" style={{ color: scanStatus === 'success' ? '#10b981' : scanStatus === 'error' ? '#ef4444' : '#38bdf8' }} />
-            
-            <p className="scanner-status" style={{ color: scanStatus === 'success' ? '#10b981' : scanStatus === 'error' ? '#ef4444' : 'var(--text-muted)' }}>
-              {scanMessage}
-            </p>
-            {scanStatus === "scanning" && <div className="scan-animation"></div>}
-            
-            <div style={{ marginTop: '15px', display: 'flex', gap: '10px', width: '100%' }}>
-              <input 
-                type="email" 
-                placeholder="Member Email" 
-                value={scanEmail} 
-                onChange={(e) => setScanEmail(e.target.value)}
-                style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #334155', background: 'rgba(0,0,0,0.2)', color: '#fff' }}
-              />
-              <button 
-                onClick={handleFingerprintScan}
-                disabled={scanStatus === 'scanning'}
-                style={{ padding: '8px 12px', background: '#38bdf8', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                Scan
-              </button>
-            </div>
-          </div>
-        </div>
-
         <div className="stats-card">
           <h3>Today's Overview ({today})</h3>
           <div className="stats-grid">
@@ -174,27 +106,12 @@ const Container = styled.div`
   }
 
   .top-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    display: grid; grid-template-columns: 1fr; gap: 24px;
   }
 
-  .scanner-card, .stats-card {
+  .stats-card {
     background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 12px; padding: 24px; box-shadow: var(--shadow);
   }
-
-  .scanner-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-    h3 { margin: 0; font-size: 1.1rem; color: var(--text-color); }
-    .method-select { background: rgba(0,0,0,0.1); border: 1px solid var(--border-color); color: var(--text-color); padding: 6px 12px; border-radius: 6px; }
-  }
-
-  .scanner-display {
-    height: 150px; background: rgba(0,0,0,0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;
-    .method-icon { color: var(--accent-color, #38bdf8); opacity: 0.8; margin-bottom: 12px; }
-    .scanner-status { color: var(--text-muted); font-size: 0.9rem; margin: 0; }
-    .scan-animation { position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent-color, #38bdf8); box-shadow: 0 0 10px var(--accent-color, #38bdf8); animation: scan 2s infinite linear; }
-  }
-
-  @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
 
   .stats-card {
     h3 { margin: 0 0 20px 0; font-size: 1.1rem; color: var(--text-color); }
