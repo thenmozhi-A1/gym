@@ -204,9 +204,9 @@ const Subscription = () => {
 };
 
 const PricingCard = ({ plan, onJoin }) => (
-  <CardWrapper accent={plan.accent}>
+  <CardWrapper accent={plan.accentColor || plan.accent}>
     <div className="image-part">
-      <img src={plan.image} alt={plan.title} />
+      <img src={plan.imageUrl || plan.image} alt={plan.title} />
       <div className="overlay"></div>
       <div className="top-tags">
         <span className="badge-slay">{plan.badge}</span>
