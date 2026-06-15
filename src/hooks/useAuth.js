@@ -13,6 +13,9 @@ export const useAuth = () => {
       if (accessToken) {
         try {
           const decoded = jwtDecode(accessToken);
+          if (decoded && decoded.sub && !decoded.id) {
+            decoded.id = decoded.sub;
+          }
           // Check if expired
           if (decoded.exp * 1000 < Date.now()) {
             // Force a refresh via an innocuous backend call, axios interceptor handles the rest
