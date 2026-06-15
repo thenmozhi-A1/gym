@@ -361,7 +361,6 @@ const AdminDashboard = () => {
             { id: "attendance", icon: <Clock size={18} />, label: "Attendance" },
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
             { id: "trainers", icon: <Users size={18} />, label: "Trainers" },
-            { id: "diet", icon: <Activity size={18} />, label: "Diet Plans" },
             { id: "products", icon: <Package size={18} />, label: "Store & Supplements" },
 
             { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },

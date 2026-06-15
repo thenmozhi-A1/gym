@@ -269,6 +269,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [workoutsOpen, setWorkoutsOpen] = useState(false);
   const [nutritionOpen, setNutritionOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -277,7 +278,7 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout, user } = useAuthStore();
 
   const handleNavClick = () => {
     // Add a small delay to prevent ghost clicks on underlying elements in mobile view
@@ -285,6 +286,7 @@ const Navbar = () => {
       setIsOpen(false);
       setWorkoutsOpen(false);
       setNutritionOpen(false);
+      setProfileOpen(false);
     }, 400);
   };
 
@@ -353,9 +355,31 @@ const Navbar = () => {
                 Enter Arena
               </BtnTech>
             ) : (
-              <BtnTech onClick={handleLogout}>
-                Logout
-              </BtnTech>
+              <NavItem 
+                onMouseEnter={() => setProfileOpen(true)} 
+                onMouseLeave={() => setProfileOpen(false)}
+                style={{ listStyle: 'none' }}
+              >
+                <BtnTech onClick={() => setProfileOpen(!profileOpen)}>
+                  My Account
+                </BtnTech>
+                <DropdownMenu $isOpen={profileOpen} style={{ left: 'auto', right: 0 }}>
+                  <li>
+                    <DropdownItem 
+                      to={user?.role === 'ADMIN' ? '/admin/dashboard' : (user?.role === 'TRAINER' || user?.role === 'STAFF' || user?.role === 'FRONT OFFICE') ? '/employee/dashboard' : '/dashboard'} 
+                      onClick={handleNavClick}
+                    >
+                      Dashboard
+                    </DropdownItem>
+                  </li>
+                  <li><DropdownDivider /></li>
+                  <li>
+                    <DropdownItem to="#" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                      Logout
+                    </DropdownItem>
+                  </li>
+                </DropdownMenu>
+              </NavItem>
             )}
           </ActionWrapper>
         </NavCollapse>
