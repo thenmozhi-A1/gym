@@ -5,7 +5,7 @@ let API_BASE;
 if (import.meta.env.DEV) {
   API_BASE = 'http://localhost:8080/api';
 } else {
-  API_BASE = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE || 'https://gymj-9.onrender.com/api';
+  API_BASE = 'https://gymj-9.onrender.com/api';
 }
 if (!API_BASE.endsWith('/api')) {
   API_BASE = API_BASE.endsWith('/') ? API_BASE + 'api' : API_BASE + '/api';
