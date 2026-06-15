@@ -33,10 +33,15 @@ public class AttendanceService {
     }
 
     /** Mark attendance (check-in) for a staff */
-    public Attendance markStaffAttendance(Long staffId, Attendance attendance) {
-        Staff staff = staffRepository.findById(staffId)
-                .orElseThrow(() -> new RuntimeException("Staff not found with id: " + staffId));
+    public Attendance markStaffAttendance(Long userId, Attendance attendance) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        Staff staff = user.getStaffDetails();
+        if (staff == null) {
+             throw new RuntimeException("Staff details not found for user: " + userId);
+        }
         attendance.setStaff(staff);
+        attendance.setUser(user); // Optional: also link to user
         return attendanceRepository.save(attendance);
     }
 
@@ -45,9 +50,13 @@ public class AttendanceService {
         return attendanceRepository.findByUserId(userId);
     }
 
-    /** Get all attendance records for a specific staff */
-    public List<Attendance> getAttendanceByStaff(Long staffId) {
-        return attendanceRepository.findByStaffId(staffId);
+    /** Get all attendance records for a specific staff using userId */
+    public List<Attendance> getAttendanceByStaff(Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null && user.getStaffDetails() != null) {
+            return attendanceRepository.findByStaffId(user.getStaffDetails().getId());
+        }
+        return List.of();
     }
 
     /** Get attendance for a specific user on a specific date */
