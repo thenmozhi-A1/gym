@@ -52,7 +52,7 @@ const EmployeeDashboard = () => {
 
           let attendanceLog = [];
           try {
-            const attRes = await axiosInstance.get(`/api/attendance/staff/${me.id}`);
+            const attRes = await axiosInstance.get(`/attendance/staff/${me.id}`);
             if (attRes.data && attRes.data.length > 0) {
               attendanceLog = attRes.data.map(log => {
                 let durationStr = '-';
@@ -129,10 +129,10 @@ const EmployeeDashboard = () => {
     if (!employeeData) return;
     try {
       if (isCheckedIn && logId) {
-        await axiosInstance.put(`/api/attendance/${logId}/checkout`);
+        await axiosInstance.put(`/attendance/${logId}/checkout`);
         toast.success("Checked out successfully!");
       } else {
-        await axiosInstance.post(`/api/attendance/staff/${employeeData.id}`, {});
+        await axiosInstance.post(`/attendance/staff/${employeeData.id}`, {});
         toast.success("Checked in successfully!");
       }
       setTimeout(() => window.location.reload(), 1000);
