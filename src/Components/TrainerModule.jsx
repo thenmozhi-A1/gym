@@ -56,37 +56,7 @@ const TrainerModule = ({ staffs, onAddUser }) => {
         )}
       </div>
 
-      <div className="schedule-section">
-        <h3>Today's PT Sessions</h3>
-        <table className="table">
-          <thead>
-            <tr><th>TIME</th><th>TRAINER</th><th>MEMBER</th><th>FOCUS</th><th>STATUS</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="fw-bold">07:00 AM</td>
-              <td>Marcus Aurelius</td>
-              <td>John Doe</td>
-              <td>Weight Training</td>
-              <td><span className="badge bg-success-light">Completed</span></td>
-            </tr>
-            <tr>
-              <td className="fw-bold">09:00 AM</td>
-              <td>Sarah Johnson</td>
-              <td>Emma Smith</td>
-              <td>Yoga</td>
-              <td><span className="badge bg-warning-light text-warning">In Progress</span></td>
-            </tr>
-            <tr>
-              <td className="fw-bold">04:00 PM</td>
-              <td>David Miller</td>
-              <td>Mike Ross</td>
-              <td>CrossFit</td>
-              <td><span className="badge">Upcoming</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+
 
       {/* Slide-out Drawer for View Schedule */}
       {selectedTrainerSchedule && (
