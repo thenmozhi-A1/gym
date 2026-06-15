@@ -71,7 +71,7 @@ const AttendanceModule = ({ attendanceData }) => {
               <th>DATE</th>
               <th>CHECK-IN</th>
               <th>CHECK-OUT</th>
-              <th>{activeTab === "members" ? "METHOD" : "ROLE"}</th>
+              {activeTab === "staff" && <th>ROLE</th>}
             </tr>
           </thead>
           <tbody>
@@ -81,15 +81,17 @@ const AttendanceModule = ({ attendanceData }) => {
                 <td>{log.date || log.attendanceDate}</td>
                 <td className="text-success fw-bold"><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {log.entry || log.checkInTime}</td>
                 <td className="text-danger fw-bold">{log.exit || log.checkOutTime ? <><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {log.exit || log.checkOutTime}</> : "-"}</td>
-                <td>
-                  <span className="badge">
-                    {activeTab === "members" ? "QR Code" : (log.staff?.role || log.user?.role || log.role)}
-                  </span>
-                </td>
+                {activeTab === "staff" && (
+                  <td>
+                    <span className="badge">
+                      {log.staff?.role || log.user?.role || log.role}
+                    </span>
+                  </td>
+                )}
               </tr>
             ))}
             {logs.length === 0 && (
-              <tr><td colSpan="5" className="text-center py-4">No logs found.</td></tr>
+              <tr><td colSpan={activeTab === "members" ? 4 : 5} className="text-center py-4">No logs found.</td></tr>
             )}
           </tbody>
         </table>
