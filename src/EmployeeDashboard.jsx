@@ -54,17 +54,56 @@ const EmployeeDashboard = () => {
           try {
             const attRes = await axiosInstance.get(`/api/attendance/staff/${me.id}`);
             if (attRes.data && attRes.data.length > 0) {
-              attendanceLog = attRes.data.map(log => ({
-                date: log.attendanceDate,
-                status: log.status || "Present",
-                checkIn: log.checkInTime || "-",
-                checkOut: log.checkOutTime || "-"
-              }));
+              attendanceLog = attRes.data.map(log => {
+                let durationStr = '-';
+                let status = "Present";
+                let permissionsUsed = 0;
+                
+                if (log.checkInTime && log.checkOutTime) {
+                   const [inH, inM] = log.checkInTime.split(':').map(Number);
+                   const [outH, outM] = log.checkOutTime.split(':').map(Number);
+                   let diffMins = (outH * 60 + outM) - (inH * 60 + inM);
+                   if (diffMins < 0) diffMins += 24 * 60;
+                   const hrs = Math.floor(diffMins / 60);
+                   const mins = diffMins % 60;
+                   durationStr = `${hrs}h ${mins}m`;
+                   
+                   if (hrs < 4) {
+                       status = "Leave";
+                   } else if (hrs < 8) {
+                       status = "Permission";
+                       permissionsUsed = 8 - hrs;
+                   } else {
+                       status = "Present";
+                   }
+                } else if (log.checkInTime) {
+                   status = "Working";
+                }
+
+                return {
+                  id: log.id,
+                  date: log.attendanceDate,
+                  status: status,
+                  checkIn: log.checkInTime || "-",
+                  checkOut: log.checkOutTime || "-",
+                  duration: durationStr,
+                  permissionsUsed
+                };
+              });
               attendanceLog.sort((a,b) => new Date(b.date) - new Date(a.date));
             }
           } catch(e) { log.error("Failed to fetch real attendance", e); }
 
-          const daysWorked = attendanceLog.filter(log => log.status.toLowerCase() === "present").length;
+          const currentMonth = new Date().getMonth();
+          const currentMonthLogs = attendanceLog.filter(log => new Date(log.date).getMonth() === currentMonth);
+          
+          const daysWorked = currentMonthLogs.filter(log => ["Present", "Permission", "Working"].includes(log.status)).length;
+          
+          let totalPermissionsHr = 0;
+          currentMonthLogs.forEach(log => {
+            if (log.permissionsUsed) totalPermissionsHr += log.permissionsUsed;
+          });
+
           // Dynamically calculate leaves based on days passed in the month minus days worked
           const daysPassed = new Date().getDate();
           const leaves = Math.max(0, daysPassed - daysWorked);
@@ -75,7 +114,7 @@ const EmployeeDashboard = () => {
             attendance: attendanceLog,
             daysWorked,
             leaves,
-            permissions: me.permissions || 0
+            permissions: totalPermissionsHr
           });
         }
       } catch (err) {
@@ -86,15 +125,20 @@ const EmployeeDashboard = () => {
     fetchEmployeeData();
   }, [navigate]);
 
-  const handleCheckIn = async () => {
+  const handleCheckIn = async (isCheckedIn, logId) => {
     if (!employeeData) return;
     try {
-      await axiosInstance.post(`/api/attendance/staff/${employeeData.id}`, {});
-      toast.success("Checked in successfully!");
+      if (isCheckedIn && logId) {
+        await axiosInstance.put(`/api/attendance/${logId}/checkout`);
+        toast.success("Checked out successfully!");
+      } else {
+        await axiosInstance.post(`/api/attendance/staff/${employeeData.id}`, {});
+        toast.success("Checked in successfully!");
+      }
       setTimeout(() => window.location.reload(), 1000);
     } catch (err) {
-      log.error("Check-in failed:", err);
-      toast.error("Check-in failed");
+      log.error("Operation failed:", err);
+      toast.error(err.response?.data?.error || "Operation failed");
     }
   };
 
@@ -168,16 +212,25 @@ const EmployeeDashboard = () => {
             <p>{employeeData?.role || "Staff Member"} • Elite Fitness Team</p>
           </div>
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-            <button 
-              onClick={handleCheckIn}
-              style={{
-                background: '#28a745', color: '#fff', border: 'none', 
-                padding: '10px 20px', borderRadius: '12px', fontWeight: 'bold',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
-              }}
-            >
-              <Clock size={18} /> Check In
-            </button>
+            {(() => {
+              const today = new Date();
+              const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+              const latestLog = employeeData?.attendance?.[0];
+              const isCheckedIn = latestLog && latestLog.date === todayStr && (latestLog.checkOut === '-' || !latestLog.checkOut);
+              
+              return (
+                <button 
+                  onClick={() => handleCheckIn(isCheckedIn, latestLog?.id)}
+                  style={{
+                    background: isCheckedIn ? '#ef4444' : '#28a745', color: '#fff', border: 'none', 
+                    padding: '10px 20px', borderRadius: '12px', fontWeight: 'bold',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
+                  }}
+                >
+                  <Clock size={18} /> {isCheckedIn ? 'Check Out' : 'Check In'}
+                </button>
+              );
+            })()}
             <div className="user-profile">
               <div className="avatar">{(employeeData?.fullName || employeeData?.name || "E").charAt(0).toUpperCase()}</div>
             </div>
@@ -292,7 +345,7 @@ const EmployeeDashboard = () => {
                         <td><span className={`badge ${log.status.toLowerCase()}`}>{log.status}</span></td>
                         <td>{log.checkIn}</td>
                         <td>{log.checkOut}</td>
-                        <td>{log.checkIn !== '-' ? '5h 10m' : '-'}</td>
+                        <td>{log.duration || (log.checkIn !== '-' && log.checkOut === '-' ? 'Working' : '-')}</td>
                       </tr>
                     ))}
                   </tbody>
