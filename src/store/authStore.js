@@ -1,11 +1,29 @@
 import { create } from 'zustand';
 import { jwtDecode } from 'jwt-decode';
 
+const initialToken = localStorage.getItem('accessToken') || null;
+let initialUser = null;
+
+if (initialToken) {
+  try {
+    const decoded = jwtDecode(initialToken);
+    if (decoded && decoded.role) {
+      decoded.role = decoded.role.toUpperCase();
+    }
+    if (decoded && decoded.sub && !decoded.id) {
+      decoded.id = decoded.sub;
+    }
+    initialUser = decoded;
+  } catch (e) {
+    // invalid token
+  }
+}
+
 const useAuthStore = create((set) => ({
-  user: null,
-  accessToken: localStorage.getItem('accessToken') || null,
+  user: initialUser,
+  accessToken: initialToken,
   refreshToken: localStorage.getItem('refreshToken') || null,
-  isAuthenticated: !!localStorage.getItem('accessToken'),
+  isAuthenticated: !!initialToken,
 
   setTokens: (accessToken, refreshToken) => {
     localStorage.setItem('accessToken', accessToken);
