@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import styled from "styled-components";
 import useAuthStore from "./store/authStore";
+import { resolveRouteForRole } from "./utils/authRoutes";
 
 const NavContainer = styled.nav`
   position: fixed;
@@ -366,7 +367,7 @@ const Navbar = () => {
                 <DropdownMenu $isOpen={profileOpen} style={{ left: 'auto', right: 0 }}>
                   <li>
                     <DropdownItem 
-                      to={user?.role === 'ADMIN' ? '/admin/dashboard' : (user?.role === 'TRAINER' || user?.role === 'STAFF' || user?.role === 'FRONT OFFICE') ? '/employee/dashboard' : '/dashboard'} 
+                      to={user?.role ? resolveRouteForRole(user.role) : '/userdashboard'} 
                       onClick={handleNavClick}
                     >
                       Dashboard
