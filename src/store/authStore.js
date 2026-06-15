@@ -16,6 +16,9 @@ const useAuthStore = create((set) => ({
       if (decodedUser && decodedUser.role) {
         decodedUser.role = decodedUser.role.toUpperCase();
       }
+      if (decodedUser && decodedUser.sub && !decodedUser.id) {
+        decodedUser.id = decodedUser.sub;
+      }
       set({ accessToken, refreshToken, user: decodedUser, isAuthenticated: true });
     } catch (e) {
       set({ accessToken, refreshToken, isAuthenticated: true });
