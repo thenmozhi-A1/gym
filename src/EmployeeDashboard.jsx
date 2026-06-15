@@ -52,7 +52,7 @@ const EmployeeDashboard = () => {
 
           let attendanceLog = [];
           try {
-            const attRes = await axiosInstance.get(`/api/attendance/user/${me.id}`);
+            const attRes = await axiosInstance.get(`/api/attendance/staff/${me.id}`);
             if (attRes.data && attRes.data.length > 0) {
               attendanceLog = attRes.data.map(log => ({
                 date: log.attendanceDate,
@@ -89,7 +89,7 @@ const EmployeeDashboard = () => {
   const handleCheckIn = async () => {
     if (!employeeData) return;
     try {
-      await axiosInstance.post(`/api/attendance/user/${employeeData.id}`, {});
+      await axiosInstance.post(`/api/attendance/staff/${employeeData.id}`, {});
       toast.success("Checked in successfully!");
       setTimeout(() => window.location.reload(), 1000);
     } catch (err) {
