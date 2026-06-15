@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import styled from "styled-components";
+import useAuthStore from "./store/authStore";
 
 const NavContainer = styled.nav`
   position: fixed;
@@ -276,7 +277,7 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const { isAuthenticated, logout } = useAuthStore();
 
   const handleNavClick = () => {
     // Add a small delay to prevent ghost clicks on underlying elements in mobile view
@@ -288,12 +289,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userRole");
-    window.location.href = "/";
+    logout();
   };
 
   return (
@@ -352,7 +348,7 @@ const Navbar = () => {
           </NavList>
 
           <ActionWrapper>
-            {!isLoggedIn ? (
+            {!isAuthenticated ? (
               <BtnTech onClick={() => { navigate("/login"); handleNavClick(); }}>
                 Enter Arena
               </BtnTech>

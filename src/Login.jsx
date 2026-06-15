@@ -42,6 +42,8 @@ const buildMobileHash = (samples) => {
 
 const Login = () => {
   const navigate = useNavigate();
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const user = useAuthStore(state => state.user);
   const [isNewUser, setIsNewUser] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -70,6 +72,13 @@ const Login = () => {
     setError("");
     setAttendanceLog(null);
   }, [isNewUser, isForgotPassword]);
+
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      redirectAfterLogin(user);
+    }
+  }, [isAuthenticated, user]);
 
   const handleInputChange = (e) => {
     setError("");
