@@ -36,7 +36,8 @@ import {
   FileText,
   CheckSquare,
   Briefcase,
-  FileCheck
+  FileCheck,
+  Package
 } from "lucide-react";
 
 import AddUserModal from "./Components/AddUserModal";
@@ -50,6 +51,7 @@ import DietModule from "./Components/DietModule";
 import LeadModule from "./Components/LeadModule";
 import CommunicationModule from "./Components/CommunicationModule";
 import ReportsModule from "./Components/ReportsModule";
+import ProductModule from "./Components/ProductModule";
 import axiosInstance from "./api/axiosInstance";
 import log from "./utils/logger";
 import { useAdminNotifications } from "./hooks/useAdminNotifications";
@@ -359,7 +361,8 @@ const AdminDashboard = () => {
             { id: "attendance", icon: <Clock size={18} />, label: "Attendance" },
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
             { id: "trainers", icon: <Users size={18} />, label: "Trainers" },
-            { id: "diet", icon: <Activity size={18} />, label: "Supplements" },
+            { id: "diet", icon: <Activity size={18} />, label: "Diet Plans" },
+            { id: "products", icon: <Package size={18} />, label: "Store & Supplements" },
 
             { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },
             { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" },
@@ -946,7 +949,8 @@ const AdminDashboard = () => {
                 <WorkoutModule />
               ) : activeTab === "diet" ? (
                 <DietModule />
-
+              ) : activeTab === "products" ? (
+                <ProductModule />
               ) : activeTab === "communications" ? (
                 <CommunicationModule />
               ) : activeTab === "reports" ? (
