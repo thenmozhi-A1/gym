@@ -575,6 +575,17 @@ const Userdashboard = () => {
       <NavBar>
         <NavBrand>B&Y FITNESS</NavBrand>
         <NavActions>
+          <button 
+            onClick={activeCheckin ? handleCheckOut : handleCheckIn}
+            style={{
+              background: activeCheckin ? '#ef4444' : '#28a745', color: '#fff', border: 'none', 
+              padding: '8px 16px', borderRadius: '12px', fontWeight: 'bold',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+              fontSize: '0.85rem'
+            }}
+          >
+            <Clock size={16} /> {activeCheckin ? 'Check Out' : 'Check In'}
+          </button>
           <IconBtn onClick={() => navigate('/myprofile')} title="Profile"><User size={16} /></IconBtn>
           <IconBtn onClick={handleLogout} title="Logout"><LogOut size={16} /></IconBtn>
         </NavActions>
@@ -644,9 +655,6 @@ const Userdashboard = () => {
               <CardTitle><Zap size={13} /> Quick Actions</CardTitle>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {[
-                  activeCheckin 
-                    ? { label: 'Check-out Now', icon: Clock, action: handleCheckOut }
-                    : { label: 'Check-in Now', icon: Clock, action: handleCheckIn },
                   { label: 'Start Today\'s Workout', icon: Dumbbell, action: () => navigate('/workouts') },
                   { label: 'View My Stats',          icon: TrendingUp, action: () => navigate('/dashboard/stats') },
                   { label: 'Browse Nutrition Plans', icon: FileText, action: () => navigate('/nutrition') },
