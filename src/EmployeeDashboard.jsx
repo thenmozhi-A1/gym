@@ -18,7 +18,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { generatePayslipPDF } from "./utils/pdfTemplates";
 
 import axiosInstance from "./api/axiosInstance";
@@ -30,14 +30,17 @@ const EmployeeDashboard = () => {
   const [scanState, setScanState] = useState("idle"); // idle, scanning, success, error
   const [scanProgress, setScanProgress] = useState(0);
   const [employeeData, setEmployeeData] = useState(null);
-  const [attendance, setAttendance] = useState([]);
   const [activeView, setActiveView] = useState("home"); // home, salary, attendance
 
   // Fetch real data for the specific staff member from the database
   useEffect(() => {
     const fetchEmployeeData = async () => {
       const email = localStorage.getItem('userEmail');
-      // Relaxed check: ProtectedRoute already verified auth state
+      if (!email) {
+        navigate('/login');
+        return;
+      }
+      
       try {
         const res = await axiosInstance.get("/staffs/me");
         const me = res.data;
@@ -49,15 +52,22 @@ const EmployeeDashboard = () => {
 
           let attendanceLog = [];
           try {
-            const attRes = await axiosInstance.get(`/attendance/staff/${me.id}`);
-            attendanceLog = attRes.data || [];
-            setAttendance(attendanceLog);
-          } catch(e) {
-            console.error("Failed to fetch staff attendance", e);
-          }
+            const attRes = await axiosInstance.get(`/api/attendance/user/${me.id}`);
+            if (attRes.data && attRes.data.length > 0) {
+              attendanceLog = attRes.data.map(log => ({
+                date: log.attendanceDate,
+                status: log.status || "Present",
+                checkIn: log.checkInTime || "-",
+                checkOut: log.checkOutTime || "-"
+              }));
+              attendanceLog.sort((a,b) => new Date(b.date) - new Date(a.date));
+            }
+          } catch(e) { log.error("Failed to fetch real attendance", e); }
 
-          const daysWorked = attendanceLog.filter(log => log.status === "PRESENT").length;
-          const leaves = attendanceLog.filter(log => log.status === "LEAVE").length;
+          const daysWorked = attendanceLog.filter(log => log.status.toLowerCase() === "present").length;
+          // Dynamically calculate leaves based on days passed in the month minus days worked
+          const daysPassed = new Date().getDate();
+          const leaves = Math.max(0, daysPassed - daysWorked);
 
           setEmployeeData({
             ...me,
@@ -75,6 +85,18 @@ const EmployeeDashboard = () => {
 
     fetchEmployeeData();
   }, [navigate]);
+
+  const handleCheckIn = async () => {
+    if (!employeeData) return;
+    try {
+      await axiosInstance.post(`/api/attendance/user/${employeeData.id}`, {});
+      toast.success("Checked in successfully!");
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err) {
+      log.error("Check-in failed:", err);
+      toast.error("Check-in failed");
+    }
+  };
 
   const handleFingerprintScan = () => {
     setScanState("scanning");
@@ -113,49 +135,12 @@ const EmployeeDashboard = () => {
     generatePayslipPDF(employeeData, netPay);
   };
 
-  const fetchAttendance = async () => {
-    if (!employeeData?.id) return;
-    try {
-      const attRes = await axiosInstance.get(`/attendance/staff/${employeeData.id}`);
-      setAttendance(attRes.data || []);
-    } catch(e) {}
-  };
-
-  const handleCheckIn = async () => {
-    try {
-      await axiosInstance.post(`/attendance/staff/${employeeData?.id}`, {});
-      toast.success('Checked in successfully!');
-      fetchAttendance();
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to check in');
-    }
-  };
-
-  const activeCheckin = attendance.find(c => {
-    if (c.checkOutTime || c.exit) return false;
-    let d = c.attendanceDate || c.date;
-    if (Array.isArray(d)) {
-      d = `${d[0]}-${String(d[1]).padStart(2, '0')}-${String(d[2]).padStart(2, '0')}`;
-    }
-    return d === new Date().toISOString().split('T')[0];
-  });
-
-  const handleCheckOut = async () => {
-    if (!activeCheckin) return;
-    try {
-      await axiosInstance.put(`/attendance/${activeCheckin.id}/checkout`, {});
-      toast.success('Checked out successfully!');
-      fetchAttendance();
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to check out');
-    }
-  };
-
   // Removed redundant secondary lock screen to show dashboard content immediately
   // if (!isVerified) { ... }
 
   return (
     <DashboardContainer>
+      <Toaster position="top-right" />
       <div className="sidebar">
         <div className="sidebar-header" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
           <img src="/logo.png" alt="B&Y Fitness" style={{ height: '60px', objectFit: 'contain' }} />
@@ -182,17 +167,20 @@ const EmployeeDashboard = () => {
             <h1>Welcome, {employeeData?.fullName || employeeData?.name || "Employee"}</h1>
             <p>{employeeData?.role || "Staff Member"} • Elite Fitness Team</p>
           </div>
-          <div className="user-profile" style={{ display: 'flex', alignItems: 'center' }}>
-            {activeCheckin ? (
-              <button onClick={handleCheckOut} style={{ marginRight: '15px', padding: '8px 16px', background: '#dc3545', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <Clock size={16} /> Check-out Now
-              </button>
-            ) : (
-              <button onClick={handleCheckIn} style={{ marginRight: '15px', padding: '8px 16px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <Clock size={16} /> Check-in Now
-              </button>
-            )}
-            <div className="avatar">{(employeeData?.fullName || employeeData?.name || "E").charAt(0).toUpperCase()}</div>
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <button 
+              onClick={handleCheckIn}
+              style={{
+                background: '#28a745', color: '#fff', border: 'none', 
+                padding: '10px 20px', borderRadius: '12px', fontWeight: 'bold',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
+              }}
+            >
+              <Clock size={18} /> Check In
+            </button>
+            <div className="user-profile">
+              <div className="avatar">{(employeeData?.fullName || employeeData?.name || "E").charAt(0).toUpperCase()}</div>
+            </div>
           </div>
         </header>
 
@@ -220,17 +208,14 @@ const EmployeeDashboard = () => {
               <div className="card">
                 <h3>Recent Attendance</h3>
                 <div className="attendance-list">
-                {[...attendance].reverse().map((log, i) => (
-                  <div key={i} className="log-item">
-                    <div className="date">{log.attendanceDate || log.date}</div>
-                    <div className="details">
-                      <span className={`status ${(log.status || 'PRESENT').toLowerCase()}`}>{log.status || 'PRESENT'}</span>
-                      <span className="time">{log.checkInTime || log.checkIn || '—'} - {log.checkOutTime || log.checkOut || '—'}</span>
+                  {employeeData?.attendance.slice(0, 3).map((log, i) => (
+                    <div key={i} className="log-item">
+                      <div className="date">{log.date}</div>
+                      <div className={`status ${log.status.toLowerCase()}`}>{log.status}</div>
+                      <div className="times">{log.checkIn} - {log.checkOut}</div>
                     </div>
-                  </div>
-                ))}
-                {attendance.length === 0 && <p style={{ color: '#64748b' }}>No attendance records found.</p>}
-              </div>
+                  ))}
+                </div>
                 <button className="view-all" onClick={() => setActiveView('attendance')}>View Detailed Logs <ChevronRight size={14} /></button>
               </div>
               <div className="card">

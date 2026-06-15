@@ -36,9 +36,7 @@ import {
   FileText,
   CheckSquare,
   Briefcase,
-  FileCheck,
-  UserCheck,
-  ShoppingBag
+  FileCheck
 } from "lucide-react";
 
 import AddUserModal from "./Components/AddUserModal";
@@ -46,7 +44,6 @@ import MemberManagement from "./Components/MemberManagement";
 import MembershipModule from "./Components/MembershipModule";
 import PaymentModule from "./Components/PaymentModule";
 import AttendanceModule from "./Components/AttendanceModule";
-import ProductModule from "./Components/ProductModule";
 import TrainerModule from "./Components/TrainerModule";
 import WorkoutModule from "./Components/WorkoutModule";
 import DietModule from "./Components/DietModule";
@@ -63,7 +60,6 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [payments, setPayments] = useState([]);
   const [attendance, setAttendance] = useState([]);
-  const [products, setProducts] = useState([]);
   const [consultations, setConsultations] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [staffs, setStaffs] = useState([]);
@@ -72,8 +68,6 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
-  const [isEditStaffModalOpen, setIsEditStaffModalOpen] = useState(false);
-  const [editStaffData, setEditStaffData] = useState(null);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [isGlobalConfigOpen, setIsGlobalConfigOpen] = useState(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
@@ -118,7 +112,7 @@ const AdminDashboard = () => {
       }
 
       const endpoints = activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks"
-        ? ["users", "payments", "attendance", "consultations", "staffs", "feedbacks", "products"]
+        ? ["users", "payments", "attendance", "consultations", "staffs", "feedbacks"]
         : [activeTab];
 
       const ts = new Date().getTime();
@@ -133,14 +127,23 @@ const AdminDashboard = () => {
         setPayments(Array.isArray(results[1]) ? results[1] : []);
         setAttendance(Array.isArray(results[2]) ? results[2] : []);
         setConsultations(Array.isArray(results[3]) ? results[3] : []);
-        setStaffs(Array.isArray(results[4]) ? results[4] : []);
+        
+        const allAttendances = Array.isArray(results[2]) ? results[2] : [];
+        const rawStaffs = Array.isArray(results[4]) ? results[4] : [];
+        const daysPassed = new Date().getDate();
+        const enhancedStaffs = rawStaffs.map(s => {
+          const staffLogs = allAttendances.filter(a => (a.staff?.id === s.id || a.user?.id === s.id) && (a.status === "PRESENT" || a.status === "Present" || !a.status));
+          const daysWorked = staffLogs.length;
+          return { ...s, leaves: Math.max(0, daysPassed - daysWorked) };
+        });
+        setStaffs(enhancedStaffs);
+
         setFeedbacks(Array.isArray(results[5]) ? results[5] : []);
       } else {
         const data = Array.isArray(results[0]) ? results[0] : [];
         if (activeTab === "payments") setPayments(data);
         else if (activeTab === "attendance") setAttendance(data);
         else if (activeTab === "feedbacks") setFeedbacks(data);
-        else if (activeTab === "products") setProducts(data);
         else setConsultations(data);
       }
     } catch (e) { log.error(e); }
@@ -325,21 +328,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleEditStaffSubmit = async (e) => {
-    e.preventDefault();
-    if (!editStaffData.fullName || !editStaffData.role) return;
-    try {
-      const response = await axiosInstance.put(`/staffs/${editStaffData.id}`, editStaffData);
-      const updatedStaff = response.data;
-      setStaffs(staffs.map(s => s.id === updatedStaff.id ? updatedStaff : s));
-      setIsEditStaffModalOpen(false);
-      toast.success("Staff details updated successfully!");
-    } catch (err) {
-      log.error(err);
-      toast.error(`Error updating staff: ${err.message}`);
-    }
-  };
-
   const handleExportData = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ users, payments, attendance, staffs }, null, 2));
     const downloadAnchorNode = document.createElement('a');
@@ -371,9 +359,10 @@ const AdminDashboard = () => {
             { id: "attendance", icon: <Clock size={18} />, label: "Attendance" },
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
             { id: "trainers", icon: <Users size={18} />, label: "Trainers" },
+            { id: "workouts", icon: <Activity size={18} />, label: "Workouts" },
+
             { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },
-            { id: "consultations", icon: <MessageSquare size={18} />, label: "Consultations" },
-            { id: "products", icon: <ShoppingBag size={18} />, label: "Products" },
+            { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" },
             { id: "feedbacks", icon: <MessageSquare size={18} />, label: "Feedbacks" }
           ].map(item => (
             <NavItem
@@ -385,6 +374,8 @@ const AdminDashboard = () => {
             </NavItem>
           ))}
         </NavSection>
+
+
       </Sidebar>
 
       <MainArea>
@@ -527,6 +518,7 @@ const AdminDashboard = () => {
                       <div className="chart-header">
                         <div className="tabs">
                           <button className="active">New Users</button>
+
                         </div>
                         <div className="legend">
                           <span className="actual">Actual Value</span>
@@ -565,6 +557,7 @@ const AdminDashboard = () => {
                 </div>
               ) : activeTab === "payroll" ? (
                 <PayrollContainer className="animate-in">
+                  {/* ── PAYROLL SUB-NAV ── */}
                   <PayrollSubNav>
                     <div className="nav-items">
                       <button className={payrollTab === "overview" ? "active" : ""} onClick={() => setPayrollTab("overview")}>Overview</button>
@@ -947,8 +940,6 @@ const AdminDashboard = () => {
                 <PaymentModule payments={payments} />
               ) : activeTab === "attendance" ? (
                 <AttendanceModule attendanceData={attendance} />
-              ) : activeTab === "products" ? (
-                <ProductModule />
               ) : activeTab === "trainers" ? (
                 <TrainerModule staffs={staffs} onAddUser={() => setIsAddUserModalOpen(true)} />
               ) : activeTab === "workouts" ? (
@@ -1034,7 +1025,7 @@ const AdminDashboard = () => {
                                 <button className="btn-icon text-danger" onClick={() => handleDeleteStaff(s.id)} title="Remove Staff">
                                   <Trash2 size={16} />
                                 </button>
-                                <button className="btn-icon" onClick={() => { setEditStaffData(s); setIsEditStaffModalOpen(true); }}><MoreVertical size={16} /></button>
+                                <button className="btn-icon"><MoreVertical size={16} /></button>
                               </div>
                             </td>
                           </tr>
@@ -1161,117 +1152,6 @@ const AdminDashboard = () => {
               <div className="modal-footer">
                 <button type="button" className="cancel-btn" onClick={() => setIsAddStaffModalOpen(false)}>CANCEL</button>
                 <button type="submit" className="submit-btn">ENLIST STAFF</button>
-              </div>
-            </form>
-          </ModalContent>
-        </ModalOverlay>
-      )}
-
-      {/* ── EDIT STAFF MODAL ── */}
-      {isEditStaffModalOpen && editStaffData && (
-        <ModalOverlay>
-          <ModalContent className="animate-in">
-            <div className="modal-header">
-              <div className="title-area">
-                <div className="icon-wrap"><Briefcase size={24} /></div>
-                <div>
-                  <h3>EDIT STAFF DETAILS</h3>
-                  <p>Update information for this staff member.</p>
-                </div>
-              </div>
-              <button className="close-btn" onClick={() => setIsEditStaffModalOpen(false)}><X size={20} /></button>
-            </div>
-
-            <form onSubmit={handleEditStaffSubmit}>
-              <div className="form-grid">
-                <div className="row">
-                  <div className="col-12 col-md-6">
-                    <div className="form-group">
-                      <label>STAFF FULL NAME</label>
-                      <div className="input-wrap">
-                        <Users size={18} />
-                        <input type="text" value={editStaffData.fullName || ''} onChange={e => setEditStaffData({ ...editStaffData, fullName: e.target.value })} required />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <div className="form-group">
-                      <label>STAFF ROLE</label>
-                      <div className="input-wrap">
-                        <Award size={18} />
-                        <select value={editStaffData.role || ''} onChange={e => setEditStaffData({ ...editStaffData, role: e.target.value })} style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontWeight: 600 }}>
-                          <option value="Trainer">Trainer</option>
-                          <option value="Front Office">Front Office</option>
-                          <option value="Admin">Admin</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>EMAIL ADDRESS</label>
-                  <div className="input-wrap">
-                    <Globe size={18} />
-                    <input type="email" value={editStaffData.email || ''} readOnly className="read-only" style={{ opacity: 0.7 }} title="Email cannot be changed" />
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col-12 col-md-6">
-                    <div className="form-group">
-                      <label>PHONE NUMBER</label>
-                      <div className="input-wrap">
-                        <Phone size={18} />
-                        <input type="text" value={editStaffData.phone || ''} onChange={e => setEditStaffData({ ...editStaffData, phone: e.target.value })} />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <div className="form-group">
-                      <label>HOME ADDRESS</label>
-                      <div className="input-wrap">
-                        <MapPin size={18} />
-                        <input type="text" value={editStaffData.address || ''} onChange={e => setEditStaffData({ ...editStaffData, address: e.target.value })} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>SPECIALTY / MAIN TASK</label>
-                  <div className="input-wrap">
-                    <Target size={18} />
-                    <input type="text" value={editStaffData.specialty || ''} onChange={e => setEditStaffData({ ...editStaffData, specialty: e.target.value })} />
-                  </div>
-                </div>
-
-                <div className="row">
-                  <div className="col-12 col-md-6">
-                    <div className="form-group">
-                      <label>MONTHLY SALARY</label>
-                      <div className="input-wrap">
-                        <CreditCard size={18} />
-                        <input type="text" value={editStaffData.salary || ''} onChange={e => setEditStaffData({ ...editStaffData, salary: e.target.value })} />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-12 col-md-6">
-                    <div className="form-group">
-                      <label>SHIFT HOURS</label>
-                      <div className="input-wrap">
-                        <Clock size={18} />
-                        <input type="text" value={editStaffData.times || ''} onChange={e => setEditStaffData({ ...editStaffData, times: e.target.value })} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-              <div className="modal-footer">
-                <button type="button" className="cancel-btn" onClick={() => setIsEditStaffModalOpen(false)}>CANCEL</button>
-                <button type="submit" className="submit-btn">SAVE CHANGES</button>
               </div>
             </form>
           </ModalContent>
