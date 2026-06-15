@@ -59,7 +59,11 @@ const MembershipModule = ({ users = [], onAddUser }) => {
 
   const handleSavePlan = async () => {
     const featureList = formData.features.split("\n").filter(f => f.trim() !== "");
-    const planToSave = { ...formData, features: featureList };
+    const planToSave = { 
+      ...formData, 
+      features: featureList,
+      rating: parseFloat(formData.rating) || 0.0
+    };
     
     try {
       if (editingPlan) {

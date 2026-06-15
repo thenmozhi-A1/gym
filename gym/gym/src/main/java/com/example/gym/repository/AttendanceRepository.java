@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     List<Attendance> findByUserId(Long userId);
+    List<Attendance> findByStaffId(Long staffId);
     List<Attendance> findByUserIdAndAttendanceDate(Long userId, LocalDate date);
     List<Attendance> findByAttendanceDate(LocalDate date);
 }
