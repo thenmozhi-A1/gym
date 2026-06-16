@@ -99,7 +99,7 @@ const Subscription = () => {
             </div>
           </SectionHeader>
           <div className="row g-4 mt-2">
-            {plans.filter(p => p.duration.includes("Month")).map(plan => (
+            {plans.filter(p => p.duration && p.duration.toLowerCase().includes("month")).map(plan => (
               <div className="col-lg-6" key={plan.id}>
                 <PricingCard plan={plan} onJoin={() => handlePayment(plan.price, plan.title)} />
               </div>
@@ -117,13 +117,33 @@ const Subscription = () => {
             </div>
           </SectionHeader>
           <div className="row g-4 mt-2">
-            {plans.filter(p => p.duration.includes("Year")).map(plan => (
+            {plans.filter(p => p.duration && p.duration.toLowerCase().includes("year")).map(plan => (
               <div className="col-lg-4" key={plan.id}>
                 <PricingCard plan={plan} onJoin={() => handlePayment(plan.price, plan.title)} />
               </div>
             ))}
           </div>
         </section>
+
+        {/* ── OTHER / SPECIAL PLANS ── */}
+        {plans.filter(p => p.duration && !p.duration.toLowerCase().includes("month") && !p.duration.toLowerCase().includes("year")).length > 0 && (
+        <section id="special-plans" className="py-5 reveal">
+          <SectionHeader>
+            <Star size={40} className="text-warning" />
+            <div>
+              <h2 className="fw-black italic">SPECIAL <span className="text-warning">PLANS</span></h2>
+              <p className="text-secondary">Unique offerings for unique needs.</p>
+            </div>
+          </SectionHeader>
+          <div className="row g-4 mt-2">
+            {plans.filter(p => p.duration && !p.duration.toLowerCase().includes("month") && !p.duration.toLowerCase().includes("year")).map(plan => (
+              <div className="col-lg-4" key={plan.id}>
+                <PricingCard plan={plan} onJoin={() => handlePayment(plan.price, plan.title)} />
+              </div>
+            ))}
+          </div>
+        </section>
+        )}
 
         {/* ── COMPARISON TABLE ── */}
         <section className="py-5 reveal">
