@@ -64,8 +64,9 @@ const AttendanceModule = ({ attendanceData }) => {
         <div className="card-header">
           <h3>{activeTab === "members" ? "Member Logs" : "Staff Logs"}</h3>
         </div>
-        <table className="table">
-          <thead>
+        <div className="table-responsive">
+          <table className="table">
+            <thead>
             <tr>
               <th>NAME</th>
               <th>DATE</th>
@@ -94,7 +95,8 @@ const AttendanceModule = ({ attendanceData }) => {
               <tr><td colSpan={activeTab === "members" ? 4 : 5} className="text-center py-4">No logs found.</td></tr>
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </Container>
   );

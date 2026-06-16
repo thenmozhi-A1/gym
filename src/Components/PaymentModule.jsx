@@ -60,7 +60,7 @@ const PaymentModule = ({ payments }) => {
         </div>
       </div>
 
-      <div className="table-card">
+      <div className="table-card table-responsive">
         <table className="table">
           <thead>
             <tr>

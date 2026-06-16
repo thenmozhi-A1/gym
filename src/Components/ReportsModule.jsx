@@ -186,9 +186,9 @@ const ReportsModule = () => {
           <div style={{ padding: "12px 20px", color: "#f87171", fontSize: "0.85rem", background: "rgba(239,68,68,0.05)" }}>{auditError}</div>
         )}
 
-        <table className="table">
-          <thead>
-            <tr>
+        <div className="table-responsive">
+          <table className="table">
+            <thead>
               <th>TIMESTAMP</th>
               <th>ACTION</th>
               <th>ADMIN</th>
@@ -236,7 +236,8 @@ const ReportsModule = () => {
               })
             )}
           </tbody>
-        </table>
+          </table>
+        </div>
         <div style={{ padding: "10px 20px", borderTop: "1px solid var(--border-color)", fontSize: "0.75rem", color: "var(--text-muted)" }}>
           Showing {filtered.length} of {auditLogs.length} events
         </div>

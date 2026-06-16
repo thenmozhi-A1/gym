@@ -23,6 +23,7 @@ import {
   Settings,
   MoreVertical,
   ChevronDown,
+  Menu,
   ArrowUpRight,
   TrendingDown,
   BarChart3,
@@ -396,10 +397,14 @@ const AdminDashboard = () => {
 
 
       </Sidebar>
+      {isSidebarOpen && <Overlay className="d-lg-none" onClick={() => setIsSidebarOpen(false)} />}
 
       <MainArea>
-        {/* ── HEADER ── */}
+        {/* 🚀 HEADER 🚀 */}
         <Header>
+          <button className="mobile-menu-btn" onClick={() => setIsSidebarOpen(true)}>
+            <Menu size={24} />
+          </button>
           <div className="search-bar">
             <Search size={18} />
             <input placeholder="Search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
@@ -1461,6 +1466,17 @@ const Header = styled.header`
       gap: 10px;
       .profile-chip .avatar { width: 32px; height: 32px; font-size: 0.8rem; }
     }
+  }
+
+  .mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 8px;
+    margin-right: 15px;
+    @media (max-width: 992px) { display: block; }
   }
 
   .search-bar {

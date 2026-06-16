@@ -80,7 +80,8 @@ const TrainerModule = ({ staffs, onAddUser }) => {
 
             <div className="schedule-section" style={{border: 'none', padding: '0', boxShadow: 'none', background: 'transparent'}}>
               <h3 style={{padding: '0 0 16px 0', border: 'none'}}>Today's Assigned Sessions</h3>
-              <table className="table">
+              <div className="table-responsive">
+                <table className="table">
                 <thead>
                   <tr><th>TIME</th><th>MEMBER</th><th>STATUS</th></tr>
                 </thead>
@@ -101,7 +102,8 @@ const TrainerModule = ({ staffs, onAddUser }) => {
                     <td><span className="badge">Upcoming</span></td>
                   </tr>
                 </tbody>
-              </table>
+                </table>
+              </div>
             </div>
 
             <button className="btn-primary w-100 mt-3" onClick={onAddUser} style={{marginTop: 'auto'}}>
