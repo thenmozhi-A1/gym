@@ -129,7 +129,7 @@ const EmployeeDashboard = () => {
     if (!employeeData) return;
     try {
       if (isCheckedIn && logId) {
-        await axiosInstance.put(`/attendance/${logId}/checkout`);
+        await axiosInstance.put(`/attendance/${logId}/checkout`, {});
         toast.success("Checked out successfully!");
       } else {
         await axiosInstance.post(`/attendance/staff/${employeeData.id}`, {});
