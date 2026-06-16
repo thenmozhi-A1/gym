@@ -75,7 +75,7 @@ const MemberManagement = ({ users, onDeleteUser, onAddUser, onEditUser, payments
                     <button className="btn-icon text-danger" onClick={() => onDeleteUser(u.id || u.memberId)} title="Delete User">
                       <Trash2 size={16} />
                     </button>
-                    <button className="btn-icon" onClick={() => setSelectedUser(u)}><MoreVertical size={16} /></button>
+                    <button className="btn-icon" onClick={(e) => { e.stopPropagation(); setEditFormData(u); setIsEditModalOpen(true); }}><MoreVertical size={16} /></button>
                   </div>
                 </td>
               </tr>
@@ -201,24 +201,46 @@ const MemberManagement = ({ users, onDeleteUser, onAddUser, onEditUser, payments
                 
                 <form onSubmit={handleEditSubmit}>
                   <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
-                    <div>
-                      <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>PLAN NAME</label>
-                      <input 
-                        type="text" 
-                        value={editFormData.membershipPlan || editFormData.membershipType || ''} 
-                        onChange={e => setEditFormData({...editFormData, membershipPlan: e.target.value})}
-                        style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
-                      />
+                    <div style={{display: 'flex', gap: '16px'}}>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>FULL NAME</label>
+                        <input 
+                          type="text" 
+                          value={editFormData.fullName || ''} 
+                          onChange={e => setEditFormData({...editFormData, fullName: e.target.value})}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        />
+                      </div>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>EMAIL ADDRESS</label>
+                        <input 
+                          type="email" 
+                          value={editFormData.email || ''} 
+                          onChange={e => setEditFormData({...editFormData, email: e.target.value})}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        />
+                      </div>
                     </div>
-                    
-                    <div>
-                      <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>PHONE NUMBER</label>
-                      <input 
-                        type="tel" 
-                        value={editFormData.phone || editFormData.mobileNumber || ''} 
-                        onChange={e => setEditFormData({...editFormData, phone: e.target.value})}
-                        style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
-                      />
+
+                    <div style={{display: 'flex', gap: '16px'}}>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>PLAN NAME</label>
+                        <input 
+                          type="text" 
+                          value={editFormData.membershipPlan || editFormData.membershipType || ''} 
+                          onChange={e => setEditFormData({...editFormData, membershipPlan: e.target.value})}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        />
+                      </div>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>PHONE NUMBER</label>
+                        <input 
+                          type="tel" 
+                          value={editFormData.phone || editFormData.mobileNumber || ''} 
+                          onChange={e => setEditFormData({...editFormData, phone: e.target.value})}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        />
+                      </div>
                     </div>
                     
                     <div style={{display: 'flex', gap: '16px'}}>

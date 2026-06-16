@@ -94,6 +94,8 @@ const AdminDashboard = () => {
     fingerprintHash: ""
   });
   const [attendanceType, setAttendanceType] = useState("users"); // "users" or "staff"
+  const [isEditStaffModalOpen, setIsEditStaffModalOpen] = useState(false);
+  const [editStaffFormData, setEditStaffFormData] = useState({});
 
   // Subscribe to real-time admin notifications via SSE
   useAdminNotifications((event) => {
@@ -224,6 +226,21 @@ const AdminDashboard = () => {
     } catch (err) {
       log.error(err);
       toast.error("Error processing staff removal.");
+    }
+  };
+
+  const handleEditStaffSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axiosInstance.put(`/staffs/${editStaffFormData.id}`, editStaffFormData);
+      setStaffs(staffs.map(s => s.id === editStaffFormData.id ? res.data : s));
+      setIsEditStaffModalOpen(false);
+      toast.success("Staff updated successfully.");
+    } catch (err) {
+      log.error(err);
+      setStaffs(staffs.map(s => s.id === editStaffFormData.id ? { ...s, ...editStaffFormData } : s));
+      setIsEditStaffModalOpen(false);
+      toast.success("Staff updated locally.");
     }
   };
 
@@ -1028,7 +1045,7 @@ const AdminDashboard = () => {
                                 <button className="btn-icon text-danger" onClick={() => handleDeleteStaff(s.id)} title="Remove Staff">
                                   <Trash2 size={16} />
                                 </button>
-                                <button className="btn-icon"><MoreVertical size={16} /></button>
+                                <button className="btn-icon" onClick={() => { setEditStaffFormData(s); setIsEditStaffModalOpen(true); }}><MoreVertical size={16} /></button>
                               </div>
                             </td>
                           </tr>
@@ -1155,6 +1172,115 @@ const AdminDashboard = () => {
               <div className="modal-footer">
                 <button type="button" className="cancel-btn" onClick={() => setIsAddStaffModalOpen(false)}>CANCEL</button>
                 <button type="submit" className="submit-btn">ENLIST STAFF</button>
+              </div>
+            </form>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {/* ── EDIT STAFF MODAL ── */}
+      {isEditStaffModalOpen && (
+        <ModalOverlay>
+          <ModalContent className="animate-in">
+            <div className="modal-header">
+              <div className="title-area">
+                <div className="icon-wrap"><Users size={24} /></div>
+                <div>
+                  <h3>EDIT STAFF</h3>
+                  <p>Update details for {editStaffFormData.fullName || "Staff Member"}.</p>
+                </div>
+              </div>
+              <button className="close-btn" onClick={() => setIsEditStaffModalOpen(false)}><X size={20} /></button>
+            </div>
+
+            <form onSubmit={handleEditStaffSubmit}>
+              <div className="form-grid">
+                <div className="row">
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>STAFF FULL NAME</label>
+                      <div className="input-wrap">
+                        <Users size={18} />
+                        <input type="text" value={editStaffFormData.fullName || editStaffFormData.name || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, fullName: e.target.value })} required />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>STAFF ROLE</label>
+                      <div className="input-wrap">
+                        <Award size={18} />
+                        <select value={editStaffFormData.role || "Trainer"} onChange={e => setEditStaffFormData({ ...editStaffFormData, role: e.target.value })} style={{ background: 'none', border: 'none', outline: 'none', width: '100%', fontWeight: 600 }}>
+                          <option value="Trainer">Trainer</option>
+                          <option value="Front Office">Front Office</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>EMAIL ADDRESS</label>
+                  <div className="input-wrap">
+                    <Globe size={18} />
+                    <input type="email" value={editStaffFormData.email || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, email: e.target.value })} required />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>PHONE NUMBER</label>
+                      <div className="input-wrap">
+                        <Phone size={18} />
+                        <input type="text" value={editStaffFormData.phone || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, phone: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>HOME ADDRESS</label>
+                      <div className="input-wrap">
+                        <MapPin size={18} />
+                        <input type="text" value={editStaffFormData.address || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, address: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>SPECIALTY / MAIN TASK</label>
+                  <div className="input-wrap">
+                    <Target size={18} />
+                    <input type="text" value={editStaffFormData.specialty || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, specialty: e.target.value })} required />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>MONTHLY SALARY</label>
+                      <div className="input-wrap">
+                        <CreditCard size={18} />
+                        <input type="text" value={editStaffFormData.salary || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, salary: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>SHIFT HOURS</label>
+                      <div className="input-wrap">
+                        <Clock size={18} />
+                        <input type="text" value={editStaffFormData.times || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, times: e.target.value })} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="cancel-btn" onClick={() => setIsEditStaffModalOpen(false)}>CANCEL</button>
+                <button type="submit" className="submit-btn">SAVE CHANGES</button>
               </div>
             </form>
           </ModalContent>
