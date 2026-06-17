@@ -1,5 +1,6 @@
 package com.example.gym.controller;
 
+import com.example.gym.dto.UserRegistrationDTO;
 import com.example.gym.entity.User;
 import com.example.gym.service.UserService;
 import com.example.gym.service.NotificationService;
@@ -60,8 +61,18 @@ public class UserController {
 
     /** POST /api/users/register — Create new account */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@RequestBody @jakarta.validation.Valid UserRegistrationDTO dto) {
         try {
+            User user = new User();
+            user.setFullName(dto.getFullName());
+            user.setEmail(dto.getEmail());
+            user.setPassword(dto.getPassword());
+            user.setPhone(dto.getPhone());
+            user.setAddress(dto.getAddress());
+            user.setGender(dto.getGender());
+            user.setMembershipType(dto.getMembershipType());
+            // Force role to USER for public registration
+            user.setRole("USER");
             User saved = userService.registerUser(user);
             notificationService.broadcast("NEW_MEMBER", Map.of(
                     "id", saved.getId(),

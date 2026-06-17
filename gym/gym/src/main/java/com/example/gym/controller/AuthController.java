@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.gym.entity.PasswordResetToken;
 import com.example.gym.repository.PasswordResetTokenRepository;
@@ -255,10 +256,9 @@ public class AuthController {
         }
     }
 
+    @Transactional
     private void revokeAllUserTokens(Long userId) {
-        // Find and revoke all refresh tokens for the user
-        // (In a real app with JPA, you'd have a custom query for this)
-        // For simplicity, we just rely on token expiration or add a manual query.
+        refreshTokenRepository.deleteByUser_Id(userId);
     }
 
     private String hashToken(String rawToken) {

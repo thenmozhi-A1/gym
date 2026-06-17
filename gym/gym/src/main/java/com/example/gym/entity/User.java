@@ -19,6 +19,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     private String phone;
@@ -44,6 +45,8 @@ public class User {
     private LocalDateTime lockedUntil;
     private Boolean mustChangePassword = false;
     private LocalDateTime passwordChangedAt;
+    
+    private Long tokenVersion = 0L;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @com.fasterxml.jackson.annotation.JsonIgnore
@@ -120,4 +123,6 @@ public class User {
     public void setMustChangePassword(Boolean mustChangePassword) { this.mustChangePassword = mustChangePassword; }
     public LocalDateTime getPasswordChangedAt() { return passwordChangedAt; }
     public void setPasswordChangedAt(LocalDateTime passwordChangedAt) { this.passwordChangedAt = passwordChangedAt; }
+    public Long getTokenVersion() { return tokenVersion; }
+    public void setTokenVersion(Long tokenVersion) { this.tokenVersion = tokenVersion; }
 }
