@@ -36,6 +36,14 @@ public class Staff {
     @JsonBackReference
     private User user;
 
+    @OneToMany(mappedBy = "staff", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private java.util.List<LeaveRequest> leaveRequests;
+
+    @OneToMany(mappedBy = "staff", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private java.util.List<Attendance> attendances;
+
     public Staff() {}
 
     public Long getId() { return id; }
