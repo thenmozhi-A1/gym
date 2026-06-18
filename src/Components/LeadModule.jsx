@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Users, Phone, Mail, Instagram, Facebook, Globe, Calendar, CheckCircle } from "lucide-react";
+import { useAdminStore } from "../store/useAdminStore";
 
 const LeadModule = () => {
-  const [leads, setLeads] = useState([
-    { id: "L-1001", name: "Alice Cooper", mobile: "9876543210", email: "alice@example.com", source: "Instagram", plan: "Annual VIP", followUp: "2026-06-10", status: "Hot", converted: false },
-    { id: "L-1002", name: "Bob Martin", mobile: "9876543211", email: "bob@example.com", source: "Walk-In", plan: "Monthly", followUp: "2026-06-09", status: "Warm", converted: false },
-    { id: "L-1003", name: "Charlie Brown", mobile: "9876543212", email: "charlie@example.com", source: "Facebook", plan: "Quarterly", followUp: "2026-06-12", status: "Cold", converted: false },
-  ]);
+  const { consultations: leads, deleteConsultation } = useAdminStore();
 
   const getSourceIcon = (source) => {
     switch(source) {
@@ -28,8 +25,8 @@ const LeadModule = () => {
     }
   };
 
-  const markConverted = (id) => {
-    setLeads(leads.map(l => l.id === id ? { ...l, converted: true } : l));
+  const markConverted = async (id) => {
+    await deleteConsultation(id);
     // In a real app, this would also open the AddUserModal pre-filled with lead data
   };
 
@@ -49,12 +46,12 @@ const LeadModule = () => {
         </div>
         <div className="metric-card">
           <div className="label">Follow-Ups Today</div>
-          <div className="value text-warning">2</div>
+          <div className="value text-warning">0</div>
         </div>
         <div className="metric-card">
           <div className="label">Conversion Rate</div>
           <div className="value text-success">
-            {leads.length > 0 ? Math.round((leads.filter(l => l.converted).length / leads.length) * 100) : 0}%
+            0%
           </div>
         </div>
       </div>
@@ -73,31 +70,31 @@ const LeadModule = () => {
             </tr>
           </thead>
           <tbody>
-            {leads.filter(l => !l.converted).map(lead => (
+            {leads.map(lead => (
               <tr key={lead.id}>
                 <td>
-                  <div className="fw-bold">{lead.name}</div>
-                  <div className="sub-text">{lead.id}</div>
+                  <div className="fw-bold">{lead.fullName || 'Unknown'}</div>
+                  <div className="sub-text">C-{lead.id}</div>
                 </td>
                 <td>
                   <div className="contact-info">
-                    <span><Phone size={12} /> {lead.mobile}</span>
+                    <span><Phone size={12} /> {lead.phone}</span>
                     <span><Mail size={12} /> {lead.email}</span>
                   </div>
                 </td>
                 <td>
                   <div className="source-badge">
-                    {getSourceIcon(lead.source)}
-                    <span>{lead.source}</span>
+                    {getSourceIcon('Web Form')}
+                    <span>Web Form</span>
                   </div>
                 </td>
-                <td className="fw-bold">{lead.plan}</td>
+                <td className="fw-bold">{lead.goals}</td>
                 <td>
                   <div className="followup-info">
-                    <Calendar size={14} /> {lead.followUp}
+                    <Calendar size={14} /> {new Date(lead.createdAt).toLocaleDateString()}
                   </div>
                 </td>
-                <td>{getStatusBadge(lead.status)}</td>
+                <td>{getStatusBadge('New')}</td>
                 <td>
                   <button className="btn-convert" onClick={() => markConverted(lead.id)} title="Convert to Member">
                     <CheckCircle size={16} /> Convert
@@ -105,7 +102,7 @@ const LeadModule = () => {
                 </td>
               </tr>
             ))}
-            {leads.filter(l => !l.converted).length === 0 && (
+            {leads.length === 0 && (
               <tr><td colSpan="7" className="text-center py-4">No active leads.</td></tr>
             )}
           </tbody>

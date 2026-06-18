@@ -232,5 +232,20 @@ export const useAdminStore = create((set, get) => ({
       toast.error("Error deleting feedback.");
       return false;
     }
+  },
+
+  deleteConsultation: async (id) => {
+    try {
+      await axiosInstance.delete(`/consultations/${id}`);
+      set((state) => ({
+        consultations: state.consultations.filter(c => c.id !== id)
+      }));
+      toast.success("Lead converted/deleted successfully.");
+      return true;
+    } catch (err) {
+      log.error(err);
+      toast.error("Error updating lead status.");
+      return false;
+    }
   }
 }));
