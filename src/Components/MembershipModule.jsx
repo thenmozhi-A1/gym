@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { CheckCircle, Clock, AlertTriangle, Shield, Plus, Edit2, Trash2, X } from "lucide-react";
 import axiosInstance from "../api/axiosInstance";
+import { useAdminStore } from "../store/useAdminStore";
 
-const MembershipModule = ({ users = [], onAddUser }) => {
+const MembershipModule = ({ onAddUser }) => {
+  const { users } = useAdminStore();
   const [plans, setPlans] = useState([]);
   
   useEffect(() => {
@@ -136,28 +138,30 @@ const MembershipModule = ({ users = [], onAddUser }) => {
       </div>
 
       <div className="renewal-section">
-        <h3>Upcoming Renewals (Next 7 Days)</h3>
+        <h3>All Member Renewals</h3>
         <div className="table-responsive">
           <table className="table">
             <thead>
               <tr><th>MEMBER</th><th>PLAN</th><th>EXPIRY DATE</th><th>CONTACT</th><th>ACTION</th></tr>
             </thead>
             <tbody>
-              {users.filter(u => {
-                if (!u.expiryDate) return false;
-                const expDate = new Date(u.expiryDate);
-                return expDate >= today && expDate <= nextWeek;
-              }).map(u => (
+              {[...users]
+              .sort((a, b) => {
+                if (!a.expiryDate) return 1;
+                if (!b.expiryDate) return -1;
+                return new Date(a.expiryDate) - new Date(b.expiryDate);
+              })
+              .map(u => (
                 <tr key={u.id || u.memberId}>
                   <td className="fw-bold">{u.fullName}</td>
                   <td>{u.membershipPlan || "Standard"}</td>
-                  <td className="text-danger fw-bold">{new Date(u.expiryDate).toLocaleDateString()}</td>
-                  <td className="sub-text">{u.mobileNumber || "N/A"}</td>
+                  <td className="text-danger fw-bold">{u.expiryDate ? new Date(u.expiryDate).toLocaleDateString() : "N/A"}</td>
+                  <td className="sub-text">{u.phone || u.mobileNumber || "N/A"}</td>
                   <td><button className="btn-renew">Send Reminder</button></td>
                 </tr>
               ))}
-              {renewalsDue === 0 && (
-                <tr><td colSpan="5" className="text-center py-4 text-muted">No renewals due in the next 7 days.</td></tr>
+              {users.length === 0 && (
+                <tr><td colSpan="5" className="text-center py-4 text-muted">No members found with an active plan.</td></tr>
               )}
             </tbody>
           </table>
@@ -245,8 +249,15 @@ const Container = styled.div`
   
   .header-actions {
     display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column; align-items: flex-start;
+    }
+
     .title-area {
       display: flex; align-items: center; gap: 16px;
+      flex-wrap: wrap;
     }
     h2 { margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text-color); display: flex; align-items: center; gap: 8px; }
     small { font-weight: 400; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 1px; }
@@ -259,7 +270,7 @@ const Container = styled.div`
   }
 
   .stats-row {
-    display: flex; gap: 12px;
+    display: flex; gap: 12px; flex-wrap: wrap;
     .stat-pill {
       display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
       &.success { background: rgba(16, 185, 129, 0.1); color: #10b981; }

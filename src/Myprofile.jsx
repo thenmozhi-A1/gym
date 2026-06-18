@@ -143,7 +143,7 @@ const Myprofile = () => {
   const user = useAuthStore((state) => state.user) || {};
   const logout = useAuthStore((state) => state.logout);
 
-  const userName = user.fullName || localStorage.getItem("userName") || "Guest User";
+  const userName = user.fullName || localStorage.getItem("userName") || "User";
   const userEmail = user.email || localStorage.getItem("userEmail") || "Not logged in";
   const membershipType = user.membershipType || "Standard";
 
@@ -173,13 +173,7 @@ const Myprofile = () => {
             <ContactInfo>
               <p><strong>Email:</strong> contact@gym.com</p>
               <p><strong>Phone:</strong> +123 456 7890</p>
-              <hr />
-              <SectionTitle>Security</SectionTitle>
-              <p style={{ fontSize: "0.85rem", marginBottom: "15px" }}>Manage your biometric login devices for the kiosk.</p>
             </ContactInfo>
-            <Button $variant="outline" onClick={() => navigate('/enrol-fingerprint')}>
-              Fingerprint Enrolment
-            </Button>
             <Button $variant="danger" onClick={handleLogout} style={{ marginTop: "10px" }}>
               Logout & Go Home
             </Button>

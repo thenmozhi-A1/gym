@@ -5,7 +5,7 @@ import styled, { keyframes, css } from "styled-components";
 import {
   User, CreditCard, Clock, Dumbbell, Star, LogOut,
   Download, ChevronRight, CheckCircle, AlertCircle,
-  Calendar, Zap, TrendingUp, FileText, MessageSquare
+  Calendar, Zap, TrendingUp, FileText, MessageSquare, ChevronLeft
 } from "lucide-react";
 import axiosInstance from "./api/axiosInstance";
 import useAuthStore from "./store/authStore";
@@ -458,6 +458,7 @@ const Userdashboard = () => {
   const [checkins,  setCheckins]    = useState([]);
   const [payments,  setPayments]    = useState([]);
   const [loading,   setLoading]     = useState(true);
+  const [attendanceMonth, setAttendanceMonth] = useState(new Date());
 
   // Feedback state
   const [rating,       setRating]       = useState(5);
@@ -465,6 +466,7 @@ const Userdashboard = () => {
   const [feedbackMsg,  setFeedbackMsg]  = useState('');
   const [submitting,   setSubmitting]   = useState(false);
   const [fbStatus,     setFbStatus]     = useState(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const userId = user?.id;
 
@@ -502,6 +504,25 @@ const Userdashboard = () => {
   const recentPayments  = [...payments].reverse().slice(0, 5);
   const totalCheckins   = checkins.length;
   const successPay      = payments.filter(p => p.paymentStatus === 'SUCCESS').length;
+
+  const handlePrevAttMonth = () => setAttendanceMonth(new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth() - 1, 1));
+  const handleNextAttMonth = () => setAttendanceMonth(new Date(attendanceMonth.getFullYear(), attendanceMonth.getMonth() + 1, 1));
+
+  const filteredCheckins = checkins.filter(c => {
+    let d = c.attendanceDate || c.date;
+    if (Array.isArray(d)) {
+      return d[0] === attendanceMonth.getFullYear() && (d[1] - 1) === attendanceMonth.getMonth();
+    }
+    if (typeof d === 'string') {
+      const dateObj = new Date(d);
+      return dateObj.getFullYear() === attendanceMonth.getFullYear() && dateObj.getMonth() === attendanceMonth.getMonth();
+    }
+    return false;
+  }).sort((a,b) => {
+     let da = Array.isArray(a.attendanceDate) ? new Date(a.attendanceDate[0], a.attendanceDate[1]-1, a.attendanceDate[2]) : new Date(a.attendanceDate || a.date);
+     let db = Array.isArray(b.attendanceDate) ? new Date(b.attendanceDate[0], b.attendanceDate[1]-1, b.attendanceDate[2]) : new Date(b.attendanceDate || b.date);
+     return db - da;
+  });
 
   // Next payment date: last payment date + 30 days
   const lastPay     = payments.length ? [...payments].sort((a,b) => new Date(b.paymentDate) - new Date(a.paymentDate))[0] : null;
@@ -575,21 +596,64 @@ const Userdashboard = () => {
       <NavBar>
         <NavBrand>B&Y FITNESS</NavBrand>
         <NavActions>
-          <button 
-            onClick={activeCheckin ? handleCheckOut : handleCheckIn}
-            style={{
-              background: activeCheckin ? '#ef4444' : '#28a745', color: '#fff', border: 'none', 
-              padding: '8px 16px', borderRadius: '12px', fontWeight: 'bold',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-              fontSize: '0.85rem'
-            }}
-          >
-            <Clock size={16} /> {activeCheckin ? 'Check Out' : 'Check In'}
-          </button>
-          <IconBtn onClick={() => navigate('/myprofile')} title="Profile"><User size={16} /></IconBtn>
-          <IconBtn onClick={handleLogout} title="Logout"><LogOut size={16} /></IconBtn>
-        </NavActions>
-      </NavBar>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {activeCheckin && (
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'right', display: 'none' }} className="d-sm-block">
+                <div>Checked in at</div>
+                <div style={{ color: '#34d399', fontWeight: 'bold' }}>{activeCheckin.checkInTime || activeCheckin.entry || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+              </div>
+            )}
+            <button 
+              onClick={activeCheckin ? handleCheckOut : handleCheckIn}
+              style={{
+                background: activeCheckin ? '#ef4444' : '#28a745', color: '#fff', border: 'none', 
+                padding: '8px 16px', borderRadius: '12px', fontWeight: 'bold',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                fontSize: '0.85rem'
+              }}
+            >
+              <Clock size={16} /> {activeCheckin ? 'Check Out' : 'Check In'}
+            </button>
+          </div>
+            <div style={{ position: 'relative' }}>
+              <IconBtn onClick={() => setIsProfileOpen(!isProfileOpen)} title="Profile"><User size={16} /></IconBtn>
+              {isProfileOpen && (
+                <>
+                  <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setIsProfileOpen(false)} />
+                  <div style={{
+                    position: 'absolute', top: '50px', right: '0', background: '#1e293b', border: '1px solid #334155',
+                    borderRadius: '12px', padding: '16px', width: '250px', zIndex: 100, boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                    animation: 'fadeUp 0.2s ease'
+                  }}>
+                    <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                      <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#facc15', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold', margin: '0 auto 10px' }}>
+                        {firstName.charAt(0)}
+                      </div>
+                      <h4 style={{ margin: '0 0 4px', fontSize: '1rem', color: '#f8fafc' }}>{displayName}</h4>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#94a3b8' }}>{profile?.email || user?.email || 'N/A'}</p>
+                    </div>
+                    <div style={{ borderTop: '1px solid #334155', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                        <span style={{ color: '#64748b' }}>Plan:</span>
+                        <span style={{ color: '#e2e8f0', fontWeight: 'bold' }}>{plan}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                        <span style={{ color: '#64748b' }}>Status:</span>
+                        <span style={{ color: isActive ? '#34d399' : '#f87171', fontWeight: 'bold' }}>{memberStatus}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                        <span style={{ color: '#64748b' }}>Next Renewal:</span>
+                        <span style={{ color: '#e2e8f0', fontWeight: 'bold' }}>{nextPayDate}</span>
+                      </div>
+                    </div>
+                    <button onClick={() => { setIsProfileOpen(false); navigate('/myprofile'); }} style={{ width: '100%', padding: '8px', marginTop: '16px', background: 'rgba(255,255,255,0.05)', border: '1px solid #334155', borderRadius: '6px', color: '#f1f5f9', cursor: 'pointer', fontSize: '0.8rem' }}>View Full Profile</button>
+                  </div>
+                </>
+              )}
+            </div>
+            <IconBtn onClick={handleLogout} title="Logout"><LogOut size={16} /></IconBtn>
+          </NavActions>
+        </NavBar>
 
       <Hero>
         <HeroGreeting>Good day</HeroGreeting>
@@ -624,6 +688,12 @@ const Userdashboard = () => {
                     <PlanBadge><Star size={12} /> {plan} Plan</PlanBadge>
                     <div style={{ marginTop: 10, fontSize: '0.8rem', color: '#64748b' }}>
                       Next renewal: <strong style={{ color: '#e2e8f0' }}>{nextPayDate}</strong>
+                      {lastPay && (
+                        <>
+                          <span style={{ margin: '0 8px', color: '#334155' }}>|</span>
+                          Last paid: <strong style={{ color: '#facc15' }}>₹{(lastPay.amount || 0).toLocaleString()}</strong>
+                        </>
+                      )}
                     </div>
                   </div>
                   <StatusBadge $ok={isActive}>
@@ -681,8 +751,8 @@ const Userdashboard = () => {
             {recentCheckins.length > 0 && (
               <Card>
                 <CardTitle><Clock size={13} /> Last Check-in</CardTitle>
-                <CheckInDate>{recentCheckins[0].date || 'Today'}</CheckInDate>
-                <CheckInTime>Entry: {recentCheckins[0].entry || recentCheckins[0].checkInTime || '—'}</CheckInTime>
+                <CheckInDate>{Array.isArray(recentCheckins[0].attendanceDate) ? `${recentCheckins[0].attendanceDate[0]}-${String(recentCheckins[0].attendanceDate[1]).padStart(2, '0')}-${String(recentCheckins[0].attendanceDate[2]).padStart(2, '0')}` : recentCheckins[0].date || recentCheckins[0].attendanceDate || 'Today'}</CheckInDate>
+                <CheckInTime>Entry: {recentCheckins[0].entry || recentCheckins[0].checkInTime || '—'} {(recentCheckins[0].exit || recentCheckins[0].checkOutTime) && `· Exit: ${recentCheckins[0].exit || recentCheckins[0].checkOutTime}`}</CheckInTime>
                 <button onClick={() => setActiveTab('checkins')} style={{
                   background: 'none', border: 'none', color: '#facc15', fontSize: '0.8rem',
                   fontWeight: 600, cursor: 'pointer', padding: 0, marginTop: 10,
@@ -696,20 +766,36 @@ const Userdashboard = () => {
         {/* ══════════ CHECK-INS TAB ══════════ */}
         {activeTab === 'checkins' && (
           <Card>
-            <CardTitle><Clock size={13} /> Recent Check-ins</CardTitle>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <CardTitle style={{ margin: 0 }}><Clock size={13} /> Monthly Attendance</CardTitle>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <button onClick={handlePrevAttMonth} style={{ padding: "4px", borderRadius: "50%", border: "1px solid #334155", background: "#0f172a", color: "#f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronLeft size={16} /></button>
+                <span style={{ fontWeight: "bold", color: "#facc15", width: "120px", textAlign: "center", fontSize: "0.85rem" }}>
+                  {attendanceMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                </span>
+                <button onClick={handleNextAttMonth} style={{ padding: "4px", borderRadius: "50%", border: "1px solid #334155", background: "#0f172a", color: "#f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronRight size={16} /></button>
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ padding: '8px 12px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '8px', color: '#34d399', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                Total Present: {filteredCheckins.length} days
+              </div>
+            </div>
+
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <SkeletonBlock key={i} $h={36} $mb={8} />
               ))
-            ) : recentCheckins.length === 0 ? (
+            ) : filteredCheckins.length === 0 ? (
               <p style={{ color: '#64748b', fontSize: '0.875rem', textAlign: 'center', padding: '20px 0' }}>
-                No check-in records found.
+                No check-in records found for this month.
               </p>
             ) : (
-              recentCheckins.map((c, i) => (
+              filteredCheckins.map((c, i) => (
                 <CheckInItem key={i}>
                   <div>
-                    <CheckInDate>{c.date || 'Unknown date'}</CheckInDate>
+                    <CheckInDate>{Array.isArray(c.attendanceDate) ? `${c.attendanceDate[0]}-${String(c.attendanceDate[1]).padStart(2, '0')}-${String(c.attendanceDate[2]).padStart(2, '0')}` : c.date || c.attendanceDate || 'Unknown date'}</CheckInDate>
                     <CheckInTime>
                       Entry: {c.entry || c.checkInTime || '—'}
                       {(c.exit || c.checkOutTime) && ` · Exit: ${c.exit || c.checkOutTime}`}

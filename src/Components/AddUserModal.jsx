@@ -17,7 +17,7 @@ const userSchema = z.object({
   gender: z.string().min(1, "Select a gender"),
   dob: z.string().min(1, "Date of birth is required"),
   age: z.string().optional(),
-  mobileNumber: z
+  phone: z
     .string()
     .regex(/^\+?[0-9\s\-().]{7,15}$/, "Enter a valid phone number (7–15 digits)"),
   email: z.string().min(1, "Email is required").email("Enter a valid email address"),
@@ -65,7 +65,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       gender: "",
       dob: "",
       age: "",
-      mobileNumber: "",
+      phone: "",
       email: "",
       password: "",
       city: "",
@@ -118,7 +118,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
 
   const handleNext = async () => {
     let fieldsToValidate = [];
-    if (currentStep === 1) fieldsToValidate = ["fullName", "gender", "dob", "mobileNumber", "email", "password", "city"];
+    if (currentStep === 1) fieldsToValidate = ["fullName", "gender", "dob", "phone", "email", "password", "city"];
     else if (currentStep === 2) fieldsToValidate = ["height", "weight", "bloodGroup", "fitnessGoal"];
     else if (currentStep === 3) fieldsToValidate = ["membershipPlan", "startDate", "expiryDate", "referralSource"];
 
@@ -181,8 +181,8 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               </div>
               <div className="form-group">
                 <label>Mobile Number</label>
-                <input type="tel" placeholder="+91 98765 43210" $hasError={!!errors.mobileNumber} {...register("mobileNumber")} />
-                {errors.mobileNumber && <p className="error-text">⚠ {errors.mobileNumber.message}</p>}
+                <input type="tel" placeholder="+91 98765 43210" $hasError={!!errors.phone} {...register("phone")} />
+                {errors.phone && <p className="error-text">⚠ {errors.phone.message}</p>}
               </div>
               <div className="form-group">
                 <label>Email Address</label>

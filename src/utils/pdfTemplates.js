@@ -129,11 +129,11 @@ export function generatePayslipPDF(employeeData, netPay) {
     startY: 100,
     head: [['Description', 'Earnings (INR)', 'Deductions (INR)']],
     body: [
-      ['Basic Salary',                        `₹ ${grossSalary.toLocaleString()}`,    '—'],
-      [`Leave Deduction (${leaves} days)`,    '—',                                    `₹ ${leaveDeduction.toLocaleString()}`],
-      [`Permission Deduction (${permissions} hrs)`, '—',                              `₹ ${permDeduction.toLocaleString()}`],
-      ['Provident Fund (PF)',                  '—',                                   `₹ ${pfDeduction.toLocaleString()}`],
-      ['TDS / Professional Tax',               '—',                                   `₹ ${tdsDeduction.toLocaleString()}`],
+      ['Basic Salary',                        `INR ${grossSalary.toLocaleString()}`,    '—'],
+      [`Leave Deduction (${leaves} days)`,    '—',                                    `INR ${leaveDeduction.toLocaleString()}`],
+      [`Permission Deduction (${permissions} hrs)`, '—',                              `INR ${permDeduction.toLocaleString()}`],
+      ['Provident Fund (PF)',                  '—',                                   `INR ${pfDeduction.toLocaleString()}`],
+      ['TDS / Professional Tax',               '—',                                   `INR ${tdsDeduction.toLocaleString()}`],
     ],
     theme: 'grid',
     headStyles: { fillColor: BRAND_BLUE, textColor: WHITE, fontStyle: 'bold', fontSize: 9 },
@@ -162,7 +162,7 @@ export function generatePayslipPDF(employeeData, netPay) {
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text(
-    `Gross: ₹${grossSalary.toLocaleString()}  |  Total Deductions: ₹${totalDeductions.toLocaleString()}`,
+    `Gross: INR ${grossSalary.toLocaleString()}  |  Total Deductions: INR ${totalDeductions.toLocaleString()}`,
     22, finalY + 17
   );
 
@@ -208,8 +208,8 @@ export function generateInvoicePDF(payment) {
     startY: 100,
     head: [['#', 'Description', 'Qty', 'Unit Price', 'Amount']],
     body: [
-      ['01', 'Gym Membership Fee',   '1', `₹ ${baseAmount.toLocaleString()}`, `₹ ${baseAmount.toLocaleString()}`],
-      ['02', 'GST @ 18%',            '—', '—',                                `₹ ${gst.toLocaleString()}`],
+      ['01', 'Gym Membership Fee',   '1', `INR ${baseAmount.toLocaleString()}`, `INR ${baseAmount.toLocaleString()}`],
+      ['02', 'GST @ 18%',            '—', '—',                                `INR ${gst.toLocaleString()}`],
     ],
     theme: 'grid',
     headStyles: { fillColor: BRAND_BLUE, textColor: WHITE, fontStyle: 'bold', fontSize: 9 },

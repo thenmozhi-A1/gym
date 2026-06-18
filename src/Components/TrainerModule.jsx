@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Users, Award, Briefcase, Calendar, ChevronRight, X } from "lucide-react";
+import { useAdminStore } from "../store/useAdminStore";
 
-const TrainerModule = ({ staffs, onAddUser }) => {
+const TrainerModule = ({ onAddUser }) => {
+  const { staffs, users } = useAdminStore();
   const [selectedTrainerSchedule, setSelectedTrainerSchedule] = useState(null);
   const trainers = staffs.filter(s => s.role === 'Trainer' || s.role === 'TRAINER');
   
@@ -31,11 +33,11 @@ const TrainerModule = ({ staffs, onAddUser }) => {
             <div className="t-stats">
               <div className="stat">
                 <label>Assigned</label>
-                <strong>{Math.floor(Math.random() * 15) + 5} Members</strong>
+                <strong>{users ? users.length : 0} Members</strong>
               </div>
               <div className="stat">
                 <label>Experience</label>
-                <strong>{Math.floor(Math.random() * 5) + 2} Years</strong>
+                <strong>{trainer.experience || "Not Specified"}</strong>
               </div>
             </div>
             
@@ -86,21 +88,25 @@ const TrainerModule = ({ staffs, onAddUser }) => {
                   <tr><th>TIME</th><th>MEMBER</th><th>STATUS</th></tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td className="fw-bold">07:00 AM</td>
-                    <td>John Doe</td>
-                    <td><span className="badge bg-success-light">Completed</span></td>
-                  </tr>
-                  <tr>
-                    <td className="fw-bold">09:00 AM</td>
-                    <td>Emma Smith</td>
-                    <td><span className="badge bg-warning-light text-warning">In Progress</span></td>
-                  </tr>
-                  <tr>
-                    <td className="fw-bold">04:00 PM</td>
-                    <td>Mike Ross</td>
-                    <td><span className="badge">Upcoming</span></td>
-                  </tr>
+                  {users && users.length > 0 ? (
+                    users.slice(0, 4).map((u, idx) => (
+                      <tr key={u.id || idx}>
+                        <td className="fw-bold">{["07:00 AM", "09:00 AM", "02:00 PM", "05:00 PM"][idx] || "06:00 PM"}</td>
+                        <td>{u.fullName || u.name}</td>
+                        <td>
+                          {idx === 0 ? <span className="badge bg-success-light">Completed</span> :
+                           idx === 1 ? <span className="badge bg-warning-light text-warning">In Progress</span> :
+                           <span className="badge">Upcoming</span>}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
+                        No members enrolled yet.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
                 </table>
               </div>

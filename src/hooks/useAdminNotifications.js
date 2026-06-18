@@ -61,6 +61,24 @@ export function useAdminNotifications(onNotification) {
       onNotification?.({ type: 'ATTENDANCE', ...data });
     });
 
+    es.addEventListener('FEEDBACK', (e) => {
+      const data = JSON.parse(e.data);
+      toast.success(
+        `New feedback from ${data.payload?.name || 'Anonymous'}`,
+        { icon: '⭐', duration: 5000, id: `fb-${data.timestamp}` }
+      );
+      onNotification?.({ type: 'FEEDBACK', ...data });
+    });
+
+    es.addEventListener('ENQUIRY', (e) => {
+      const data = JSON.parse(e.data);
+      toast(
+        `New Enquiry from ${data.payload?.name || 'Someone'}`,
+        { icon: '📞', duration: 5000, id: `enq-${data.timestamp}` }
+      );
+      onNotification?.({ type: 'ENQUIRY', ...data });
+    });
+
     es.onerror = () => {
       es.close();
       esRef.current = null;

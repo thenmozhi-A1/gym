@@ -38,7 +38,8 @@ import {
   CheckSquare,
   Briefcase,
   FileCheck,
-  Package
+  Package,
+  Menu
 } from "lucide-react";
 
 import AddUserModal from "./Components/AddUserModal";
@@ -53,20 +54,21 @@ import LeadModule from "./Components/LeadModule";
 import CommunicationModule from "./Components/CommunicationModule";
 import ReportsModule from "./Components/ReportsModule";
 import ProductModule from "./Components/ProductModule";
+import RequestsModule from "./Components/RequestsModule";
 import axiosInstance from "./api/axiosInstance";
 import log from "./utils/logger";
 import { useAdminNotifications } from "./hooks/useAdminNotifications";
+import { useAdminStore } from "./store/useAdminStore";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [users, setUsers] = useState([]);
-  const [payments, setPayments] = useState([]);
-  const [attendance, setAttendance] = useState([]);
-  const [consultations, setConsultations] = useState([]);
-  const [feedbacks, setFeedbacks] = useState([]);
-  const [staffs, setStaffs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    users, staffs, payments, attendance, consultations, feedbacks, isLoading: loading,
+    fetchData, addUser, updateUser, deleteUser, addStaff, updateStaff, deleteStaff, deleteFeedback
+  } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -89,7 +91,7 @@ const AdminDashboard = () => {
   const progressTimer = useRef(null);
   const [enrollProgress, setEnrollProgress] = useState(0);
   const [newStaff, setNewStaff] = useState({
-    name: "", specialty: "", salary: "", times: "", email: "",
+    name: "", specialty: "", experience: "", salary: "", times: "", email: "",
     role: "Trainer", phone: "", address: "",
     fingerprintEnrolled: false,
     fingerprintHash: ""
@@ -105,144 +107,41 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
-    fetchData();
-  }, [activeTab]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      if (activeTab === "payroll") {
-        setLoading(false);
-        return;
-      }
-
-      const endpoints = activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks"
-        ? ["users", "payments", "attendance", "consultations", "staffs", "feedbacks"]
-        : [activeTab];
-
-      const ts = new Date().getTime();
-      const results = await Promise.all(
-        endpoints.map(ep => axiosInstance.get(`/${ep}?_t=${ts}`).then(r => r.data).catch(() => []))
-      );
-
-      if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
-        const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => !['admin', 'ADMIN'].includes(u.role));
-        
-        setUsers(standardUsers);
-        setPayments(Array.isArray(results[1]) ? results[1] : []);
-        setAttendance(Array.isArray(results[2]) ? results[2] : []);
-        setConsultations(Array.isArray(results[3]) ? results[3] : []);
-        
-        const allAttendances = Array.isArray(results[2]) ? results[2] : [];
-        const rawStaffs = Array.isArray(results[4]) ? results[4] : [];
-        const daysPassed = new Date().getDate();
-        const enhancedStaffs = rawStaffs.map(s => {
-          const staffLogs = allAttendances.filter(a => (a.staff?.id === s.id || a.user?.id === s.id) && (a.status === "PRESENT" || a.status === "Present" || !a.status));
-          const daysWorked = staffLogs.length;
-          return { ...s, leaves: Math.max(0, daysPassed - daysWorked) };
-        });
-        setStaffs(enhancedStaffs);
-
-        setFeedbacks(Array.isArray(results[5]) ? results[5] : []);
-      } else {
-        const data = Array.isArray(results[0]) ? results[0] : [];
-        if (activeTab === "payments") setPayments(data);
-        else if (activeTab === "attendance") setAttendance(data);
-        else if (activeTab === "feedbacks") setFeedbacks(data);
-        else setConsultations(data);
-      }
-    } catch (e) { log.error(e); }
-    finally { setLoading(false); }
-  };
+    fetchData(activeTab);
+  }, [activeTab, fetchData]);
 
   const handleAddUser = async (userData) => {
-    try {
-      const res = await axiosInstance.post("/users/register", userData);
-      
-      const savedUser = res.data;
-      setUsers([savedUser, ...users]);
-      
-      if (userData.paymentAmount) {
-        setPayments([{
-          id: `PAY-${Math.floor(Math.random() * 10000)}`,
-          user: { fullName: userData.fullName },
-          amount: parseFloat(userData.paymentAmount),
-          paymentStatus: "SUCCESS",
-          paymentDate: new Date().toISOString().split('T')[0],
-          paymentMode: userData.paymentMode
-        }, ...payments]);
-      }
-      toast.success("MEMBER ENLISTED AND SAVED TO DATABASE SUCCESSFULLY!");
-    } catch (err) {
-      toast.error(`Failed to save to database: ${err.response?.data?.error || err.message}`);
+    const success = await addUser(userData);
+    if (success) {
+      setIsAddUserModalOpen(false);
     }
   };
 
   const handleDeleteFeedback = async (id) => {
     if (!window.confirm("Remove this feedback?")) return;
-    try {
-      await axiosInstance.delete(`/feedbacks/${id}`);
-      setFeedbacks(feedbacks.filter(f => f.id !== id));
-      toast.success("Feedback deleted successfully.");
-    } catch (err) {
-      log.error(err);
-      toast.error("Error deleting feedback.");
-    }
+    await deleteFeedback(id);
   };
 
   const handleLogout = () => { localStorage.clear(); navigate("/login"); };
 
   const handleDeleteUser = async (id) => {
     if (!window.confirm("Permanent deletion cannot be undone. Proceed?")) return;
-    try {
-      await axiosInstance.delete(`/users/${id}`);
-      setUsers(users.filter(u => u.id !== id && u.memberId !== id));
-      toast.success("User completely deleted from the database.");
-    } catch (err) {
-      if (id.toString().startsWith("u_")) {
-        setUsers(users.filter(u => u.id !== id && u.memberId !== id));
-      } else {
-        toast.error("Failed to delete user from the database.");
-      }
-    }
+    await deleteUser(id);
   };
 
   const handleEditUser = async (id, updatedData) => {
-    try {
-      const res = await axiosInstance.put(`/users/${id}`, updatedData);
-      const updatedUser = res.data;
-      setUsers(users.map(u => (u.id === id || u.memberId === id) ? updatedUser : u));
-      return true;
-    } catch (err) {
-      setUsers(users.map(u => (u.id === id || u.memberId === id) ? { ...u, ...updatedData } : u));
-      return true;
-    }
+    return await updateUser(id, updatedData);
   };
+
   const handleDeleteStaff = async (id) => {
     if (!window.confirm("Remove this staff member from the system?")) return;
-    try {
-      await axiosInstance.delete(`/staffs/${id}`);
-      setStaffs(staffs.filter(s => s.id !== id));
-      toast.success("Staff removed successfully.");
-    } catch (err) {
-      log.error(err);
-      toast.error("Error processing staff removal.");
-    }
+    await deleteStaff(id);
   };
 
   const handleEditStaffSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await axiosInstance.put(`/staffs/${editStaffFormData.id}`, editStaffFormData);
-      setStaffs(staffs.map(s => s.id === editStaffFormData.id ? res.data : s));
-      setIsEditStaffModalOpen(false);
-      toast.success("Staff updated successfully.");
-    } catch (err) {
-      log.error(err);
-      setStaffs(staffs.map(s => s.id === editStaffFormData.id ? { ...s, ...editStaffFormData } : s));
-      setIsEditStaffModalOpen(false);
-      toast.success("Staff updated locally.");
-    }
+    await updateStaff(editStaffFormData.id, editStaffFormData);
+    setIsEditStaffModalOpen(false);
   };
 
   const isWebAuthnSupported = () => window.PublicKeyCredential !== undefined && typeof window.PublicKeyCredential === 'function';
@@ -317,50 +216,79 @@ const AdminDashboard = () => {
   const handleAddStaff = async (e) => {
     e.preventDefault();
     if (!newStaff.name || !newStaff.role) return;
-
     const staffToAdd = {
-      fullName: newStaff.name,
-      email: newStaff.email,
-      password: newStaff.password,
-      role: newStaff.role,
-      salary: newStaff.salary,
-      times: newStaff.times,
-      specialty: newStaff.specialty,
-      phone: newStaff.phone,
-      address: newStaff.address,
-      status: "ACTIVE"
+      fullName: newStaff.name, email: newStaff.email, password: newStaff.password,
+      role: newStaff.role, salary: newStaff.salary, times: newStaff.times,
+      specialty: newStaff.specialty, experience: newStaff.experience,
+      phone: newStaff.phone, address: newStaff.address, status: "ACTIVE"
     };
-
-    try {
-      const response = await axiosInstance.post("/staffs/register", staffToAdd);
-
-      const savedStaffData = response.data;
-      setStaffs([savedStaffData, ...staffs]);
+    const success = await addStaff(staffToAdd);
+    if (success) {
       setNewStaff({
-        name: "", specialty: "", salary: "", times: "", email: "",
+        name: "", specialty: "", experience: "", salary: "", times: "", email: "",
         role: "Trainer", phone: "", address: "", password: ""
       });
       setIsAddStaffModalOpen(false);
-      toast.success("Staff member added successfully!");
-    } catch (error) {
-      log.error(error);
-      toast.error(`Cannot connect to server to save staff. (Network/CORS error): ${error.message}`);
     }
   };
 
   const handleExportData = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ users, payments, attendance, staffs }, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "gym_data_export.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(22);
+    doc.text("Gym Data Export", 14, 20);
+    
+    // Meta Info
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+    doc.text(`Total Users: ${users.length}`, 14, 36);
+    doc.text(`Total Staff: ${staffs.length}`, 14, 42);
+    doc.text(`Total Revenue: Rs. ${payments.reduce((acc, p) => acc + (p.amount || 0), 0).toLocaleString()}`, 14, 48);
+
+    // Users Table
+    doc.setFontSize(14);
+    doc.text("Active Members", 14, 60);
+    const userRows = users.map(u => [
+      u.fullName || "N/A", 
+      u.email || "N/A", 
+      u.membershipPlan || u.membershipType || "Standard", 
+      u.status || "ACTIVE"
+    ]);
+    
+    autoTable(doc, {
+      startY: 65,
+      head: [["Name", "Email", "Membership", "Status"]],
+      body: userRows,
+      theme: 'grid',
+      headStyles: { fillColor: [15, 23, 42] }
+    });
+
+    // Staffs Table
+    doc.addPage();
+    doc.setFontSize(14);
+    doc.text("Staff Members", 14, 20);
+    const staffRows = staffs.map(s => [
+      s.fullName || "N/A", 
+      s.role || "N/A", 
+      s.salary || "N/A",
+      s.times || "N/A"
+    ]);
+    
+    autoTable(doc, {
+      startY: 25,
+      head: [["Name", "Role", "Salary", "Shift"]],
+      body: staffRows,
+      theme: 'grid',
+      headStyles: { fillColor: [59, 130, 246] }
+    });
+
+    doc.save("gym_data_export.pdf");
     setIsSettingsOpen(false);
   };
 
   return (
-    <AuroraWrapper themeName={themeName}>
+    <AuroraWrapper theme={themeName}>
       <Toaster position="top-right" />
       {/* ── SIDEBAR ── */}
       <Sidebar isOpen={isSidebarOpen}>
@@ -382,6 +310,7 @@ const AdminDashboard = () => {
             { id: "products", icon: <Package size={18} />, label: "Store & Supplements" },
 
             { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },
+            { id: "requests", icon: <CheckSquare size={18} />, label: "Requests" },
             { id: "consultations", icon: <MessageSquare size={18} />, label: "Inquiries" },
             { id: "feedbacks", icon: <MessageSquare size={18} />, label: "Feedbacks" }
           ].map(item => (
@@ -410,6 +339,9 @@ const AdminDashboard = () => {
             <input placeholder="Search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
           <div className="header-actions" style={{ position: 'relative' }}>
+            <button className="mobile-toggle" onClick={() => setIsSidebarOpen(true)}>
+              <Menu size={24} />
+            </button>
             <button className="h-btn" onClick={() => setIsSettingsOpen(!isSettingsOpen)}><Settings size={18} /></button>
             {isSettingsOpen && (
               <SettingsDropdown>
@@ -418,7 +350,6 @@ const AdminDashboard = () => {
                   <button className="close-btn" onClick={() => setIsSettingsOpen(false)}><X size={16} /></button>
                 </div>
                 <div className="sd-body">
-                  <button className="sd-item" onClick={() => { setIsGlobalConfigOpen(true); setIsSettingsOpen(false); }}><Globe size={16} /> Global Config</button>
                   <button className="sd-item" onClick={() => { setIsThemeModalOpen(true); setIsSettingsOpen(false); }}><Layout size={16} /> Theme Customization</button>
                   <button className="sd-item" onClick={handleExportData}><CheckSquare size={16} /> Export Data</button>
                   <div className="sd-divider"></div>
@@ -465,13 +396,15 @@ const AdminDashboard = () => {
                         display: 'flex', gap: 10, alignItems: 'flex-start'
                       }}>
                         <span style={{ fontSize: 18 }}>
-                          {n.type === 'NEW_MEMBER' ? '👤' : n.type === 'PAYMENT_FAILED' ? '❌' : '🏋️'}
+                          {n.type === 'NEW_MEMBER' ? '👤' : n.type === 'PAYMENT_FAILED' ? '❌' : n.type === 'FEEDBACK' ? '⭐' : n.type === 'ENQUIRY' ? '📞' : '🏋️'}
                         </span>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
                             {n.type === 'NEW_MEMBER' && `New member: ${n.payload?.name}`}
                             {n.type === 'PAYMENT_FAILED' && `Payment failed — ₹${n.payload?.amount}`}
                             {n.type === 'ATTENDANCE' && `${n.payload?.name} checked in`}
+                            {n.type === 'FEEDBACK' && `Feedback from ${n.payload?.name}`}
+                            {n.type === 'ENQUIRY' && `New Enquiry: ${n.payload?.name}`}
                           </div>
                           <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
                             {new Date(n.timestamp).toLocaleTimeString()}
@@ -950,22 +883,15 @@ const AdminDashboard = () => {
                   </div>
                 </PayrollContainer>
               ) : activeTab === "users" ? (
-                <MemberManagement 
-                  users={users} 
-                  setUsers={setUsers} 
-                  onAddUser={() => setIsAddUserModalOpen(true)} 
-                  onDeleteUser={handleDeleteUser} 
-                  onEditUser={handleEditUser}
-                  payments={payments}
-                />
+                <MemberManagement onAddUser={() => setIsAddUserModalOpen(true)} />
               ) : activeTab === "memberships" ? (
-                <MembershipModule users={users} onAddUser={() => setIsAddUserModalOpen(true)} />
+                <MembershipModule onAddUser={() => setIsAddUserModalOpen(true)} />
               ) : activeTab === "payments" ? (
-                <PaymentModule payments={payments} />
+                <PaymentModule />
               ) : activeTab === "attendance" ? (
-                <AttendanceModule attendanceData={attendance} />
+                <AttendanceModule />
               ) : activeTab === "trainers" ? (
-                <TrainerModule staffs={staffs} onAddUser={() => setIsAddUserModalOpen(true)} />
+                <TrainerModule onAddUser={() => setIsAddUserModalOpen(true)} />
               ) : activeTab === "workouts" ? (
                 <WorkoutModule />
               ) : activeTab === "diet" ? (
@@ -976,6 +902,8 @@ const AdminDashboard = () => {
                 <CommunicationModule />
               ) : activeTab === "reports" ? (
                 <ReportsModule />
+              ) : activeTab === "requests" ? (
+                <RequestsModule />
               ) : (
                 <TableCard className="animate-in">
                   <div className="table-header">
@@ -1143,11 +1071,24 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label>SPECIALTY / MAIN TASK</label>
-                  <div className="input-wrap">
-                    <Target size={18} />
-                    <input type="text" placeholder="e.g. Yoga Expert or Receptionist" value={newStaff.specialty} onChange={e => setNewStaff({ ...newStaff, specialty: e.target.value })} required />
+                <div className="row">
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>SPECIALTY / MAIN TASK</label>
+                      <div className="input-wrap">
+                        <Target size={18} />
+                        <input type="text" placeholder="e.g. Yoga Expert or Receptionist" value={newStaff.specialty} onChange={e => setNewStaff({ ...newStaff, specialty: e.target.value })} required />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>EXPERIENCE (Years)</label>
+                      <div className="input-wrap">
+                        <Award size={18} />
+                        <input type="text" placeholder="e.g. 5 Years" value={newStaff.experience || ''} onChange={e => setNewStaff({ ...newStaff, experience: e.target.value })} />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1253,11 +1194,24 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label>SPECIALTY / MAIN TASK</label>
-                  <div className="input-wrap">
-                    <Target size={18} />
-                    <input type="text" value={editStaffFormData.specialty || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, specialty: e.target.value })} required />
+                <div className="row">
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>SPECIALTY / MAIN TASK</label>
+                      <div className="input-wrap">
+                        <Target size={18} />
+                        <input type="text" value={editStaffFormData.specialty || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, specialty: e.target.value })} required />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <div className="form-group">
+                      <label>EXPERIENCE (Years)</label>
+                      <div className="input-wrap">
+                        <Award size={18} />
+                        <input type="text" value={editStaffFormData.experience || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, experience: e.target.value })} />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1370,16 +1324,16 @@ const AuroraWrapper = styled.div`
   position: relative;
   overflow-x: hidden;
   
-  --bg-color: ${props => props.themeName === 'midnight' ? '#060814' : props.themeName === 'neon' ? '#04060d' : '#f4f7fa'};
-  --card-bg: ${props => props.themeName === 'midnight' ? 'rgba(255, 255, 255, 0.03)' : props.themeName === 'neon' ? 'rgba(15, 23, 42, 0.6)' : '#ffffff'};
-  --text-color: ${props => props.themeName === 'midnight' ? '#f8fafc' : props.themeName === 'neon' ? '#e2e8f0' : '#1e293b'};
-  --text-muted: ${props => props.themeName === 'midnight' ? '#94a3b8' : props.themeName === 'neon' ? '#64748b' : '#64748b'};
-  --sidebar-bg: ${props => props.themeName === 'midnight' ? 'rgba(6, 8, 20, 0.7)' : props.themeName === 'neon' ? '#080c18' : '#ffffff'};
-  --border-color: ${props => props.themeName === 'midnight' ? 'rgba(255, 255, 255, 0.06)' : props.themeName === 'neon' ? 'rgba(56, 189, 248, 0.15)' : '#e9ecef'};
-  --accent-color: ${props => props.themeName === 'midnight' ? '#ffc107' : props.themeName === 'neon' ? '#38bdf8' : '#007bff'};
-  --accent-glow: ${props => props.themeName === 'midnight' ? 'rgba(255, 193, 7, 0.3)' : props.themeName === 'neon' ? 'rgba(56, 189, 248, 0.3)' : 'rgba(0, 123, 255, 0.1)'};
-  --backdrop: ${props => props.themeName === 'midnight' ? 'blur(20px)' : props.themeName === 'neon' ? 'blur(15px)' : 'none'};
-  --shadow: ${props => props.themeName === 'midnight' ? '0 20px 50px rgba(0, 0, 0, 0.3)' : props.themeName === 'neon' ? '0 15px 35px rgba(56, 189, 248, 0.1)' : '0 10px 30px rgba(0,0,0,0.03)'};
+  --bg-color: ${props => props.theme === 'midnight' ? '#060814' : props.theme === 'neon' ? '#04060d' : '#f4f7fa'};
+  --card-bg: ${props => props.theme === 'midnight' ? 'rgba(255, 255, 255, 0.03)' : props.theme === 'neon' ? 'rgba(15, 23, 42, 0.6)' : '#ffffff'};
+  --text-color: ${props => props.theme === 'midnight' ? '#f8fafc' : props.theme === 'neon' ? '#e2e8f0' : '#1e293b'};
+  --text-muted: ${props => props.theme === 'midnight' ? '#94a3b8' : props.theme === 'neon' ? '#64748b' : '#64748b'};
+  --sidebar-bg: ${props => props.theme === 'midnight' ? 'rgba(6, 8, 20, 0.7)' : props.theme === 'neon' ? '#080c18' : '#ffffff'};
+  --border-color: ${props => props.theme === 'midnight' ? 'rgba(255, 255, 255, 0.06)' : props.theme === 'neon' ? 'rgba(56, 189, 248, 0.15)' : '#e9ecef'};
+  --accent-color: ${props => props.theme === 'midnight' ? '#ffc107' : props.theme === 'neon' ? '#38bdf8' : '#007bff'};
+  --accent-glow: ${props => props.theme === 'midnight' ? 'rgba(255, 193, 7, 0.3)' : props.theme === 'neon' ? 'rgba(56, 189, 248, 0.3)' : 'rgba(0, 123, 255, 0.1)'};
+  --backdrop: ${props => props.theme === 'midnight' ? 'blur(20px)' : props.theme === 'neon' ? 'blur(15px)' : 'none'};
+  --shadow: ${props => props.theme === 'midnight' ? '0 20px 50px rgba(0, 0, 0, 0.3)' : props.theme === 'neon' ? '0 15px 35px rgba(56, 189, 248, 0.1)' : '0 10px 30px rgba(0,0,0,0.03)'};
 
   background: var(--bg-color);
   color: var(--text-color);
@@ -1392,9 +1346,9 @@ const AuroraWrapper = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: ${props => props.themeName === 'midnight' 
+    background: ${props => props.theme === 'midnight' 
       ? 'radial-gradient(circle at 80% 20%, rgba(255, 193, 7, 0.05) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(0, 123, 255, 0.05) 0%, transparent 50%)' 
-      : props.themeName === 'neon' 
+      : props.theme === 'neon' 
       ? 'radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 50%)' 
       : 'none'};
     pointer-events: none;

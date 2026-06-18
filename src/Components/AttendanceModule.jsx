@@ -1,32 +1,132 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Clock, QrCode, Smartphone, Zap } from "lucide-react";
+import { Search, X, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import axiosInstance from '../api/axiosInstance';
+import { useAdminStore } from '../store/useAdminStore';
 
-const AttendanceModule = ({ attendanceData }) => {
+const AttendanceModule = () => {
+  const { attendance: attendanceData, users, staffs, fetchData: onRefresh } = useAdminStore();
   const [activeTab, setActiveTab] = useState("members"); // members or staff
-  const [stats, setStats] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editCell, setEditCell] = useState(null);
 
-  useEffect(() => {
-    axiosInstance.get('/attendance/stats/today')
-      .then(r => setStats(r.data))
-      .catch(() => {});
-  }, []);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
-  const today = new Date().toISOString().split('T')[0];
-  const todayLogs = (attendanceData || []).filter(log => (log.date || log.attendanceDate) === today);
+  const realToday = new Date();
+  const todayStr = `${realToday.getFullYear()}-${String(realToday.getMonth() + 1).padStart(2, '0')}-${String(realToday.getDate()).padStart(2, '0')}`;
 
-  const filterLogs = (type) => {
-    return attendanceData.filter(log => {
-      const roleStr = (log.role || log.staff?.role || log.user?.role || "").toString().toUpperCase();
-      const isStaff = ["TRAINER", "FRONT OFFICE", "STAFF"].some(r => roleStr.includes(r));
-      return type === "staff" ? isStaff : !isStaff;
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  const handlePrevMonth = () => {
+    setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
+  };
+  
+  const daysArray = Array.from({ length: daysInMonth }, (_, i) => {
+    const date = new Date(currentYear, currentMonth, i + 1);
+    return {
+      dateNum: i + 1,
+      dayStr: date.toLocaleDateString('en-US', { weekday: 'short' }),
+      isSunday: date.getDay() === 0,
+      fullDate: `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`
+    };
+  });
+
+  const listToRender = activeTab === "members" ? users : staffs;
+  const filteredList = listToRender.filter(p => (p.fullName || p.name || "").toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const getLogForCell = (person, dateStr) => {
+    return attendanceData.find(log => {
+      const logPersonId = log.staff?.id || log.user?.id || log.userId || log.staffId;
+      const logPersonName = (log.staff?.fullName || log.user?.fullName || log.fullName || log.name || "").toLowerCase();
+      const currentPersonName = (person.fullName || person.name || "").toLowerCase();
+      
+      const logDate = log.date || log.attendanceDate;
+      if (logDate !== dateStr) return false;
+
+      if (logPersonId && logPersonId === person.id) return true;
+      if (logPersonName && currentPersonName && logPersonName === currentPersonName) return true;
+      return false;
     });
   };
 
-  const logs = filterLogs(activeTab);
+  const getStatus = (log, dateStr, isSunday) => {
+    if (dateStr > todayStr) return "-";
+    if (log) {
+       if (log.status === 'LEAVE') return 'L';
+       if (log.status === 'PERMISSION') return 'PR';
+       if (log.status === 'ABSENT') return 'A';
+       return 'P';
+    }
+    if (isSunday) return "S";
+    return "A";
+  };
 
+  const handleCellClick = (person, dateStr, currentLog) => {
+     if (dateStr > todayStr) return; // disable future editing
+     setEditCell({ person, dateStr, currentLog });
+  };
 
+  const handleSaveAttendance = async (newStatus) => {
+    try {
+      if (editCell.currentLog && editCell.currentLog.id) {
+         await axiosInstance.delete(`/attendance/${editCell.currentLog.id}`);
+      }
+      
+      if (newStatus !== 'A') {
+         const payload = {
+           attendanceDate: editCell.dateStr,
+           status: newStatus === 'P' ? 'PRESENT' : newStatus === 'L' ? 'LEAVE' : 'PERMISSION',
+           checkInTime: "00:00:00"
+         };
+         if (activeTab === "members") {
+           await axiosInstance.post(`/attendance/user/${editCell.person.id}`, payload);
+         } else {
+           await axiosInstance.post(`/attendance/staff/${editCell.person.id}`, payload);
+         }
+      }
+      setEditCell(null);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Failed to update attendance", err);
+      alert("Failed to update attendance: " + (err.response?.data?.error || err.message));
+    }
+  };
+
+  const handleExportCSV = () => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    const headers = ["Employee/Member"];
+    daysArray.forEach(d => headers.push(`${d.dateNum}`));
+    headers.push("P", "A");
+    csvContent += headers.join(",") + "\n";
+
+    filteredList.forEach(person => {
+      let totalP = 0, totalA = 0;
+      const row = [person.fullName || person.name || "Unknown"];
+      daysArray.forEach(d => {
+        const currentLog = getLogForCell(person, d.fullDate);
+        const status = getStatus(currentLog, d.fullDate, d.isSunday);
+        if (status === "P") totalP++;
+        if (status === "A") totalA++;
+        row.push(status);
+      });
+      row.push(totalP, totalA);
+      csvContent += row.join(",") + "\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `attendance_${currentYear}_${currentMonth+1}_${activeTab}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <Container className="animate-in">
@@ -40,70 +140,165 @@ const AttendanceModule = ({ attendanceData }) => {
         </div>
       </div>
 
-      <div className="top-row">
-        <div className="stats-card">
-          <h3>Today's Overview ({stats?.today ?? today})</h3>
-          <div className="stats-grid">
-            <div className="stat-item">
-              <span className="label">Total Check-ins</span>
-              <span className="value">{stats?.totalCheckIns ?? todayLogs.length}</span>
-            </div>
-            <div className="stat-item">
-              <span className="label">Peak Hour</span>
-              <span className="value text-primary">{stats?.peakHour ?? '—'}</span>
-            </div>
-            <div className="stat-item">
-              <span className="label">Active Inside</span>
-              <span className="value text-success">{stats?.activeInside ?? 42}</span>
-            </div>
-          </div>
+      <div className="grid-controls" style={{ marginBottom: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <button onClick={handlePrevMonth} style={{ padding: "5px", borderRadius: "50%", border: "1px solid var(--border-color)", background: "var(--card-bg)", color: "var(--text-color)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronLeft size={18} /></button>
+          <span style={{ fontWeight: "bold", color: "var(--text-color)", width: "150px", textAlign: "center" }}>
+            {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+          </span>
+          <button onClick={handleNextMonth} style={{ padding: "5px", borderRadius: "50%", border: "1px solid var(--border-color)", background: "var(--card-bg)", color: "var(--text-color)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><ChevronRight size={18} /></button>
+        </div>
+        <button onClick={handleExportCSV} style={{ display: "flex", alignItems: "center", gap: "8px", background: "#10b981", color: "white", padding: "8px 16px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: "bold" }}>
+          <Download size={16} /> Export CSV
+        </button>
+      </div>
+
+      <div className="legend-card">
+        <div className="legend-items">
+          <span className="legend-label">Legend:</span>
+          <div className="legend-item"><span className="badge bg-present">P</span> Present</div>
+          <div className="legend-item"><span className="badge bg-absent">A</span> Absent</div>
+          <div className="legend-item"><span className="badge bg-leave">L</span> Leave</div>
+          <div className="legend-item"><span className="badge bg-permission">PR</span> Permission</div>
+          <div className="legend-item"><span className="badge bg-sunday">S</span> Sunday</div>
         </div>
       </div>
 
-      <div className="logs-table-card">
-        <div className="card-header">
-          <h3>{activeTab === "members" ? "Member Logs" : "Staff Logs"}</h3>
+      <div className="grid-controls">
+        <div className="search-box">
+          <Search size={16} />
+          <input type="text" placeholder={`Search ${activeTab}...`} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
-        <div className="table-responsive">
-          <table className="table">
-            <thead>
-            <tr>
-              <th>NAME</th>
-              <th>DATE</th>
-              <th>CHECK-IN</th>
-              <th>CHECK-OUT</th>
-              {activeTab === "staff" && <th>ROLE</th>}
+        <select className="group-select">
+          <option>All Groups</option>
+          <option>Active</option>
+          <option>Inactive</option>
+        </select>
+      </div>
+
+      <div className="table-responsive" style={{marginTop: '20px'}}>
+        <table className="table">
+          <thead>
+          <tr>
+            <th>NAME</th>
+            <th>DATE</th>
+            <th>CHECK-IN</th>
+            <th>CHECK-OUT</th>
+            {activeTab === "staff" && <th>ROLE</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {attendanceData.map((log, i) => (
+            <tr key={i}>
+              <td className="fw-bold">{log.staff?.fullName || log.user?.fullName || log.fullName || log.name || log.email || "Unknown Member"}</td>
+              <td>{log.date || log.attendanceDate}</td>
+              <td className="text-success fw-bold"><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {log.entry || log.checkInTime}</td>
+              <td className="text-danger fw-bold">{log.exit || log.checkOutTime ? <><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {log.exit || log.checkOutTime}</> : "-"}</td>
+              {activeTab === "staff" && (
+                <td>
+                  <span className="badge">
+                    {log.staff?.role || log.user?.role || log.role}
+                  </span>
+                </td>
+              )}
             </tr>
-          </thead>
-          <tbody>
-            {logs.map((log, i) => (
-              <tr key={i}>
-                <td className="fw-bold">{log.staff?.fullName || log.user?.fullName || log.fullName || log.name || log.email || "Unknown Member"}</td>
-                <td>{log.date || log.attendanceDate}</td>
-                <td className="text-success fw-bold"><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {log.entry || log.checkInTime}</td>
-                <td className="text-danger fw-bold">{log.exit || log.checkOutTime ? <><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {log.exit || log.checkOutTime}</> : "-"}</td>
-                {activeTab === "staff" && (
-                  <td>
-                    <span className="badge">
-                      {log.staff?.role || log.user?.role || log.role}
-                    </span>
-                  </td>
-                )}
+          ))}
+          {attendanceData.length === 0 && (
+            <tr><td colSpan={activeTab === "members" ? 4 : 5} className="text-center py-4">No logs found.</td></tr>
+          )}
+        </tbody>
+        </table>
+      </div>
+
+      <div className="grid-card">
+        <div className="table-responsive">
+          <table className="matrix-table">
+            <thead>
+              <tr>
+                <th className="sticky-col">Employee / Member</th>
+                {daysArray.map(d => (
+                  <th key={d.dateNum} className={d.isSunday ? 'sunday-col' : ''}>
+                    <div className="date-num">{d.dateNum}</div>
+                    <div className="day-str">{d.dayStr}</div>
+                  </th>
+                ))}
+                <th className="summary-th bg-present">P</th>
+                <th className="summary-th bg-absent">A</th>
               </tr>
-            ))}
-            {logs.length === 0 && (
-              <tr><td colSpan={activeTab === "members" ? 4 : 5} className="text-center py-4">No logs found.</td></tr>
-            )}
-          </tbody>
+            </thead>
+            <tbody>
+              {filteredList.map((person, i) => {
+                let totalP = 0;
+                let totalA = 0;
+
+                const rowCells = daysArray.map(d => {
+                  const currentLog = getLogForCell(person, d.fullDate);
+                  const status = getStatus(currentLog, d.fullDate, d.isSunday);
+                  if (status === "P") totalP++;
+                  if (status === "A") totalA++;
+                  
+                  return (
+                    <td key={d.dateNum} 
+                        className={`${d.isSunday ? 'sunday-col' : ''} clickable-cell`}
+                        onClick={() => handleCellClick(person, d.fullDate, currentLog)}
+                        title="Click to edit">
+                      {status === "P" && <span className="status-badge bg-present">P</span>}
+                      {status === "A" && <span className="status-badge bg-absent">A</span>}
+                      {status === "L" && <span className="status-badge bg-leave">L</span>}
+                      {status === "PR" && <span className="status-badge bg-permission">PR</span>}
+                      {status === "S" && <span className="status-text text-muted">S</span>}
+                      {status === "-" && <span className="status-text">-</span>}
+                    </td>
+                  );
+                });
+
+                return (
+                  <tr key={person.id || i}>
+                    <td className="sticky-col fw-bold">{person.fullName || person.name || "Unknown"}</td>
+                    {rowCells}
+                    <td className="summary-td bg-present-light fw-bold text-success">{totalP}</td>
+                    <td className="summary-td bg-absent-light fw-bold text-danger">{totalA}</td>
+                  </tr>
+                );
+              })}
+              {filteredList.length === 0 && (
+                <tr>
+                  <td colSpan={daysInMonth + 3} className="text-center py-4 text-muted">
+                    No records found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
           </table>
         </div>
       </div>
+      
+      {editCell && (
+        <div className="modal-overlay" style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000}}>
+          <div className="modal-content animate-in" style={{background: 'var(--card-bg, #1e293b)', padding: '24px', borderRadius: '12px', width: '350px', border: '1px solid var(--border-color)'}}>
+             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+                <h3 style={{margin: 0, color: 'var(--text-color)'}}>Edit Attendance</h3>
+                <button style={{background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer'}} onClick={() => setEditCell(null)}><X size={20}/></button>
+             </div>
+             <p style={{color: 'var(--text-muted)', marginBottom: '20px'}}>
+               <strong>{editCell.person.fullName || editCell.person.name}</strong><br/>
+               {editCell.dateStr}
+             </p>
+             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
+                <button className="status-btn bg-present" onClick={() => handleSaveAttendance('P')}>Mark Present</button>
+                <button className="status-btn bg-absent" onClick={() => handleSaveAttendance('A')}>Mark Absent</button>
+                <button className="status-btn bg-leave" onClick={() => handleSaveAttendance('L')}>Mark Leave</button>
+                <button className="status-btn bg-permission" onClick={() => handleSaveAttendance('PR')}>Mark Permission</button>
+             </div>
+          </div>
+        </div>
+      )}
     </Container>
   );
 };
 
 const Container = styled.div`
-  display: flex; flex-direction: column; gap: 24px;
+  display: flex; flex-direction: column; gap: 20px;
 
   .module-header {
     display: flex; justify-content: space-between; align-items: center;
@@ -117,40 +312,75 @@ const Container = styled.div`
     }
   }
 
-  .top-row {
-    display: grid; grid-template-columns: 1fr; gap: 24px;
-  }
-
-  .stats-card {
-    background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 12px; padding: 24px; box-shadow: var(--shadow);
-  }
-
-  .stats-card {
-    h3 { margin: 0 0 20px 0; font-size: 1.1rem; color: var(--text-color); }
-    .stats-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
-      .stat-item {
-        display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.1); padding: 16px; border-radius: 8px;
-        .label { font-size: 0.8rem; color: var(--text-muted); }
-        .value { font-size: 1.5rem; font-weight: 700; color: var(--text-color); }
-        .text-primary { color: var(--accent-color, #38bdf8); }
-        .text-success { color: #10b981; }
-      }
+  .legend-card {
+    background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 8px; padding: 16px 20px; box-shadow: var(--shadow);
+    .legend-items {
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+      .legend-label { font-weight: 600; color: var(--text-muted); }
+      .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-color); }
+      .badge { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; color: white; }
     }
   }
 
-  .logs-table-card {
+  .grid-controls {
+    display: flex; gap: 16px;
+    .search-box {
+      flex: 1; display: flex; align-items: center; gap: 8px; background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 8px; padding: 10px 16px; color: var(--text-muted);
+      input { width: 100%; border: none; background: transparent; outline: none; color: var(--text-color); font-size: 0.9rem; }
+    }
+    .group-select {
+      background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 8px; padding: 0 16px; color: var(--text-color); outline: none; cursor: pointer; min-width: 150px;
+    }
+  }
+
+  .grid-card {
     background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
-    .card-header { padding: 20px; border-bottom: 1px solid var(--border-color); h3 { margin: 0; font-size: 1.1rem; color: var(--text-color); } }
-    .table {
-      width: 100%; border-collapse: collapse;
-      th { text-align: left; padding: 12px 20px; font-size: 0.75rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
-      td { padding: 16px 20px; font-size: 0.9rem; border-bottom: 1px solid var(--border-color); color: var(--text-color); }
-      .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: rgba(255,255,255,0.05); }
-      .text-success { color: #10b981; }
-      .text-danger { color: #ef4444; }
+    
+    .table-responsive {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    .matrix-table {
+      width: 100%; border-collapse: collapse; min-width: 1200px;
+      
+      th, td { border: 1px solid var(--border-color, #334155); text-align: center; padding: 8px 4px; font-size: 0.85rem; }
+      
+      th { background: #1f2937; color: white; padding: 12px 4px; }
+      .date-num { font-weight: bold; font-size: 0.9rem; margin-bottom: 2px; }
+      .day-str { font-size: 0.65rem; color: #9ca3af; text-transform: uppercase; }
+      
+      td { background: var(--card-bg, #1e293b); color: var(--text-color); height: 45px; }
+      
+      .sticky-col { position: sticky; left: 0; background: #1f2937; z-index: 2; text-align: left; padding: 0 16px; min-width: 150px; border-right: 2px solid var(--border-color, #334155); }
+      td.sticky-col { background: var(--card-bg, #1e293b); }
+      
+      .sunday-col { background: rgba(255,255,255,0.03); }
+      
+      .summary-th { padding: 12px; font-size: 0.9rem; }
+      .summary-td { padding: 8px 12px; }
+      
+      .status-badge { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; color: white; }
+      .status-text { font-size: 0.8rem; }
+      
+      .clickable-cell { cursor: pointer; transition: background 0.2s; }
+      .clickable-cell:hover { background: rgba(255,255,255,0.05); }
     }
   }
+
+  .status-btn {
+    padding: 10px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; opacity: 0.9; transition: opacity 0.2s;
+    &:hover { opacity: 1; }
+  }
+
+  .bg-present { background-color: #10b981; }
+  .bg-absent { background-color: #ef4444; }
+  .bg-leave { background-color: #f59e0b; }
+  .bg-permission { background-color: #3b82f6; }
+  .bg-sunday { background-color: #6b7280; }
+  
+  .bg-present-light { background-color: rgba(16, 185, 129, 0.1); }
+  .bg-absent-light { background-color: rgba(239, 68, 68, 0.1); }
 `;
 
 export default AttendanceModule;

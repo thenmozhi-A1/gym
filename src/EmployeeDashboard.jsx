@@ -14,8 +14,18 @@ import {
   ChevronRight,
   LogOut,
   User,
-  Zap,
-  ArrowLeft
+  ArrowLeft,
+  Building2,
+  Briefcase,
+  Camera,
+  Save,
+  Phone,
+  Info,
+  Link,
+  GraduationCap,
+  CalendarDays,
+  FileCheck2,
+  AlertCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
@@ -23,123 +33,95 @@ import { generatePayslipPDF } from "./utils/pdfTemplates";
 
 import axiosInstance from "./api/axiosInstance";
 import log from "./utils/logger";
+import { useEmployeeStore } from "./store/useEmployeeStore";
 
 const EmployeeDashboard = () => {
   const navigate = useNavigate();
   const [isVerified, setIsVerified] = useState(false);
   const [scanState, setScanState] = useState("idle"); // idle, scanning, success, error
   const [scanProgress, setScanProgress] = useState(0);
-  const [employeeData, setEmployeeData] = useState(null);
-  const [activeView, setActiveView] = useState("home"); // home, salary, attendance
+  const { employeeData, leaves, fetchEmployeeData, updateProfile, checkIn, requestCorrection, applyLeave, cancelLeave } = useEmployeeStore();
+  const [activeView, setActiveView] = useState("home"); // home, profile, salary, attendance
+  
+  const [profileForm, setProfileForm] = useState(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  const [leaveForm, setLeaveForm] = useState({ leaveType: 'CASUAL', startDate: '', endDate: '', reason: '' });
+  const [submittingLeave, setSubmittingLeave] = useState(false);
 
   // Fetch real data for the specific staff member from the database
   useEffect(() => {
-    const fetchEmployeeData = async () => {
-      const email = localStorage.getItem('userEmail');
-      if (!email) {
-        navigate('/login');
+    const email = localStorage.getItem('userEmail');
+    if (!email) {
+      navigate('/login');
+      return;
+    }
+    fetchEmployeeData(email);
+  }, [navigate, fetchEmployeeData]);
+
+  useEffect(() => {
+    if (employeeData && !profileForm) {
+      setProfileForm(employeeData);
+    }
+  }, [employeeData]);
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setSavingProfile(true);
+    const success = await updateProfile(employeeData.id, profileForm);
+    if (success) {
+      setIsEditingProfile(false);
+    }
+    setSavingProfile(false);
+  };
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size should be less than 2MB");
         return;
       }
-      
-      try {
-        const res = await axiosInstance.get("/staffs/me");
-        const me = res.data;
-        
-        if (me) {
-          const cleanSalary = typeof me.salary === 'string' 
-            ? parseInt(me.salary.replace(/[^0-9]/g, '')) 
-            : (me.salary || 0);
-
-          let attendanceLog = [];
-          try {
-            const attRes = await axiosInstance.get(`/attendance/staff/${me.id}`);
-            if (attRes.data && attRes.data.length > 0) {
-              attendanceLog = attRes.data.map(log => {
-                let durationStr = '-';
-                let status = "Present";
-                let permissionsUsed = 0;
-                
-                if (log.checkInTime && log.checkOutTime) {
-                   const [inH, inM] = log.checkInTime.split(':').map(Number);
-                   const [outH, outM] = log.checkOutTime.split(':').map(Number);
-                   let diffMins = (outH * 60 + outM) - (inH * 60 + inM);
-                   if (diffMins < 0) diffMins += 24 * 60;
-                   const hrs = Math.floor(diffMins / 60);
-                   const mins = diffMins % 60;
-                   durationStr = `${hrs}h ${mins}m`;
-                   
-                   if (hrs < 4) {
-                       status = "Leave";
-                   } else if (hrs < 8) {
-                       status = "Permission";
-                       permissionsUsed = 8 - hrs;
-                   } else {
-                       status = "Present";
-                   }
-                } else if (log.checkInTime) {
-                   status = "Working";
-                }
-
-                return {
-                  id: log.id,
-                  date: log.attendanceDate,
-                  status: status,
-                  checkIn: log.checkInTime || "-",
-                  checkOut: log.checkOutTime || "-",
-                  duration: durationStr,
-                  permissionsUsed
-                };
-              });
-              attendanceLog.sort((a,b) => new Date(b.date) - new Date(a.date));
-            }
-          } catch(e) { log.error("Failed to fetch real attendance", e); }
-
-          const currentMonth = new Date().getMonth();
-          const currentMonthLogs = attendanceLog.filter(log => new Date(log.date).getMonth() === currentMonth);
-          
-          const daysWorked = currentMonthLogs.filter(log => ["Present", "Permission", "Working"].includes(log.status)).length;
-          
-          let totalPermissionsHr = 0;
-          currentMonthLogs.forEach(log => {
-            if (log.permissionsUsed) totalPermissionsHr += log.permissionsUsed;
-          });
-
-          // Dynamically calculate leaves based on days passed in the month minus days worked
-          const daysPassed = new Date().getDate();
-          const leaves = Math.max(0, daysPassed - daysWorked);
-
-          setEmployeeData({
-            ...me,
-            salary: cleanSalary,
-            attendance: attendanceLog,
-            daysWorked,
-            leaves,
-            permissions: totalPermissionsHr
-          });
-        }
-      } catch (err) {
-        log.error("Failed to sync employee data:", err);
-      }
-    };
-
-    fetchEmployeeData();
-  }, [navigate]);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileForm(prev => ({ ...prev, profilePhoto: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleCheckIn = async (isCheckedIn, logId) => {
     if (!employeeData) return;
-    try {
-      if (isCheckedIn && logId) {
-        await axiosInstance.put(`/attendance/${logId}/checkout`, {});
-        toast.success("Checked out successfully!");
-      } else {
-        await axiosInstance.post(`/attendance/staff/${employeeData.id}`, {});
-        toast.success("Checked in successfully!");
-      }
+    const success = await checkIn(isCheckedIn, logId, employeeData.id);
+    if (success) {
       setTimeout(() => window.location.reload(), 1000);
-    } catch (err) {
-      log.error("Operation failed:", err);
-      toast.error(err.response?.data?.error || "Operation failed");
     }
+  };
+
+  const handleCorrectionRequest = async (logId) => {
+    const reason = prompt("Enter reason for correction (e.g. Forgot to checkout at 18:00):");
+    if (!reason) return;
+    const success = await requestCorrection(logId, reason);
+    if (success) {
+      setTimeout(() => window.location.reload(), 1000);
+    }
+  };
+
+  const handleLeaveSubmit = async (e) => {
+    e.preventDefault();
+    if (!employeeData) return;
+    setSubmittingLeave(true);
+    const success = await applyLeave(employeeData.id, leaveForm);
+    if (success) {
+      setLeaveForm({ leaveType: 'CASUAL', startDate: '', endDate: '', reason: '' });
+    }
+    setSubmittingLeave(false);
+  };
+
+  const handleCancelLeave = async (id) => {
+    if (!window.confirm("Are you sure you want to cancel this leave request?")) return;
+    await cancelLeave(id);
   };
 
   const handleFingerprintScan = () => {
@@ -193,11 +175,17 @@ const EmployeeDashboard = () => {
           <button className={activeView === 'home' ? 'active' : ''} onClick={() => setActiveView('home')}>
             <Calendar size={20} /> Dashboard
           </button>
+          <button className={activeView === 'profile' ? 'active' : ''} onClick={() => { setActiveView('profile'); setIsEditingProfile(false); setProfileForm(employeeData); }}>
+            <User size={20} /> My Profile
+          </button>
           <button className={activeView === 'salary' ? 'active' : ''} onClick={() => setActiveView('salary')}>
             <CreditCard size={20} /> My Salary
           </button>
           <button className={activeView === 'attendance' ? 'active' : ''} onClick={() => setActiveView('attendance')}>
             <Clock size={20} /> Attendance
+          </button>
+          <button className={activeView === 'leave' ? 'active' : ''} onClick={() => setActiveView('leave')}>
+            <CalendarDays size={20} /> Leave Mgmt
           </button>
         </nav>
         <button className="logout-btn" onClick={handleLogout}>
@@ -232,7 +220,13 @@ const EmployeeDashboard = () => {
               );
             })()}
             <div className="user-profile">
-              <div className="avatar">{(employeeData?.fullName || employeeData?.name || "E").charAt(0).toUpperCase()}</div>
+              <div className="avatar" style={{ overflow: 'hidden' }}>
+                {employeeData?.profilePhoto ? (
+                  <img src={employeeData.profilePhoto} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  (employeeData?.fullName || employeeData?.name || "E").charAt(0).toUpperCase()
+                )}
+              </div>
             </div>
           </div>
         </header>
@@ -241,20 +235,50 @@ const EmployeeDashboard = () => {
           <div className="view-content animate-in">
             <div className="stats-row">
               <StatCard color="#007bff">
+                <div className="label">Employee ID</div>
+                <div className="value" style={{fontSize: '1.4rem'}}>{employeeData?.id ? `EMP-${String(employeeData.id).padStart(4, '0')}` : 'N/A'}</div>
+                <div className="sub">{employeeData?.department || 'General'} Dept</div>
+              </StatCard>
+              <StatCard color="#28a745">
                 <div className="label">Days Worked</div>
                 <div className="value">{employeeData?.daysWorked || 0}</div>
                 <div className="sub">Current Month</div>
-              </StatCard>
-              <StatCard color="#28a745">
-                <div className="label">Est. Net Payable</div>
-                <div className="value">₹{calculateNetPay().toLocaleString()}</div>
-                <div className="sub">Due on May 31</div>
               </StatCard>
               <StatCard color="#ef4444">
                 <div className="label">Total Leaves</div>
                 <div className="value">{employeeData?.leaves || 0}</div>
                 <div className="sub">This Month</div>
               </StatCard>
+            </div>
+
+            <div className="grid-2" style={{ marginBottom: '30px' }}>
+              <div className="card">
+                <h3><Info size={16} style={{display: 'inline', verticalAlign: 'text-bottom', marginRight: '5px'}}/> Employee Summary</h3>
+                <div className="salary-mini">
+                  <div className="row"><span>Joining Date</span> <strong>{employeeData?.joiningDate || 'Not specified'}</strong></div>
+                  <div className="row"><span>Department</span> <strong>{employeeData?.department || 'Not specified'}</strong></div>
+                  <div className="row"><span>Designation</span> <strong>{employeeData?.role || 'Staff'}</strong></div>
+                  <div className="row"><span>Specialty</span> <strong>{employeeData?.specialty || 'N/A'}</strong></div>
+                </div>
+              </div>
+
+              <div className="card">
+                <h3><Calendar size={16} style={{display: 'inline', verticalAlign: 'text-bottom', marginRight: '5px'}}/> Pending Tasks & Events</h3>
+                <div className="attendance-list">
+                  <div className="log-item" style={{ borderLeft: '3px solid #facc15', paddingLeft: '10px' }}>
+                    <div className="date">Complete mandatory safety training</div>
+                    <div className="status" style={{background: '#fef3c7', color: '#92400e'}}>Pending</div>
+                  </div>
+                  <div className="log-item" style={{ borderLeft: '3px solid #3b82f6', paddingLeft: '10px' }}>
+                    <div className="date">Team Building Event</div>
+                    <div className="times">Next Friday, 4:00 PM</div>
+                  </div>
+                  <div className="log-item" style={{ borderLeft: '3px solid #10b981', paddingLeft: '10px' }}>
+                    <div className="date">Monthly Performance Review</div>
+                    <div className="times">May 28th</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="grid-2">
@@ -274,12 +298,125 @@ const EmployeeDashboard = () => {
               <div className="card">
                 <h3>Salary Breakdown</h3>
                 <div className="salary-mini">
-                  <div className="row"><span>Gross Salary</span> <strong>₹{employeeData?.salary.toLocaleString()}</strong></div>
+                  <div className="row"><span>Gross Salary</span> <strong>₹{employeeData?.salary?.toLocaleString() || 0}</strong></div>
                   <div className="row text-danger"><span>Deductions</span> <strong>-₹{(employeeData?.salary - calculateNetPay()).toLocaleString()}</strong></div>
                   <div className="divider" />
                   <div className="row total"><span>Net Payable</span> <strong>₹{calculateNetPay().toLocaleString()}</strong></div>
                 </div>
                 <button className="view-all" onClick={() => setActiveView('salary')}>View Pay Slips <ChevronRight size={14} /></button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeView === 'profile' && (
+          <div className="view-content animate-in">
+            <div className="card" style={{ marginBottom: '25px' }}>
+              <div className="card-header-flex">
+                <h3>My Profile</h3>
+                {!isEditingProfile ? (
+                  <button onClick={() => setIsEditingProfile(true)} style={{ background: '#007bff', color: '#fff', padding: '8px 16px', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Edit Profile</button>
+                ) : (
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button onClick={() => { setIsEditingProfile(false); setProfileForm(employeeData); }} style={{ background: '#e2e8f0', color: '#1e293b', padding: '8px 16px', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>Cancel</button>
+                    <button onClick={handleProfileUpdate} disabled={savingProfile} style={{ background: '#10b981', color: '#fff', padding: '8px 16px', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <Save size={14} /> {savingProfile ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
+                {/* Avatar Section */}
+                <div style={{ textAlign: 'center', minWidth: '150px' }}>
+                  <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: '#f1f5f9', border: '2px dashed #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px', color: '#94a3b8', position: 'relative', overflow: 'hidden' }}>
+                    {(isEditingProfile ? profileForm?.profilePhoto : employeeData?.profilePhoto) ? (
+                      <img src={isEditingProfile ? profileForm.profilePhoto : employeeData.profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <Camera size={40} opacity={0.5} />
+                    )}
+                    {isEditingProfile && (
+                      <label style={{ position: 'absolute', bottom: '0', background: 'rgba(0,0,0,0.6)', width: '100%', padding: '5px 0', fontSize: '0.7rem', color: '#fff', cursor: 'pointer', textAlign: 'center', margin: 0 }}>
+                        Upload
+                        <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
+                      </label>
+                    )}
+                  </div>
+                  <h4 style={{ margin: '0 0 5px 0' }}>{employeeData?.fullName}</h4>
+                  <p style={{ margin: '0', fontSize: '0.8rem', color: '#64748b' }}>{employeeData?.role}</p>
+                </div>
+
+                {/* Forms Area */}
+                <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  {/* Personal Info */}
+                  <div className="form-section" style={{ gridColumn: '1 / -1' }}>
+                    <h4 style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '15px', color: '#007bff' }}><User size={14} style={{verticalAlign: 'text-bottom'}} /> Personal Details</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                      <FormGroup>
+                        <label>Full Name</label>
+                        <input type="text" value={isEditingProfile ? profileForm?.fullName : employeeData?.fullName} onChange={e => setProfileForm({...profileForm, fullName: e.target.value})} disabled={!isEditingProfile} />
+                      </FormGroup>
+                      <FormGroup>
+                        <label>Phone Number</label>
+                        <input type="text" value={isEditingProfile ? profileForm?.phone : employeeData?.phone} onChange={e => setProfileForm({...profileForm, phone: e.target.value})} disabled={!isEditingProfile} />
+                      </FormGroup>
+                      <FormGroup>
+                        <label>Department</label>
+                        <input type="text" placeholder="E.g. Training, Admin" value={isEditingProfile ? (profileForm?.department || '') : (employeeData?.department || '')} onChange={e => setProfileForm({...profileForm, department: e.target.value})} disabled={!isEditingProfile} />
+                      </FormGroup>
+                      <FormGroup>
+                        <label>Joining Date</label>
+                        <input type="date" value={isEditingProfile ? (profileForm?.joiningDate || '') : (employeeData?.joiningDate || '')} onChange={e => setProfileForm({...profileForm, joiningDate: e.target.value})} disabled={!isEditingProfile} />
+                      </FormGroup>
+                      <FormGroup style={{ gridColumn: '1 / -1' }}>
+                        <label>Address</label>
+                        <input type="text" value={isEditingProfile ? profileForm?.address : employeeData?.address} onChange={e => setProfileForm({...profileForm, address: e.target.value})} disabled={!isEditingProfile} />
+                      </FormGroup>
+                    </div>
+                  </div>
+
+                  {/* Emergency Contact */}
+                  <div className="form-section">
+                    <h4 style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '15px', color: '#ef4444' }}><Phone size={14} style={{verticalAlign: 'text-bottom'}} /> Emergency Contact</h4>
+                    <FormGroup>
+                      <label>Contact Name</label>
+                      <input type="text" placeholder="E.g. Jane Doe (Wife)" value={isEditingProfile ? (profileForm?.emergencyContactName || '') : (employeeData?.emergencyContactName || '')} onChange={e => setProfileForm({...profileForm, emergencyContactName: e.target.value})} disabled={!isEditingProfile} />
+                    </FormGroup>
+                    <FormGroup>
+                      <label>Contact Phone</label>
+                      <input type="text" placeholder="E.g. +91 9876543210" value={isEditingProfile ? (profileForm?.emergencyContactPhone || '') : (employeeData?.emergencyContactPhone || '')} onChange={e => setProfileForm({...profileForm, emergencyContactPhone: e.target.value})} disabled={!isEditingProfile} />
+                    </FormGroup>
+                  </div>
+
+                  {/* Bank Details */}
+                  <div className="form-section">
+                    <h4 style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '15px', color: '#28a745' }}><Building2 size={14} style={{verticalAlign: 'text-bottom'}} /> Bank Details</h4>
+                    <FormGroup>
+                      <label>Bank Name</label>
+                      <input type="text" placeholder="E.g. HDFC Bank" value={isEditingProfile ? (profileForm?.bankName || '') : (employeeData?.bankName || '')} onChange={e => setProfileForm({...profileForm, bankName: e.target.value})} disabled={!isEditingProfile} />
+                    </FormGroup>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                      <FormGroup>
+                        <label>Account No.</label>
+                        <input type="password" placeholder="••••••••" value={isEditingProfile ? (profileForm?.accountNumber || '') : (employeeData?.accountNumber ? '••••••••'+employeeData.accountNumber.slice(-4) : '')} onChange={e => setProfileForm({...profileForm, accountNumber: e.target.value})} disabled={!isEditingProfile} />
+                      </FormGroup>
+                      <FormGroup>
+                        <label>IFSC Code</label>
+                        <input type="text" placeholder="HDFC0001234" value={isEditingProfile ? (profileForm?.ifscCode || '') : (employeeData?.ifscCode || '')} onChange={e => setProfileForm({...profileForm, ifscCode: e.target.value})} disabled={!isEditingProfile} />
+                      </FormGroup>
+                    </div>
+                  </div>
+
+                  {/* Documents Upload */}
+                  <div className="form-section" style={{ gridColumn: '1 / -1' }}>
+                    <h4 style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '15px', color: '#8b5cf6' }}><Link size={14} style={{verticalAlign: 'text-bottom'}} /> Documents & Certificates</h4>
+                    <FormGroup>
+                      <label>Document URLs (Comma separated links to your ID / Certs)</label>
+                      <input type="text" placeholder="https://drive.google.com/..., https://..." value={isEditingProfile ? (profileForm?.documents || '') : (employeeData?.documents || '')} onChange={e => setProfileForm({...profileForm, documents: e.target.value})} disabled={!isEditingProfile} />
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '5px' }}>Note: Secure file upload integration is pending. Please provide secure links to your documents for now.</div>
+                    </FormGroup>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -336,16 +473,122 @@ const EmployeeDashboard = () => {
               <div className="table-wrapper">
                 <table className="custom-table">
                   <thead>
-                    <tr><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th><th>Duration</th></tr>
+                    <tr><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th><th>Work Hours</th><th>Actions</th></tr>
                   </thead>
                   <tbody>
                     {employeeData?.attendance.map((log, i) => (
                       <tr key={i}>
                         <td>{log.date}</td>
-                        <td><span className={`badge ${log.status.toLowerCase()}`}>{log.status}</span></td>
+                        <td>
+                          <span className={`badge ${log.status.toLowerCase()}`}>{log.status}</span>
+                          {log.isLate && <span className="badge" style={{background: '#fee2e2', color: '#991b1b', marginLeft: '5px'}}>Late</span>}
+                        </td>
                         <td>{log.checkIn}</td>
                         <td>{log.checkOut}</td>
                         <td>{log.duration || (log.checkIn !== '-' && log.checkOut === '-' ? 'Working' : '-')}</td>
+                        <td>
+                          {log.correctionStatus === 'PENDING' ? (
+                            <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontWeight: 'bold' }}><AlertCircle size={14} style={{verticalAlign:'text-bottom'}}/> Correction Pending</span>
+                          ) : (
+                            <button onClick={() => handleCorrectionRequest(log.id)} style={{ background: 'none', border: '1px solid #e2e8f0', padding: '5px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold', color: '#64748b' }}>
+                              Request Correction
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeView === 'leave' && (
+          <div className="view-content animate-in">
+            <div className="grid-2">
+              <div className="card">
+                <h3>Apply for Leave</h3>
+                <form onSubmit={handleLeaveSubmit}>
+                  <FormGroup>
+                    <label>Leave Type</label>
+                    <select value={leaveForm.leaveType} onChange={e => setLeaveForm({...leaveForm, leaveType: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}>
+                      <option value="CASUAL">Casual Leave</option>
+                      <option value="SICK">Sick Leave</option>
+                      <option value="PAID">Paid Leave</option>
+                    </select>
+                  </FormGroup>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                    <FormGroup>
+                      <label>Start Date</label>
+                      <input type="date" required value={leaveForm.startDate} onChange={e => setLeaveForm({...leaveForm, startDate: e.target.value})} />
+                    </FormGroup>
+                    <FormGroup>
+                      <label>End Date</label>
+                      <input type="date" required value={leaveForm.endDate} onChange={e => setLeaveForm({...leaveForm, endDate: e.target.value})} />
+                    </FormGroup>
+                  </div>
+                  <FormGroup>
+                    <label>Reason</label>
+                    <textarea rows="3" required placeholder="Reason for leave..." value={leaveForm.reason} onChange={e => setLeaveForm({...leaveForm, reason: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', resize: 'vertical' }}></textarea>
+                  </FormGroup>
+                  <button type="submit" disabled={submittingLeave} style={{ background: '#007bff', color: '#fff', width: '100%', padding: '12px', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>
+                    {submittingLeave ? 'Submitting...' : 'Submit Leave Request'}
+                  </button>
+                </form>
+              </div>
+
+              <div className="card">
+                <h3>Leave Balance Summary</h3>
+                <div className="salary-mini" style={{ marginBottom: '30px' }}>
+                  <div className="row"><span>Casual Leaves Remaining</span> <strong>12</strong></div>
+                  <div className="row"><span>Sick Leaves Remaining</span> <strong>6</strong></div>
+                  <div className="row"><span>Paid Leaves</span> <strong>{employeeData?.leaves || 0} used</strong></div>
+                </div>
+                
+                <h3>Recent Requests</h3>
+                <div className="attendance-list">
+                  {leaves.length === 0 ? (
+                    <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>No recent leave requests.</p>
+                  ) : (
+                    leaves.slice(0, 4).map(l => (
+                      <div key={l.id} className="log-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                          <div className="date">{l.leaveType} Leave</div>
+                          <div className="status" style={{ background: l.status === 'APPROVED' ? '#d1fae5' : l.status === 'REJECTED' || l.status === 'CANCELLED' ? '#fee2e2' : '#fef3c7', color: l.status === 'APPROVED' ? '#065f46' : l.status === 'REJECTED' || l.status === 'CANCELLED' ? '#991b1b' : '#92400e', fontSize: '0.7rem', padding: '2px 8px', borderRadius: '12px', fontWeight: 'bold' }}>{l.status}</div>
+                        </div>
+                        <div className="times">{l.startDate} to {l.endDate}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="card" style={{ marginTop: '30px' }}>
+              <h3>Leave History</h3>
+              <div className="table-wrapper">
+                <table className="custom-table">
+                  <thead>
+                    <tr><th>Type</th><th>Dates</th><th>Reason</th><th>Status</th><th>Applied On</th><th>Action</th></tr>
+                  </thead>
+                  <tbody>
+                    {leaves.map(l => (
+                      <tr key={l.id}>
+                        <td><strong>{l.leaveType}</strong></td>
+                        <td>{l.startDate} <ArrowLeft size={10} style={{margin:'0 5px'}}/> {l.endDate}</td>
+                        <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.reason}</td>
+                        <td>
+                          <span style={{ background: l.status === 'APPROVED' ? '#d1fae5' : l.status === 'REJECTED' || l.status === 'CANCELLED' ? '#fee2e2' : '#fef3c7', color: l.status === 'APPROVED' ? '#065f46' : l.status === 'REJECTED' || l.status === 'CANCELLED' ? '#991b1b' : '#92400e', fontSize: '0.75rem', padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold' }}>
+                            {l.status}
+                          </span>
+                        </td>
+                        <td>{new Date(l.appliedAt).toLocaleDateString()}</td>
+                        <td>
+                          {l.status === 'PENDING' && (
+                            <button onClick={() => handleCancelLeave(l.id)} style={{ background: 'none', border: '1px solid #ef4444', color: '#ef4444', padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}>Cancel</button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -481,8 +724,17 @@ const MainArea = styled.div`
     .status-badge { display: inline-block; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; } 
     .download-btn { background: #007bff; border: none; color: #fff; padding: 15px 30px; border-radius: 12px; font-weight: 800; display: flex; align-items: center; gap: 10px; cursor: pointer; @media (max-width: 768px) { width: 100%; justify-content: center; } &:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3); } } 
   }
-  .table-wrapper { @media (max-width: 768px) { overflow-x: auto; &::-webkit-scrollbar { display: none; } } }
-  .custom-table { width: 100%; border-collapse: collapse; @media (max-width: 768px) { min-width: 600px; } th { text-align: left; padding: 15px; font-size: 0.75rem; color: #94a3b8; border-bottom: 1px solid #e2e8f0; } td { padding: 20px 15px; font-weight: 600; font-size: 0.9rem; color: #1e293b; border-bottom: 1px solid #f1f5f9; } .badge { font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; &.present { background: #d1fae5; color: #065f46; } &.leave { background: #fee2e2; color: #991b1b; } &.permission { background: #fef3c7; color: #92400e; } } }
+  .table-wrapper { width: 100%; }
+  .custom-table { width: 100%; border-collapse: collapse; th { text-align: left; padding: 15px; font-size: 0.75rem; color: #94a3b8; border-bottom: 1px solid #e2e8f0; } td { padding: 20px 15px; font-weight: 600; font-size: 0.9rem; color: #1e293b; border-bottom: 1px solid #f1f5f9; } .badge { font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; &.present { background: #d1fae5; color: #065f46; } &.leave { background: #fee2e2; color: #991b1b; } &.permission { background: #fef3c7; color: #92400e; } } }
+`;
+
+const FormGroup = styled.div`
+  display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px;
+  label { font-size: 0.8rem; font-weight: 700; color: #64748b; }
+  input { padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.9rem; color: #1e293b; background: #fff; transition: all 0.2s; 
+    &:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+    &:disabled { background: #f8fafc; color: #94a3b8; border-color: #e2e8f0; cursor: not-allowed; }
+  }
 `;
 
 const StatCard = styled.div`

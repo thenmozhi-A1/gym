@@ -143,6 +143,43 @@ img, video {
   .dashboard-container {
     padding: 12px 10px 30px;
   }
+
+  /* Mobile Responsive Tables (Card Layout) */
+  table, thead, tbody, th, td, tr {
+    display: block !important;
+  }
+  
+  thead tr {
+    position: absolute !important;
+    top: -9999px;
+    left: -9999px;
+  }
+  
+  tr {
+    margin-bottom: 15px;
+    border: 1px solid rgba(100, 116, 139, 0.2);
+    border-radius: 12px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.02);
+  }
+  
+  td {
+    border: none !important;
+    border-bottom: 1px solid rgba(100, 116, 139, 0.1) !important;
+    position: relative;
+    padding: 10px 5px !important;
+    text-align: left !important;
+    min-height: 40px;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  td:last-child {
+    border-bottom: 0 !important;
+  }
 }
 
 /* ── Small Mobile (≤480px) ── */

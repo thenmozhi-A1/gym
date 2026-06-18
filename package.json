@@ -7,7 +7,6 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
@@ -21,7 +20,6 @@
     "jwt-decode": "^4.0.0",
     "loglevel": "^1.9.2",
     "lucide-react": "^0.483.0",
-    "mysql2": "^3.22.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.78.0",
@@ -33,28 +31,6 @@
     "zod": "^4.4.3",
     "zustand": "^5.0.14"
   },
-  "eslintConfig": {
-    "extends": [
-      "plugin:react/recommended",
-      "plugin:react-hooks/recommended",
-      "plugin:react-refresh/recommended",
-      "plugin:@typescript-eslint/recommended",
-      "prettier"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": 2020,
-      "sourceType": "module"
-    },
-    "plugins": [
-      "react",
-      "@typescript-eslint"
-    ],
-    "rules": {
-      "react/react-in-jsx-scope": "off"
-    }
-  },
-  "homepage": "https://dineshmurugan2022.github.io/gymsite",
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@testing-library/jest-dom": "^6.4.0",
@@ -67,7 +43,6 @@
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
-    "gh-pages": "^6.3.0",
     "globals": "^15.15.0",
     "jsdom": "^24.1.0",
     "msw": "^2.3.0",

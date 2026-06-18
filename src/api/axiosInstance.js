@@ -2,7 +2,9 @@ import axios from 'axios';
 import useAuthStore from '../store/authStore';
 
 let API_BASE;
-if (import.meta.env.DEV) {
+if (import.meta.env.VITE_API_BASE) {
+  API_BASE = import.meta.env.VITE_API_BASE;
+} else if (import.meta.env.DEV) {
   API_BASE = 'http://localhost:8080/api';
 } else {
   API_BASE = 'https://gymj-9.onrender.com/api';

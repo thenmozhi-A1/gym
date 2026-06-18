@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { MoreVertical, Trash2, X, User, Heart, CreditCard, Calendar, Activity, ChevronRight, Save } from "lucide-react";
+import { useAdminStore } from "../store/useAdminStore";
 
-const MemberManagement = ({ users, onDeleteUser, onAddUser, onEditUser, payments = [] }) => {
+const MemberManagement = ({ onAddUser }) => {
+  const { users, payments, deleteUser, updateUser } = useAdminStore();
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({});
@@ -11,13 +13,8 @@ const MemberManagement = ({ users, onDeleteUser, onAddUser, onEditUser, payments
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
-    if (onEditUser) {
-      const success = await onEditUser(editFormData.id || editFormData.memberId, editFormData);
-      if (success) {
-        setSelectedUser(editFormData);
-        setIsEditModalOpen(false);
-      }
-    } else {
+    const success = await updateUser(editFormData.id || editFormData.memberId, editFormData);
+    if (success) {
       setSelectedUser(editFormData);
       setIsEditModalOpen(false);
     }
@@ -56,7 +53,11 @@ const MemberManagement = ({ users, onDeleteUser, onAddUser, onEditUser, payments
             </tr>
           </thead>
           <tbody>
-            {users.map(u => (
+            {[...users].sort((a, b) => {
+              if (!a.expiryDate) return 1;
+              if (!b.expiryDate) return -1;
+              return new Date(a.expiryDate) - new Date(b.expiryDate);
+            }).map(u => (
               <tr key={u.id || u.memberId} onClick={() => setSelectedUser(u)}>
                 <td>
                   <div className="u-cell">
@@ -72,7 +73,7 @@ const MemberManagement = ({ users, onDeleteUser, onAddUser, onEditUser, payments
                 <td className="sub-text">{u.mobileNumber || u.phone || "N/A"}</td>
                 <td>
                   <div className="d-flex gap-2" onClick={e => e.stopPropagation()}>
-                    <button className="btn-icon text-danger" onClick={() => onDeleteUser(u.id || u.memberId)} title="Delete User">
+                    <button className="btn-icon text-danger" onClick={() => deleteUser(u.id || u.memberId)} title="Delete User">
                       <Trash2 size={16} />
                     </button>
                     <button className="btn-icon" onClick={(e) => { e.stopPropagation(); setEditFormData(u); setIsEditModalOpen(true); }}><MoreVertical size={16} /></button>
