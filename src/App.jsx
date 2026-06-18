@@ -14,7 +14,6 @@ import Nav from "./Nav";
 import Footer from "./Footer";
 import ChangePassword from "./pages/ChangePassword";
 import ForgotPassword from "./pages/ForgotPassword";
-import EnrolFingerprint from "./pages/EnrolFingerprint";
 import Dashboard from "./Dashboard";
 import Userdashboard from "./Userdashboard";
 import Subscription from "./Subscription";
@@ -59,7 +58,6 @@ function LayoutWrapper() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/enrol-fingerprint" element={<ProtectedRoute><EnrolFingerprint /></ProtectedRoute>} />
         
         {/* Public Marketing/Info Routes */}
         <Route path="/subscription" element={<Subscription />} />
