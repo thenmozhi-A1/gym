@@ -38,8 +38,7 @@ import {
   CheckSquare,
   Briefcase,
   FileCheck,
-  Package,
-  Menu
+  Package
 } from "lucide-react";
 
 import AddUserModal from "./Components/AddUserModal";

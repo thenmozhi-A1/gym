@@ -189,13 +189,14 @@ const ReportsModule = () => {
         <div className="table-responsive">
           <table className="table">
             <thead>
-              <th>TIMESTAMP</th>
-              <th>ACTION</th>
-              <th>ADMIN</th>
-              <th>TARGET</th>
-              <th>DETAILS</th>
-            </tr>
-          </thead>
+              <tr>
+                <th>TIMESTAMP</th>
+                <th>ACTION</th>
+                <th>ADMIN</th>
+                <th>TARGET</th>
+                <th>DETAILS</th>
+              </tr>
+            </thead>
           <tbody>
             {auditLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
