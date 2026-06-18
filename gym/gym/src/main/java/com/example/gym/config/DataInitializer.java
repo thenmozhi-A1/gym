@@ -1,7 +1,5 @@
 package com.example.gym.config;
 
-import com.example.gym.entity.Attendance;
-import com.example.gym.entity.Payment;
 import com.example.gym.entity.User;
 import com.example.gym.repository.AttendanceRepository;
 import com.example.gym.repository.PaymentRepository;
@@ -10,11 +8,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration

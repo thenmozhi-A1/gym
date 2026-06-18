@@ -56,6 +56,14 @@ public class User {
     @com.fasterxml.jackson.annotation.JsonIgnore
     private java.util.List<Attendance> attendances;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private java.util.List<RefreshToken> refreshTokens;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private java.util.List<PasswordResetToken> passwordResetTokens;
+
     public User() {}
 
     public User(Long id, String fullName, String email, String password, String phone, String address, String gender, String membershipType, String status, String role, String fingerprintHash, Boolean fingerprintEnrolled, LocalDateTime createdAt) {

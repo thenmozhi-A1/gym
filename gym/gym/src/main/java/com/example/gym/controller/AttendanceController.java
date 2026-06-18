@@ -92,6 +92,26 @@ public class AttendanceController {
         }
     }
 
+    /** PUT /api/attendance/{id}/correction — Submit a correction request */
+    @PutMapping("/{id}/correction")
+    public ResponseEntity<?> requestCorrection(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        try {
+            return ResponseEntity.ok(attendanceService.requestCorrection(id, payload.get("reason")));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** PUT /api/attendance/{id}/correction-status — Admin approve/reject correction */
+    @PutMapping("/{id}/correction-status")
+    public ResponseEntity<?> updateCorrectionStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        try {
+            return ResponseEntity.ok(attendanceService.updateCorrectionStatus(id, payload.get("status")));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     /** DELETE /api/attendance/{id} — Delete attendance record */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAttendance(@PathVariable Long id) {

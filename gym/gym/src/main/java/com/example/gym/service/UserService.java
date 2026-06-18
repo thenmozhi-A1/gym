@@ -2,7 +2,6 @@ package com.example.gym.service;
 
 import com.example.gym.entity.User;
 import com.example.gym.repository.UserRepository;
-import com.example.gym.repository.StaffRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +15,10 @@ import java.util.regex.Pattern;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final StaffRepository staffRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, StaffRepository staffRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.staffRepository = staffRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -193,8 +190,15 @@ public class UserService {
         existing.setAddress(updatedUser.getAddress());
         existing.setGender(updatedUser.getGender());
         existing.setMembershipType(updatedUser.getMembershipType());
+        boolean statusOrRoleChanged = !existing.getStatus().equals(updatedUser.getStatus()) || !existing.getRole().equals(updatedUser.getRole());
+        
         existing.setStatus(updatedUser.getStatus());
         existing.setRole(updatedUser.getRole());
+        
+        if (statusOrRoleChanged) {
+            Long currentVersion = existing.getTokenVersion() != null ? existing.getTokenVersion() : 0L;
+            existing.setTokenVersion(currentVersion + 1);
+        }
         existing.setFingerprintHash(updatedUser.getFingerprintHash());
         existing.setFingerprintEnrolled(updatedUser.getFingerprintEnrolled());
         return userRepository.save(existing);

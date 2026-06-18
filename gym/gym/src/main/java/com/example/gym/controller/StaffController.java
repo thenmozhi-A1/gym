@@ -56,8 +56,19 @@ public class StaffController {
         staff.setSalary(staffDto.getSalary());
         staff.setTimes(staffDto.getTimes());
         staff.setSpecialty(staffDto.getSpecialty());
+        staff.setExperience(staffDto.getExperience());
         staff.setLeaves(staffDto.getLeaves() != null ? staffDto.getLeaves() : 0);
         staff.setPermissions(staffDto.getPermissions() != null ? staffDto.getPermissions() : 0);
+        
+        staff.setDepartment(staffDto.getDepartment());
+        staff.setJoiningDate(staffDto.getJoiningDate());
+        staff.setEmergencyContactName(staffDto.getEmergencyContactName());
+        staff.setEmergencyContactPhone(staffDto.getEmergencyContactPhone());
+        staff.setBankName(staffDto.getBankName());
+        staff.setAccountNumber(staffDto.getAccountNumber());
+        staff.setIfscCode(staffDto.getIfscCode());
+        staff.setDocuments(staffDto.getDocuments());
+        staff.setProfilePhoto(staffDto.getProfilePhoto());
         
         // Link bidirectional
         staff.setUser(user);
@@ -119,8 +130,19 @@ public class StaffController {
                     staff.setSalary(updatedStaffDto.getSalary());
                     staff.setTimes(updatedStaffDto.getTimes());
                     staff.setSpecialty(updatedStaffDto.getSpecialty());
+                    staff.setExperience(updatedStaffDto.getExperience());
                     staff.setLeaves(updatedStaffDto.getLeaves() != null ? updatedStaffDto.getLeaves() : staff.getLeaves());
                     staff.setPermissions(updatedStaffDto.getPermissions() != null ? updatedStaffDto.getPermissions() : staff.getPermissions());
+                    
+                    if (updatedStaffDto.getDepartment() != null) staff.setDepartment(updatedStaffDto.getDepartment());
+                    if (updatedStaffDto.getJoiningDate() != null) staff.setJoiningDate(updatedStaffDto.getJoiningDate());
+                    if (updatedStaffDto.getEmergencyContactName() != null) staff.setEmergencyContactName(updatedStaffDto.getEmergencyContactName());
+                    if (updatedStaffDto.getEmergencyContactPhone() != null) staff.setEmergencyContactPhone(updatedStaffDto.getEmergencyContactPhone());
+                    if (updatedStaffDto.getBankName() != null) staff.setBankName(updatedStaffDto.getBankName());
+                    if (updatedStaffDto.getAccountNumber() != null) staff.setAccountNumber(updatedStaffDto.getAccountNumber());
+                    if (updatedStaffDto.getIfscCode() != null) staff.setIfscCode(updatedStaffDto.getIfscCode());
+                    if (updatedStaffDto.getDocuments() != null) staff.setDocuments(updatedStaffDto.getDocuments());
+                    if (updatedStaffDto.getProfilePhoto() != null) staff.setProfilePhoto(updatedStaffDto.getProfilePhoto());
 
                     User savedUser = userRepository.save(existingUser);
                     return ResponseEntity.ok(mapToDTO(savedUser));
@@ -159,8 +181,18 @@ public class StaffController {
             dto.setSalary(staff.getSalary());
             dto.setTimes(staff.getTimes());
             dto.setSpecialty(staff.getSpecialty());
+            dto.setExperience(staff.getExperience());
             dto.setLeaves(staff.getLeaves());
             dto.setPermissions(staff.getPermissions());
+            dto.setDepartment(staff.getDepartment());
+            dto.setJoiningDate(staff.getJoiningDate());
+            dto.setEmergencyContactName(staff.getEmergencyContactName());
+            dto.setEmergencyContactPhone(staff.getEmergencyContactPhone());
+            dto.setBankName(staff.getBankName());
+            dto.setAccountNumber(staff.getAccountNumber());
+            dto.setIfscCode(staff.getIfscCode());
+            dto.setDocuments(staff.getDocuments());
+            dto.setProfilePhoto(staff.getProfilePhoto());
         }
         return dto;
     }

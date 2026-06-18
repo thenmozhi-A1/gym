@@ -9,17 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.gym.security.JwtTokenProvider;
-import com.example.gym.entity.RefreshToken;
-import com.example.gym.repository.RefreshTokenRepository;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,15 +18,11 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final JwtTokenProvider tokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final NotificationService notificationService;
     private final AuditLogService auditLogService;
 
-    public UserController(UserService userService, JwtTokenProvider tokenProvider, RefreshTokenRepository refreshTokenRepository, NotificationService notificationService, AuditLogService auditLogService) {
+    public UserController(UserService userService, NotificationService notificationService, AuditLogService auditLogService) {
         this.userService = userService;
-        this.tokenProvider = tokenProvider;
-        this.refreshTokenRepository = refreshTokenRepository;
         this.notificationService = notificationService;
         this.auditLogService = auditLogService;
     }
@@ -47,16 +33,6 @@ public class UserController {
             if (principal instanceof User u) return u.getEmail();
         } catch (Exception ignored) {}
         return "system";
-    }
-
-    private String hashToken(String rawToken) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(rawToken.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(hashBytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 not available", e);
-        }
     }
 
     /** POST /api/users/register — Create new account */
@@ -139,9 +115,10 @@ public class UserController {
             userService.deleteUser(id);
             auditLogService.log("DELETE_USER", currentAdminEmail(), id, "User",
                     "Deleted user: " + (target != null ? target.getFullName() + " (" + target.getEmail() + ")" : "id=" + id));
+            return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
         } catch (Exception e) {
-            userService.deleteUser(id);
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Failed to delete user: " + e.getMessage()));
         }
-        return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
     }
 }

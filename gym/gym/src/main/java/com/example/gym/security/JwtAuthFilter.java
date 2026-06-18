@@ -15,7 +15,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Optional;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -37,12 +36,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 Long userId = tokenProvider.extractUserId(jwt);
                 String email = tokenProvider.extractEmail(jwt);
                 String role = tokenProvider.extractRole(jwt);
+                Long tokenVersion = tokenProvider.extractTokenVersion(jwt);
                 
-                // Create a lightweight user representation from token claims
-                User virtualUser = new User();
-                virtualUser.setId(userId);
-                virtualUser.setEmail(email);
-                virtualUser.setRole(role);
+                // Fetch user from DB to check status and token version
+                User dbUser = userRepository.findById(userId).orElse(null);
+                
+                Long dbTokenVersion = (dbUser != null && dbUser.getTokenVersion() != null) ? dbUser.getTokenVersion() : 0L;
+                Long jwtTokenVersion = tokenVersion != null ? tokenVersion : 0L;
+
+                if (dbUser != null && "ACTIVE".equalsIgnoreCase(dbUser.getStatus()) && dbTokenVersion.equals(jwtTokenVersion)) {
+                    // Create a lightweight user representation from token claims
+                    User virtualUser = new User();
+                    virtualUser.setId(userId);
+                    virtualUser.setEmail(email);
+                    virtualUser.setRole(role);
                 
                 String safeRole = (role != null) ? role.toUpperCase() : "USER";
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -50,7 +57,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 );
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
@@ -65,9 +73,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
         // EventSource (SSE) cannot send Authorization headers — fall back to query param
-        String tokenParam = request.getParameter("token");
-        if (tokenParam != null && !tokenParam.isEmpty()) {
-            return tokenParam;
+        if (request.getRequestURI().equals("/api/notifications/stream")) {
+            String tokenParam = request.getParameter("token");
+            if (tokenParam != null && !tokenParam.isEmpty()) {
+                return tokenParam;
+            }
         }
         return null;
     }
