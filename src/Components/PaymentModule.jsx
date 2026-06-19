@@ -77,6 +77,7 @@ const PaymentModule = () => {
               <th>INVOICE #</th>
               <th>MEMBER</th>
               <th>AMOUNT</th>
+              <th>PLAN</th>
               <th>MODE</th>
               <th>DATE</th>
               <th>STATUS</th>
@@ -89,6 +90,7 @@ const PaymentModule = () => {
                 <td className="fw-bold text-muted">{p.id || `INV-${Math.floor(Math.random() * 10000)}`}</td>
                 <td className="fw-bold">{p.user?.fullName || p.fullName || "Member"}</td>
                 <td className="fw-bold text-primary">₹{p.amount?.toLocaleString()}</td>
+                <td>{p.planName || "Standard"}</td>
                 <td>{p.paymentMethod || p.paymentMode || "Card"}</td>
                 <td>{Array.isArray(p.paymentDate) ? `${p.paymentDate[0]}-${String(p.paymentDate[1]).padStart(2, '0')}-${String(p.paymentDate[2]).padStart(2, '0')}` : new Date(p.paymentDate).toLocaleDateString()}</td>
                 <td>
@@ -108,7 +110,7 @@ const PaymentModule = () => {
               </tr>
             ))}
             {filteredPayments.length === 0 && (
-              <tr><td colSpan="7" className="text-center py-4">No payments found.</td></tr>
+              <tr><td colSpan="8" className="text-center py-4">No payments found.</td></tr>
             )}
           </tbody>
         </table>
