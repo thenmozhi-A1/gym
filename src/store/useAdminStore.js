@@ -20,9 +20,20 @@ export const useAdminStore = create((set, get) => ({
         return;
       }
 
-      const endpoints = activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks"
-        ? ["users", "payments", "attendance", "consultations", "staffs", "feedbacks"]
-        : [activeTab];
+      let endpoints = [];
+      if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
+        endpoints = ["users", "payments", "attendance", "consultations", "staffs", "feedbacks"];
+      } else {
+        // Map UI tabs to actual backend endpoints
+        const endpointMap = {
+          "trainers": "staffs",
+          "memberships": "membership-plans",
+          "requests": "leaves", // Or whatever 'requests' is supposed to map to
+          "payments": "payments",
+          "attendance": "attendance"
+        };
+        endpoints = [endpointMap[activeTab] || activeTab];
+      }
 
       const ts = new Date().getTime();
       const results = await Promise.all(
@@ -70,7 +81,11 @@ export const useAdminStore = create((set, get) => ({
         if (activeTab === "payments") set({ payments: data });
         else if (activeTab === "attendance") set({ attendance: data });
         else if (activeTab === "feedbacks") set({ feedbacks: data });
-        else set({ consultations: data });
+        else if (activeTab === "consultations" || activeTab === "requests") set({ consultations: data });
+        else if (activeTab === "users") set({ users: data });
+        else if (activeTab === "staffs" || activeTab === "trainers") set({ staffs: data });
+        // memberships, products etc don't have dedicated arrays in the store, 
+        // modules fetch them independently.
       }
     } catch (e) {
       log.error("Failed to fetch admin data", e);

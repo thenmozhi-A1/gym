@@ -11,6 +11,10 @@ if (import.meta.env.VITE_API_BASE) {
   API_BASE = 'https://gymj-9.onrender.com/api';
 }
 
+if (!API_BASE.endsWith('/api')) {
+  API_BASE = API_BASE.endsWith('/') ? API_BASE + 'api' : API_BASE + '/api';
+}
+
 /**
  * Subscribes to the backend SSE stream and pushes toast notifications
  * when admin-relevant events arrive (new member, payment failed, attendance).
