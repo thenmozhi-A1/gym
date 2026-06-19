@@ -74,6 +74,25 @@ public class DataInitializer {
                 System.err.println("❌ Failed to verify/create 'membership_plans' tables: " + e.getMessage());
             }
 
+            try {
+                jdbcTemplate.execute(
+                    "CREATE TABLE IF NOT EXISTS leave_requests (" +
+                    "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                    "staff_id BIGINT NOT NULL, " +
+                    "start_date DATE, " +
+                    "end_date DATE, " +
+                    "leave_type VARCHAR(255), " +
+                    "reason TEXT, " +
+                    "status VARCHAR(255), " +
+                    "applied_at DATETIME(6), " +
+                    "FOREIGN KEY (staff_id) REFERENCES staff_details(id) ON DELETE CASCADE" +
+                    ") ENGINE=InnoDB"
+                );
+                System.out.println("✅ Database table 'leave_requests' checked/created successfully.");
+            } catch (Exception e) {
+                System.err.println("❌ Failed to verify/create 'leave_requests' table: " + e.getMessage());
+            }
+
             String adminEmail = "admin@gym.com";
             User admin = userRepository.findByEmail(adminEmail).orElse(new User());
             admin.setFullName("Gym Admin");

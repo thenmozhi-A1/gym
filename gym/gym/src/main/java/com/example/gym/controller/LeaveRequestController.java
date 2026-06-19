@@ -30,6 +30,7 @@ public class LeaveRequestController {
 
     /** POST /api/leaves/apply — Employee applies for leave */
     @PostMapping("/apply/{userId}")
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> applyLeave(@PathVariable Long userId, @RequestBody LeaveRequestDTO dto) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null || user.getStaffDetails() == null) {
