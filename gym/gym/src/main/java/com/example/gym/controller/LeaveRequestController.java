@@ -28,25 +28,55 @@ public class LeaveRequestController {
         this.userRepository = userRepository;
     }
 
-    /** POST /api/leaves/apply — Employee applies for leave */
+    /** POST /api/leaves/apply/{userId} — Employee applies for leave */
     @PostMapping("/apply/{userId}")
     @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<?> applyLeave(@PathVariable Long userId, @RequestBody LeaveRequestDTO dto) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null || user.getStaffDetails() == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Staff not found"));
-        }
+        try {
+            User user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "User not found with id: " + userId));
+            }
+            if (user.getStaffDetails() == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "User " + userId + " has no staff record"));
+            }
 
-        Staff staff = user.getStaffDetails();
-        LeaveRequest req = new LeaveRequest();
-        req.setStaff(staff);
-        req.setStartDate(dto.getStartDate());
-        req.setEndDate(dto.getEndDate());
-        req.setLeaveType(dto.getLeaveType());
-        req.setReason(dto.getReason());
-        
-        LeaveRequest saved = leaveRequestRepository.save(req);
-        return ResponseEntity.ok(mapToDTO(saved));
+            // Re-fetch staff directly to avoid any lazy-load or detached entity issues
+            Staff staff = staffRepository.findById(user.getStaffDetails().getId())
+                    .orElseThrow(() -> new RuntimeException("Staff record missing for user " + userId));
+
+            LeaveRequest req = new LeaveRequest();
+            req.setStaff(staff);
+            req.setStartDate(dto.getStartDate());
+            req.setEndDate(dto.getEndDate());
+            req.setLeaveType(dto.getLeaveType());
+            req.setReason(dto.getReason());
+            req.setStatus("PENDING");
+            req.setAppliedAt(java.time.LocalDateTime.now());
+
+            LeaveRequest saved = leaveRequestRepository.save(req);
+            leaveRequestRepository.flush();
+
+            // Build DTO manually — avoids any Jackson serialization issues with JPA proxies
+            LeaveRequestDTO result = new LeaveRequestDTO();
+            result.setId(saved.getId());
+            result.setStaffId(staff.getId());
+            result.setStaffName(user.getFullName());
+            result.setStartDate(saved.getStartDate());
+            result.setEndDate(saved.getEndDate());
+            result.setLeaveType(saved.getLeaveType());
+            result.setReason(saved.getReason());
+            result.setStatus(saved.getStatus());
+            result.setAppliedAt(saved.getAppliedAt());
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "error", e.getMessage() != null ? e.getMessage() : "Unknown error",
+                "cause", e.getCause() != null ? e.getCause().getMessage() : "none",
+                "type", e.getClass().getName()
+            ));
+        }
     }
 
     /** GET /api/leaves/staff/{userId} — Get leaves for a specific employee */
@@ -75,7 +105,6 @@ public class LeaveRequestController {
         return leaveRequestRepository.findById(id).map(req -> {
             String newStatus = payload.get("status");
             if (newStatus != null) {
-                // If it's CANCELLED, verify it's PENDING
                 if ("CANCELLED".equals(newStatus) && !"PENDING".equals(req.getStatus())) {
                     return ResponseEntity.badRequest().body(Map.of("error", "Only PENDING leaves can be cancelled"));
                 }
