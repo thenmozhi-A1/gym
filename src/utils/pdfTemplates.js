@@ -198,17 +198,19 @@ export function generateInvoicePDF(payment) {
   doc.roundedRect(15, 58, pageW - 30, 36, 3, 3, 'F');
 
   infoRow(doc, 'BILLED TO',    memberName,                          22, 67);
-  infoRow(doc, 'EMAIL',        payment.email || '—',                22, 80);
+  infoRow(doc, 'EMAIL',        payment.user?.email || payment.email || '—', 22, 80);
   infoRow(doc, 'INVOICE DATE', date.toLocaleDateString(),          120, 67);
-  infoRow(doc, 'PAYMENT MODE', payment.paymentMode || 'Card',      120, 80);
+  infoRow(doc, 'PAYMENT MODE', payment.paymentMethod || payment.paymentMode || 'Card', 120, 80);
   infoRow(doc, 'STATUS',       status,                             170, 67);
+
+  const planDescription = payment.planName ? `Gym Membership (${payment.planName})` : 'Gym Membership Fee';
 
   // ── Line items table ───────────────────────────────────────────────────────
   autoTable(doc, {
     startY: 100,
     head: [['#', 'Description', 'Qty', 'Unit Price', 'Amount']],
     body: [
-      ['01', 'Gym Membership Fee',   '1', `INR ${baseAmount.toLocaleString()}`, `INR ${baseAmount.toLocaleString()}`],
+      ['01', planDescription,        '1', `INR ${baseAmount.toLocaleString()}`, `INR ${baseAmount.toLocaleString()}`],
       ['02', 'GST @ 18%',            '—', '—',                                `INR ${gst.toLocaleString()}`],
     ],
     theme: 'grid',
