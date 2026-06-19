@@ -3,8 +3,10 @@ import toast from 'react-hot-toast';
 import { Users, CreditCard, Clock } from 'lucide-react';
 
 let API_BASE;
-if (import.meta.env.DEV) {
-  API_BASE = 'http://localhost:8080/api';
+if (import.meta.env.VITE_API_BASE) {
+  API_BASE = import.meta.env.VITE_API_BASE;
+} else if (import.meta.env.DEV) {
+  API_BASE = 'https://gymj-9.onrender.com/api';
 } else {
   API_BASE = 'https://gymj-9.onrender.com/api';
 }

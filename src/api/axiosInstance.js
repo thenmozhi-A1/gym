@@ -5,7 +5,7 @@ let API_BASE;
 if (import.meta.env.VITE_API_BASE) {
   API_BASE = import.meta.env.VITE_API_BASE;
 } else if (import.meta.env.DEV) {
-  API_BASE = 'http://localhost:8080/api';
+  API_BASE = 'https://gymj-9.onrender.com/api'; // Point to deployed backend for local dev CRUD
 } else {
   API_BASE = 'https://gymj-9.onrender.com/api';
 }
