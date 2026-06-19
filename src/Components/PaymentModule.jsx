@@ -13,7 +13,7 @@ const PaymentModule = () => {
     String(p.id || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalIncome = payments.reduce((acc, p) => acc + (p.amount || 0), 0);
+  const totalIncome = payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
   const totalOutcome = staffs.reduce((acc, s) => {
     const salary = parseFloat(s.salary) || 0;
     return acc + salary;
