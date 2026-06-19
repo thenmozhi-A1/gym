@@ -46,7 +46,22 @@ public class UserController {
             user.setPhone(dto.getPhone());
             user.setAddress(dto.getAddress());
             user.setGender(dto.getGender());
-            user.setMembershipType(dto.getMembershipType());
+            user.setMembershipPlan(dto.getMembershipPlan());
+            user.setDob(dto.getDob());
+            user.setAge(dto.getAge());
+            user.setCity(dto.getCity());
+            user.setHeight(dto.getHeight());
+            user.setWeight(dto.getWeight());
+            user.setBmi(dto.getBmi());
+            user.setBloodGroup(dto.getBloodGroup());
+            user.setFitnessGoal(dto.getFitnessGoal());
+            user.setStartDate(dto.getStartDate());
+            user.setExpiryDate(dto.getExpiryDate());
+            user.setReferralSource(dto.getReferralSource());
+            user.setEmergencyContactName(dto.getEmergencyContactName());
+            user.setEmergencyContactNumber(dto.getEmergencyContactNumber());
+            user.setMedicalConditions(dto.getMedicalConditions());
+            user.setAllergies(dto.getAllergies());
             // Force role to USER for public registration
             user.setRole("USER");
             User saved = userService.registerUser(user);
