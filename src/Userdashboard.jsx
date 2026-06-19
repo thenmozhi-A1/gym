@@ -524,11 +524,41 @@ const Userdashboard = () => {
      return db - da;
   });
 
-  // Next payment date: last payment date + 30 days
-  const lastPay     = payments.length ? [...payments].sort((a,b) => new Date(b.paymentDate) - new Date(a.paymentDate))[0] : null;
-  const nextPayDate = lastPay
-    ? new Date(new Date(lastPay.paymentDate).getTime() + 30 * 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-    : 'N/A';
+  const sortedPayments = payments.length 
+    ? [...payments].sort((a,b) => {
+        let dateA = a.paymentDate;
+        let dateB = b.paymentDate;
+        if (Array.isArray(dateA)) dateA = new Date(dateA[0], dateA[1]-1, dateA[2], dateA[3]||0, dateA[4]||0);
+        else dateA = new Date(dateA);
+        if (Array.isArray(dateB)) dateB = new Date(dateB[0], dateB[1]-1, dateB[2], dateB[3]||0, dateB[4]||0);
+        else dateB = new Date(dateB);
+        return dateB - dateA;
+      }) 
+    : [];
+
+  const lastPay = sortedPayments[0] || null;
+
+  let nextPayDateStr = 'N/A';
+  if (lastPay) {
+    if (lastPay.planEndDate) {
+      let d = lastPay.planEndDate;
+      if (Array.isArray(d)) d = new Date(d[0], d[1]-1, d[2], d[3]||0, d[4]||0);
+      else d = new Date(d);
+      nextPayDateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    } else {
+      let d = lastPay.paymentDate;
+      if (Array.isArray(d)) d = new Date(d[0], d[1]-1, d[2], d[3]||0, d[4]||0);
+      else d = new Date(d);
+      nextPayDateStr = new Date(d.getTime() + 30 * 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+  } else if (profile?.expiryDate) {
+    let d = profile.expiryDate;
+    if (Array.isArray(d)) d = new Date(d[0], d[1]-1, d[2], d[3]||0, d[4]||0);
+    else d = new Date(d);
+    nextPayDateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  const nextPayDate = nextPayDateStr;
 
   // ── Feedback submit ───────────────────────────────────────────────────────────
   const handleFeedback = async (e) => {
@@ -826,7 +856,7 @@ const Userdashboard = () => {
                   <div>
                     <PayAmount>₹{(p.amount || 0).toLocaleString()}</PayAmount>
                     <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: 3 }}>
-                      {p.paymentDate} · {p.paymentMode || 'Card'}
+                      {Array.isArray(p.paymentDate) ? new Date(p.paymentDate[0], p.paymentDate[1]-1, p.paymentDate[2], p.paymentDate[3]||0, p.paymentDate[4]||0).toLocaleDateString() : new Date(p.paymentDate).toLocaleDateString()} · {p.paymentMode || 'Card'}
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

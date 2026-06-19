@@ -229,7 +229,25 @@ const MemberManagement = ({ onAddUser }) => {
                         <input 
                           type="text" 
                           value={editFormData.membershipPlan || editFormData.membershipType || ''} 
-                          onChange={e => setEditFormData({...editFormData, membershipPlan: e.target.value})}
+                          onChange={e => {
+                            const newPlan = e.target.value;
+                            let newExpiry = null;
+                            if (editFormData.startDate && newPlan) {
+                              const start = new Date(editFormData.startDate);
+                              if (!isNaN(start.getTime())) {
+                                const expiry = new Date(start);
+                                if (newPlan === "Monthly") expiry.setMonth(expiry.getMonth() + 1);
+                                else if (newPlan === "Quarterly") expiry.setMonth(expiry.getMonth() + 3);
+                                else if (newPlan === "Half-Yearly") expiry.setMonth(expiry.getMonth() + 6);
+                                else if (newPlan === "Annual") expiry.setFullYear(expiry.getFullYear() + 1);
+                                
+                                if (["Monthly", "Quarterly", "Half-Yearly", "Annual"].includes(newPlan)) {
+                                  newExpiry = `${expiry.getFullYear()}-${String(expiry.getMonth() + 1).padStart(2, '0')}-${String(expiry.getDate()).padStart(2, '0')}`;
+                                }
+                              }
+                            }
+                            setEditFormData({...editFormData, membershipPlan: newPlan, ...(newExpiry ? {expiryDate: newExpiry} : {})});
+                          }}
                           style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
                         />
                       </div>
@@ -250,7 +268,26 @@ const MemberManagement = ({ onAddUser }) => {
                         <input 
                           type="date" 
                           value={editFormData.startDate || ''} 
-                          onChange={e => setEditFormData({...editFormData, startDate: e.target.value})}
+                          onChange={e => {
+                            const newStart = e.target.value;
+                            const plan = editFormData.membershipPlan || editFormData.membershipType;
+                            let newExpiry = null;
+                            if (newStart && plan) {
+                              const start = new Date(newStart);
+                              if (!isNaN(start.getTime())) {
+                                const expiry = new Date(start);
+                                if (plan === "Monthly") expiry.setMonth(expiry.getMonth() + 1);
+                                else if (plan === "Quarterly") expiry.setMonth(expiry.getMonth() + 3);
+                                else if (plan === "Half-Yearly") expiry.setMonth(expiry.getMonth() + 6);
+                                else if (plan === "Annual") expiry.setFullYear(expiry.getFullYear() + 1);
+                                
+                                if (["Monthly", "Quarterly", "Half-Yearly", "Annual"].includes(plan)) {
+                                  newExpiry = `${expiry.getFullYear()}-${String(expiry.getMonth() + 1).padStart(2, '0')}-${String(expiry.getDate()).padStart(2, '0')}`;
+                                }
+                              }
+                            }
+                            setEditFormData({...editFormData, startDate: newStart, ...(newExpiry ? {expiryDate: newExpiry} : {})});
+                          }}
                           style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px', colorScheme: 'dark'}}
                         />
                       </div>

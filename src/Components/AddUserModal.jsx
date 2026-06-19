@@ -89,6 +89,8 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   const weight = watch("weight");
   const email = watch("email");
   const fullName = watch("fullName");
+  const membershipPlan = watch("membershipPlan");
+  const startDate = watch("startDate");
 
   useEffect(() => {
     if (dob) {
@@ -113,6 +115,39 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       }
     }
   }, [height, weight, setValue]);
+
+  useEffect(() => {
+    if (startDate && membershipPlan) {
+      const start = new Date(startDate);
+      if (!isNaN(start.getTime())) {
+        const expiry = new Date(start);
+        
+        switch (membershipPlan) {
+          case "Monthly":
+            expiry.setMonth(expiry.getMonth() + 1);
+            break;
+          case "Quarterly":
+            expiry.setMonth(expiry.getMonth() + 3);
+            break;
+          case "Half-Yearly":
+            expiry.setMonth(expiry.getMonth() + 6);
+            break;
+          case "Annual":
+            expiry.setFullYear(expiry.getFullYear() + 1);
+            break;
+          default:
+            break;
+        }
+        
+        const yyyy = expiry.getFullYear();
+        const mm = String(expiry.getMonth() + 1).padStart(2, '0');
+        const dd = String(expiry.getDate()).padStart(2, '0');
+        const formattedExpiry = `${yyyy}-${mm}-${dd}`;
+        
+        setValue("expiryDate", formattedExpiry, { shouldValidate: true });
+      }
+    }
+  }, [startDate, membershipPlan, setValue]);
 
 
 
