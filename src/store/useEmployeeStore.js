@@ -21,7 +21,7 @@ export const useEmployeeStore = create((set, get) => ({
 
         let attendanceLog = [];
         try {
-          const attRes = await axiosInstance.get(`/attendance/staff/${me.id}`);
+          const attRes = await axiosInstance.get(`/attendance/staff/${me.staffId}`);
           if (attRes.data && attRes.data.length > 0) {
             attendanceLog = attRes.data.map(log => {
               let durationStr = '-';
@@ -91,7 +91,7 @@ export const useEmployeeStore = create((set, get) => ({
 
         // Fetch leaves
         try {
-          const leavesRes = await axiosInstance.get(`/leaves/staff/${me.id}`);
+          const leavesRes = await axiosInstance.get(`/leaves/staff/${me.staffId}`);
           if (leavesRes.data) {
             set({ leaves: leavesRes.data });
           }

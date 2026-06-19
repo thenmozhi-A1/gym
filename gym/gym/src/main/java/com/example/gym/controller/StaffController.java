@@ -178,6 +178,7 @@ public class StaffController {
 
         if (user.getStaffDetails() != null) {
             Staff staff = user.getStaffDetails();
+            dto.setStaffId(staff.getId());
             dto.setSalary(staff.getSalary());
             dto.setTimes(staff.getTimes());
             dto.setSpecialty(staff.getSpecialty());
