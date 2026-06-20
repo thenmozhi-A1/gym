@@ -282,13 +282,13 @@ const Settings = () => {
 
   useEffect(() => {
     resetProfile({
-      fullName: user.fullName || localStorage.getItem("userName") || "",
-      phone: user.phone || localStorage.getItem("userPhone") || "",
+      fullName: user.fullName || "" || "",
+      phone: user.phone || "" || "",
     });
   }, [user, resetProfile]);
 
   const onSaveProfile = async (data) => {
-    const userId = user.id || localStorage.getItem("userId");
+    const userId = user.id || user?.id;
     if (!userId) {
       toast.error("User ID not found. Please log in again.");
       return;
@@ -300,8 +300,8 @@ const Settings = () => {
         phone: data.phone,
       });
       useAuthStore.getState().setUser(response.data);
-      localStorage.setItem("userName", response.data.fullName);
-      if (response.data.phone) localStorage.setItem("userPhone", response.data.phone);
+      
+      
       toast.success("Profile updated successfully!");
     } catch {
       toast.error("Failed to update profile. Please try again.");
@@ -328,7 +328,7 @@ const Settings = () => {
   ];
 
   const onSavePassword = async (data) => {
-    const userId = user.id || localStorage.getItem("userId");
+    const userId = user.id || user?.id;
     if (!userId) {
       toast.error("User ID not found. Please log in again.");
       return;
@@ -393,7 +393,7 @@ const Settings = () => {
                   <label>Email Address</label>
                   <input
                     type="email"
-                    value={user.email || localStorage.getItem("userEmail") || ""}
+                    value={user.email || "" || ""}
                     disabled
                   />
                 </FormGroup>

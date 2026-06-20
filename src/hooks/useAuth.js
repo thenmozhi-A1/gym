@@ -1,30 +1,25 @@
 import { useEffect, useState } from 'react';
 import useAuthStore from '../store/authStore';
-import { jwtDecode } from 'jwt-decode';
 import axiosInstance from '../api/axiosInstance';
 import log from '../utils/logger';
 
 export const useAuth = () => {
-  const { user, accessToken, isAuthenticated, login, logout } = useAuthStore();
+  const { user, isAuthenticated, login, logout } = useAuthStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const restoreAuth = async () => {
-      if (accessToken) {
+      if (isAuthenticated) {
         try {
-          const decoded = jwtDecode(accessToken);
-          if (decoded && decoded.sub && !decoded.id) {
-            decoded.id = decoded.sub;
-          }
-          // Check if expired
-          if (decoded.exp * 1000 < Date.now()) {
-            // Force a refresh via an innocuous backend call, axios interceptor handles the rest
-            await axiosInstance.get('/auth/me');
+          // Verify session is still valid with the HttpOnly cookies
+          const res = await axiosInstance.get('/auth/me');
+          if (res.data && res.data.user) {
+            useAuthStore.getState().setUser(res.data.user);
           } else {
-            useAuthStore.getState().setUser(decoded);
+            throw new Error("Invalid response");
           }
         } catch (e) {
-          log.error("Token restore failed", e);
+          log.error("Session verification failed", e);
           logout();
         }
       }
@@ -32,7 +27,7 @@ export const useAuth = () => {
     };
 
     restoreAuth();
-  }, [accessToken, logout]);
+  }, [isAuthenticated, logout]);
 
   const hasRole = (roleArray) => {
     if (!user || !user.role) return false;

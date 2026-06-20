@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import useAuthStore from "./store/authStore";
 import { useLocation } from "react-router-dom";
 import axiosInstance from "./api/axiosInstance";
 
@@ -159,7 +160,7 @@ const Nutrition = () => {
   };
 
   const handleBuyProduct = async (product, quantity = 1) => {
-    const userEmail = localStorage.getItem('userEmail');
+    const user = useAuthStore((state) => state.user); const userEmail = user?.email;
     if (!userEmail) {
       alert("Please login to buy products.");
       return;

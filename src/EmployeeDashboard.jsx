@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useAuthStore from "./store/authStore";
 import styled from "styled-components";
 import { 
   Fingerprint, 
@@ -52,7 +53,7 @@ const EmployeeDashboard = () => {
 
   // Fetch real data for the specific staff member from the database
   useEffect(() => {
-    const email = localStorage.getItem('userEmail');
+    const user = useAuthStore((state) => state.user); const email = user?.email;
     if (!email) {
       navigate('/login');
       return;

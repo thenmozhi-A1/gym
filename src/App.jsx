@@ -41,9 +41,9 @@ function LayoutWrapper() {
   // List all routes that should HIDE Navbar & Footer
   const hideLayoutRoutes = ["/AdminDashboard", "/EmployeeDashboard"];
 
-  // Case-insensitive match to be ultra-robust
+  // Case-insensitive and path prefix match to be ultra-robust for nested routes
   const hideLayout = hideLayoutRoutes.some(
-    (route) => route.toLowerCase() === location.pathname.toLowerCase()
+    (route) => location.pathname.toLowerCase().startsWith(route.toLowerCase())
   );
 
   return (

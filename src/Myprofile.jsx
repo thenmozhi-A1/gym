@@ -143,8 +143,8 @@ const Myprofile = () => {
   const user = useAuthStore((state) => state.user) || {};
   const logout = useAuthStore((state) => state.logout);
 
-  const userName = user.fullName || localStorage.getItem("userName") || "User";
-  const userEmail = user.email || localStorage.getItem("userEmail") || "Not logged in";
+  const userName = user.fullName || "" || "User";
+  const userEmail = user.email || "" || "Not logged in";
   const membershipType = user.membershipType || "Standard";
 
   const handleLogout = () => {
