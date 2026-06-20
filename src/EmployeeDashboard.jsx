@@ -152,8 +152,7 @@ const EmployeeDashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
+    useAuthStore.getState().logout();
   };
 
   const handleDownloadSlip = () => {

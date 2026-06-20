@@ -614,9 +614,7 @@ const Userdashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
     logout();
-    navigate('/login');
   };
 
   // ── Render ────────────────────────────────────────────────────────────────────
