@@ -21,7 +21,12 @@ export function useAdminNotifications(onNotification) {
   const esRef = useRef(null);
   const reconnectTimer = useRef(null);
 
-  const connect = useCallback(async () => {
+  const connect = useCallback(async (retryCount = 0) => {
+    if (retryCount >= 5) {
+      console.warn("Max SSE reconnect attempts reached.");
+      return;
+    }
+
     try {
       // Fetch a short-lived ticket to authenticate the SSE connection
       const res = await axiosInstance.post('/notifications/ticket');
@@ -87,13 +92,15 @@ export function useAdminNotifications(onNotification) {
       es.onerror = () => {
         es.close();
         esRef.current = null;
-        // Auto-reconnect after 5 seconds
-        reconnectTimer.current = setTimeout(connect, 5000);
+        // Auto-reconnect with exponential backoff
+        const delay = Math.min(5000 * Math.pow(2, retryCount), 60000);
+        reconnectTimer.current = setTimeout(() => connect(retryCount + 1), delay);
       };
     } catch (err) {
       console.error("Failed to get SSE ticket", err);
-      // Auto-reconnect
-      reconnectTimer.current = setTimeout(connect, 5000);
+      // Auto-reconnect with exponential backoff
+      const delay = Math.min(5000 * Math.pow(2, retryCount), 60000);
+      reconnectTimer.current = setTimeout(() => connect(retryCount + 1), delay);
     }
   }, [onNotification]);
 

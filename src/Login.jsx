@@ -23,22 +23,7 @@ const isWebAuthnSupported = () =>
   window.PublicKeyCredential !== undefined &&
   typeof window.PublicKeyCredential === "function";
 
-// ── Mobile helpers ────────────────────────────────────────────
-const isMobileDevice = () =>
-  ('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
-  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-
-const buildMobileHash = (samples) => {
-  if (!samples.length) return `fp_${Date.now()}`;
-  const n = samples.length;
-  const rx = Math.round(samples.reduce((s, t) => s + t.rx, 0) / n);
-  const ry = Math.round(samples.reduce((s, t) => s + t.ry, 0) / n);
-  const f  = Math.round(samples.reduce((s, t) => s + t.f,  0) / n * 20);
-  const key = `${rx}:${ry}:${f}`;
-  let h = 0x811c9dc5;
-  for (let i = 0; i < key.length; i++) { h ^= key.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
-  return `M${h.toString(16)}`;
-};
+// ── Mobile helpers (Removed insecure touch mocks) ─────────────────
 
 const Login = () => {
   const navigate = useNavigate();
@@ -53,11 +38,9 @@ const Login = () => {
   const [biometricState, setBiometricState] = useState("idle");
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [attendanceLog, setAttendanceLog] = useState(null);
-  const [scanProgress, setScanProgress] = useState(0);
   const touchSamples = React.useRef([]);
   const holdTimer    = React.useRef(null);
   const progressTimer = React.useRef(null);
-  const IS_MOBILE = React.useMemo(() => isMobileDevice(), []);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -109,94 +92,7 @@ const Login = () => {
     }
   };
 
-  // ── Mobile touch handlers (no PIN, pure touch) ───────────────
-  const startMobileScan = (e, onComplete) => {
-    e.preventDefault();
-    if (biometricState === 'success') return;
-    setEnrollError(""); setError("");
-    touchSamples.current = [];
-    setScanProgress(0);
-    setBiometricState('scanning');
-    const t = e.touches[0];
-    touchSamples.current.push({ rx: t.radiusX || 14, ry: t.radiusY || 14, f: t.force || 0.5 });
-    // Progress bar over 2.5s
-    let p = 0;
-    progressTimer.current = setInterval(() => { p = Math.min(p + 2, 100); setScanProgress(p); }, 50);
-    holdTimer.current = setTimeout(() => {
-      clearInterval(progressTimer.current);
-      setScanProgress(100);
-      onComplete(touchSamples.current);
-    }, 2500);
-  };
 
-  const moveMobileScan = (e) => {
-    e.preventDefault();
-    if (biometricState !== 'scanning') return;
-    const t = e.touches[0];
-    touchSamples.current.push({ rx: t.radiusX || 14, ry: t.radiusY || 14, f: t.force || 0.5 });
-  };
-
-  const cancelMobileScan = () => {
-    clearTimeout(holdTimer.current); clearInterval(progressTimer.current);
-    if (biometricState === 'scanning') {
-      setBiometricState('idle'); setScanProgress(0);
-      setEnrollError('Hold your finger steady for 2–3 seconds.');
-    }
-  };
-
-  // ── Desktop mouse handler (click & hold 2.5s) ──────────────
-  const startDesktopScan = (e, onComplete) => {
-    if (biometricState === 'success') return;
-    setEnrollError(""); setError("");
-    touchSamples.current = [{ rx: 14, ry: 14, f: 0.5 }];
-    setScanProgress(0);
-    setBiometricState('scanning');
-    let p = 0;
-    progressTimer.current = setInterval(() => { p = Math.min(p + 2, 100); setScanProgress(p); }, 50);
-    holdTimer.current = setTimeout(() => {
-      clearInterval(progressTimer.current);
-      setScanProgress(100);
-      onComplete(touchSamples.current);
-    }, 2500);
-  };
-
-  const cancelScan = () => {
-    clearTimeout(holdTimer.current); clearInterval(progressTimer.current);
-    if (biometricState === 'scanning') {
-      setBiometricState('idle'); setScanProgress(0);
-      setEnrollError('Hold your finger steady for the full 2–3 seconds.');
-    }
-  };
-
-  const completeMobileEnroll = (samples) => {
-    const hash = buildMobileHash(samples);
-    localStorage.setItem('lastEnrolledEmail', formData.email);
-    setBiometricState('success'); setIsEnrolled(true);
-  };
-
-  const completeMobileLogin = async (samples) => {
-    const hash = buildMobileHash(samples);
-    setBiometricState('scanning');
-    setError("");
-
-    try {
-      const res = await axiosInstance.post("/users/biometric-login", {
-        email: formData.email || localStorage.getItem("lastEnrolledEmail"),
-        fingerprintHash: hash 
-      });
-
-      const data = res.data;
-
-      useAuthStore.getState().login(data.user);
-      recordAttendance(data.user);
-
-      setBiometricState('success');
-      setTimeout(() => redirectAfterLogin(data.user), 1500);
-    } catch (err) { 
-      setBiometricState('error'); 
-      setError(err.response?.data?.error || 'Cannot connect to server.'); 
-    }
-  };
 
   // ── Desktop WebAuthn enroll ───────────────────────────────────
   const handleBiometricEnroll = async () => {
