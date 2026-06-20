@@ -58,6 +58,7 @@ import axiosInstance from "./api/axiosInstance";
 import log from "./utils/logger";
 import { useAdminNotifications } from "./hooks/useAdminNotifications";
 import { useAdminStore } from "./store/useAdminStore";
+import useAuthStore from "./store/authStore";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -121,7 +122,9 @@ const AdminDashboard = () => {
     await deleteFeedback(id);
   };
 
-  const handleLogout = () => { localStorage.clear(); navigate("/login"); };
+  const handleLogout = () => {
+    useAuthStore.getState().logout();
+  };
 
   const handleDeleteUser = async (id) => {
     if (!window.confirm("Permanent deletion cannot be undone. Proceed?")) return;

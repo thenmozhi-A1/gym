@@ -2,15 +2,9 @@ import { useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { Users, CreditCard, Clock } from 'lucide-react';
 import axiosInstance from '../api/axiosInstance';
+import { getAbsoluteApiBase } from '../config';
 
-let API_BASE;
-if (import.meta.env.VITE_API_BASE) {
-  API_BASE = import.meta.env.VITE_API_BASE;
-} else if (import.meta.env.DEV) {
-  API_BASE = 'https://gymj-10.onrender.com/api';
-} else {
-  API_BASE = 'https://gymj-10.onrender.com/api';
-}
+let API_BASE = getAbsoluteApiBase();
 
 if (!API_BASE.endsWith('/api')) {
   API_BASE = API_BASE.endsWith('/') ? API_BASE + 'api' : API_BASE + '/api';
