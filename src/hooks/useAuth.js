@@ -11,7 +11,7 @@ export const useAuth = () => {
     const restoreAuth = async () => {
       if (isAuthenticated) {
         try {
-          // Verify session is still valid with the HttpOnly cookies
+          // Verify session is still valid
           const res = await axiosInstance.get('/auth/me');
           if (res.data && res.data.user) {
             useAuthStore.getState().setUser(res.data.user);
@@ -19,8 +19,24 @@ export const useAuth = () => {
             throw new Error("Invalid response");
           }
         } catch (e) {
-          log.error("Session verification failed", e);
-          logout();
+          // Explicit token refresh fallback
+          if (e.response?.status === 401) {
+            try {
+              await axiosInstance.post('/auth/refresh');
+              const retryRes = await axiosInstance.get('/auth/me');
+              if (retryRes.data && retryRes.data.user) {
+                useAuthStore.getState().setUser(retryRes.data.user);
+                setLoading(false);
+                return;
+              }
+            } catch (refreshErr) {
+              log.error("Explicit session refresh failed", refreshErr);
+              logout();
+            }
+          } else {
+            log.error("Session verification failed", e);
+            logout();
+          }
         }
       }
       setLoading(false);
