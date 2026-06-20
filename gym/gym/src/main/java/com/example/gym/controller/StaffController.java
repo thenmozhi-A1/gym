@@ -1,4 +1,5 @@
-package com.example.gym.controller; 
+package com.example.gym.controller;
+import org.springframework.transaction.annotation.Transactional; 
 import com.example.gym.dto.StaffDTO;
 import com.example.gym.entity.Staff;
 import com.example.gym.entity.User;
@@ -150,17 +151,23 @@ public class StaffController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /** DELETE /api/v1/staffs/{id} — Delete staff */
+    /** DELETE /api/staffs/{id} — Delete staff */
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteStaff(@PathVariable Long id) {
-        if (userRepository.existsById(id)) {
-            String name = userRepository.findById(id).map(User::getFullName).orElse("id=" + id);
-            userRepository.deleteById(id);
-            auditLogService.log("DELETE_STAFF", currentAdminEmail(), id, "Staff",
-                    "Deleted staff: " + name);
-            return ResponseEntity.ok(Map.of("message", "Staff deleted successfully"));
+        try {
+            if (userRepository.existsById(id)) {
+                String name = userRepository.findById(id).map(User::getFullName).orElse("id=" + id);
+                userRepository.deleteById(id);
+                auditLogService.log("DELETE_STAFF", currentAdminEmail(), id, "Staff",
+                        "Deleted staff: " + name);
+                return ResponseEntity.ok(Map.of("message", "Staff deleted successfully"));
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Failed to delete staff: " + e.getMessage()));
         }
-        return ResponseEntity.notFound().build();
     }
 
     private StaffDTO mapToDTO(User user) {

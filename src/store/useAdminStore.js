@@ -41,7 +41,10 @@ export const useAdminStore = create((set, get) => ({
       );
 
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
-        const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => !['admin', 'ADMIN'].includes(u.role));
+        const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => {
+            const r = u.role ? u.role.toUpperCase() : '';
+            return !['ADMIN', 'STAFF', 'TRAINER', 'FRONT OFFICE'].includes(r);
+        });
         const paymentsData = Array.isArray(results[1]) ? results[1] : [];
         
         const enhancedUsers = standardUsers.map(user => {
@@ -82,7 +85,10 @@ export const useAdminStore = create((set, get) => ({
         else if (activeTab === "attendance") set({ attendance: data });
         else if (activeTab === "feedbacks") set({ feedbacks: data });
         else if (activeTab === "consultations" || activeTab === "requests") set({ consultations: data });
-        else if (activeTab === "users") set({ users: data });
+        else if (activeTab === "users") set({ users: data.filter(u => {
+            const r = u.role ? u.role.toUpperCase() : '';
+            return !['ADMIN', 'STAFF', 'TRAINER', 'FRONT OFFICE'].includes(r);
+        }) });
         else if (activeTab === "staffs" || activeTab === "trainers") set({ staffs: data });
         // memberships, products etc don't have dedicated arrays in the store, 
         // modules fetch them independently.
@@ -229,7 +235,8 @@ export const useAdminStore = create((set, get) => ({
       return true;
     } catch (err) {
       log.error(err);
-      toast.error("Error processing staff removal.");
+      const errMsg = err.response?.data?.message || "Error processing staff removal.";
+      toast.error(errMsg);
       return false;
     }
   },

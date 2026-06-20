@@ -190,6 +190,25 @@ public class UserService {
         existing.setAddress(updatedUser.getAddress());
         existing.setGender(updatedUser.getGender());
         existing.setMembershipType(updatedUser.getMembershipType());
+        
+        // Add missing fields
+        existing.setDob(updatedUser.getDob());
+        existing.setAge(updatedUser.getAge());
+        existing.setCity(updatedUser.getCity());
+        existing.setHeight(updatedUser.getHeight());
+        existing.setWeight(updatedUser.getWeight());
+        existing.setBmi(updatedUser.getBmi());
+        existing.setBloodGroup(updatedUser.getBloodGroup());
+        existing.setFitnessGoal(updatedUser.getFitnessGoal());
+        existing.setMembershipPlan(updatedUser.getMembershipPlan());
+        existing.setStartDate(updatedUser.getStartDate());
+        existing.setExpiryDate(updatedUser.getExpiryDate());
+        existing.setReferralSource(updatedUser.getReferralSource());
+        existing.setEmergencyContactName(updatedUser.getEmergencyContactName());
+        existing.setEmergencyContactNumber(updatedUser.getEmergencyContactNumber());
+        existing.setMedicalConditions(updatedUser.getMedicalConditions());
+        existing.setAllergies(updatedUser.getAllergies());
+
         boolean statusOrRoleChanged = !existing.getStatus().equals(updatedUser.getStatus()) || !existing.getRole().equals(updatedUser.getRole());
         
         existing.setStatus(updatedUser.getStatus());
