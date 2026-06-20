@@ -68,16 +68,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("accessToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
-        }
-        // EventSource (SSE) cannot send Authorization headers — fall back to query param
-        if (request.getRequestURI().equals("/api/notifications/stream")) {
-            String tokenParam = request.getParameter("token");
-            if (tokenParam != null && !tokenParam.isEmpty()) {
-                return tokenParam;
-            }
         }
         return null;
     }

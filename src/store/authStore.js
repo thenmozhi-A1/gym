@@ -1,77 +1,54 @@
 import { create } from 'zustand';
-import { jwtDecode } from 'jwt-decode';
+import axiosInstance from '../api/axiosInstance';
 
-const initialToken = localStorage.getItem('accessToken') || null;
+const initialUserString = localStorage.getItem('user');
 let initialUser = null;
 
-if (initialToken) {
+if (initialUserString) {
   try {
-    const decoded = jwtDecode(initialToken);
-    if (decoded && decoded.role) {
-      decoded.role = decoded.role.toUpperCase();
-    }
-    if (decoded && decoded.sub && !decoded.id) {
-      decoded.id = decoded.sub;
-    }
-    initialUser = decoded;
+    initialUser = JSON.parse(initialUserString);
   } catch (e) {
-    // invalid token
+    // invalid JSON
   }
 }
 
 const useAuthStore = create((set) => ({
   user: initialUser,
-  accessToken: initialToken,
-  refreshToken: localStorage.getItem('refreshToken') || null,
-  isAuthenticated: !!initialToken,
-
-  setTokens: (accessToken, refreshToken) => {
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-    
-    try {
-      const decodedUser = jwtDecode(accessToken);
-      if (decodedUser && decodedUser.role) {
-        decodedUser.role = decodedUser.role.toUpperCase();
-      }
-      if (decodedUser && decodedUser.sub && !decodedUser.id) {
-        decodedUser.id = decodedUser.sub;
-      }
-      set({ accessToken, refreshToken, user: decodedUser, isAuthenticated: true });
-    } catch (e) {
-      set({ accessToken, refreshToken, isAuthenticated: true });
-    }
-  },
+  isAuthenticated: !!initialUser,
 
   setUser: (user) => {
     if (user && user.role) {
       user.role = user.role.toUpperCase();
     }
-    set({ user });
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+    set({ user, isAuthenticated: !!user });
   },
 
-  login: (accessToken, refreshToken, user) => {
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-    if (user && user.email) {
-      localStorage.setItem('userEmail', user.email);
-    }
+  login: (user) => {
     if (user && user.role) {
       user.role = user.role.toUpperCase();
     }
-    set({ accessToken, refreshToken, user, isAuthenticated: true });
+    if (user && user.email) {
+      localStorage.setItem('userEmail', user.email);
+    }
+    localStorage.setItem('user', JSON.stringify(user));
+    set({ user, isAuthenticated: true });
   },
 
   logout: () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userEmail');
     localStorage.removeItem('webauthnCredentials');
     
-    // Optional: Call logout endpoint here to revoke refresh token on backend
-    set({ accessToken: null, refreshToken: null, user: null, isAuthenticated: false });
-    
-    // Force redirect to login
-    window.location.href = '/login';
+    // Call backend logout to clear HttpOnly cookies
+    axiosInstance.post('/auth/logout').catch(() => {}).finally(() => {
+      set({ user: null, isAuthenticated: false });
+      window.location.href = '/login';
+    });
   }
 }));
 

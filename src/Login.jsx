@@ -187,7 +187,7 @@ const Login = () => {
 
       const data = res.data;
 
-      useAuthStore.getState().login(data.accessToken, data.refreshToken, data.user);
+      useAuthStore.getState().login(data.user);
       recordAttendance(data.user);
 
       setBiometricState('success');
@@ -263,7 +263,7 @@ const Login = () => {
         const loginData = loginRes.data;
 
         // Use the Zustand auth store
-        useAuthStore.getState().login(loginData.accessToken, loginData.refreshToken, loginData.user);
+        useAuthStore.getState().login(data.user);
 
         alert("Account created successfully! Welcome to B&Y Fitness 🎉");
         
@@ -280,7 +280,7 @@ const Login = () => {
         const data = res.data;
 
         // Use Zustand store for authentication state
-        useAuthStore.getState().login(data.accessToken, data.refreshToken, data.user);
+        useAuthStore.getState().login(data.user);
         recordAttendance(data.user);
 
         log.debug("Login Data Detected:", data.user.role);
@@ -355,7 +355,7 @@ const Login = () => {
 
       // ── Step 6: Login ──────────────────────────────────────────
       setBiometricState("success");
-      useAuthStore.getState().login(data.accessToken, data.refreshToken, data.user);
+      useAuthStore.getState().login(data.user);
 
       setTimeout(() => redirectAfterLogin(data.user), 1500);
 

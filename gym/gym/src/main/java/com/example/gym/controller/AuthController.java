@@ -6,7 +6,9 @@ import com.example.gym.repository.RefreshTokenRepository;
 import com.example.gym.repository.UserRepository;
 import com.example.gym.security.JwtTokenProvider;
 import com.example.gym.service.UserService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -73,9 +75,13 @@ public class AuthController {
             );
             refreshTokenRepository.save(rt);
 
+            ResponseCookie jwtCookie = ResponseCookie.from("accessToken", accessToken)
+                    .httpOnly(true).secure(true).sameSite("None").path("/").maxAge(15 * 60).build();
+                    
+            ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", rawRefreshToken)
+                    .httpOnly(true).secure(true).sameSite("None").path("/api/auth/refresh").maxAge(30 * 24 * 60 * 60).build();
+
             Map<String, Object> response = new HashMap<>();
-            response.put("accessToken", accessToken);
-            response.put("refreshToken", rawRefreshToken);
             response.put("user", Map.of(
                     "id", user.getId(),
                     "name", user.getFullName(),
@@ -84,15 +90,17 @@ public class AuthController {
                     "mustChangePassword", user.getMustChangePassword() != null ? user.getMustChangePassword() : false
             ));
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                    .body(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
         }
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody Map<String, String> request) {
-        String rawRefreshToken = request.get("refreshToken");
+    public ResponseEntity<?> refresh(@CookieValue(value = "refreshToken", required = false) String rawRefreshToken) {
         if (rawRefreshToken == null) return ResponseEntity.badRequest().body(Map.of("error", "Refresh token required"));
 
         String hash = hashToken(rawRefreshToken);
@@ -120,16 +128,20 @@ public class AuthController {
         );
         refreshTokenRepository.save(newToken);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("accessToken", newAccessToken);
-        response.put("refreshToken", newRawRefreshToken);
+        ResponseCookie jwtCookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true).secure(true).sameSite("None").path("/").maxAge(15 * 60).build();
+                
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", newRawRefreshToken)
+                .httpOnly(true).secure(true).sameSite("None").path("/api/auth/refresh").maxAge(30 * 24 * 60 * 60).build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(Map.of("message", "Token refreshed successfully"));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody Map<String, String> request) {
-        String rawRefreshToken = request.get("refreshToken");
+    public ResponseEntity<?> logout(@CookieValue(value = "refreshToken", required = false) String rawRefreshToken) {
         if (rawRefreshToken != null) {
             String hash = hashToken(rawRefreshToken);
             Optional<RefreshToken> rtOpt = refreshTokenRepository.findByTokenHash(hash);
@@ -138,7 +150,16 @@ public class AuthController {
                 refreshTokenRepository.save(rt);
             });
         }
-        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
+        
+        ResponseCookie clearJwt = ResponseCookie.from("accessToken", "")
+                .httpOnly(true).secure(true).sameSite("None").path("/").maxAge(0).build();
+        ResponseCookie clearRefresh = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true).secure(true).sameSite("None").path("/api/auth/refresh").maxAge(0).build();
+                
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, clearJwt.toString())
+                .header(HttpHeaders.SET_COOKIE, clearRefresh.toString())
+                .body(Map.of("message", "Logged out successfully"));
     }
 
     @GetMapping("/me")
