@@ -44,7 +44,7 @@ public class ConsultationRequestController {
 
     /** DELETE /api/consultations/{id} — Delete a request */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRequest(@PathVariable Long id) {
+    public ResponseEntity<?> deleteRequest(@PathVariable("id") Long id) {
         repository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "Request deleted successfully"));
     }

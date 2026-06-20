@@ -44,7 +44,7 @@ public class FeedbackController {
 
     /** DELETE /api/feedbacks/{id} — Delete a feedback (for Admin) */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteFeedback(@PathVariable Long id) {
+    public ResponseEntity<?> deleteFeedback(@PathVariable("id") Long id) {
         try {
             repository.deleteById(id);
             return ResponseEntity.ok(Map.of("message", "Feedback deleted successfully"));

@@ -104,7 +104,7 @@ public class UserController {
 
     /** GET /api/users/{id} — Get user by ID */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+    public ResponseEntity<?> getUserById(@PathVariable("id") Long id) {
         try {
             return ResponseEntity.ok(userService.getUserById(id));
         } catch (RuntimeException e) {
@@ -114,7 +114,7 @@ public class UserController {
 
     /** PUT /api/users/{id} — Update user profile */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<?> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
         try {
             return ResponseEntity.ok(userService.updateUser(id, user));
         } catch (RuntimeException e) {
@@ -124,7 +124,7 @@ public class UserController {
 
     /** DELETE /api/users/{id} — Delete user */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable("id") Long id) {
         try {
             User target = userService.getUserById(id);
             userService.deleteUser(id);
