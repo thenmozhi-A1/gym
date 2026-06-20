@@ -10,19 +10,17 @@ export const useAdminStore = create((set, get) => ({
   attendance: [],
   consultations: [],
   feedbacks: [],
+  leaves: [],
   isLoading: false,
 
   fetchData: async (activeTab) => {
     set({ isLoading: true });
     try {
-      if (activeTab === "payroll") {
-        set({ isLoading: false });
-        return;
-      }
+
 
       let endpoints = [];
-      if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
-        endpoints = ["users", "payments", "attendance", "consultations", "staffs", "feedbacks"];
+      if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks" || activeTab === "payroll") {
+        endpoints = ["users", "payments", "attendance", "consultations", "staffs", "feedbacks", "leaves"];
       } else {
         // Map UI tabs to actual backend endpoints
         const endpointMap = {
@@ -40,7 +38,7 @@ export const useAdminStore = create((set, get) => ({
         endpoints.map(ep => axiosInstance.get(`/${ep}?_t=${ts}`).then(r => r.data).catch(() => []))
       );
 
-      if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks") {
+      if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks" || activeTab === "payroll") {
         const standardUsers = (Array.isArray(results[0]) ? results[0] : []).filter(u => {
             const r = u.role ? u.role.toUpperCase() : '';
             return !['ADMIN', 'STAFF', 'TRAINER', 'FRONT OFFICE'].includes(r);
@@ -77,7 +75,8 @@ export const useAdminStore = create((set, get) => ({
           attendance: allAttendances,
           consultations: Array.isArray(results[3]) ? results[3] : [],
           staffs: enhancedStaffs,
-          feedbacks: Array.isArray(results[5]) ? results[5] : []
+          feedbacks: Array.isArray(results[5]) ? results[5] : [],
+          leaves: Array.isArray(results[6]) ? results[6] : []
         });
       } else {
         const data = Array.isArray(results[0]) ? results[0] : [];
@@ -267,6 +266,21 @@ export const useAdminStore = create((set, get) => ({
     } catch (err) {
       log.error(err);
       toast.error("Error updating lead status.");
+      return false;
+    }
+  },
+
+  updateLeaveStatus: async (id, status) => {
+    try {
+      await axiosInstance.put(`/leaves/${id}/status`, { status });
+      set((state) => ({
+        leaves: state.leaves.map(l => l.id === id ? { ...l, status } : l)
+      }));
+      toast.success(`Leave request ${status.toLowerCase()}`);
+      return true;
+    } catch (err) {
+      log.error("Failed to update leave status", err);
+      toast.error("Failed to update leave status");
       return false;
     }
   }

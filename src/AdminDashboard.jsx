@@ -65,8 +65,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const {
-    users, staffs, payments, attendance, consultations, feedbacks, isLoading: loading,
-    fetchData, addUser, updateUser, deleteUser, addStaff, updateStaff, deleteStaff, deleteFeedback
+    users, staffs, payments, attendance, consultations, feedbacks, leaves, isLoading: loading,
+    fetchData, addUser, updateUser, deleteUser, addStaff, updateStaff, deleteStaff, deleteFeedback, updateLeaveStatus
   } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -798,25 +798,26 @@ const AdminDashboard = () => {
                           <div className="grid-card">
                             <h5>Pending Leave Requests</h5>
                             <div className="request-list">
-                              {[
-                                { name: "Marcus Aurelius", role: "Trainer", type: "Sick Leave", dates: "May 18 - May 20", reason: "Fever" },
-                                { name: "David Miller", role: "Front Office", type: "Casual Leave", dates: "May 22", reason: "Family Function" }
-                              ].map((req, i) => (
-                                <div key={i} className="request-item">
-                                  <div className="req-profile">
-                                    <div className="avatar-small">{req.name.charAt(0)}</div>
-                                    <div><strong>{req.name}</strong><p>{req.role}</p></div>
+                              {leaves && leaves.filter(l => l.status === 'PENDING').length > 0 ? (
+                                leaves.filter(l => l.status === 'PENDING').slice(0, 5).map((req, i) => (
+                                  <div key={i} className="request-item">
+                                    <div className="req-profile">
+                                      <div className="avatar-small">{(req.staffName || "S").charAt(0)}</div>
+                                      <div><strong>{req.staffName}</strong><p>{req.leaveType}</p></div>
+                                    </div>
+                                    <div className="req-details">
+                                      <span className="type">{req.reason}</span>
+                                      <span className="dates">{req.startDate} to {req.endDate}</span>
+                                    </div>
+                                    <div className="req-actions">
+                                      <button className="btn-icon text-success" onClick={() => updateLeaveStatus(req.id, 'APPROVED')}><CheckCircle size={18} /></button>
+                                      <button className="btn-icon text-danger" onClick={() => updateLeaveStatus(req.id, 'REJECTED')}><XCircle size={18} /></button>
+                                    </div>
                                   </div>
-                                  <div className="req-details">
-                                    <span className="type">{req.type}</span>
-                                    <span className="dates">{req.dates}</span>
-                                  </div>
-                                  <div className="req-actions">
-                                    <button className="btn-icon text-success"><CheckCircle size={18} /></button>
-                                    <button className="btn-icon text-danger"><XCircle size={18} /></button>
-                                  </div>
-                                </div>
-                              ))}
+                                ))
+                              ) : (
+                                <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>No pending leave requests.</div>
+                              )}
                             </div>
                           </div>
                           <div className="grid-card">
