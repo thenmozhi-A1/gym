@@ -1104,9 +1104,27 @@ const AdminDashboard = () => {
                   <div className="col-12 col-md-6">
                     <div className="form-group">
                       <label>SHIFT HOURS</label>
-                      <div className="input-wrap">
+                      <div className="input-wrap" style={{ paddingRight: '10px' }}>
                         <Clock size={18} />
-                        <input type="text" placeholder="6AM - 11AM" value={newStaff.times} onChange={e => setNewStaff({ ...newStaff, times: e.target.value })} />
+                        <input 
+                          type="time" 
+                          value={newStaff.times?.split(' - ')[0] || ''} 
+                          onChange={e => {
+                            const end = newStaff.times?.split(' - ')[1] || '';
+                            setNewStaff({ ...newStaff, times: `${e.target.value} - ${end}` });
+                          }}
+                          style={{ flex: 1, background: 'transparent', border: 'none', color: 'inherit', outline: 'none' }}
+                        />
+                        <span style={{ color: 'var(--text-muted)', margin: '0 5px' }}>to</span>
+                        <input 
+                          type="time" 
+                          value={newStaff.times?.split(' - ')[1] || ''} 
+                          onChange={e => {
+                            const start = newStaff.times?.split(' - ')[0] || '';
+                            setNewStaff({ ...newStaff, times: `${start} - ${e.target.value}` });
+                          }}
+                          style={{ flex: 1, background: 'transparent', border: 'none', color: 'inherit', outline: 'none' }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -1227,9 +1245,27 @@ const AdminDashboard = () => {
                   <div className="col-12 col-md-6">
                     <div className="form-group">
                       <label>SHIFT HOURS</label>
-                      <div className="input-wrap">
+                      <div className="input-wrap" style={{ paddingRight: '10px' }}>
                         <Clock size={18} />
-                        <input type="text" value={editStaffFormData.times || ""} onChange={e => setEditStaffFormData({ ...editStaffFormData, times: e.target.value })} />
+                        <input 
+                          type="time" 
+                          value={editStaffFormData.times?.split(' - ')[0] || ''} 
+                          onChange={e => {
+                            const end = editStaffFormData.times?.split(' - ')[1] || '';
+                            setEditStaffFormData({ ...editStaffFormData, times: `${e.target.value} - ${end}` });
+                          }}
+                          style={{ flex: 1, background: 'transparent', border: 'none', color: 'inherit', outline: 'none' }}
+                        />
+                        <span style={{ color: 'var(--text-muted)', margin: '0 5px' }}>to</span>
+                        <input 
+                          type="time" 
+                          value={editStaffFormData.times?.split(' - ')[1] || ''} 
+                          onChange={e => {
+                            const start = editStaffFormData.times?.split(' - ')[0] || '';
+                            setEditStaffFormData({ ...editStaffFormData, times: `${start} - ${e.target.value}` });
+                          }}
+                          style={{ flex: 1, background: 'transparent', border: 'none', color: 'inherit', outline: 'none' }}
+                        />
                       </div>
                     </div>
                   </div>
