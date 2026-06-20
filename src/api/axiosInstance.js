@@ -1,10 +1,18 @@
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
 
-let API_BASE = 'https://gymj-10.onrender.com/api';
+let API_BASE;
+if (import.meta.env.VITE_API_BASE) {
+  API_BASE = import.meta.env.VITE_API_BASE;
+} else if (import.meta.env.DEV) {
+  API_BASE = 'http://localhost:8080/api';
+} else {
+  // Use relative path so Vercel rewrites it to Render, making cookies first-party
+  API_BASE = '/api';
+}
 
-if (!API_BASE.endsWith('/api')) {
-  API_BASE = API_BASE.endsWith('/') ? API_BASE + 'api' : API_BASE + '/api';
+if (!API_BASE.endsWith('/api') && !API_BASE.endsWith('/')) {
+  API_BASE = API_BASE + '/api';
 }
 
 const axiosInstance = axios.create({

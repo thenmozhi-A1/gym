@@ -7,9 +7,9 @@ let API_BASE;
 if (import.meta.env.VITE_API_BASE) {
   API_BASE = import.meta.env.VITE_API_BASE;
 } else if (import.meta.env.DEV) {
-  API_BASE = 'https://gymj-9.onrender.com/api';
+  API_BASE = 'https://gymj-10.onrender.com/api';
 } else {
-  API_BASE = 'https://gymj-9.onrender.com/api';
+  API_BASE = 'https://gymj-10.onrender.com/api';
 }
 
 if (!API_BASE.endsWith('/api')) {
