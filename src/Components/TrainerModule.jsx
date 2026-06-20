@@ -37,7 +37,7 @@ const TrainerModule = ({ onAddUser }) => {
               </div>
               <div className="stat">
                 <label>Experience</label>
-                <strong>{trainer.experience || "Not Specified"}</strong>
+                <strong>{(trainer.experience !== undefined && trainer.experience !== null && trainer.experience !== "") ? trainer.experience : "Not Specified"}</strong>
               </div>
             </div>
             

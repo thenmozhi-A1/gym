@@ -31,7 +31,7 @@ public class LeaveRequestController {
     /** POST /api/leaves/apply/{userId} — Employee applies for leave */
     @PostMapping("/apply/{userId}")
     @org.springframework.transaction.annotation.Transactional
-    public ResponseEntity<?> applyLeave(@PathVariable Long userId, @RequestBody LeaveRequestDTO dto) {
+    public ResponseEntity<?> applyLeave(@PathVariable("userId") Long userId, @RequestBody LeaveRequestDTO dto) {
         try {
             User user = userRepository.findById(userId).orElse(null);
             if (user == null) {
@@ -81,7 +81,7 @@ public class LeaveRequestController {
 
     /** GET /api/leaves/staff/{userId} — Get leaves for a specific employee */
     @GetMapping("/staff/{userId}")
-    public ResponseEntity<?> getLeavesByStaff(@PathVariable Long userId) {
+    public ResponseEntity<?> getLeavesByStaff(@PathVariable("userId") Long userId) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null || user.getStaffDetails() == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Staff not found"));
@@ -101,7 +101,7 @@ public class LeaveRequestController {
 
     /** PUT /api/leaves/{id}/status — Admin approve/reject, or Employee cancel */
     @PutMapping("/{id}/status")
-    public ResponseEntity<?> updateLeaveStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> updateLeaveStatus(@PathVariable("id") Long id, @RequestBody Map<String, String> payload) {
         return leaveRequestRepository.findById(id).map(req -> {
             String newStatus = payload.get("status");
             if (newStatus != null) {

@@ -105,7 +105,7 @@ public class StaffController {
 
     /** GET /api/v1/staffs/{id} — Get staff by ID */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getStaffById(@PathVariable Long id) {
+    public ResponseEntity<?> getStaffById(@PathVariable("id") Long id) {
         return userRepository.findById(id)
                 .map(user -> ResponseEntity.ok(mapToDTO(user)))
                 .orElse(ResponseEntity.notFound().build());
@@ -113,7 +113,7 @@ public class StaffController {
 
     /** PUT /api/v1/staffs/{id} — Update staff details */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateStaff(@PathVariable Long id, @Valid @RequestBody StaffDTO updatedStaffDto) {
+    public ResponseEntity<?> updateStaff(@PathVariable("id") Long id, @Valid @RequestBody StaffDTO updatedStaffDto) {
         return userRepository.findById(id)
                 .map(existingUser -> {
                     existingUser.setFullName(updatedStaffDto.getFullName());
@@ -154,7 +154,7 @@ public class StaffController {
     /** DELETE /api/staffs/{id} — Delete staff */
     @Transactional
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteStaff(@PathVariable Long id) {
+    public ResponseEntity<?> deleteStaff(@PathVariable("id") Long id) {
         try {
             if (userRepository.existsById(id)) {
                 String name = userRepository.findById(id).map(User::getFullName).orElse("id=" + id);
