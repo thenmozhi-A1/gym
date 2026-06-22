@@ -205,12 +205,28 @@ const EmployeeDashboard = () => {
             {(() => {
               const today = new Date();
               const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-              const latestLog = employeeData?.attendance?.[0];
-              const isCheckedIn = latestLog && latestLog.date === todayStr && (latestLog.checkOut === '-' || !latestLog.checkOut);
+              const todayLog = employeeData?.attendance?.find(log => log.date === todayStr);
+              const isCheckedIn = todayLog && (todayLog.checkOut === '-' || !todayLog.checkOut);
+              const hasCheckedOut = todayLog && todayLog.checkOut !== '-';
               
+              if (hasCheckedOut) {
+                return (
+                  <button 
+                    disabled
+                    style={{
+                      background: '#6c757d', color: '#fff', border: 'none', 
+                      padding: '10px 20px', borderRadius: '12px', fontWeight: 'bold',
+                      cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '8px'
+                    }}
+                  >
+                    <Clock size={18} /> Shift Completed
+                  </button>
+                );
+              }
+
               return (
                 <button 
-                  onClick={() => handleCheckIn(isCheckedIn, latestLog?.id)}
+                  onClick={() => handleCheckIn(isCheckedIn, todayLog?.id)}
                   style={{
                     background: isCheckedIn ? '#ef4444' : '#28a745', color: '#fff', border: 'none', 
                     padding: '10px 20px', borderRadius: '12px', fontWeight: 'bold',

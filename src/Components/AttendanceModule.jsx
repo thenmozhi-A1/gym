@@ -186,20 +186,6 @@ const AttendanceModule = () => {
         </div>
       </div>
 
-      <div className="grid-controls">
-        <div className="search-box">
-          <Search size={16} />
-          <input type="text" placeholder={`Search ${activeTab}...`} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-        </div>
-        <select className="group-select">
-          <option>All Groups</option>
-          <option>Active</option>
-          <option>Inactive</option>
-        </select>
-      </div>
-
-
-
       <div className="grid-card">
         <div className="table-responsive">
           <table className="matrix-table">
