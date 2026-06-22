@@ -155,7 +155,7 @@ const MembershipModule = ({ onAddUser }) => {
                 <tr key={u.id || u.memberId}>
                   <td className="fw-bold">{u.fullName}</td>
                   <td>{u.membershipPlan || "Standard"}</td>
-                  <td className="text-danger fw-bold">{u.expiryDate ? new Date(u.expiryDate).toLocaleDateString() : "N/A"}</td>
+                  <td className="text-danger fw-bold">{u.expiryDate ? u.expiryDate.split('T')[0] : "N/A"}</td>
                   <td className="sub-text">{u.phone || u.mobileNumber || "N/A"}</td>
                   <td><button className="btn-renew">Send Reminder</button></td>
                 </tr>

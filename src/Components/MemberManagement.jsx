@@ -139,7 +139,7 @@ const MemberManagement = ({ onAddUser }) => {
               <h5><Calendar size={14} className="mr-2" style={{marginRight: '8px'}} /> MEMBERSHIP</h5>
               <div className="line-item"><span>Plan Name</span> <strong>{selectedUser.membershipPlan || "Standard"}</strong></div>
               <div className="line-item"><span>Start Date</span> <span>{selectedUser.startDate || "-"}</span></div>
-              <div className="line-item"><span>Expiry Date</span> <span className="text-danger">{selectedUser.expiryDate || "-"}</span></div>
+              <div className="line-item"><span>Expiry Date</span> <span className="text-danger">{selectedUser.expiryDate ? selectedUser.expiryDate.split('T')[0] : "-"}</span></div>
             </div>
 
             {(() => {

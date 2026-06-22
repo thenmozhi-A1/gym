@@ -50,14 +50,35 @@ export const useAdminStore = create((set, get) => ({
             if (userPayments.length > 0) {
                 userPayments.sort((a, b) => new Date(a.paymentDate) - new Date(b.paymentDate));
                 const latestPayment = userPayments[userPayments.length - 1];
+                
+                let calculatedExpiry = latestPayment.planEndDate || user.expiryDate;
+                if (!calculatedExpiry && latestPayment.paymentDate) {
+                    const payDate = new Date(latestPayment.paymentDate);
+                    const planDuration = latestPayment.planName === "Annual" ? 12 : latestPayment.planName === "Half-Yearly" ? 6 : latestPayment.planName === "Quarterly" ? 3 : 1;
+                    payDate.setMonth(payDate.getMonth() + planDuration);
+                    calculatedExpiry = payDate.toISOString().split('T')[0];
+                }
+
                 return { 
                   ...user, 
-                  expiryDate: latestPayment.planEndDate || user.expiryDate,
-                  startDate: latestPayment.planStartDate || user.startDate,
+                  expiryDate: calculatedExpiry,
+                  startDate: latestPayment.planStartDate || user.startDate || latestPayment.paymentDate.split('T')[0],
                   membershipPlan: latestPayment.planName || user.membershipPlan || user.membershipType
                 };
             }
-            return user;
+            
+            let calculatedExpiry = user.expiryDate;
+            if (!calculatedExpiry && user.createdAt) {
+                const createdDate = new Date(user.createdAt);
+                createdDate.setMonth(createdDate.getMonth() + 1);
+                calculatedExpiry = createdDate.toISOString().split('T')[0];
+            }
+
+            return {
+                ...user,
+                expiryDate: calculatedExpiry,
+                startDate: user.startDate || (user.createdAt ? user.createdAt.split('T')[0] : null)
+            };
         });
         
         const allAttendances = Array.isArray(results[2]) ? results[2] : [];
