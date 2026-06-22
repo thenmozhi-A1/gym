@@ -25,7 +25,7 @@ const PaymentModule = () => {
   });
   
   const originalIncome = Object.values(userFirstPayments).reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
-  const totalIncome = originalIncome; // Use original income for net revenue calculation as requested
+  const totalIncome = payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0); // Calculate total of all payments
   const totalOutcome = staffs.reduce((acc, s) => {
     const salary = parseFloat(s.salary) || 0;
     return acc + salary;
@@ -58,7 +58,7 @@ const PaymentModule = () => {
         <div className="stat-card">
           <div className="icon"><DollarSign size={24} /></div>
           <div className="info">
-            <label>Original Income (Users)</label>
+            <label>Total Income (Users)</label>
             <h3 className="text-success">₹{totalIncome.toLocaleString()}</h3>
           </div>
         </div>
