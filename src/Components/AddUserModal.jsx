@@ -236,7 +236,6 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
 
             </div>
           </div>
-        </div>
         <div style={{ display: currentStep === 2 ? 'block' : 'none' }} className="form-section animate-in">
             <h4><Heart size={18} /> Health Information</h4>
             <div className="form-grid">
@@ -281,7 +280,6 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               </div>
             </div>
           </div>
-        </div>
         <div style={{ display: currentStep === 3 ? 'block' : 'none' }} className="form-section animate-in">
             <h4><Calendar size={18} /> Membership Details</h4>
             <div className="form-grid">
@@ -318,7 +316,6 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               </div>
             </div>
           </div>
-        </div>
         <div style={{ display: currentStep === 4 ? 'block' : 'none' }} className="form-section animate-in">
             <h4><CreditCard size={18} /> Payment Management</h4>
             <div className="form-grid">
@@ -344,7 +341,6 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               </div>
             </div>
           </div>
-        </div>
       </>
     );
   };
