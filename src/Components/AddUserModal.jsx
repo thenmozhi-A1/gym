@@ -60,6 +60,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   } = useForm({
     resolver: zodResolver(userSchema),
     mode: "onTouched",
+    shouldUnregister: false,
     defaultValues: {
       fullName: "",
       gender: "",
@@ -172,6 +173,8 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       membershipStatus: "Active",
       discountApplied: "0",
     };
+    
+    console.log("Submitting completeData to backend:", completeData);
 
     onAddUser(completeData);
     onClose();
