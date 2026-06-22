@@ -82,7 +82,7 @@ const AttendanceModule = () => {
      setEditCell({ person, dateStr, currentLog });
      
      if (currentLog) {
-       setEditStatus(currentLog.status === 'LEAVE' ? 'L' : currentLog.status === 'PERMISSION' ? 'PR' : currentLog.status === 'ABSENT' ? 'A' : 'P');
+       setEditStatus(currentLog.status === 'LEAVE' ? 'L' : currentLog.status === 'PERMISSION' ? 'PR' : currentLog.status === 'ABSENT' ? 'A' : currentLog.status === 'SUNDAY' ? 'S' : 'P');
        setEditCheckIn(currentLog.checkInTime || "");
        setEditCheckOut(currentLog.checkOutTime || "");
      } else {
@@ -101,7 +101,7 @@ const AttendanceModule = () => {
       if (editStatus !== 'A') {
          const payload = {
            attendanceDate: editCell.dateStr,
-           status: editStatus === 'P' ? 'PRESENT' : editStatus === 'L' ? 'LEAVE' : 'PERMISSION',
+           status: editStatus === 'P' ? 'PRESENT' : editStatus === 'L' ? 'LEAVE' : editStatus === 'S' ? 'SUNDAY' : 'PERMISSION',
            checkInTime: editCheckIn || "00:00:00"
          };
          if (editCheckOut) payload.checkOutTime = editCheckOut;
@@ -262,19 +262,32 @@ const AttendanceModule = () => {
              </p>
              <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px'}}>
                <div>
-                 <label style={{display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px'}}>Status</label>
-                 <select 
-                    style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-color)'}}
-                    value={editStatus}
-                    onChange={(e) => setEditStatus(e.target.value)}
-                 >
-                   <option value="P">Present</option>
-                   <option value="A">Absent</option>
-                   <option value="L">Leave</option>
-                   <option value="PR">Permission</option>
-                 </select>
+                 <label style={{display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px'}}>Status</label>
+                 <div style={{display: 'flex', flexWrap: 'wrap', gap: '10px'}}>
+                   {[
+                     { val: 'P', cls: 'bg-present', label: 'Present' },
+                     { val: 'A', cls: 'bg-absent', label: 'Absent' },
+                     { val: 'L', cls: 'bg-leave', label: 'Leave' },
+                     { val: 'PR', cls: 'bg-permission', label: 'Permission' },
+                     { val: 'S', cls: 'bg-sunday', label: 'Sunday' }
+                   ].map(opt => (
+                     <div 
+                       key={opt.val}
+                       onClick={() => setEditStatus(opt.val)}
+                       style={{
+                         display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
+                         border: editStatus === opt.val ? '2px solid var(--accent-color, #3b82f6)' : '1px solid var(--border-color)',
+                         borderRadius: '6px', cursor: 'pointer', background: editStatus === opt.val ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-color)',
+                         minWidth: '120px'
+                       }}
+                     >
+                       <span className={`badge ${opt.cls}`} style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', borderRadius: '4px', fontWeight: 'bold', fontSize: '0.75rem', color: 'white'}}>{opt.val}</span>
+                       <span style={{fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: editStatus === opt.val ? 'bold' : 'normal'}}>{opt.label}</span>
+                     </div>
+                   ))}
+                 </div>
                </div>
-               {editStatus !== 'A' && editStatus !== 'L' && (
+               {editStatus !== 'A' && editStatus !== 'L' && editStatus !== 'S' && (
                  <>
                    <div>
                      <label style={{display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px'}}>Check In Time</label>
