@@ -19,6 +19,15 @@ const axiosInstance = axios.create({
   }
 });
 
+// Request interceptor to attach Bearer token
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -56,8 +65,15 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
       
       try {
-        // Attempt to refresh (cookies are sent automatically)
-        await axios.post(`${API_BASE}/auth/refresh`, {}, { withCredentials: true });
+        // Attempt to refresh using localStorage token
+        const refreshResponse = await axios.post(`${API_BASE}/auth/refresh`, { 
+          refreshToken: localStorage.getItem('refreshToken') 
+        }, { withCredentials: true });
+        
+        // Save new tokens if they exist in the response
+        if (refreshResponse.data.accessToken) localStorage.setItem('accessToken', refreshResponse.data.accessToken);
+        if (refreshResponse.data.refreshToken) localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
+
         isRefreshing = false;
         processQueue(null);
         // Retry the original request

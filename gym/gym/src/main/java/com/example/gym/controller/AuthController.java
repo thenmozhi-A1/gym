@@ -90,6 +90,9 @@ public class AuthController {
                     "mustChangePassword", user.getMustChangePassword() != null ? user.getMustChangePassword() : false
             ));
 
+            response.put("accessToken", accessToken);
+            response.put("refreshToken", rawRefreshToken);
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                     .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
@@ -100,7 +103,8 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@CookieValue(value = "refreshToken", required = false) String rawRefreshToken) {
+    public ResponseEntity<?> refresh(@CookieValue(value = "refreshToken", required = false) String cookieRefreshToken, @RequestBody(required = false) Map<String, String> requestBody) {
+        String rawRefreshToken = cookieRefreshToken != null ? cookieRefreshToken : (requestBody != null ? requestBody.get("refreshToken") : null);
         if (rawRefreshToken == null) return ResponseEntity.badRequest().body(Map.of("error", "Refresh token required"));
 
         String hash = hashToken(rawRefreshToken);
@@ -137,7 +141,11 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(Map.of("message", "Token refreshed successfully"));
+                .body(Map.of(
+                    "message", "Token refreshed successfully",
+                    "accessToken", newAccessToken,
+                    "refreshToken", newRawRefreshToken
+                ));
     }
 
     @PostMapping("/logout")

@@ -158,8 +158,11 @@ const Login = () => {
         });
         const loginData = loginRes.data;
 
+        if (loginData.accessToken) localStorage.setItem('accessToken', loginData.accessToken);
+        if (loginData.refreshToken) localStorage.setItem('refreshToken', loginData.refreshToken);
+
         // Use the Zustand auth store
-        useAuthStore.getState().login(data.user);
+        useAuthStore.getState().login(loginData.user);
 
         alert("Account created successfully! Welcome to B&Y Fitness 🎉");
         
@@ -174,6 +177,9 @@ const Login = () => {
         });
 
         const data = res.data;
+
+        if (data.accessToken) localStorage.setItem('accessToken', data.accessToken);
+        if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
 
         // Use Zustand store for authentication state
         useAuthStore.getState().login(data.user);

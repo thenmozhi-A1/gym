@@ -43,8 +43,10 @@ const useAuthStore = create((set) => ({
     localStorage.removeItem('user');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('webauthnCredentials');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     
-    // Call backend logout to clear HttpOnly cookies
+    // Call backend logout to clear HttpOnly cookies (in case they are still used)
     axiosInstance.post('/auth/logout').catch(() => {}).finally(() => {
       set({ user: null, isAuthenticated: false });
       window.location.href = '/login';
