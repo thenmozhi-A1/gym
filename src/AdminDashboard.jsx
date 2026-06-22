@@ -558,7 +558,7 @@ const AdminDashboard = () => {
                               <header className="payroll-header">
                                 <h1 className="welcome">Welcome Slayfit!</h1>
                                 <div className="pay-run-status">
-                                  <span>Process Pay Run for May 2024</span>
+                                  <span>Process Pay Run for {currentMonthName} {currentYear}</span>
                                   <span className="badge-approved">APPROVED</span>
                                 </div>
                               </header>
@@ -593,17 +593,17 @@ const AdminDashboard = () => {
                                   <div className="stat-divider" />
                                   <div className="stat-group">
                                     <label>PAYMENT DATE</label>
-                                    <div className="date">31 May 2024</div>
+                                    <div className="date">{lastDayOfMonth} {currentMonthName} {currentYear}</div>
                                   </div>
                                   <div className="stat-divider" />
                                   <div className="stat-group">
                                     <label>NO. OF EMPLOYEES</label>
-                                    <div className="count">1308</div>
+                                    <div className="count">{activeStaffCount}</div>
                                   </div>
                                   <button className="btn-black" onClick={() => setIsPayrollDetailOpen(true)}>View Details</button>
                                 </div>
                                 <p className="hero-note">
-                                  <Clock size={12} /> Pay your employees on 31/05/2024. Record it here once you made the payment.
+                                  <Clock size={12} /> Pay your employees on {lastDayOfMonth}/{String(new Date().getMonth() + 1).padStart(2, '0')}/{currentYear}. Record it here once you made the payment.
                                 </p>
                               </div>
 
@@ -611,25 +611,25 @@ const AdminDashboard = () => {
                                 <div className="grid-card deduction-card">
                                   <div className="card-header">
                                     <h5>DEDUCTION SUMMARY</h5>
-                                    <select className="small-select"><option>Previous Month</option></select>
+                                    <select className="small-select"><option>Current Month</option></select>
                                   </div>
                                   <div className="deduction-row">
                                     <div className="deduction-item">
                                       <div className="icon-circle"><Layers size={14} /></div>
                                       <label>EPF</label>
-                                      <div className="val">₹39,73,913.00</div>
+                                      <div className="val">₹{Math.floor(totalEPF).toLocaleString()}</div>
                                       <span className="link">View Details</span>
                                     </div>
                                     <div className="deduction-item">
                                       <div className="icon-circle gold"><Award size={14} /></div>
                                       <label>ESI</label>
-                                      <div className="val">₹91,010.00</div>
+                                      <div className="val">₹{Math.floor(totalESI).toLocaleString()}</div>
                                       <span className="link">View Details</span>
                                     </div>
                                     <div className="deduction-item">
                                       <div className="icon-circle red"><TrendingDown size={14} /></div>
                                       <label>TDS DEDUCTION</label>
-                                      <div className="val">₹1,15,89,089.00</div>
+                                      <div className="val">₹{Math.floor(totalTDS).toLocaleString()}</div>
                                       <span className="link">View Details</span>
                                     </div>
                                   </div>
@@ -639,8 +639,8 @@ const AdminDashboard = () => {
                                   <h5>EMPLOYEE SUMMARY</h5>
                                   <div className="summary-body">
                                     <label>ACTIVE EMPLOYEES</label>
-                                    <div className="big-count">1308</div>
-                                    <span className="link">View Employees</span>
+                                    <div className="big-count">{activeStaffCount}</div>
+                                    <span className="link" onClick={() => setIsPayrollDetailOpen(true)} style={{cursor: 'pointer'}}>View Employees</span>
                                   </div>
                                 </div>
                               </div>
@@ -669,7 +669,7 @@ const AdminDashboard = () => {
                                 <button className="back-btn" onClick={() => setIsPayrollDetailOpen(false)}>
                                   <ArrowUpRight style={{ transform: 'rotate(-135deg)' }} size={16} /> BACK
                                 </button>
-                                <h2>Payroll <small>DETAILS / MAY 2024</small></h2>
+                                <h2>Payroll <small>DETAILS / {currentMonthName.toUpperCase()} {currentYear}</small></h2>
                               </div>
                               <div className="d-flex gap-3">
                                 <div className="search-box-mini"><Search size={14} /><input type="text" placeholder="Search Staff..." value={payrollSearchTerm} onChange={(e) => setPayrollSearchTerm(e.target.value)} /></div>
