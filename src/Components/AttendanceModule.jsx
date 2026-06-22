@@ -57,10 +57,18 @@ const AttendanceModule = () => {
       
       if (logDate !== dateStr) return false;
 
-      if (log.user?.id === person.id) return true;
-      if (activeTab === "staff" && log.staff?.id === person.staffId) return true;
-      if (logPersonId && logPersonId === person.id) return true;
-      if (logPersonName && currentPersonName && logPersonName === currentPersonName) return true;
+      // Strict ID matching first
+      if (activeTab === "members") {
+         if (log.user?.id && person.id && log.user.id === person.id) return true;
+         if (logPersonId && person.id && logPersonId === person.id && !log.staff) return true;
+         if (logPersonName && currentPersonName && logPersonName === currentPersonName && !log.staff) return true;
+      } else {
+         const sId = person.staffId || person.id;
+         if (log.staff?.id && sId && log.staff.id === sId) return true;
+         if (logPersonId && sId && logPersonId === sId && !log.user) return true;
+         if (logPersonName && currentPersonName && logPersonName === currentPersonName && !log.user) return true;
+      }
+      
       return false;
     });
   };
@@ -109,7 +117,8 @@ const AttendanceModule = () => {
          if (activeTab === "members") {
            await axiosInstance.post(`/attendance/user/${editCell.person.id}`, payload);
          } else {
-           await axiosInstance.post(`/attendance/staff/${editCell.person.id}`, payload);
+           const sId = editCell.person.staffId || editCell.person.id;
+           await axiosInstance.post(`/attendance/staff/${sId}`, payload);
          }
       }
       setEditCell(null);
