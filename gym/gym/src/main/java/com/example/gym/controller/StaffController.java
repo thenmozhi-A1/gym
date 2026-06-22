@@ -180,8 +180,6 @@ public class StaffController {
         dto.setAddress(user.getAddress());
         dto.setRole(user.getRole());
         dto.setStatus(user.getStatus());
-        dto.setFingerprintHash(user.getFingerprintHash());
-        dto.setFingerprintEnrolled(user.getFingerprintEnrolled());
 
         if (user.getStaffDetails() != null) {
             Staff staff = user.getStaffDetails();
