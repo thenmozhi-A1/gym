@@ -46,9 +46,6 @@ public class User {
     private String medicalConditions;
     private String allergies;
 
-    @Column(unique = true)
-    private String fingerprintHash;
-    private Boolean fingerprintEnrolled = false;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @com.fasterxml.jackson.annotation.JsonManagedReference
@@ -83,7 +80,7 @@ public class User {
 
     public User() {}
 
-    public User(Long id, String fullName, String email, String password, String phone, String address, String gender, String membershipType, String status, String role, String fingerprintHash, Boolean fingerprintEnrolled, LocalDateTime createdAt) {
+    public User(Long id, String fullName, String email, String password, String phone, String address, String gender, String membershipType, String status, String role, LocalDateTime createdAt) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
@@ -94,8 +91,6 @@ public class User {
         this.membershipType = membershipType;
         this.status = status;
         this.role = role;
-        this.fingerprintHash = fingerprintHash;
-        this.fingerprintEnrolled = fingerprintEnrolled;
         this.createdAt = createdAt;
     }
 
@@ -104,7 +99,6 @@ public class User {
         this.createdAt = LocalDateTime.now();
         if (this.status == null) this.status = "ACTIVE";
         if (this.role == null) this.role = "USER";
-        if (this.fingerprintEnrolled == null) this.fingerprintEnrolled = false;
         if (this.failedLoginAttempts == null) this.failedLoginAttempts = 0;
         if (this.mustChangePassword == null) this.mustChangePassword = false;
     }
@@ -165,10 +159,6 @@ public class User {
     public void setAllergies(String allergies) { this.allergies = allergies; }
     public Staff getStaffDetails() { return staffDetails; }
     public void setStaffDetails(Staff staffDetails) { this.staffDetails = staffDetails; }
-    public String getFingerprintHash() { return fingerprintHash; }
-    public void setFingerprintHash(String fingerprintHash) { this.fingerprintHash = fingerprintHash; }
-    public Boolean getFingerprintEnrolled() { return fingerprintEnrolled; }
-    public void setFingerprintEnrolled(Boolean fingerprintEnrolled) { this.fingerprintEnrolled = fingerprintEnrolled; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     

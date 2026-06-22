@@ -104,47 +104,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    /** Biometric Login - check fingerprint hash in both Users and Staffs, with fallback email enrollment */
-    public User loginBiometric(String email, String fingerprintHash) {
-        if (fingerprintHash == null || fingerprintHash.trim().isEmpty()) {
-            throw new RuntimeException("Fingerprint hash is required");
-        }
-        
-        // 1. If email is provided, verify directly by email for maximum reliability and uniqueness
-        if (email != null && !email.trim().isEmpty()) {
-            Optional<User> userOpt = userRepository.findByEmail(email);
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
-                    throw new RuntimeException("ACCESS DENIED: Membership is not active.");
-                }
-                
-                String dbHash = user.getFingerprintHash();
-                if (dbHash == null || dbHash.trim().isEmpty() || dbHash.startsWith("fp_") || dbHash.equalsIgnoreCase(fingerprintHash)) {
-                    user.setFingerprintHash(fingerprintHash);
-                    user.setFingerprintEnrolled(true);
-                    userRepository.save(user);
-                    return user;
-                } else {
-                    throw new RuntimeException("Fingerprint verification failed for " + email);
-                }
-            }
-        }
 
-        // 2. If email is NOT provided, search by fingerprint hash only (List-based query to avoid NonUniqueResultException)
-        java.util.List<User> matchedUsers = userRepository.findByFingerprintHash(fingerprintHash);
-        if (matchedUsers.size() == 1) {
-            User user = matchedUsers.get(0);
-            if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
-                throw new RuntimeException("ACCESS DENIED: Membership is not active.");
-            }
-            return user;
-        } else if (matchedUsers.size() > 1) {
-            throw new RuntimeException("Multiple users matched this scan. Please enter your email to identify yourself.");
-        }
-
-        throw new RuntimeException("Fingerprint not recognized. Please register or try again.");
-    }
     /** Get all users */
     public List<User> getAllUsers() {
         return userRepository.findByRoleIn(java.util.Collections.singletonList("USER"));
@@ -218,8 +178,7 @@ public class UserService {
             Long currentVersion = existing.getTokenVersion() != null ? existing.getTokenVersion() : 0L;
             existing.setTokenVersion(currentVersion + 1);
         }
-        existing.setFingerprintHash(updatedUser.getFingerprintHash());
-        existing.setFingerprintEnrolled(updatedUser.getFingerprintEnrolled());
+
         return userRepository.save(existing);
     }
 
