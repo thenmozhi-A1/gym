@@ -19,6 +19,21 @@ const axiosInstance = axios.create({
   }
 });
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
 // Response interceptor to handle 401 and refresh
 axiosInstance.interceptors.response.use(
   (response) => response,
@@ -27,15 +42,29 @@ axiosInstance.interceptors.response.use(
     
     // Prevent infinite loops if refresh itself fails
     if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh')) {
+      if (isRefreshing) {
+        return new Promise(function(resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        }).then(() => {
+          return axiosInstance(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
       
       try {
         // Attempt to refresh (cookies are sent automatically)
         await axios.post(`${API_BASE}/auth/refresh`, {}, { withCredentials: true });
-        
+        isRefreshing = false;
+        processQueue(null);
         // Retry the original request
         return axiosInstance(originalRequest);
       } catch (refreshError) {
+        isRefreshing = false;
+        processQueue(refreshError);
         // Refresh token is expired or revoked
         useAuthStore.getState().logout();
         return Promise.reject(refreshError);
