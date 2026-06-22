@@ -9,11 +9,23 @@ const PaymentModule = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredPayments = payments.filter(p => 
-    (p.user?.fullName || p.fullName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    String(p.id || "").toLowerCase().includes(searchTerm.toLowerCase())
+    ((p.user?.fullName || p.fullName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    String(p.id || "").toLowerCase().includes(searchTerm.toLowerCase())) &&
+    Number(p.amount) > 0
   );
 
-  const totalIncome = payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+  const userFirstPayments = {};
+  payments.forEach(p => {
+    const uid = p.user?.id || p.userId || p.fullName;
+    if (uid) {
+      if (!userFirstPayments[uid] || new Date(p.paymentDate) < new Date(userFirstPayments[uid].paymentDate)) {
+        userFirstPayments[uid] = p;
+      }
+    }
+  });
+  
+  const originalIncome = Object.values(userFirstPayments).reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+  const totalIncome = originalIncome; // Use original income for net revenue calculation as requested
   const totalOutcome = staffs.reduce((acc, s) => {
     const salary = parseFloat(s.salary) || 0;
     return acc + salary;
@@ -46,7 +58,7 @@ const PaymentModule = () => {
         <div className="stat-card">
           <div className="icon"><DollarSign size={24} /></div>
           <div className="info">
-            <label>Income from Users</label>
+            <label>Original Income (Users)</label>
             <h3 className="text-success">₹{totalIncome.toLocaleString()}</h3>
           </div>
         </div>

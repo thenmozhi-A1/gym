@@ -143,8 +143,8 @@ const MemberManagement = ({ onAddUser }) => {
             </div>
 
             {(() => {
-              const userPayments = payments?.filter(p => p.user?.fullName === selectedUser.fullName || p.userId === selectedUser.id) || [];
-              const firstPayment = userPayments.length > 0 ? userPayments[userPayments.length - 1] : null;
+              const userPayments = [...(payments?.filter(p => p.user?.fullName === selectedUser.fullName || p.userId === selectedUser.id) || [])].sort((a, b) => new Date(a.paymentDate) - new Date(b.paymentDate));
+              const firstPayment = userPayments.length > 0 ? userPayments[0] : null;
               
               return (
                 <div className="slip-section">
