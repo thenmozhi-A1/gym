@@ -183,60 +183,7 @@ const AttendanceModule = () => {
         </select>
       </div>
 
-      <div className="table-responsive" style={{marginTop: '20px'}}>
-        <table className="table">
-          <thead>
-          <tr>
-            <th>NAME</th>
-            <th>DATE</th>
-            <th>CHECK-IN</th>
-            <th>CHECK-OUT</th>
-            {activeTab === "staff" && <th>ROLE</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {attendanceData.map((log, i) => {
-            let logDate = log.date || log.attendanceDate;
-            if (Array.isArray(logDate)) {
-               const [y, m, d] = logDate;
-               logDate = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            }
-            let checkIn = log.entry || log.checkInTime;
-            if (Array.isArray(checkIn)) {
-               const [h, m] = checkIn;
-               checkIn = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-            } else if (typeof checkIn === 'string' && checkIn.length > 5) {
-               checkIn = checkIn.substring(0, 5);
-            }
-            let checkOut = log.exit || log.checkOutTime;
-            if (Array.isArray(checkOut)) {
-               const [h, m] = checkOut;
-               checkOut = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-            } else if (typeof checkOut === 'string' && checkOut.length > 5) {
-               checkOut = checkOut.substring(0, 5);
-            }
-            return (
-            <tr key={i}>
-              <td className="fw-bold">{log.user?.fullName || log.fullName || log.name || log.email || (activeTab === "staff" ? staffs.find(s => s.staffId === log.staff?.id)?.fullName : undefined) || "Unknown Member"}</td>
-              <td>{logDate}</td>
-              <td className="text-success fw-bold"><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {checkIn}</td>
-              <td className="text-danger fw-bold">{checkOut ? <><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {checkOut}</> : "-"}</td>
-              {activeTab === "staff" && (
-                <td>
-                  <span className="badge">
-                    {log.staff?.role || log.user?.role || log.role}
-                  </span>
-                </td>
-              )}
-            </tr>
-            );
-          })}
-          {attendanceData.length === 0 && (
-            <tr><td colSpan={activeTab === "members" ? 4 : 5} className="text-center py-4">No logs found.</td></tr>
-          )}
-        </tbody>
-        </table>
-      </div>
+
 
       <div className="grid-card">
         <div className="table-responsive">
