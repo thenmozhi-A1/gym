@@ -23,6 +23,7 @@ import {
   Settings,
   MoreVertical,
   ChevronDown,
+  ChevronRight,
   Menu,
   ArrowUpRight,
   TrendingDown,
