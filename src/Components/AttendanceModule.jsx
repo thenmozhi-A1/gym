@@ -9,6 +9,9 @@ const AttendanceModule = () => {
   const [activeTab, setActiveTab] = useState("members"); // members or staff
   const [searchTerm, setSearchTerm] = useState("");
   const [editCell, setEditCell] = useState(null);
+  const [editStatus, setEditStatus] = useState("P");
+  const [editCheckIn, setEditCheckIn] = useState("");
+  const [editCheckOut, setEditCheckOut] = useState("");
 
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -77,20 +80,32 @@ const AttendanceModule = () => {
   const handleCellClick = (person, dateStr, currentLog) => {
      if (dateStr > todayStr) return; // disable future editing
      setEditCell({ person, dateStr, currentLog });
+     
+     if (currentLog) {
+       setEditStatus(currentLog.status === 'LEAVE' ? 'L' : currentLog.status === 'PERMISSION' ? 'PR' : currentLog.status === 'ABSENT' ? 'A' : 'P');
+       setEditCheckIn(currentLog.checkInTime || "");
+       setEditCheckOut(currentLog.checkOutTime || "");
+     } else {
+       setEditStatus("P");
+       setEditCheckIn("");
+       setEditCheckOut("");
+     }
   };
 
-  const handleSaveAttendance = async (newStatus) => {
+  const handleSaveAttendance = async () => {
     try {
       if (editCell.currentLog && editCell.currentLog.id) {
          await axiosInstance.delete(`/attendance/${editCell.currentLog.id}`);
       }
       
-      if (newStatus !== 'A') {
+      if (editStatus !== 'A') {
          const payload = {
            attendanceDate: editCell.dateStr,
-           status: newStatus === 'P' ? 'PRESENT' : newStatus === 'L' ? 'LEAVE' : 'PERMISSION',
-           checkInTime: "00:00:00"
+           status: editStatus === 'P' ? 'PRESENT' : editStatus === 'L' ? 'LEAVE' : 'PERMISSION',
+           checkInTime: editCheckIn || "00:00:00"
          };
+         if (editCheckOut) payload.checkOutTime = editCheckOut;
+
          if (activeTab === "members") {
            await axiosInstance.post(`/attendance/user/${editCell.person.id}`, payload);
          } else {
@@ -259,11 +274,49 @@ const AttendanceModule = () => {
                <strong>{editCell.person.fullName || editCell.person.name}</strong><br/>
                {editCell.dateStr}
              </p>
-             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
-                <button className="status-btn bg-present" onClick={() => handleSaveAttendance('P')}>Mark Present</button>
-                <button className="status-btn bg-absent" onClick={() => handleSaveAttendance('A')}>Mark Absent</button>
-                <button className="status-btn bg-leave" onClick={() => handleSaveAttendance('L')}>Mark Leave</button>
-                <button className="status-btn bg-permission" onClick={() => handleSaveAttendance('PR')}>Mark Permission</button>
+             <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px'}}>
+               <div>
+                 <label style={{display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px'}}>Status</label>
+                 <select 
+                    style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-color)'}}
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value)}
+                 >
+                   <option value="P">Present</option>
+                   <option value="A">Absent</option>
+                   <option value="L">Leave</option>
+                   <option value="PR">Permission</option>
+                 </select>
+               </div>
+               {editStatus !== 'A' && editStatus !== 'L' && (
+                 <>
+                   <div>
+                     <label style={{display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px'}}>Check In Time</label>
+                     <input type="time" step="1"
+                        style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-color)'}}
+                        value={editCheckIn}
+                        onChange={(e) => setEditCheckIn(e.target.value)}
+                     />
+                   </div>
+                   <div>
+                     <label style={{display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '5px'}}>Check Out Time</label>
+                     <input type="time" step="1"
+                        style={{width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-color)'}}
+                        value={editCheckOut}
+                        onChange={(e) => setEditCheckOut(e.target.value)}
+                     />
+                   </div>
+                 </>
+               )}
+             </div>
+
+             <div style={{display: 'flex', gap: '10px'}}>
+                <button 
+                  onClick={handleSaveAttendance}
+                  style={{flex: 1, padding: '10px', background: 'var(--accent-color, #3b82f6)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'}}
+                >
+                  Save Changes
+                </button>
              </div>
           </div>
         </div>
