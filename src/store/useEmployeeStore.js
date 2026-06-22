@@ -21,17 +21,39 @@ export const useEmployeeStore = create((set, get) => ({
 
         let attendanceLog = [];
         try {
-          if (me.staffId) {
-            const attRes = await axiosInstance.get(`/attendance/staff/${me.staffId}`);
+          if (me.id) {
+            const attRes = await axiosInstance.get(`/attendance/staff/${me.id}`);
           if (attRes.data && attRes.data.length > 0) {
             attendanceLog = attRes.data.map(log => {
               let durationStr = '-';
               let status = "Present";
               let permissionsUsed = 0;
               
-              if (log.checkInTime && log.checkOutTime) {
-                 const [inH, inM] = log.checkInTime.split(':').map(Number);
-                 const [outH, outM] = log.checkOutTime.split(':').map(Number);
+              let formattedCheckIn = log.checkInTime || "-";
+              let formattedCheckOut = log.checkOutTime || "-";
+              let formattedDate = log.attendanceDate;
+
+              if (Array.isArray(log.attendanceDate)) {
+                 const [y, m, d] = log.attendanceDate;
+                 formattedDate = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+              }
+              if (Array.isArray(log.checkInTime)) {
+                 const [h, m] = log.checkInTime;
+                 formattedCheckIn = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+              } else if (typeof log.checkInTime === 'string') {
+                 formattedCheckIn = log.checkInTime.substring(0, 5);
+              }
+
+              if (Array.isArray(log.checkOutTime)) {
+                 const [h, m] = log.checkOutTime;
+                 formattedCheckOut = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+              } else if (typeof log.checkOutTime === 'string') {
+                 formattedCheckOut = log.checkOutTime.substring(0, 5);
+              }
+
+              if (formattedCheckIn !== "-" && formattedCheckOut !== "-") {
+                 const [inH, inM] = formattedCheckIn.split(':').map(Number);
+                 const [outH, outM] = formattedCheckOut.split(':').map(Number);
                  let diffMins = (outH * 60 + outM) - (inH * 60 + inM);
                  if (diffMins < 0) diffMins += 24 * 60;
                  const hrs = Math.floor(diffMins / 60);
@@ -46,16 +68,16 @@ export const useEmployeeStore = create((set, get) => ({
                  } else {
                      status = "Present";
                  }
-              } else if (log.checkInTime) {
+              } else if (formattedCheckIn !== "-") {
                  status = "Working";
               }
 
               return {
                 id: log.id,
-                date: log.attendanceDate,
+                date: formattedDate,
                 status: status,
-                checkIn: log.checkInTime || "-",
-                checkOut: log.checkOutTime || "-",
+                checkIn: formattedCheckIn,
+                checkOut: formattedCheckOut,
                 duration: durationStr,
                 isLate: log.isLate,
                 correctionStatus: log.correctionStatus,

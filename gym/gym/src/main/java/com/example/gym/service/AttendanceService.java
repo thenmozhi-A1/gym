@@ -33,7 +33,6 @@ public class AttendanceService {
         return attendanceRepository.save(attendance);
     }
 
-    /** Mark attendance (check-in) for a staff */
     public Attendance markStaffAttendance(Long userId, Attendance attendance) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
@@ -42,6 +41,7 @@ public class AttendanceService {
             throw new RuntimeException("Staff not found with id: " + userId);
         }
         attendance.setStaff(staff);
+        attendance.setUser(user);
         checkIfLate(attendance);
         return attendanceRepository.save(attendance);
     }

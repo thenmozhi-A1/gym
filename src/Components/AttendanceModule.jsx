@@ -43,12 +43,19 @@ const AttendanceModule = () => {
   const getLogForCell = (person, dateStr) => {
     return attendanceData.find(log => {
       const logPersonId = log.staff?.id || log.user?.id || log.userId || log.staffId;
-      const logPersonName = (log.staff?.fullName || log.user?.fullName || log.fullName || log.name || "").toLowerCase();
+      const logPersonName = (log.user?.fullName || log.fullName || log.name || "").toLowerCase();
       const currentPersonName = (person.fullName || person.name || "").toLowerCase();
       
-      const logDate = log.date || log.attendanceDate;
+      let logDate = log.date || log.attendanceDate;
+      if (Array.isArray(logDate)) {
+         const [y, m, d] = logDate;
+         logDate = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      }
+      
       if (logDate !== dateStr) return false;
 
+      if (log.user?.id === person.id) return true;
+      if (activeTab === "staff" && log.staff?.id === person.staffId) return true;
       if (logPersonId && logPersonId === person.id) return true;
       if (logPersonName && currentPersonName && logPersonName === currentPersonName) return true;
       return false;
@@ -188,12 +195,32 @@ const AttendanceModule = () => {
           </tr>
         </thead>
         <tbody>
-          {attendanceData.map((log, i) => (
+          {attendanceData.map((log, i) => {
+            let logDate = log.date || log.attendanceDate;
+            if (Array.isArray(logDate)) {
+               const [y, m, d] = logDate;
+               logDate = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            }
+            let checkIn = log.entry || log.checkInTime;
+            if (Array.isArray(checkIn)) {
+               const [h, m] = checkIn;
+               checkIn = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            } else if (typeof checkIn === 'string' && checkIn.length > 5) {
+               checkIn = checkIn.substring(0, 5);
+            }
+            let checkOut = log.exit || log.checkOutTime;
+            if (Array.isArray(checkOut)) {
+               const [h, m] = checkOut;
+               checkOut = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+            } else if (typeof checkOut === 'string' && checkOut.length > 5) {
+               checkOut = checkOut.substring(0, 5);
+            }
+            return (
             <tr key={i}>
-              <td className="fw-bold">{log.staff?.fullName || log.user?.fullName || log.fullName || log.name || log.email || "Unknown Member"}</td>
-              <td>{log.date || log.attendanceDate}</td>
-              <td className="text-success fw-bold"><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {log.entry || log.checkInTime}</td>
-              <td className="text-danger fw-bold">{log.exit || log.checkOutTime ? <><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {log.exit || log.checkOutTime}</> : "-"}</td>
+              <td className="fw-bold">{log.user?.fullName || log.fullName || log.name || log.email || (activeTab === "staff" ? staffs.find(s => s.staffId === log.staff?.id)?.fullName : undefined) || "Unknown Member"}</td>
+              <td>{logDate}</td>
+              <td className="text-success fw-bold"><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {checkIn}</td>
+              <td className="text-danger fw-bold">{checkOut ? <><Clock size={14} className="mr-2" style={{marginRight: '4px'}} /> {checkOut}</> : "-"}</td>
               {activeTab === "staff" && (
                 <td>
                   <span className="badge">
@@ -202,7 +229,8 @@ const AttendanceModule = () => {
                 </td>
               )}
             </tr>
-          ))}
+            );
+          })}
           {attendanceData.length === 0 && (
             <tr><td colSpan={activeTab === "members" ? 4 : 5} className="text-center py-4">No logs found.</td></tr>
           )}
