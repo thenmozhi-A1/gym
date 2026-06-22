@@ -50,7 +50,7 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
     
     // Prevent infinite loops if refresh itself fails
-    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh') && !originalRequest.url.includes('/auth/login')) {
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh') && !originalRequest.url.includes('/auth/login') && !originalRequest.url.includes('/auth/logout')) {
       if (isRefreshing) {
         return new Promise(function(resolve, reject) {
           failedQueue.push({ resolve, reject });
