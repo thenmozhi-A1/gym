@@ -114,7 +114,7 @@ const MemberManagement = ({ onAddUser }) => {
             <div className="slip-section">
               <h5><User size={14} className="mr-2" style={{marginRight: '8px'}} /> PERSONAL DETAILS</h5>
               <div className="line-item"><span>Email</span> <span>{selectedUser.email || "N/A"}</span></div>
-              <div className="line-item"><span>Mobile</span> <span>{selectedUser.mobileNumber || "N/A"}</span></div>
+              <div className="line-item"><span>Mobile</span> <span>{selectedUser.phone || selectedUser.mobileNumber || "N/A"}</span></div>
               <div className="line-item"><span>DOB / Age</span> <span>{selectedUser.dob || "-"} / {selectedUser.age || "-"} yrs</span></div>
               <div className="line-item"><span>Gender</span> <span>{selectedUser.gender || "-"}</span></div>
               <div className="line-item"><span>Blood Group</span> <span>{selectedUser.bloodGroup || "-"}</span></div>

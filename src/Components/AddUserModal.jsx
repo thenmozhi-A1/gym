@@ -180,10 +180,9 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   if (!isOpen) return null;
 
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="form-section animate-in">
+    return (
+      <>
+        <div style={{ display: currentStep === 1 ? 'block' : 'none' }} className="form-section animate-in">
             <h4><User size={18} /> Personal Details</h4>
             <div className="form-grid">
               <div className="form-group">
@@ -237,10 +236,8 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
 
             </div>
           </div>
-        );
-      case 2:
-        return (
-          <div className="form-section animate-in">
+        </div>
+        <div style={{ display: currentStep === 2 ? 'block' : 'none' }} className="form-section animate-in">
             <h4><Heart size={18} /> Health Information</h4>
             <div className="form-grid">
               <div className="form-group">
@@ -284,10 +281,8 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               </div>
             </div>
           </div>
-        );
-      case 3:
-        return (
-          <div className="form-section animate-in">
+        </div>
+        <div style={{ display: currentStep === 3 ? 'block' : 'none' }} className="form-section animate-in">
             <h4><Calendar size={18} /> Membership Details</h4>
             <div className="form-grid">
               <div className="form-group">
@@ -323,10 +318,8 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               </div>
             </div>
           </div>
-        );
-      case 4:
-        return (
-          <div className="form-section animate-in">
+        </div>
+        <div style={{ display: currentStep === 4 ? 'block' : 'none' }} className="form-section animate-in">
             <h4><CreditCard size={18} /> Payment Management</h4>
             <div className="form-grid">
               <div className="form-group">
@@ -351,10 +344,9 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               </div>
             </div>
           </div>
-        );
-      default:
-        return null;
-    }
+        </div>
+      </>
+    );
   };
 
   return (
