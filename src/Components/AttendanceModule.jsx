@@ -113,7 +113,7 @@ const AttendanceModule = () => {
          }
       }
       setEditCell(null);
-      if (onRefresh) onRefresh();
+      if (onRefresh) onRefresh("attendance");
     } catch (err) {
       console.error("Failed to update attendance", err);
       alert("Failed to update attendance: " + (err.response?.data?.error || err.message));
