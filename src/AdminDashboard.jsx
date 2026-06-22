@@ -429,7 +429,7 @@ const AdminDashboard = () => {
                         display: 'flex', gap: 10, alignItems: 'flex-start'
                       }}>
                         <span style={{ fontSize: 18 }}>
-                          {n.type === 'NEW_MEMBER' ? '👤' : n.type === 'PAYMENT_FAILED' ? '❌' : n.type === 'FEEDBACK' ? '⭐' : n.type === 'ENQUIRY' ? '📞' : '🏋️'}
+                          {n.type === 'NEW_MEMBER' ? '👤' : n.type === 'PAYMENT_FAILED' ? '❌' : n.type === 'FEEDBACK' ? '⭐' : n.type === 'ENQUIRY' ? '📞' : n.type === 'LEAVE_REQUEST' ? '🏖️' : '🏋️'}
                         </span>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
@@ -438,6 +438,7 @@ const AdminDashboard = () => {
                             {n.type === 'ATTENDANCE' && `${n.payload?.name} checked in`}
                             {n.type === 'FEEDBACK' && `Feedback from ${n.payload?.name}`}
                             {n.type === 'ENQUIRY' && `New Enquiry: ${n.payload?.name}`}
+                            {n.type === 'LEAVE_REQUEST' && `Leave request: ${n.payload?.name}`}
                           </div>
                           <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
                             {new Date(n.timestamp).toLocaleTimeString()}
@@ -519,7 +520,6 @@ const AdminDashboard = () => {
                       <div className="chart-header">
                         <div className="tabs">
                           <button className="active">New Users</button>
-
                         </div>
                         <div className="legend">
                           <span className="actual">Actual Value</span>
@@ -552,6 +552,38 @@ const AdminDashboard = () => {
                             <div className="bar" style={{ height: `${h}%` }}></div>
                           </div>
                         ))}
+                      </div>
+                    </ChartCard>
+                  </div>
+
+                  {/* Pending Approvals Widget on Main Dashboard */}
+                  <div className="mt-4">
+                    <ChartCard>
+                      <div className="chart-header" style={{ marginBottom: '15px' }}>
+                        <h5>Pending Leave Approvals</h5>
+                        <button className="dropdown" onClick={() => setActiveTab("requests")}>View All <ChevronRight size={14} /></button>
+                      </div>
+                      <div className="request-list">
+                        {leaves && leaves.filter(l => l.status === 'PENDING').length > 0 ? (
+                          leaves.filter(l => l.status === 'PENDING').slice(0, 5).map((req, i) => (
+                            <div key={i} className="request-item">
+                              <div className="req-profile">
+                                <div className="avatar-small">{(req.staffName || "S").charAt(0)}</div>
+                                <div><strong>{req.staffName}</strong><p>{req.leaveType}</p></div>
+                              </div>
+                              <div className="req-details">
+                                <span className="type">{req.reason}</span>
+                                <span className="dates">{req.startDate} to {req.endDate}</span>
+                              </div>
+                              <div className="req-actions">
+                                <button className="btn-icon text-success" onClick={() => updateLeaveStatus(req.id, 'APPROVED')} title="Approve"><CheckCircle size={18} /></button>
+                                <button className="btn-icon text-danger" onClick={() => updateLeaveStatus(req.id, 'REJECTED')} title="Reject"><XCircle size={18} /></button>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>No pending leave requests at this time.</div>
+                        )}
                       </div>
                     </ChartCard>
                   </div>

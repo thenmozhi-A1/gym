@@ -21,11 +21,13 @@ public class LeaveRequestController {
     private final LeaveRequestRepository leaveRequestRepository;
     private final StaffRepository staffRepository;
     private final UserRepository userRepository;
+    private final com.example.gym.service.NotificationService notificationService;
 
-    public LeaveRequestController(LeaveRequestRepository leaveRequestRepository, StaffRepository staffRepository, UserRepository userRepository) {
+    public LeaveRequestController(LeaveRequestRepository leaveRequestRepository, StaffRepository staffRepository, UserRepository userRepository, com.example.gym.service.NotificationService notificationService) {
         this.leaveRequestRepository = leaveRequestRepository;
         this.staffRepository = staffRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     /** POST /api/leaves/apply/{userId} — Employee applies for leave */
@@ -56,6 +58,13 @@ public class LeaveRequestController {
 
             LeaveRequest saved = leaveRequestRepository.save(req);
             leaveRequestRepository.flush();
+
+            notificationService.broadcast("LEAVE_REQUEST", Map.of(
+                    "userId", userId,
+                    "name", user.getFullName() != null ? user.getFullName() : "Employee",
+                    "leaveType", dto.getLeaveType(),
+                    "reason", dto.getReason() != null ? dto.getReason() : "No reason provided"
+            ));
 
             // Build DTO manually — avoids any Jackson serialization issues with JPA proxies
             LeaveRequestDTO result = new LeaveRequestDTO();
