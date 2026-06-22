@@ -53,19 +53,21 @@ const AttendanceModule = () => {
       if (Array.isArray(logDate)) {
          const [y, m, d] = logDate;
          logDate = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      } else if (typeof logDate === 'string') {
+         logDate = logDate.split('T')[0];
       }
       
       if (logDate !== dateStr) return false;
 
       // Strict ID matching first
       if (activeTab === "members") {
-         if (log.user?.id && person.id && log.user.id === person.id) return true;
-         if (logPersonId && person.id && logPersonId === person.id && !log.staff) return true;
+         if (log.user?.id && person.id && log.user.id == person.id) return true;
+         if (logPersonId && person.id && logPersonId == person.id && !log.staff) return true;
          if (logPersonName && currentPersonName && logPersonName === currentPersonName && !log.staff) return true;
       } else {
          const sId = person.staffId || person.id;
-         if (log.staff?.id && sId && log.staff.id === sId) return true;
-         if (logPersonId && sId && logPersonId === sId && !log.user) return true;
+         if (log.staff?.id && sId && log.staff.id == sId) return true;
+         if (logPersonId && sId && logPersonId == sId && !log.user) return true;
          if (logPersonName && currentPersonName && logPersonName === currentPersonName && !log.user) return true;
       }
       
@@ -79,6 +81,7 @@ const AttendanceModule = () => {
        if (log.status === 'LEAVE') return 'L';
        if (log.status === 'PERMISSION') return 'PR';
        if (log.status === 'ABSENT') return 'A';
+       if (log.status === 'SUNDAY') return 'S';
        return 'P';
     }
     if (isSunday) return "S";
@@ -110,9 +113,9 @@ const AttendanceModule = () => {
          const payload = {
            attendanceDate: editCell.dateStr,
            status: editStatus === 'P' ? 'PRESENT' : editStatus === 'L' ? 'LEAVE' : editStatus === 'S' ? 'SUNDAY' : 'PERMISSION',
-           checkInTime: editCheckIn || "00:00:00"
+           checkInTime: editCheckIn ? (editCheckIn.split(':').length === 2 ? editCheckIn + ':00' : editCheckIn) : "00:00:00"
          };
-         if (editCheckOut) payload.checkOutTime = editCheckOut;
+         if (editCheckOut) payload.checkOutTime = editCheckOut.split(':').length === 2 ? editCheckOut + ':00' : editCheckOut;
 
          if (activeTab === "members") {
            await axiosInstance.post(`/attendance/user/${editCell.person.id}`, payload);
