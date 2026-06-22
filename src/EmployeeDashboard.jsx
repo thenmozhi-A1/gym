@@ -51,15 +51,17 @@ const EmployeeDashboard = () => {
   const [leaveForm, setLeaveForm] = useState({ leaveType: 'CASUAL', startDate: '', endDate: '', reason: '' });
   const [submittingLeave, setSubmittingLeave] = useState(false);
 
+  const user = useAuthStore((state) => state.user);
+  
   // Fetch real data for the specific staff member from the database
   useEffect(() => {
-    const user = useAuthStore((state) => state.user); const email = user?.email;
+    const email = user?.email;
     if (!email) {
       navigate('/login');
       return;
     }
     fetchEmployeeData(email);
-  }, [navigate, fetchEmployeeData]);
+  }, [navigate, fetchEmployeeData, user]);
 
   useEffect(() => {
     if (employeeData && !profileForm) {

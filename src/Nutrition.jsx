@@ -160,7 +160,7 @@ const Nutrition = () => {
   };
 
   const handleBuyProduct = async (product, quantity = 1) => {
-    const user = useAuthStore((state) => state.user); const userEmail = user?.email;
+    const user = useAuthStore.getState().user; const userEmail = user?.email;
     if (!userEmail) {
       alert("Please login to buy products.");
       return;
