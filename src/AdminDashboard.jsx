@@ -2012,7 +2012,8 @@ const PayrollContainer = styled.div`
 `;
 
 const PayrollSubNav = styled.div`
-  background: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); margin: -40px -40px 30px -40px; padding: 0 40px;
+  position: relative; z-index: 10;
+  background: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); margin: -20px -24px 30px -24px; padding: 0 24px;
   backdrop-filter: var(--backdrop);
   transition: all 0.3s ease;
   @media (max-width: 768px) { margin: -20px -20px 20px -20px; padding: 0 20px; overflow-x: auto; &::-webkit-scrollbar { display: none; } }
