@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Download, BarChart2, TrendingUp, Users, DollarSign, Activity, ShieldCheck, Search, RefreshCw } from "lucide-react";
 import axiosInstance from "../api/axiosInstance";
 import log from "../utils/logger";
+import { useAdminStore } from "../store/useAdminStore";
 
 // ── Action badge colours ──────────────────────────────────────────────────────
 const ACTION_META = {
@@ -17,6 +18,7 @@ const getActionMeta = (action) =>
   ACTION_META[action] || { label: action, color: "#94a3b8", bg: "rgba(148,163,184,0.1)" };
 
 const ReportsModule = () => {
+  const { payments } = useAdminStore();
   const [auditLogs,   setAuditLogs]   = useState([]);
   const [auditLoading, setAuditLoading] = useState(true);
   const [auditError,  setAuditError]  = useState(null);
@@ -89,7 +91,18 @@ const ReportsModule = () => {
           <div className="kpi-icon blue"><DollarSign size={20} /></div>
           <div className="kpi-info">
             <label>Total Revenue</label>
-            <h3>₹2,45,000</h3>
+            <h3>₹{(() => {
+                const userFirstPayments = {};
+                payments.forEach(p => {
+                  const uid = p.user?.id || p.userId || p.fullName;
+                  if (uid) {
+                    if (!userFirstPayments[uid] || new Date(p.paymentDate) < new Date(userFirstPayments[uid].paymentDate)) {
+                      userFirstPayments[uid] = p;
+                    }
+                  }
+                });
+                return Object.values(userFirstPayments).reduce((acc, p) => acc + (Number(p.amount) || 0), 0).toLocaleString();
+            })()}</h3>
             <span className="trend positive"><TrendingUp size={12} /> +12.5%</span>
           </div>
         </div>

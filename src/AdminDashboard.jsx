@@ -246,7 +246,19 @@ const AdminDashboard = () => {
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
     doc.text(`Total Users: ${users.length}`, 14, 36);
     doc.text(`Total Staff: ${staffs.length}`, 14, 42);
-    doc.text(`Total Revenue: Rs. ${payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0).toLocaleString()}`, 14, 48);
+    
+    const userFirstPayments = {};
+    payments.forEach(p => {
+      const uid = p.user?.id || p.userId || p.fullName;
+      if (uid) {
+        if (!userFirstPayments[uid] || new Date(p.paymentDate) < new Date(userFirstPayments[uid].paymentDate)) {
+          userFirstPayments[uid] = p;
+        }
+      }
+    });
+    const originalIncome = Object.values(userFirstPayments).reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+    
+    doc.text(`Total Revenue: Rs. ${originalIncome.toLocaleString()}`, 14, 48);
 
     // Users Table
     doc.setFontSize(14);
@@ -456,7 +468,18 @@ const AdminDashboard = () => {
                       <div className="card-glow" />
                       <div className="lab">Growth</div>
                       <div className="val-row">
-                        <div className="val">₹{payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0).toLocaleString()}</div>
+                        <div className="val">₹{(() => {
+                            const userFirstPayments = {};
+                            payments.forEach(p => {
+                              const uid = p.user?.id || p.userId || p.fullName;
+                              if (uid) {
+                                if (!userFirstPayments[uid] || new Date(p.paymentDate) < new Date(userFirstPayments[uid].paymentDate)) {
+                                  userFirstPayments[uid] = p;
+                                }
+                              }
+                            });
+                            return Object.values(userFirstPayments).reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+                        })().toLocaleString()}</div>
                         <div className="icon-badge"><CreditCard size={24} /></div>
                       </div>
                       <div className="footer-text">See last week's <span>Revenue</span></div>
