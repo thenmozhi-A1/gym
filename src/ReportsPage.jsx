@@ -3,26 +3,51 @@ import styled from "styled-components";
 import { Users, Clock, DollarSign, TrendingUp, Download, Filter } from "lucide-react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useState, useEffect } from "react";
+import useAuthStore from "./store/authStore";
+import axiosInstance from "./api/axiosInstance";
 
 const ReportsPage = () => {
+  const { user } = useAuthStore();
+  const [sessions, setSessions] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    const fetchData = async () => {
+      try {
+        const [attRes, payRes] = await Promise.all([
+          axiosInstance.get(`/attendance/user/${user.id}`),
+          axiosInstance.get(`/payments/user/${user.id}`)
+        ]);
+        
+        const formattedSessions = (attRes.data || []).map(a => ({
+          date: a.attendanceDate || a.date,
+          workout: "General Training",
+          time: a.checkInTime || "N/A",
+          duration: a.checkOutTime ? "Completed" : "Active",
+          intensity: "Medium"
+        }));
+        
+        setSessions(formattedSessions);
+        setPayments(payRes.data || []);
+      } catch (err) {
+        console.error("Failed to fetch report data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [user]);
+
   const currentUser = {
-    name: "Dinesh Kumar",
-    role: "Elite Member",
-    memberSince: "Jan 2024",
-    avatar: "https://ui-avatars.com/api/?name=Dinesh+Kumar&background=ffc107&color=000"
+    name: user?.fullName || user?.name || "Member",
+    role: user?.planType || user?.role || "Member",
+    memberSince: user?.createdAt ? new Date(user.createdAt).getFullYear() : "2024",
+    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || "User")}&background=ffc107&color=000`
   };
-
-  const mySessions = [
-    { date: "29 Apr 2026", workout: "Heavy Chest Day", time: "06:30 AM", duration: "75m", intensity: "High" },
-    { date: "27 Apr 2026", workout: "Morning Yoga", time: "07:00 AM", duration: "45m", intensity: "Low" },
-    { date: "26 Apr 2026", workout: "HIIT Sprints", time: "05:15 PM", duration: "30m", intensity: "Max" },
-    { date: "24 Apr 2026", workout: "Back & Bis", time: "06:00 PM", duration: "60m", intensity: "Medium" },
-  ];
-
-  const myPayments = [
-    { id: "INV-98210", date: "01 Apr 2026", amount: "₹12,000", method: "Razorpay", plan: "Elite Yearly" },
-    { id: "INV-87122", date: "01 Apr 2025", amount: "₹12,000", method: "UPI", plan: "Elite Yearly" },
-  ];
 
   const handleDownload = () => {
     const doc = new jsPDF();
@@ -52,7 +77,7 @@ const ReportsPage = () => {
     doc.setFont("helvetica", "bold");
     doc.text("Training Session History", 15, 85);
     
-    const sessionData = mySessions.map(s => [s.date, s.workout, s.time, s.duration, s.intensity]);
+    const sessionData = sessions.map(s => [s.date, s.workout, s.time, s.duration, s.intensity]);
     autoTable(doc, {
       startY: 90,
       head: [['Date', 'Workout', 'Time', 'Duration', 'Intensity']],
@@ -65,7 +90,7 @@ const ReportsPage = () => {
     const finalY = doc.lastAutoTable.finalY || 150;
     doc.text("Billing & Payment History", 15, finalY + 20);
     
-    const paymentData = myPayments.map(p => [p.id, p.date, p.plan, p.amount]);
+    const paymentData = payments.map(p => [p.id, p.paymentDate || "N/A", p.planName || p.plan || "Membership", p.amount || 0]);
     autoTable(doc, {
       startY: finalY + 25,
       head: [['Invoice ID', 'Date', 'Plan', 'Amount']],
@@ -138,7 +163,9 @@ const ReportsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {mySessions.map((s, i) => (
+                {sessions.length === 0 ? (
+                  <tr><td colSpan="5" className="text-center">No recent sessions found.</td></tr>
+                ) : sessions.map((s, i) => (
                   <tr key={i}>
                     <td>{s.date}</td>
                     <td><strong>{s.workout}</strong></td>
@@ -168,12 +195,14 @@ const ReportsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {myPayments.map((p, i) => (
+                {payments.length === 0 ? (
+                  <tr><td colSpan="4" className="text-center">No billing history found.</td></tr>
+                ) : payments.map((p, i) => (
                   <tr key={i}>
                     <td><code style={{ color: '#007bff' }}>{p.id}</code></td>
-                    <td>{p.date}</td>
-                    <td>{p.plan}</td>
-                    <td className="fw-bold">{p.amount}</td>
+                    <td>{p.paymentDate || "N/A"}</td>
+                    <td>{p.planName || p.plan || "Membership"}</td>
+                    <td className="fw-bold">₹{(p.amount || 0).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
