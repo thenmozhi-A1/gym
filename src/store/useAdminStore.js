@@ -280,16 +280,30 @@ export const useAdminStore = create((set, get) => ({
   deleteConsultation: async (id) => {
     try {
       await axiosInstance.delete(`/consultations/${id}`);
-      set((state) => ({
-        consultations: state.consultations.filter(c => c.id !== id)
-      }));
-      toast.success("Lead converted/deleted successfully.");
+      set((state) => ({ consultations: state.consultations.filter(c => c.id !== id) }));
+      toast.success("Lead removed");
       return true;
-    } catch (err) {
-      log.error(err);
-      toast.error("Error updating lead status.");
-      return false;
-    }
+    } catch(e) { toast.error("Failed to delete lead"); return false; }
+  },
+
+  addConsultation: async (data) => {
+    try {
+      const res = await axiosInstance.post('/consultations', data);
+      set((state) => ({ consultations: [...state.consultations, res.data] }));
+      toast.success("Lead added successfully");
+      return true;
+    } catch(e) { toast.error("Failed to add lead"); return false; }
+  },
+
+  updateConsultationStatus: async (id, status) => {
+    try {
+      await axiosInstance.put(`/consultations/${id}/status`, { status });
+      set((state) => ({
+        consultations: state.consultations.map(c => c.id === id ? { ...c, status } : c)
+      }));
+      toast.success(`Lead marked as ${status}`);
+      return true;
+    } catch(e) { toast.error("Failed to update lead"); return false; }
   },
 
   updateLeaveStatus: async (id, status) => {

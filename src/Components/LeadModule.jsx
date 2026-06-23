@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Users, Phone, Mail, Instagram, Facebook, Globe, Calendar, CheckCircle } from "lucide-react";
+import { Users, Phone, Mail, Instagram, Facebook, Globe, Calendar, CheckCircle, X } from "lucide-react";
 import { useAdminStore } from "../store/useAdminStore";
 
 const LeadModule = () => {
-  const { consultations: leads, deleteConsultation } = useAdminStore();
+  const { consultations: leads, addConsultation, updateConsultationStatus, deleteConsultation } = useAdminStore();
+  const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
+  const [newLead, setNewLead] = useState({ fullName: '', phone: '', email: '', source: 'Walk-In', goals: '' });
+  const [submitting, setSubmitting] = useState(false);
 
   const getSourceIcon = (source) => {
     switch(source) {
@@ -26,8 +29,18 @@ const LeadModule = () => {
   };
 
   const markConverted = async (id) => {
-    await deleteConsultation(id);
-    // In a real app, this would also open the AddUserModal pre-filled with lead data
+    await updateConsultationStatus(id, 'CONVERTED');
+  };
+
+  const handleAddLead = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const success = await addConsultation({ ...newLead, status: 'NEW', createdAt: new Date().toISOString() });
+    if (success) {
+      setIsAddLeadOpen(false);
+      setNewLead({ fullName: '', phone: '', email: '', source: 'Walk-In', goals: '' });
+    }
+    setSubmitting(false);
   };
 
   return (
@@ -36,7 +49,7 @@ const LeadModule = () => {
         <div className="title-area">
           <h2>LEADS <small>MARKETING FUNNEL</small></h2>
         </div>
-        <button className="btn-primary">Add New Lead</button>
+        <button className="btn-primary" onClick={() => setIsAddLeadOpen(true)}>Add New Lead</button>
       </div>
 
       <div className="funnel-metrics">
@@ -84,8 +97,8 @@ const LeadModule = () => {
                 </td>
                 <td>
                   <div className="source-badge">
-                    {getSourceIcon('Web Form')}
-                    <span>Web Form</span>
+                    {getSourceIcon(lead.source)}
+                    <span>{lead.source}</span>
                   </div>
                 </td>
                 <td className="fw-bold">{lead.goals}</td>
@@ -94,7 +107,7 @@ const LeadModule = () => {
                     <Calendar size={14} /> {new Date(lead.createdAt).toLocaleDateString()}
                   </div>
                 </td>
-                <td>{getStatusBadge('New')}</td>
+                <td>{getStatusBadge(lead.status)}</td>
                 <td>
                   <button className="btn-convert" onClick={() => markConverted(lead.id)} title="Convert to Member">
                     <CheckCircle size={16} /> Convert
@@ -108,6 +121,52 @@ const LeadModule = () => {
           </tbody>
         </table>
       </div>
+
+      {isAddLeadOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content animate-scale">
+            <div className="modal-header">
+              <h2>Add New Lead</h2>
+              <button className="close-btn" onClick={() => setIsAddLeadOpen(false)}><X size={24}/></button>
+            </div>
+            <form className="modal-body" onSubmit={handleAddLead}>
+              <div className="form-group">
+                <label>Full Name</label>
+                <input type="text" value={newLead.fullName} onChange={e => setNewLead({...newLead, fullName: e.target.value})} required />
+              </div>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input type="text" value={newLead.phone} onChange={e => setNewLead({...newLead, phone: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input type="email" value={newLead.email} onChange={e => setNewLead({...newLead, email: e.target.value})} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Source</label>
+                <select value={newLead.source} onChange={e => setNewLead({...newLead, source: e.target.value})}>
+                  <option value="Walk-In">Walk-In</option>
+                  <option value="Instagram">Instagram</option>
+                  <option value="Facebook">Facebook</option>
+                  <option value="Google Ads">Google Ads</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Notes / Goals</label>
+                <textarea rows="3" value={newLead.goals} onChange={e => setNewLead({...newLead, goals: e.target.value})}></textarea>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setIsAddLeadOpen(false)}>Cancel</button>
+                <button type="submit" className="btn-primary" disabled={submitting}>
+                  {submitting ? 'Adding...' : 'Add Lead'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </Container>
   );
 };
