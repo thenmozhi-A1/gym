@@ -15,14 +15,15 @@ const ReportsPage = () => {
 
   useEffect(() => {
     if (!user?.id) return;
-    
+
     const fetchData = async () => {
       try {
         const [attRes, payRes] = await Promise.all([
           axiosInstance.get(`/attendance/user/${user.id}`),
+
           axiosInstance.get(`/payments/user/${user.id}`)
         ]);
-        
+
         const formattedSessions = (attRes.data || []).map(a => ({
           date: a.attendanceDate || a.date,
           workout: "General Training",
@@ -30,7 +31,7 @@ const ReportsPage = () => {
           duration: a.checkOutTime ? "Completed" : "Active",
           intensity: "Medium"
         }));
-        
+
         setSessions(formattedSessions);
         setPayments(payRes.data || []);
       } catch (err) {
@@ -51,7 +52,7 @@ const ReportsPage = () => {
 
   const handleDownload = () => {
     const doc = new jsPDF();
-    
+
     // Header
     doc.setFillColor(26, 26, 26);
     doc.rect(0, 0, 210, 40, 'F');
@@ -59,7 +60,7 @@ const ReportsPage = () => {
     doc.setFontSize(24);
     doc.setFont("helvetica", "bold");
     doc.text("GYMDASH", 15, 25);
-    
+
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(12);
     doc.text("PERSONAL FITNESS REPORT", 140, 25);
@@ -76,7 +77,7 @@ const ReportsPage = () => {
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     doc.text("Training Session History", 15, 85);
-    
+
     const sessionData = sessions.map(s => [s.date, s.workout, s.time, s.duration, s.intensity]);
     autoTable(doc, {
       startY: 90,
@@ -89,7 +90,7 @@ const ReportsPage = () => {
     // Billing Table
     const finalY = doc.lastAutoTable.finalY || 150;
     doc.text("Billing & Payment History", 15, finalY + 20);
-    
+
     const paymentData = payments.map(p => [p.id, p.paymentDate || "N/A", p.planName || p.plan || "Membership", p.amount || 0]);
     autoTable(doc, {
       startY: finalY + 25,
@@ -392,7 +393,7 @@ const IntensityTag = styled.span`
   font-size: 0.8rem;
   font-weight: 700;
   background: ${props => {
-    switch(props.level) {
+    switch (props.level) {
       case 'High': return '#f8d7da';
       case 'Max': return '#e2d9f3';
       case 'Medium': return '#fff3cd';
@@ -401,7 +402,7 @@ const IntensityTag = styled.span`
     }
   }};
   color: ${props => {
-    switch(props.level) {
+    switch (props.level) {
       case 'High': return '#721c24';
       case 'Max': return '#5a32a3';
       case 'Medium': return '#856404';
