@@ -201,7 +201,7 @@ const EmployeeDashboard = () => {
             <Clock size={20} /> Attendance
           </button>
           <button className={activeView === 'leave' ? 'active' : ''} onClick={() => setActiveView('leave')}>
-            <CalendarDays size={20} /> Leave Mgmt
+            <FileText size={20} /> Leave
           </button>
         </nav>
         <button className="logout-btn" onClick={handleLogout}>
