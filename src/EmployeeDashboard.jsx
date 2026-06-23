@@ -43,6 +43,7 @@ const EmployeeDashboard = () => {
   const [scanProgress, setScanProgress] = useState(0);
   const { employeeData, leaves, fetchEmployeeData, updateProfile, checkIn, requestCorrection, applyLeave, cancelLeave } = useEmployeeStore();
   const [activeView, setActiveView] = useState("home"); // home, profile, salary, attendance
+  const [selectedMonth, setSelectedMonth] = useState("All");
   
   const [profileForm, setProfileForm] = useState(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -163,8 +164,21 @@ const EmployeeDashboard = () => {
     generatePayslipPDF(employeeData, netPay);
   };
 
-  // Removed redundant secondary lock screen to show dashboard content immediately
-  // if (!isVerified) { ... }
+  // Dynamic Month Filtering
+  const uniqueMonths = Array.from(new Set((employeeData?.attendance || []).map(log => {
+    if (!log.date) return null;
+    const d = new Date(log.date);
+    return isNaN(d.getTime()) ? null : d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  }).filter(Boolean)));
+
+  const filteredAttendance = selectedMonth === "All" 
+    ? (employeeData?.attendance || [])
+    : (employeeData?.attendance || []).filter(log => {
+        if (!log.date) return false;
+        const d = new Date(log.date);
+        if (isNaN(d.getTime())) return false;
+        return d.toLocaleString('en-US', { month: 'long', year: 'numeric' }) === selectedMonth;
+      });
 
   return (
     <DashboardContainer>
@@ -485,7 +499,12 @@ const EmployeeDashboard = () => {
               <div className="card-header-flex">
                 <h3>Attendance History</h3>
                 <div className="filters">
-                  <select><option>May 2024</option></select>
+                  <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                    <option value="All">All Months</option>
+                    {uniqueMonths.map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="table-wrapper">
@@ -494,7 +513,7 @@ const EmployeeDashboard = () => {
                     <tr><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th><th>Work Hours</th><th>Actions</th></tr>
                   </thead>
                   <tbody>
-                    {employeeData?.attendance.map((log, i) => (
+                    {filteredAttendance.map((log, i) => (
                       <tr key={i}>
                         <td>{log.date}</td>
                         <td>
