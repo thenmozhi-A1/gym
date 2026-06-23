@@ -903,24 +903,28 @@ const AdminDashboard = () => {
                       return (
                         <div className="payroll-main animate-in">
                           <header className="payroll-header">
-                            <h1 className="welcome">Pay Runs</h1>
-                            <button className="btn-black"><Plus size={18} /> Create Pay Run</button>
+                            <div className="header-title">
+                              <h1 className="welcome">Pay Runs</h1>
+                              <p className="premium-subtitle text-muted">Manage and process monthly payments</p>
+                            </div>
+                            <button className="btn-black btn-premium-glow"><Plus size={18} /> Create Pay Run</button>
                           </header>
                           <div className="payrun-list">
                             {runs.map((run, i) => (
-                              <div key={i} className="payrun-card">
+                              <div key={i} className="payrun-card premium-payrun-card">
                                 <div className="run-info">
-                                  <h3>{run.month}</h3>
-                                  <p>Scheduled for {run.date}</p>
+                                  <h3 className="premium-title" style={{fontSize: '1.2rem'}}>{run.month}</h3>
+                                  <p className="subtext-muted">Scheduled for {run.date}</p>
                                 </div>
-                                <div className="run-stats">
+                                <div className="run-stats premium-run-stats">
                                   <div><label>NET PAY</label><strong>{run.amount}</strong></div>
+                                  <div className="divider-vert"></div>
                                   <div><label>EMPLOYEES</label><strong>{run.employees}</strong></div>
                                 </div>
                                 <div className="run-status">
-                                  <span className={`badge ${run.status === 'COMPLETED' ? 'bg-success-light' : 'bg-primary-light'}`}>{run.status}</span>
+                                  <span className={`badge-modern ${run.status === 'COMPLETED' ? 'badge-modern-success' : 'badge-soft-warning'}`}>{run.status}</span>
                                 </div>
-                                <button className="btn-outline">View Details</button>
+                                <button className="btn-outline-premium">View Details</button>
                               </div>
                             ))}
                           </div>
@@ -940,44 +944,53 @@ const AdminDashboard = () => {
                       return (
                         <div className="payroll-main animate-in">
                           <header className="payroll-header">
-                            <h1 className="welcome">Tax & Forms</h1>
-                            <button className="btn-outline"><FileText size={18} /> Tax Calendar</button>
+                            <div className="header-title">
+                              <h1 className="welcome">Tax & Forms</h1>
+                              <p className="premium-subtitle text-muted">Statutory compliances and document tracking</p>
+                            </div>
+                            <button className="btn-outline-premium"><FileText size={18} /> Tax Calendar</button>
                           </header>
                           <div className="tax-grid">
-                            <div className="grid-card">
-                              <h5>Statutory Compliances</h5>
+                            <div className="grid-card premium-grid-card">
+                              <div className="card-header-glow">
+                                <h5>Statutory Compliances</h5>
+                                <div className="glow-line"></div>
+                              </div>
                               <div className="tax-list-mini">
-                                <div className="tax-item-mini">
-                                  <div className="tax-icon"><FileCheck size={18} /></div>
+                                <div className="tax-item-mini premium-tax-item">
+                                  <div className="tax-icon premium-tax-icon"><FileCheck size={18} /></div>
                                   <div className="tax-info"><strong>EPF Filing</strong><p>Due: {monthName} 15, {year}</p></div>
-                                  <button className="btn-link">Pay Now</button>
+                                  <button className="btn-link-premium">Pay Now</button>
                                 </div>
-                                <div className="tax-item-mini">
-                                  <div className="tax-icon"><FileCheck size={18} /></div>
+                                <div className="tax-item-mini premium-tax-item">
+                                  <div className="tax-icon premium-tax-icon"><FileCheck size={18} /></div>
                                   <div className="tax-info"><strong>ESI Filing</strong><p>Due: {monthName} 15, {year}</p></div>
-                                  <button className="btn-link">Pay Now</button>
+                                  <button className="btn-link-premium">Pay Now</button>
                                 </div>
-                                <div className="tax-item-mini">
-                                  <div className="tax-icon"><FileCheck size={18} /></div>
+                                <div className="tax-item-mini premium-tax-item">
+                                  <div className="tax-icon premium-tax-icon warning"><FileCheck size={18} /></div>
                                   <div className="tax-info"><strong>TDS Return (Quarterly)</strong><p>Due: {tdsDate}</p></div>
-                                  <button className="btn-link disabled">Upcoming</button>
+                                  <button className="btn-link-premium disabled">Upcoming</button>
                                 </div>
                               </div>
                             </div>
-                            <div className="grid-card">
-                              <h5>Employee Tax Forms</h5>
+                            <div className="grid-card premium-grid-card">
+                              <div className="card-header-glow">
+                                <h5>Employee Tax Forms</h5>
+                                <div className="glow-line"></div>
+                              </div>
                               <div className="form-downloads">
-                                <div className="form-item">
-                                  <span>Form 16 (FY {new Date().getFullYear() - 1}-{String(new Date().getFullYear()).slice(2)})</span>
-                                  <button className="btn-icon"><ArrowUpRight size={16} /></button>
+                                <div className="form-item premium-form-item">
+                                  <div className="d-flex align-items-center gap-2"><FileText size={16} className="text-muted"/> <span>Form 16 (FY {new Date().getFullYear() - 1}-{String(new Date().getFullYear()).slice(2)})</span></div>
+                                  <button className="btn-icon-premium"><ArrowUpRight size={16} /></button>
                                 </div>
-                                <div className="form-item">
-                                  <span>Investment Declarations</span>
-                                  <button className="btn-icon"><ArrowUpRight size={16} /></button>
+                                <div className="form-item premium-form-item">
+                                  <div className="d-flex align-items-center gap-2"><FileText size={16} className="text-muted"/> <span>Investment Declarations</span></div>
+                                  <button className="btn-icon-premium"><ArrowUpRight size={16} /></button>
                                 </div>
-                                <div className="form-item">
-                                  <span>Salary Certificates</span>
-                                  <button className="btn-icon"><ArrowUpRight size={16} /></button>
+                                <div className="form-item premium-form-item">
+                                  <div className="d-flex align-items-center gap-2"><FileText size={16} className="text-muted"/> <span>Salary Certificates</span></div>
+                                  <button className="btn-icon-premium"><ArrowUpRight size={16} /></button>
                                 </div>
                               </div>
                             </div>
@@ -2019,6 +2032,59 @@ const PayrollContainer = styled.div`
         .btn-outline { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); font-weight: 800; font-size: 0.7rem; padding: 6px 12px; border-radius: 8px; cursor: pointer; &:hover { background: var(--accent-color); color: #000; border-color: var(--accent-color); } }
       }
     }
+  }
+
+  /* Premium Styles for Payruns & Taxes */
+  .btn-premium-glow { position: relative; overflow: hidden; }
+  .btn-premium-glow::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%); opacity: 0; transition: opacity 0.3s; }
+  .btn-premium-glow:hover::after { opacity: 1; }
+
+  .premium-payrun-card {
+    border: 1px solid rgba(255, 255, 255, 0.05) !important; background: linear-gradient(145deg, var(--card-bg), rgba(255, 255, 255, 0.02)) !important;
+    position: relative; overflow: hidden;
+    &::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent-color); border-radius: 4px 0 0 4px; opacity: 0; transition: opacity 0.3s; }
+    &:hover::before { opacity: 1; }
+    .premium-run-stats { display: flex; align-items: center; gap: 20px; background: rgba(0,0,0,0.1); padding: 10px 20px; border-radius: 12px; }
+    .divider-vert { width: 1px; height: 30px; background: var(--border-color); }
+  }
+
+  .btn-outline-premium {
+    background: transparent; border: 1px solid var(--border-color); color: var(--text-color); font-weight: 800; font-size: 0.8rem; padding: 10px 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s;
+    &:hover { border-color: var(--accent-color); color: var(--accent-color); background: var(--accent-glow); transform: translateY(-2px); }
+  }
+
+  .premium-grid-card {
+    position: relative; overflow: hidden; padding: 30px; border-radius: 24px;
+    background: linear-gradient(to bottom right, var(--card-bg), rgba(255, 255, 255, 0.01)) !important;
+    box-shadow: var(--shadow); border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    .card-header-glow {
+      position: relative; margin-bottom: 25px;
+      h5 { font-weight: 900; font-size: 1.1rem; margin: 0; color: var(--text-color); }
+      .glow-line { height: 2px; width: 40px; background: var(--accent-color); margin-top: 10px; border-radius: 2px; box-shadow: 0 0 10px var(--accent-color); }
+    }
+  }
+
+  .premium-tax-item {
+    transition: all 0.2s; border: 1px solid transparent !important; background: rgba(255, 255, 255, 0.02) !important;
+    &:hover { border-color: var(--accent-color) !important; transform: translateX(5px); background: var(--accent-glow) !important; }
+    .premium-tax-icon {
+      background: linear-gradient(135deg, var(--accent-color), #f59e0b) !important; color: #000 !important; box-shadow: 0 4px 10px var(--accent-glow); border-radius: 12px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;
+      &.warning { background: linear-gradient(135deg, #f59e0b, #ef4444) !important; color: #fff !important; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); }
+    }
+    .tax-info strong { font-size: 0.95rem; font-weight: 800; }
+  }
+
+  .btn-link-premium {
+    background: var(--accent-color); color: #000; border: none; padding: 6px 16px; border-radius: 10px; font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;
+    &:hover { transform: scale(1.05); box-shadow: 0 4px 10px var(--accent-glow); }
+    &.disabled { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted); box-shadow: none; cursor: default; &:hover { transform: none; } }
+  }
+
+  .premium-form-item {
+    transition: all 0.2s; border: 1px solid rgba(255, 255, 255, 0.05) !important; background: rgba(255, 255, 255, 0.02) !important;
+    &:hover { border-color: var(--accent-color) !important; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    span { font-weight: 700; }
+    .btn-icon-premium { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; &:hover { background: var(--accent-color); color: #000; border-color: var(--accent-color); } }
   }
 
   .payrun-list {
