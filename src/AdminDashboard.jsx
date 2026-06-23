@@ -81,6 +81,7 @@ const AdminDashboard = () => {
   const [globalConfig, setGlobalConfig] = useState({ gymName: "B&Y Fitness Arena", contactEmail: "admin@byfitness.com", maxCapacity: "500", currency: "USD" });
   const [isPayrollDetailOpen, setIsPayrollDetailOpen] = useState(false);
   const [payrollTab, setPayrollTab] = useState("overview"); // overview, payruns, attendance, tax
+  const [selectedHistoricalRun, setSelectedHistoricalRun] = useState(null);
   const [selectedStaffForSlip, setSelectedStaffForSlip] = useState(null);
   const [payrollSearchTerm, setPayrollSearchTerm] = useState("");
   const [payrollRoleFilter, setPayrollRoleFilter] = useState("ALL");
@@ -763,12 +764,12 @@ const AdminDashboard = () => {
                           <div className="payroll-detail-overlay animate-in">
                             <div className="detail-header-premium">
                               <div className="d-flex align-items-center gap-3">
-                                <button className="back-btn-premium" onClick={() => setIsPayrollDetailOpen(false)}>
+                                <button className="back-btn-premium" onClick={() => { setIsPayrollDetailOpen(false); setSelectedHistoricalRun(null); }}>
                                   <ArrowUpRight style={{ transform: 'rotate(-135deg)' }} size={18} />
                                 </button>
                                 <div>
-                                  <h2 className="premium-title">Payroll Details</h2>
-                                  <span className="premium-subtitle">{currentMonthName.toUpperCase()} {currentYear}</span>
+                                  <h2 className="premium-title">{selectedHistoricalRun ? "Pay Run Details" : "Payroll Details"}</h2>
+                                  <span className="premium-subtitle">{selectedHistoricalRun ? selectedHistoricalRun.month.toUpperCase() : `${currentMonthName.toUpperCase()} ${currentYear}`}</span>
                                 </div>
                               </div>
                               <div className="d-flex gap-3 align-items-center">
@@ -812,7 +813,11 @@ const AdminDashboard = () => {
                                             <span className="subtext-muted">TDS + PF + Attnd</span>
                                           </td>
                                           <td className="fw-black text-success" style={{ fontSize: '1.05rem' }}>₹{Math.floor(netPay).toLocaleString()}</td>
-                                          <td><span className="badge-modern-success"><CheckCircle size={14}/> PAID</span></td>
+                                          <td>
+                                            <span className={`badge-modern-success ${selectedHistoricalRun && selectedHistoricalRun.status !== 'COMPLETED' ? 'bg-warning-light text-warning border-warning' : ''}`}>
+                                              {selectedHistoricalRun && selectedHistoricalRun.status === 'PROCESSING' ? <><Activity size={14}/> PROCESSING</> : <><CheckCircle size={14}/> PAID</>}
+                                            </span>
+                                          </td>
                                         </tr>
                                       );
                                     })}
@@ -869,7 +874,7 @@ const AdminDashboard = () => {
                                         ).toLocaleString()}
                                       </span>
                                     </div>
-                                    <p>Payment via Bank Transfer • May 31, 2024</p>
+                                    <p>Payment via Bank Transfer • {selectedHistoricalRun ? selectedHistoricalRun.date : `${lastDayOfMonth} ${currentMonthName} ${currentYear}`}</p>
                                   </div>
                                   <button className="download-btn-full">DOWNLOAD SLIP (PDF)</button>
                                 </div>
@@ -924,7 +929,11 @@ const AdminDashboard = () => {
                                 <div className="run-status">
                                   <span className={`badge-modern ${run.status === 'COMPLETED' ? 'badge-modern-success' : 'badge-soft-warning'}`}>{run.status}</span>
                                 </div>
-                                <button className="btn-outline-premium">View Details</button>
+                                <button className="btn-outline-premium" onClick={() => {
+                                  setSelectedHistoricalRun(run);
+                                  setPayrollTab("overview");
+                                  setIsPayrollDetailOpen(true);
+                                }}>View Details</button>
                               </div>
                             ))}
                           </div>
