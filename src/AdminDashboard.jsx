@@ -642,7 +642,6 @@ const AdminDashboard = () => {
                     <div className="nav-items">
                       <button className={payrollTab === "overview" ? "active" : ""} onClick={() => setPayrollTab("overview")}>Overview</button>
                       <button className={payrollTab === "payruns" ? "active" : ""} onClick={() => setPayrollTab("payruns")}>Pay Runs</button>
-                      <button className={payrollTab === "attendance" ? "active" : ""} onClick={() => setPayrollTab("attendance")}>Leave & Attendance</button>
                       <button className={payrollTab === "tax" ? "active" : ""} onClick={() => setPayrollTab("tax")}>Tax & Forms</button>
                     </div>
                   </PayrollSubNav>
@@ -921,64 +920,6 @@ const AdminDashboard = () => {
                                 <button className="btn-outline">View Details</button>
                               </div>
                             ))}
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {payrollTab === "attendance" && (() => {
-                      const todayStr = new Date().toISOString().split('T')[0];
-                      const todayAttendance = attendance.filter(a => ((a.date || a.attendanceDate) === todayStr) && a.staff?.id);
-                      
-                      const presentToday = todayAttendance.filter(a => a.status === 'PRESENT' || a.status === 'P' || !a.status).length;
-                      const onLeaveToday = todayAttendance.filter(a => a.status === 'LEAVE' || a.status === 'L').length;
-                      const lateArrivals = todayAttendance.filter(a => a.checkInTime && a.checkInTime > '09:00:00').length;
-                      const totalActiveStaff = staffs.length;
-
-                      return (
-                        <div className="payroll-main animate-in">
-                          <header className="payroll-header">
-                            <h1 className="welcome">Leave & Attendance</h1>
-                            <div className="d-flex gap-2">
-                              <button className="btn-outline">Attendance Logs</button>
-                              <button className="btn-black">Leave Policy</button>
-                            </div>
-                          </header>
-                          <div className="attendance-grid">
-                            <div className="grid-card">
-                              <h5>Pending Leave Requests</h5>
-                              <div className="request-list">
-                                {leaves && leaves.filter(l => l.status === 'PENDING').length > 0 ? (
-                                  leaves.filter(l => l.status === 'PENDING').slice(0, 5).map((req, i) => (
-                                    <div key={i} className="request-item">
-                                      <div className="req-profile">
-                                        <div className="avatar-small">{(req.staffName || "S").charAt(0)}</div>
-                                        <div><strong>{req.staffName}</strong><p>{req.leaveType}</p></div>
-                                      </div>
-                                      <div className="req-details">
-                                        <span className="type">{req.reason}</span>
-                                        <span className="dates">{req.startDate} to {req.endDate}</span>
-                                      </div>
-                                      <div className="req-actions">
-                                        <button className="btn-icon text-success" onClick={() => updateLeaveStatus(req.id, 'APPROVED')}><CheckCircle size={18} /></button>
-                                        <button className="btn-icon text-danger" onClick={() => updateLeaveStatus(req.id, 'REJECTED')}><XCircle size={18} /></button>
-                                      </div>
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>No pending leave requests.</div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="grid-card">
-                              <h5>Daily Attendance Summary</h5>
-                              <div className="summary-list">
-                                <div className="summary-item"><span>Present Today</span> <strong>{presentToday}/{totalActiveStaff}</strong></div>
-                                <div className="summary-item"><span>On Leave</span> <strong>{onLeaveToday}</strong></div>
-                                <div className="summary-item"><span>Late Arrivals</span> <strong>{lateArrivals}</strong></div>
-                              </div>
-                              <button className="btn-outline w-100 mt-3">View Full Report</button>
-                            </div>
                           </div>
                         </div>
                       );
