@@ -381,6 +381,7 @@ const AdminDashboard = () => {
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
             { id: "trainers", icon: <Users size={18} />, label: "Trainers" },
             { id: "products", icon: <Package size={18} />, label: "Store & Supplements" },
+            { id: "orders", icon: <Package size={18} />, label: "Store Orders" },
 
             { id: "payroll", icon: <CreditCard size={18} />, label: "Payroll" },
             { id: "requests", icon: <CheckSquare size={18} />, label: "Requests" },
