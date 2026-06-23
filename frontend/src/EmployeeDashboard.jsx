@@ -176,9 +176,22 @@ const EmployeeDashboard = () => {
     : (employeeData?.attendance || []).filter(log => {
         if (!log.date) return false;
         const d = new Date(log.date);
-        if (isNaN(d.getTime())) return false;
-        return d.toLocaleString('en-US', { month: 'long', year: 'numeric' }) === selectedMonth;
       });
+
+  const getLeaveDays = (start, end) => {
+    if (!start || !end) return 0;
+    const s = new Date(start);
+    const e = new Date(end);
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) return 0;
+    return Math.max(1, Math.ceil((e - s) / (1000 * 60 * 60 * 24)) + 1);
+  };
+
+  const usedCasual = (leaves || []).filter(l => l.leaveType === 'CASUAL' && l.status === 'APPROVED').reduce((acc, l) => acc + getLeaveDays(l.startDate, l.endDate), 0);
+  const usedSick = (leaves || []).filter(l => l.leaveType === 'SICK' && l.status === 'APPROVED').reduce((acc, l) => acc + getLeaveDays(l.startDate, l.endDate), 0);
+  const usedPaid = (leaves || []).filter(l => l.leaveType === 'PAID' && l.status === 'APPROVED').reduce((acc, l) => acc + getLeaveDays(l.startDate, l.endDate), 0);
+
+  const casualRemaining = Math.max(0, 12 - usedCasual);
+  const sickRemaining = Math.max(0, 6 - usedSick);
 
   return (
     <DashboardContainer>
@@ -578,9 +591,9 @@ const EmployeeDashboard = () => {
               <div className="card">
                 <h3>Leave Balance Summary</h3>
                 <div className="salary-mini" style={{ marginBottom: '30px' }}>
-                  <div className="row"><span>Casual Leaves Remaining</span> <strong>12</strong></div>
-                  <div className="row"><span>Sick Leaves Remaining</span> <strong>6</strong></div>
-                  <div className="row"><span>Paid Leaves</span> <strong>{employeeData?.leaves || 0} used</strong></div>
+                  <div className="row"><span>Casual Leaves Remaining</span> <strong>{casualRemaining}</strong></div>
+                  <div className="row"><span>Sick Leaves Remaining</span> <strong>{sickRemaining}</strong></div>
+                  <div className="row"><span>Paid Leaves</span> <strong>{usedPaid} used</strong></div>
                 </div>
                 
                 <h3>Recent Requests</h3>
