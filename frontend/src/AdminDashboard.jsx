@@ -55,6 +55,7 @@ import CommunicationModule from "./Components/CommunicationModule";
 import ReportsModule from "./Components/ReportsModule";
 import ProductModule from "./Components/ProductModule";
 import RequestsModule from "./Components/RequestsModule";
+import OrdersModule from "./Components/OrdersModule";
 import axiosInstance from "./api/axiosInstance";
 import log from "./utils/logger";
 import { useAdminNotifications } from "./hooks/useAdminNotifications";
@@ -1025,6 +1026,8 @@ const AdminDashboard = () => {
                 <DietModule />
               ) : activeTab === "products" ? (
                 <ProductModule />
+              ) : activeTab === "orders" ? (
+                <OrdersModule />
               ) : activeTab === "communications" ? (
                 <CommunicationModule />
               ) : activeTab === "reports" ? (

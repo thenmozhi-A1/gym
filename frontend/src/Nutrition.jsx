@@ -171,6 +171,12 @@ const Nutrition = () => {
       return;
     }
 
+    const address = window.prompt("Enter your shipping address for delivery:");
+    if (!address) {
+      alert("Address is required to place an order.");
+      return;
+    }
+
     const options = {
       key: "rzp_test_SoL1lxm6LzPqie",
       amount: product.price * quantity * 100,
@@ -182,7 +188,9 @@ const Nutrition = () => {
           if (typeof product.id === 'number') {
             await axiosInstance.post("/orders", {
               productId: product.id,
-              quantity: quantity
+              quantity: quantity,
+              shippingAddress: address,
+              razorpayPaymentId: response.razorpay_payment_id
             });
           }
           alert(`Payment Successful! ID: ${response.razorpay_payment_id}\nOrder placed for ${product.name}!`);
@@ -484,10 +492,6 @@ const Nutrition = () => {
 
           <div className="row g-4">
             {[
-              { id: "mock-1", name: "Smart BMI Scale", price: 2499, imageUrl: "/scale.png", stockQuantity: 100, isMock: true },
-              { id: "mock-2", name: "Precision Food Scale", price: 999, imageUrl: "/scale.png", stockQuantity: 100, isMock: true },
-              { id: "mock-3", name: "Elite Fitness Band", price: 3999, imageUrl: "/app.png", stockQuantity: 100, isMock: true },
-              { id: "mock-4", name: "90-Day Journal", price: 599, imageUrl: "/journal.png", stockQuantity: 100, isMock: true },
               ...products.filter(p => p.category === 'ACCESSORY' || p.category === 'EQUIPMENT' || p.category === 'APPAREL')
             ].map((prod, i) => {
               const qty = quantities[prod.id] || 1;
