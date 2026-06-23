@@ -1507,6 +1507,10 @@ const Sidebar = styled.div`
     position: fixed; left: 0; transform: ${props => props.isOpen ? "translateX(0)" : "translateX(-100%)"};
     transition: transform 0.3s ease; box-shadow: 20px 0 50px rgba(0,0,0,0.1); width: 260px; height: 100%;
     background: var(--sidebar-bg);
+    overflow-y: auto;
+    overflow-x: hidden;
+    &::-webkit-scrollbar { display: none; }
+    scrollbar-width: none;
   }
 
   .sidebar-header {
@@ -1517,7 +1521,7 @@ const Sidebar = styled.div`
   }
 `;
 
-const NavSection = styled.div` flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 0 15px; z-index: 10; `;
+const NavSection = styled.div` flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 0 15px; z-index: 10; overflow-y: auto; &::-webkit-scrollbar { display: none; } scrollbar-width: none; `;
 
 const NavItem = styled.div`
   display: flex; align-items: center; gap: 15px; padding: 12px 20px; border-radius: 8px;
