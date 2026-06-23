@@ -582,12 +582,23 @@ const AdminDashboard = () => {
                         <h5>Weekly Attendance</h5>
                         <button className="dropdown">Last 7 Days <ChevronDown size={14} /></button>
                       </div>
-                      <div className="bar-chart mt-4">
-                        {weeklyAttData.map((val, i) => (
-                          <div className="bar-group" key={i}>
-                            <div className="bar" style={{ height: `${(val / maxWeeklyAtt) * 100}%` }}></div>
-                          </div>
-                        ))}
+                      <div className="bar-chart mt-4" style={{ height: '220px' }}>
+                        {weeklyAttData.map((val, i) => {
+                          const dateObj = new Date(last7Days[i]);
+                          const dayLabel = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                          return (
+                            <div className="bar-group" key={i} style={{ flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
+                              <div 
+                                className="bar" 
+                                style={{ height: `${(val / maxWeeklyAtt) * 100}%`, cursor: 'pointer' }}
+                                title={`${last7Days[i]}: ${val} Active Logs`}
+                              ></div>
+                              <span style={{ fontSize: '0.65rem', marginTop: '8px', color: 'var(--text-color)', opacity: 0.7 }}>
+                                {dayLabel}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </ChartCard>
                   </div>
