@@ -104,7 +104,8 @@ export const useAdminStore = create((set, get) => ({
         if (activeTab === "payments") set({ payments: data });
         else if (activeTab === "attendance") set({ attendance: data });
         else if (activeTab === "feedbacks") set({ feedbacks: data });
-        else if (activeTab === "consultations" || activeTab === "requests") set({ consultations: data });
+        else if (activeTab === "consultations") set({ consultations: data });
+        else if (activeTab === "requests") set({ leaves: data });
         else if (activeTab === "users") set({ users: data.filter(u => {
             const r = u.role ? u.role.toUpperCase() : '';
             return !['ADMIN', 'STAFF', 'TRAINER', 'FRONT OFFICE'].includes(r);

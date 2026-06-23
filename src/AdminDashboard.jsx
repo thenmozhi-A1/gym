@@ -373,9 +373,7 @@ const AdminDashboard = () => {
             <input placeholder="Search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
           <div className="header-actions" style={{ position: 'relative' }}>
-            <button className="mobile-toggle" onClick={() => setIsSidebarOpen(true)}>
-              <Menu size={24} />
-            </button>
+
             <button className="h-btn" onClick={() => setIsSettingsOpen(!isSettingsOpen)}><Settings size={18} /></button>
             {isSettingsOpen && (
               <SettingsDropdown>
@@ -454,7 +452,7 @@ const AdminDashboard = () => {
             <div className="profile-chip">
               <div className="avatar">AD</div>
             </div>
-            <button className="mobile-toggle" onClick={() => setIsSidebarOpen(true)}><Layout size={24} /></button>
+
           </div>
         </Header>
 
