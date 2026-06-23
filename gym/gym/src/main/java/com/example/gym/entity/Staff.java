@@ -96,4 +96,9 @@ public class Staff {
     
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+
+    @com.fasterxml.jackson.annotation.JsonProperty("userId")
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
+    }
 }
