@@ -14,7 +14,7 @@ import Nav from "./Nav";
 import Footer from "./Footer";
 import ChangePassword from "./pages/ChangePassword";
 import ForgotPassword from "./pages/ForgotPassword";
-import Dashboard from "./Dashboard";
+
 import Userdashboard from "./Userdashboard";
 import Subscription from "./Subscription";
 import PlanDetail from "./PlanDetail";
@@ -57,7 +57,7 @@ function LayoutWrapper() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/change-password" element={<ChangePassword />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
         
         {/* Public Marketing/Info Routes */}
         <Route path="/subscription" element={<Subscription />} />
