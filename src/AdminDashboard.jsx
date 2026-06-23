@@ -321,6 +321,43 @@ const AdminDashboard = () => {
   }, 0);
   const pendingLeavesCount = leaves ? leaves.filter(l => l.status === 'PENDING').length : 0;
 
+  // Calculate Retention Rate
+  const retentionRate = users.length > 0 
+    ? ((users.filter(u => u.status === 'ACTIVE' || u.status === 'Active' || !u.status).length / users.length) * 100).toFixed(2)
+    : 0;
+
+  // Calculate New Users this month
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  const newUsersCount = users.filter(u => new Date(u.createdAt || Date.now()) > oneMonthAgo).length;
+
+  // Calculate Average Session Time from Attendance
+  let totalSessionSeconds = 0;
+  let validSessions = 0;
+  attendance.forEach(a => {
+    if (a.checkInTime && a.checkOutTime) {
+      const start = new Date(`1970-01-01T${a.checkInTime}`);
+      const end = new Date(`1970-01-01T${a.checkOutTime}`);
+      if (end > start) {
+        totalSessionSeconds += (end - start) / 1000;
+        validSessions++;
+      }
+    }
+  });
+  const avgSessionSecs = validSessions > 0 ? Math.floor(totalSessionSeconds / validSessions) : 0;
+  const avgSessionMins = Math.floor(avgSessionSecs / 60);
+  const avgSessionRemSecs = avgSessionSecs % 60;
+  const avgSessionStr = validSessions > 0 ? `${avgSessionMins}m ${avgSessionRemSecs}s` : "0m 0s";
+
+  // Calculate Weekly Attendance for Bar Chart
+  const last7Days = Array.from({length: 7}).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    return d.toISOString().split('T')[0];
+  }).reverse();
+  const weeklyAttData = last7Days.map(dateStr => attendance.filter(a => (a.attendanceDate || a.date) === dateStr).length);
+  const maxWeeklyAtt = Math.max(...weeklyAttData, 1);
+
   return (
     <AuroraWrapper theme={themeName}>
       <Toaster position="top-right" />
@@ -478,7 +515,7 @@ const AdminDashboard = () => {
                       <div className="card-glow" />
                       <div className="lab">Retention Rate</div>
                       <div className="val-row">
-                        <div className="val">84.22%</div>
+                        <div className="val">{retentionRate}%</div>
                         <div className="icon-badge"><TrendingUp size={24} /></div>
                       </div>
                       <div className="footer-text">See page-wise <span>Performance</span></div>
@@ -534,21 +571,21 @@ const AdminDashboard = () => {
                           </svg>
                         </div>
                         <div className="chart-footer">
-                          <div className="f-stat"><span>275K</span><small>New Users</small></div>
-                          <div className="f-stat"><span>3m 12s</span><small>Avg. Session</small></div>
+                          <div className="f-stat"><span>{newUsersCount}</span><small>New Users</small></div>
+                          <div className="f-stat"><span>{avgSessionStr}</span><small>Avg. Session</small></div>
                         </div>
                       </div>
                     </ChartCard>
 
                     <ChartCard className="flex-1">
                       <div className="chart-header">
-                        <h5>Top Classes</h5>
-                        <button className="dropdown">This Week <ChevronDown size={14} /></button>
+                        <h5>Weekly Attendance</h5>
+                        <button className="dropdown">Last 7 Days <ChevronDown size={14} /></button>
                       </div>
                       <div className="bar-chart mt-4">
-                        {[40, 70, 50, 90, 60, 30].map((h, i) => (
+                        {weeklyAttData.map((val, i) => (
                           <div className="bar-group" key={i}>
-                            <div className="bar" style={{ height: `${h}%` }}></div>
+                            <div className="bar" style={{ height: `${(val / maxWeeklyAtt) * 100}%` }}></div>
                           </div>
                         ))}
                       </div>
