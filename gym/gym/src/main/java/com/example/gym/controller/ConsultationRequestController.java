@@ -48,4 +48,13 @@ public class ConsultationRequestController {
         repository.deleteById(id);
         return ResponseEntity.ok(Map.of("message", "Request deleted successfully"));
     }
+
+    /** PUT /api/consultations/{id}/status ?" Update a request status */
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable("id") Long id, @RequestBody Map<String, String> payload) {
+        ConsultationRequest req = repository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
+        req.setStatus(payload.get("status"));
+        repository.save(req);
+        return ResponseEntity.ok(Map.of("message", "Status updated"));
+    }
 }
