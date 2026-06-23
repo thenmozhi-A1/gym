@@ -752,7 +752,7 @@ const AdminDashboard = () => {
                                   { label: "55 Salary Revision(s)", sub: "Pending Approval" }
                                 ].map((task, i) => (
                                   <div key={i} className="task-item">
-                                    <div className="task-info"><h6>{task.label}</h6><p>{task.sub}</p></div>
+                        <div className="task-info"><h6>{task.label}</h6><p>{task.sub}</p></div>
                                     <button className="btn-outline">Approve</button>
                                   </div>
                                 ))}
@@ -761,29 +761,32 @@ const AdminDashboard = () => {
                           </>
                         ) : (
                           <div className="payroll-detail-overlay animate-in">
-                            <div className="detail-header">
-                              <div className="d-flex align-items-center gap-4">
-                                <button className="back-btn" onClick={() => setIsPayrollDetailOpen(false)}>
-                                  <ArrowUpRight style={{ transform: 'rotate(-135deg)' }} size={16} /> BACK
+                            <div className="detail-header-premium">
+                              <div className="d-flex align-items-center gap-3">
+                                <button className="back-btn-premium" onClick={() => setIsPayrollDetailOpen(false)}>
+                                  <ArrowUpRight style={{ transform: 'rotate(-135deg)' }} size={18} />
                                 </button>
-                                <h2>Payroll <small>DETAILS / {currentMonthName.toUpperCase()} {currentYear}</small></h2>
+                                <div>
+                                  <h2 className="premium-title">Payroll Details</h2>
+                                  <span className="premium-subtitle">{currentMonthName.toUpperCase()} {currentYear}</span>
+                                </div>
                               </div>
-                              <div className="d-flex gap-3">
-                                <div className="search-box-mini"><Search size={14} /><input type="text" placeholder="Search Staff..." value={payrollSearchTerm} onChange={(e) => setPayrollSearchTerm(e.target.value)} /></div>
-                                <select className="role-filter-select" value={payrollRoleFilter} onChange={(e) => setPayrollRoleFilter(e.target.value)}>
+                              <div className="d-flex gap-3 align-items-center">
+                                <div className="search-box-premium"><Search size={14} /><input type="text" placeholder="Search Staff..." value={payrollSearchTerm} onChange={(e) => setPayrollSearchTerm(e.target.value)} /></div>
+                                <select className="role-filter-premium" value={payrollRoleFilter} onChange={(e) => setPayrollRoleFilter(e.target.value)}>
                                   <option value="ALL">All Roles</option>
                                   <option value="Trainer">Trainers</option>
                                   <option value="Front Office">Front Office</option>
                                 </select>
-                                <button className="export-btn pdf"><Activity size={14} /> PDF</button>
+                                <button className="export-btn-premium pdf"><Activity size={16} /> Export PDF</button>
                               </div>
                             </div>
 
-                            <TableCard style={{ border: 'none', padding: 0, background: 'transparent' }}>
+                            <TableCard style={{ border: 'none', padding: 0, background: 'transparent', boxShadow: 'none' }}>
                               <div className="table-responsive">
-                                <table className="table interactive-table">
+                                <table className="table interactive-table premium-table">
                                   <thead>
-                                    <tr><th>EMPLOYEE</th><th>ROLE</th><th>GROSS PAY</th><th>LEAVES/PERM</th><th>DEDUCTIONS</th><th>NET PAY</th><th>STATUS</th></tr>
+                                    <tr><th>EMPLOYEE</th><th>ROLE</th><th>GROSS PAY</th><th>LEAVES / PERMS</th><th>DEDUCTIONS</th><th>NET PAY</th><th>STATUS</th></tr>
                                   </thead>
                                   <tbody>
                                     {staffs.filter(s => (payrollRoleFilter === "ALL" || s.role === payrollRoleFilter) && ((s.fullName || s.name || "").toLowerCase().includes(payrollSearchTerm.toLowerCase()))).map(s => {
@@ -794,22 +797,22 @@ const AdminDashboard = () => {
                                       const netPay = gross - leaveDed - permDed - 2450;
 
                                       return (
-                                        <tr key={s.id} onClick={() => setSelectedStaffForSlip(s)}>
-                                          <td><div className="u-cell"><div className="avatar-small">{(s.fullName || s.name || "S").charAt(0)}</div><div className="fw-bold">{s.fullName || s.name || "Staff Member"}</div></div></td>
-                                          <td><span className="badge bg-primary-light">{s.role}</span></td>
-                                          <td className="fw-bold">{s.salary}</td>
+                                        <tr key={s.id} onClick={() => setSelectedStaffForSlip(s)} className="align-middle">
+                                          <td><div className="u-cell"><div className="avatar-premium">{(s.fullName || s.name || "S").charAt(0)}</div><div className="fw-bolder" style={{ letterSpacing: '-0.3px' }}>{s.fullName || s.name || "Staff Member"}</div></div></td>
+                                          <td><span className="badge bg-primary-light badge-modern">{s.role}</span></td>
+                                          <td className="fw-bolder text-muted">₹{gross.toLocaleString()}</td>
                                           <td>
-                                            <div className="d-flex flex-column">
-                                              <span className="text-danger" style={{ fontSize: '0.75rem', fontWeight: 700 }}>{s.leaves} Leaves</span>
-                                              <span className="text-warning" style={{ fontSize: '0.65rem', fontWeight: 600 }}>{s.permissions} Perms</span>
+                                            <div className="d-flex gap-2">
+                                              <span className="badge-soft-danger">{s.leaves} Leaves</span>
+                                              <span className="badge-soft-warning">{s.permissions} Perms</span>
                                             </div>
                                           </td>
-                                          <td className="text-danger">
-                                            ₹{Math.floor(2450 + leaveDed + permDed).toLocaleString()}
-                                            <small style={{ display: 'block', fontSize: '0.6rem', opacity: 0.6 }}>TDS + PF + Attnd</small>
+                                          <td>
+                                            <div className="text-danger fw-bolder">₹{Math.floor(2450 + leaveDed + permDed).toLocaleString()}</div>
+                                            <span className="subtext-muted">TDS + PF + Attnd</span>
                                           </td>
-                                          <td className="fw-black text-primary">₹{Math.floor(netPay).toLocaleString()}</td>
-                                          <td><span className="sync-badge">PAID</span></td>
+                                          <td className="fw-black text-success" style={{ fontSize: '1.05rem' }}>₹{Math.floor(netPay).toLocaleString()}</td>
+                                          <td><span className="badge-modern-success"><CheckCircle size={14}/> PAID</span></td>
                                         </tr>
                                       );
                                     })}
@@ -2067,19 +2070,60 @@ const PayrollContainer = styled.div`
 
   .btn-link { background: none; border: none; color: var(--accent-color); font-weight: 800; font-size: 0.75rem; cursor: pointer; &.disabled { color: var(--text-muted); cursor: default; } }
 
-  .detail-header {
-    display: flex; justify-content: space-between; align-items: center;
-    @media (max-width: 992px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 20px;
-      width: 100%;
-      .d-flex {
-        width: 100%;
-        flex-wrap: wrap;
-        gap: 10px !important;
-      }
+  .detail-header-premium {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);
+    @media (max-width: 992px) { flex-direction: column; align-items: flex-start; gap: 20px; }
+    
+    .back-btn-premium {
+      background: var(--card-bg); border: 1px solid var(--border-color); width: 45px; height: 45px; border-radius: 14px; 
+      display: flex; align-items: center; justify-content: center; color: var(--text-color); cursor: pointer; transition: all 0.2s;
+      &:hover { background: var(--accent-color); color: #000; border-color: var(--accent-color); transform: translateX(-4px); }
     }
+    
+    .premium-title { margin: 0; font-weight: 900; font-size: 1.8rem; letter-spacing: -0.5px; color: var(--text-color); }
+    .premium-subtitle { font-size: 0.8rem; font-weight: 700; color: var(--accent-color); letter-spacing: 2px; }
+    
+    .search-box-premium {
+      display: flex; align-items: center; gap: 10px; background: var(--card-bg); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 12px;
+      input { background: none; border: none; color: var(--text-color); font-size: 0.85rem; outline: none; width: 200px; }
+      svg { color: var(--text-muted); }
+    }
+    
+    .role-filter-premium {
+      background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 16px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; outline: none; cursor: pointer;
+    }
+    
+    .export-btn-premium {
+      background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 16px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;
+      &:hover { background: #ef4444; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+    }
+  }
+
+  /* Premium Table Styles */
+  .premium-table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    th { font-size: 0.75rem; letter-spacing: 1px; padding: 0 20px 10px 20px; border: none; color: var(--text-muted); }
+    td { background: var(--card-bg); border: 1px solid var(--border-color); border-style: solid none; padding: 20px; transition: all 0.2s; }
+    td:first-child { border-left-style: solid; border-radius: 16px 0 0 16px; }
+    td:last-child { border-right-style: solid; border-radius: 0 16px 16px 0; }
+    tr:hover td { background: var(--accent-glow) !important; border-color: var(--accent-color); }
+  }
+
+  .avatar-premium {
+    width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-color), #f59e0b); color: #000;
+    display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; box-shadow: 0 4px 10px var(--accent-glow);
+  }
+
+  .badge-modern { padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; }
+  
+  .badge-soft-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(239, 68, 68, 0.2); }
+  .badge-soft-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(245, 158, 11, 0.2); }
+  
+  .subtext-muted { display: block; font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; letter-spacing: 0.5px; }
+
+  .badge-modern-success {
+    display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 900; letter-spacing: 1px; border: 1px solid rgba(16, 185, 129, 0.3);
   }
 
   .pay-slip-drawer {
