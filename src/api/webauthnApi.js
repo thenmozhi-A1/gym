@@ -49,11 +49,12 @@ export async function verifyFingerprint(email) {
 
 // GET CREDENTIALS
 export async function getCredentials(userId) {
-  // Not fully implemented on backend in plan, but good placeholder
-  return [];
+  const { data } = await axiosInstance.get(`/v1/webauthn/credentials/${userId}`);
+  return data;
 }
 
 // DELETE CREDENTIAL
 export async function deleteCredential(credentialId) {
-  // Placeholder
+  const { data } = await axiosInstance.delete(`/v1/webauthn/credentials/${credentialId}`);
+  return data;
 }
