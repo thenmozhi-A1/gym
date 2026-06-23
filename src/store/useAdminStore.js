@@ -11,6 +11,8 @@ export const useAdminStore = create((set, get) => ({
   consultations: [],
   feedbacks: [],
   leaves: [],
+  workouts: [],
+  diets: [],
   isLoading: false,
 
   fetchData: async (activeTab) => {
@@ -20,7 +22,7 @@ export const useAdminStore = create((set, get) => ({
 
       let endpoints = [];
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks" || activeTab === "payroll") {
-        endpoints = ["users", "payments", "attendance", "consultations", "staffs", "feedbacks", "leaves"];
+        endpoints = ["users", "payments", "attendance", "consultations", "staffs", "feedbacks", "leaves", "workouts", "diets"];
       } else {
         // Map UI tabs to actual backend endpoints
         const endpointMap = {
@@ -97,7 +99,9 @@ export const useAdminStore = create((set, get) => ({
           consultations: Array.isArray(results[3]) ? results[3] : [],
           staffs: enhancedStaffs,
           feedbacks: Array.isArray(results[5]) ? results[5] : [],
-          leaves: Array.isArray(results[6]) ? results[6] : []
+          leaves: Array.isArray(results[6]) ? results[6] : [],
+          workouts: Array.isArray(results[7]) ? results[7] : [],
+          diets: Array.isArray(results[8]) ? results[8] : []
         });
       } else {
         const data = Array.isArray(results[0]) ? results[0] : [];
@@ -319,5 +323,41 @@ export const useAdminStore = create((set, get) => ({
       toast.error("Failed to update leave status");
       return false;
     }
+  },
+
+  addWorkout: async (data) => {
+    try {
+      const res = await axiosInstance.post('/workouts', data);
+      set((state) => ({ workouts: [...state.workouts, res.data] }));
+      toast.success("Workout plan added successfully");
+      return true;
+    } catch (e) { toast.error("Failed to add workout plan"); return false; }
+  },
+
+  deleteWorkout: async (id) => {
+    try {
+      await axiosInstance.delete(`/workouts/${id}`);
+      set((state) => ({ workouts: state.workouts.filter(w => w.id !== id) }));
+      toast.success("Workout plan deleted");
+      return true;
+    } catch (e) { toast.error("Failed to delete workout plan"); return false; }
+  },
+
+  addDiet: async (data) => {
+    try {
+      const res = await axiosInstance.post('/diets', data);
+      set((state) => ({ diets: [...state.diets, res.data] }));
+      toast.success("Diet plan added successfully");
+      return true;
+    } catch (e) { toast.error("Failed to add diet plan"); return false; }
+  },
+
+  deleteDiet: async (id) => {
+    try {
+      await axiosInstance.delete(`/diets/${id}`);
+      set((state) => ({ diets: state.diets.filter(d => d.id !== id) }));
+      toast.success("Diet plan deleted");
+      return true;
+    } catch (e) { toast.error("Failed to delete diet plan"); return false; }
   }
 }));

@@ -1,15 +1,32 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Coffee, Apple, Search, Plus, Trash2 } from "lucide-react";
+import { Coffee, Apple, Search, Plus, Trash2, X } from "lucide-react";
+import { useAdminStore } from "../store/useAdminStore";
 
 const DietModule = () => {
+  const { diets, addDiet, deleteDiet } = useAdminStore();
+  const [isAddPlanOpen, setIsAddPlanOpen] = useState(false);
+  const [newPlan, setNewPlan] = useState({ name: '', calories: 0, protein: 0, carbs: 0, fats: 0, description: '' });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleCreatePlan = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const success = await addDiet({ ...newPlan, calories: Number(newPlan.calories), protein: Number(newPlan.protein), carbs: Number(newPlan.carbs), fats: Number(newPlan.fats) });
+    if (success) {
+      setIsAddPlanOpen(false);
+      setNewPlan({ name: '', calories: 0, protein: 0, carbs: 0, fats: 0, description: '' });
+    }
+    setSubmitting(false);
+  };
+
   return (
     <Container className="animate-in">
       <div className="module-header">
         <div className="title-area">
           <h2>DIET <small>& NUTRITION PLANS</small></h2>
         </div>
-        <button className="btn-primary"><Plus size={16} /> Create Diet Plan</button>
+        <button className="btn-primary" onClick={() => setIsAddPlanOpen(true)}><Plus size={16} /> Create Diet Plan</button>
       </div>
 
       <div className="layout-grid">
@@ -20,56 +37,27 @@ const DietModule = () => {
           </div>
 
           <div className="plan-list">
-            <div className="diet-card">
-              <div className="d-header">
-                <h4>Extreme Fat Loss</h4>
-                <div className="calories">1,500 kcal</div>
+            {diets.map(plan => (
+              <div className="diet-card" key={plan.id}>
+                <div className="d-header">
+                  <h4>{plan.name}</h4>
+                  <div className="calories">{plan.calories} kcal</div>
+                </div>
+                <div className="d-macros">
+                  <div className="macro protein">{plan.protein}g P</div>
+                  <div className="macro carbs">{plan.carbs}g C</div>
+                  <div className="macro fats">{plan.fats}g F</div>
+                </div>
+                <p>{plan.description}</p>
+                <div className="d-actions">
+                  <button className="btn-icon-danger" onClick={() => deleteDiet(plan.id)} title="Delete Plan"><Trash2 size={16}/></button>
+                  <button className="btn-outline-sm">Assign</button>
+                </div>
               </div>
-              <div className="d-macros">
-                <div className="macro protein">120g P</div>
-                <div className="macro carbs">100g C</div>
-                <div className="macro fats">60g F</div>
-              </div>
-              <p>Low carb, high protein diet focused on lean meats and vegetables.</p>
-              <div className="d-actions">
-                <button className="btn-link">View Details</button>
-                <button className="btn-outline-sm">Assign</button>
-              </div>
-            </div>
-
-            <div className="diet-card">
-              <div className="d-header">
-                <h4>Lean Muscle Builder</h4>
-                <div className="calories">2,800 kcal</div>
-              </div>
-              <div className="d-macros">
-                <div className="macro protein">180g P</div>
-                <div className="macro carbs">300g C</div>
-                <div className="macro fats">80g F</div>
-              </div>
-              <p>Caloric surplus diet with balanced macronutrients for muscle growth.</p>
-              <div className="d-actions">
-                <button className="btn-link">View Details</button>
-                <button className="btn-outline-sm">Assign</button>
-              </div>
-            </div>
-            
-            <div className="diet-card">
-              <div className="d-header">
-                <h4>Keto Adaptation</h4>
-                <div className="calories">2,000 kcal</div>
-              </div>
-              <div className="d-macros">
-                <div className="macro protein">100g P</div>
-                <div className="macro carbs">30g C</div>
-                <div className="macro fats">150g F</div>
-              </div>
-              <p>High fat, extremely low carb diet for ketogenic fat burning.</p>
-              <div className="d-actions">
-                <button className="btn-link">View Details</button>
-                <button className="btn-outline-sm">Assign</button>
-              </div>
-            </div>
+            ))}
+            {diets.length === 0 && (
+              <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>No diet plans created yet.</div>
+            )}
           </div>
         </div>
 
@@ -133,6 +121,53 @@ const DietModule = () => {
           </div>
         </div>
       </div>
+
+      {isAddPlanOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content animate-scale">
+            <div className="modal-header">
+              <h2>Create Diet Plan</h2>
+              <button className="close-btn" onClick={() => setIsAddPlanOpen(false)}><X size={24}/></button>
+            </div>
+            <form className="modal-body" onSubmit={handleCreatePlan}>
+              <div className="form-group">
+                <label>Plan Name</label>
+                <input type="text" value={newPlan.name} onChange={e => setNewPlan({...newPlan, name: e.target.value})} required />
+              </div>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Calories (kcal)</label>
+                  <input type="number" value={newPlan.calories} onChange={e => setNewPlan({...newPlan, calories: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label>Protein (g)</label>
+                  <input type="number" value={newPlan.protein} onChange={e => setNewPlan({...newPlan, protein: e.target.value})} required />
+                </div>
+              </div>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Carbs (g)</label>
+                  <input type="number" value={newPlan.carbs} onChange={e => setNewPlan({...newPlan, carbs: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label>Fats (g)</label>
+                  <input type="number" value={newPlan.fats} onChange={e => setNewPlan({...newPlan, fats: e.target.value})} required />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Description</label>
+                <textarea rows="3" value={newPlan.description} onChange={e => setNewPlan({...newPlan, description: e.target.value})} required></textarea>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setIsAddPlanOpen(false)}>Cancel</button>
+                <button type="submit" className="btn-primary" disabled={submitting}>
+                  {submitting ? 'Creating...' : 'Create Plan'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </Container>
   );
 };
@@ -175,7 +210,7 @@ const Container = styled.div`
     p { margin: 0 0 16px 0; color: var(--text-muted); font-size: 0.85rem; line-height: 1.4; }
     .d-actions {
       display: flex; justify-content: space-between; align-items: center;
-      .btn-link { background: none; border: none; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; &:hover { color: var(--text-color); } }
+      .btn-icon-danger { background: transparent; border: none; color: #ef4444; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px; transition: background 0.2s; &:hover { background: rgba(239, 68, 68, 0.1); } }
       .btn-outline-sm { background: transparent; border: 1px solid var(--border-color); color: var(--text-color); padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: background 0.2s; &:hover { background: rgba(255,255,255,0.05); } }
     }
   }

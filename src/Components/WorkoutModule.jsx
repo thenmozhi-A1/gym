@@ -1,55 +1,56 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import { Activity, Camera, TrendingUp, Plus } from "lucide-react";
+import { Activity, Camera, TrendingUp, Plus, Trash2, X } from "lucide-react";
+import { useAdminStore } from "../store/useAdminStore";
 
 const WorkoutModule = () => {
+  const { workouts, addWorkout, deleteWorkout } = useAdminStore();
+  const [isAddPlanOpen, setIsAddPlanOpen] = useState(false);
+  const [newPlan, setNewPlan] = useState({ name: '', duration: '', description: '', trainerName: '' });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleCreatePlan = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const success = await addWorkout(newPlan);
+    if (success) {
+      setIsAddPlanOpen(false);
+      setNewPlan({ name: '', duration: '', description: '', trainerName: '' });
+    }
+    setSubmitting(false);
+  };
+
   return (
     <Container className="animate-in">
       <div className="module-header">
         <div className="title-area">
           <h2>WORKOUT <small>PLANS & PROGRESS</small></h2>
         </div>
-        <button className="btn-primary"><Plus size={16} /> Create Workout Plan</button>
+        <button className="btn-primary" onClick={() => setIsAddPlanOpen(true)}><Plus size={16} /> Create Workout Plan</button>
       </div>
 
       <div className="layout-grid">
         <div className="plans-list">
           <h3>Active Workout Plans</h3>
-          <div className="w-card">
-            <div className="w-header">
-              <h4>Beginner Weight Loss</h4>
-              <span className="badge bg-primary-light">4 Weeks</span>
+          {workouts.map(plan => (
+            <div className="w-card" key={plan.id}>
+              <div className="w-header">
+                <h4>{plan.name}</h4>
+                <span className="badge bg-primary-light">{plan.duration}</span>
+                <button className="btn-icon-danger" onClick={() => deleteWorkout(plan.id)} title="Delete Plan">
+                  <Trash2 size={16} />
+                </button>
+              </div>
+              <p>{plan.description}</p>
+              <div className="w-meta">
+                <span>Trainer: {plan.trainerName}</span>
+                <span>{plan.assignedMembersCount} Members Assigned</span>
+              </div>
             </div>
-            <p>Focus on cardio and high repetition light weights to maximize calorie burn.</p>
-            <div className="w-meta">
-              <span>Trainer: Sarah Johnson</span>
-              <span>12 Members Assigned</span>
-            </div>
-          </div>
-          
-          <div className="w-card">
-            <div className="w-header">
-              <h4>Hypertrophy Core</h4>
-              <span className="badge bg-success-light">8 Weeks</span>
-            </div>
-            <p>Heavy compound lifts combined with targeted isolation movements.</p>
-            <div className="w-meta">
-              <span>Trainer: Marcus Aurelius</span>
-              <span>5 Members Assigned</span>
-            </div>
-          </div>
-
-          <div className="w-card">
-            <div className="w-header">
-              <h4>Flexibility & Yoga Flow</h4>
-              <span className="badge bg-warning-light">Ongoing</span>
-            </div>
-            <p>Daily routines for core strength and mobility improvements.</p>
-            <div className="w-meta">
-              <span>Trainer: Emma Watson</span>
-              <span>24 Members Assigned</span>
-            </div>
-          </div>
+          ))}
+          {workouts.length === 0 && (
+            <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>No workout plans created yet.</div>
+          )}
         </div>
 
         <div className="progress-section">
@@ -103,6 +104,43 @@ const WorkoutModule = () => {
           </div>
         </div>
       </div>
+
+      {isAddPlanOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content animate-scale">
+            <div className="modal-header">
+              <h2>Create Workout Plan</h2>
+              <button className="close-btn" onClick={() => setIsAddPlanOpen(false)}><X size={24}/></button>
+            </div>
+            <form className="modal-body" onSubmit={handleCreatePlan}>
+              <div className="form-group">
+                <label>Plan Name</label>
+                <input type="text" value={newPlan.name} onChange={e => setNewPlan({...newPlan, name: e.target.value})} required />
+              </div>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Duration (e.g. 4 Weeks)</label>
+                  <input type="text" value={newPlan.duration} onChange={e => setNewPlan({...newPlan, duration: e.target.value})} required />
+                </div>
+                <div className="form-group">
+                  <label>Trainer Name</label>
+                  <input type="text" value={newPlan.trainerName} onChange={e => setNewPlan({...newPlan, trainerName: e.target.value})} required />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Description</label>
+                <textarea rows="3" value={newPlan.description} onChange={e => setNewPlan({...newPlan, description: e.target.value})} required></textarea>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setIsAddPlanOpen(false)}>Cancel</button>
+                <button type="submit" className="btn-primary" disabled={submitting}>
+                  {submitting ? 'Creating...' : 'Create Plan'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </Container>
   );
 };
@@ -127,9 +165,10 @@ const Container = styled.div`
   }
 
   .w-card {
-    background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 12px; padding: 20px; box-shadow: var(--shadow);
-    .w-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; h4 { margin: 0; color: var(--text-color); font-size: 1rem; } }
+    background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); position: relative;
+    .w-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; h4 { margin: 0; color: var(--text-color); font-size: 1rem; flex: 1; } }
     .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .btn-icon-danger { background: transparent; border: none; color: #ef4444; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px; transition: background 0.2s; &:hover { background: rgba(239, 68, 68, 0.1); } }
     .bg-primary-light { background: rgba(56, 189, 248, 0.1); color: var(--accent-color, #38bdf8); }
     .bg-success-light { background: rgba(16, 185, 129, 0.1); color: #10b981; }
     .bg-warning-light { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
