@@ -120,7 +120,8 @@ const AttendanceModule = () => {
          if (activeTab === "members") {
            await axiosInstance.post(`/attendance/user/${editCell.person.id}`, payload);
          } else {
-           await axiosInstance.post(`/attendance/staff/${editCell.person.id}`, payload);
+           const userId = editCell.person.user?.id || editCell.person.userId || editCell.person.id;
+           await axiosInstance.post(`/attendance/staff/${userId}`, payload);
          }
       }
       setEditCell(null);
