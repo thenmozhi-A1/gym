@@ -59,7 +59,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     getValues,
     setValue,
     trigger,
-    formState: { errors, touchedFields },
+    formState: { errors, touchedFields, isSubmitting },
   } = useForm({
     resolver: zodResolver(userSchema),
     mode: "onTouched",
@@ -223,7 +223,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     }
   };
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     const completeData = {
       ...data,
       memberId: generatedId.current,
@@ -269,7 +269,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       });
       paymentObject.open();
     } else {
-      onAddUser(completeData);
+      await onAddUser(completeData);
       onClose();
     }
   };
@@ -537,7 +537,9 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
             {currentStep < 4 ? (
               <button type="button" className="btn-primary" onClick={handleNext}>Next</button>
             ) : (
-              <button type="submit" className="btn-success">Complete Registration</button>
+              <button type="submit" className="btn-success" disabled={isSubmitting}>
+                {isSubmitting ? "Processing..." : "Complete Registration"}
+              </button>
             )}
           </div>
         </form>
