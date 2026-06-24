@@ -81,8 +81,8 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         isRefreshing = false;
         processQueue(refreshError);
-        // Refresh token is expired or revoked
-        useAuthStore.getState().logout();
+        // Refresh token is expired or revoked. We no longer automatically logout the user.
+        // The user must manually logout.
         return Promise.reject(refreshError);
       }
     }
