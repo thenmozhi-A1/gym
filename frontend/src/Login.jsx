@@ -36,6 +36,7 @@ const Login = () => {
   const [enrollError, setEnrollError] = useState("");
   const [loginMethod, setLoginMethod] = useState("password");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [biometricState, setBiometricState] = useState("idle");
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [attendanceLog, setAttendanceLog] = useState(null);
@@ -321,23 +322,41 @@ const Login = () => {
                     <div className="label-row">
                       <label><Lock size={16} /> Password</label>
                     </div>
-                    <input 
-                      type="password" 
-                      name="password" 
-                      placeholder="••••••••" 
-                      required 
-                      onChange={handleInputChange}
-                    />
+                    <div className="password-wrapper">
+                      <input 
+                        type={showPassword ? "text" : "password"} 
+                        name="password" 
+                        placeholder="••••••••" 
+                        required 
+                        onChange={handleInputChange}
+                      />
+                      <button 
+                        type="button" 
+                        className="eye-icon" 
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
                   </InputGroup>
                   <InputGroup>
                     <label><Lock size={16} /> Confirm Password</label>
-                    <input 
-                      type="password" 
-                      name="confirmPassword" 
-                      placeholder="••••••••" 
-                      required 
-                      onChange={handleInputChange}
-                    />
+                    <div className="password-wrapper">
+                      <input 
+                        type={showConfirmPassword ? "text" : "password"} 
+                        name="confirmPassword" 
+                        placeholder="••••••••" 
+                        required 
+                        onChange={handleInputChange}
+                      />
+                      <button 
+                        type="button" 
+                        className="eye-icon" 
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
                   </InputGroup>
 
                   {error && loginMethod === "password" && (
