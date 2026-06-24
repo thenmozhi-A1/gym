@@ -56,6 +56,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     register,
     handleSubmit,
     watch,
+    getValues,
     setValue,
     trigger,
     formState: { errors, touchedFields },
@@ -208,7 +209,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     console.log("Submitting completeData to backend:", completeData);
 
     const onlineMethods = ["UPI", "Card", "Net Banking"];
-    if (onlineMethods.includes(data.paymentMode)) {
+    if (onlineMethods.includes(data.paymentMode) && !data.transactionRef) {
       if (!razorpayLoaded) {
         toast.error("Payment gateway is loading. Please try again.");
         return;
@@ -241,6 +242,49 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       onAddUser(completeData);
       onClose();
     }
+  };
+
+  const handleManualPay = () => {
+    const data = getValues();
+    const onlineMethods = ["UPI", "Card", "Net Banking"];
+    
+    if (!data.paymentAmount || isNaN(data.paymentAmount)) {
+      toast.error("Please enter a valid payment amount first.");
+      return;
+    }
+    
+    if (!onlineMethods.includes(data.paymentMode)) {
+      toast.error("Please select an online payment mode (UPI, Card, Net Banking) to use Razorpay.");
+      return;
+    }
+    
+    if (!razorpayLoaded) {
+      toast.error("Payment gateway is loading. Please try again.");
+      return;
+    }
+    
+    const options = {
+      key: "rzp_test_Mk659ISVbs7cZv",
+      amount: Number(data.paymentAmount) * 100, 
+      currency: "INR",
+      name: "B&Y Fitness Gym",
+      description: `Payment for ${data.membershipPlan} Plan`,
+      handler: function (response) {
+        setValue("transactionRef", response.razorpay_payment_id, { shouldValidate: true });
+        toast.success("Payment successful! You can now complete the registration.");
+      },
+      prefill: {
+        name: data.fullName,
+        email: data.email,
+        contact: data.phone,
+      },
+      theme: {
+        color: "#38bdf8",
+      },
+    };
+
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
   };
 
   if (!isOpen) return null;
@@ -411,6 +455,17 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                 <label>Transaction Reference Number (If applicable)</label>
                 <input type="text" placeholder="TXN123456789" $hasError={!!errors.transactionRef} {...register("transactionRef")} />
                 {errors.transactionRef && <p className="error-text">⚠ {errors.transactionRef.message}</p>}
+              </div>
+              
+              <div className="form-group full-width" style={{ marginTop: '10px' }}>
+                <button 
+                  type="button" 
+                  className="btn-primary" 
+                  onClick={handleManualPay}
+                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                >
+                  <CreditCard size={18} /> Pay with Razorpay
+                </button>
               </div>
             </div>
           </div>
