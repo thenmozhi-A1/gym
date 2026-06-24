@@ -5,7 +5,7 @@ import styled, { keyframes, css } from "styled-components";
 import {
   User, CreditCard, Clock, Dumbbell, Star, LogOut,
   Download, ChevronRight, CheckCircle, AlertCircle,
-  Calendar, Zap, TrendingUp, FileText, MessageSquare, ChevronLeft
+  Calendar, Zap, TrendingUp, FileText, MessageSquare, ChevronLeft, Package
 } from "lucide-react";
 import axiosInstance from "./api/axiosInstance";
 import useAuthStore from "./store/authStore";
@@ -445,6 +445,7 @@ const TABS = [
   { id: 'home',      label: 'Home',     icon: Zap },
   { id: 'checkins',  label: 'Check-ins',icon: Clock },
   { id: 'payments',  label: 'Payments', icon: CreditCard },
+  { id: 'orders',    label: 'Orders',   icon: Package },
   { id: 'workout',   label: 'Workout',  icon: Dumbbell },
   { id: 'feedback',  label: 'Feedback', icon: MessageSquare },
 ];
@@ -457,6 +458,7 @@ const Userdashboard = () => {
   const [profile,   setProfile]     = useState(null);
   const [checkins,  setCheckins]    = useState([]);
   const [payments,  setPayments]    = useState([]);
+  const [productOrders, setProductOrders] = useState([]);
   const [loading,   setLoading]     = useState(true);
   const [attendanceMonth, setAttendanceMonth] = useState(new Date());
 
@@ -475,15 +477,17 @@ const Userdashboard = () => {
     if (!userId) return;
     setLoading(true);
     try {
-      const [profileRes, checkinsRes, paymentsRes] = await Promise.allSettled([
+      const [profileRes, checkinsRes, paymentsRes, ordersRes] = await Promise.allSettled([
         axiosInstance.get(`/users/${userId}`),
         axiosInstance.get(`/attendance/user/${userId}`),
         axiosInstance.get(`/payments/user/${userId}`),
+        axiosInstance.get(`/orders/user/${userId}`),
       ]);
 
       if (profileRes.status === 'fulfilled')  setProfile(profileRes.value.data);
       if (checkinsRes.status === 'fulfilled') setCheckins(checkinsRes.value.data || []);
       if (paymentsRes.status === 'fulfilled') setPayments(paymentsRes.value.data || []);
+      if (ordersRes.status === 'fulfilled') setProductOrders(ordersRes.value.data || []);
     } catch (e) {
       log.error('Failed to fetch member data', e);
     } finally {
@@ -870,6 +874,63 @@ const Userdashboard = () => {
                   </div>
                 </PaymentRow>
               ))
+            )}
+          </Card>
+        )}
+
+        {/* ══════════ ORDERS TAB ══════════ */}
+        {activeTab === 'orders' && (
+          <Card>
+            <CardTitle><Package size={13} /> My Orders</CardTitle>
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => <SkeletonBlock key={i} $h={44} $mb={8} />)
+            ) : productOrders.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '30px 0', color: '#64748b', fontSize: '0.9rem' }}>
+                No product orders found.
+              </div>
+            ) : (
+              <div>
+                {productOrders.map((order, i) => {
+                  let d = order.orderDate;
+                  if (Array.isArray(d)) d = new Date(d[0], d[1]-1, d[2], d[3]||0, d[4]||0);
+                  else d = new Date(d);
+                  
+                  const statusColors = {
+                    'PAID': '#3b82f6',
+                    'SHIPPED': '#f59e0b',
+                    'DELIVERED': '#22c55e'
+                  };
+                  const statusBg = {
+                    'PAID': 'rgba(59, 130, 246, 0.1)',
+                    'SHIPPED': 'rgba(245, 158, 11, 0.1)',
+                    'DELIVERED': 'rgba(34, 197, 94, 0.1)'
+                  };
+
+                  return (
+                    <PaymentRow key={i}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 3 }}>
+                          {order.productName} <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 500 }}>x{order.quantity}</span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: 6 }}>
+                          Ordered on: {d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </div>
+                        <div style={{
+                          display: 'inline-flex', padding: '4px 8px', borderRadius: '4px',
+                          fontSize: '0.7rem', fontWeight: 700,
+                          background: statusBg[order.status] || 'rgba(100, 116, 139, 0.1)',
+                          color: statusColors[order.status] || '#94a3b8'
+                        }}>
+                          {order.status}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                        <PayAmount>₹{order.totalPrice?.toLocaleString()}</PayAmount>
+                      </div>
+                    </PaymentRow>
+                  );
+                })}
+              </div>
             )}
           </Card>
         )}

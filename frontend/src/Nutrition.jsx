@@ -4,9 +4,9 @@ import { useLocation } from "react-router-dom";
 import axiosInstance from "./api/axiosInstance";
 
 
-import { 
-  TrendingDown, Zap, CheckCircle, Flame, Leaf, Apple, Activity, 
-  Droplets, Info, Target, Award, ShieldCheck, HeartPulse, Clock 
+import {
+  TrendingDown, Zap, CheckCircle, Flame, Leaf, Apple, Activity,
+  Droplets, Info, Target, Award, ShieldCheck, HeartPulse, Clock
 } from "lucide-react";
 import styled from "styled-components";
 
@@ -143,7 +143,7 @@ const Nutrition = () => {
     }
 
     const options = {
-      key: "rzp_test_T5P2c2t4n8vCwb",
+      key: "rzp_test_SoL1lxm6LzPqie",
       amount: amount * 100,
       currency: "INR",
       name: "B&Y Fitness Shop",
@@ -165,15 +165,20 @@ const Nutrition = () => {
       alert("Please login to buy products.");
       return;
     }
-    
+
     if (!window.Razorpay) {
       alert("Razorpay SDK not loaded.");
       return;
     }
 
-    const address = "";
+    const address = window.prompt("Enter your shipping address for delivery:");
+    if (!address) {
+      alert("Address is required to place an order.");
+      return;
+    }
+
     const options = {
-      key: "rzp_test_T5P2c2t4n8vCwb",
+      key: "rzp_test_SoL1lxm6LzPqie",
       amount: product.price * quantity * 100,
       currency: "INR",
       name: "B&Y Fitness Shop",
@@ -189,7 +194,7 @@ const Nutrition = () => {
             });
           }
           alert(`Payment Successful! ID: ${response.razorpay_payment_id}\nOrder placed for ${product.name}!`);
-          
+
           axiosInstance.get("/products")
             .then(res => setProducts(res.data.data || []));
         } catch (err) {
@@ -223,7 +228,7 @@ const Nutrition = () => {
           <Badge>NUTRITION PERFORMANCE</Badge>
           <h1 className="display-1 fw-black italic">FUEL THE <span className="text-warning">BEAST</span></h1>
           <p className="lead mx-auto" style={{ maxWidth: '700px' }}>
-            Precision nutrition for high-performance athletes. 
+            Precision nutrition for high-performance athletes.
             Stop eating for taste, start eating for <span className="text-warning fw-bold">dominance</span>.
           </p>
           <div className="d-flex gap-3 justify-content-center mt-5">
@@ -270,25 +275,25 @@ const Nutrition = () => {
 
         <div className="row g-4">
           {[
-            { 
-              title: "PROTEIN", 
-              desc: "Muscle repair & growth synthesis.", 
+            {
+              title: "PROTEIN",
+              desc: "Muscle repair & growth synthesis.",
               img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?q=80&w=800",
               color: "#ffc107",
               stat: "1.6 - 2.2g/kg",
               ratio: "30%"
             },
-            { 
-              title: "CARBS", 
-              desc: "Glycogen fuel for explosive power.", 
+            {
+              title: "CARBS",
+              desc: "Glycogen fuel for explosive power.",
               img: "https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=800",
               color: "#ffc107",
               stat: "High Density",
               ratio: "50%"
             },
-            { 
-              title: "FATS", 
-              desc: "Hormonal balance & brain health.", 
+            {
+              title: "FATS",
+              desc: "Hormonal balance & brain health.",
               img: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?q=80&w=800",
               color: "#ffc107",
               stat: "Healthy Acids",
@@ -327,8 +332,8 @@ const Nutrition = () => {
               <PlanSelectorCard>
                 <div className="plan-list">
                   {Object.keys(goalDetails).map((goal) => (
-                    <div 
-                      key={goal} 
+                    <div
+                      key={goal}
                       className={`plan-item ${activeGoal === goal ? 'active' : ''}`}
                       onClick={() => setActiveGoal(goal)}
                     >
@@ -428,45 +433,46 @@ const Nutrition = () => {
             {products.filter(p => p.category === 'SUPPLEMENT').map((supp, i) => {
               const qty = quantities[supp.id] || 1;
               return (
-              <div className="col-lg-4" key={i}>
-                <SuppCard>
-                  <div className="supp-bg" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url(${supp.imageUrl || '/whey.png'})` }}></div>
-                  <div className="supp-content">
-                    <div className="supp-icon"><Zap /></div>
-                    <h3 className="fw-black" style={{ fontSize: '1.5rem', marginBottom: '5px' }}>{supp.name}</h3>
-                    <p className="small mb-2 text-white-50">{supp.description || 'Premium supplement for elite performance.'}</p>
-                    
-                    {/* Quantity Selector */}
-                    {supp.stockQuantity > 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Qty:</span>
-                        <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', overflow: 'hidden' }}>
-                          <button onClick={() => updateQuantity(supp.id, -1, supp.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '4px 10px', cursor: 'pointer' }}>-</button>
-                          <span style={{ fontSize: '0.9rem', width: '20px', textAlign: 'center' }}>{qty}</span>
-                          <button onClick={() => updateQuantity(supp.id, 1, supp.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '4px 10px', cursor: 'pointer' }}>+</button>
-                        </div>
-                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>({supp.stockQuantity} available)</span>
-                      </div>
-                    )}
+                <div className="col-lg-4" key={i}>
+                  <SuppCard>
+                    <div className="supp-bg" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url(${supp.imageUrl || '/whey.png'})` }}></div>
+                    <div className="supp-content">
+                      <div className="supp-icon"><Zap /></div>
+                      <h3 className="fw-black" style={{ fontSize: '1.5rem', marginBottom: '5px' }}>{supp.name}</h3>
+                      <p className="small mb-2 text-white-50">{supp.description || 'Premium supplement for elite performance.'}</p>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px' }}>
-                      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ffc107' }}>₹{(supp.price * qty).toLocaleString()}</span>
-                      <button 
-                        onClick={() => handleBuyProduct(supp, qty)}
-                        style={{ 
-                          background: '#ffc107', color: '#000', border: 'none', 
-                          padding: '6px 12px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer',
-                          opacity: supp.stockQuantity <= 0 ? 0.5 : 1
-                        }}
-                        disabled={supp.stockQuantity <= 0}
-                      >
-                        {supp.stockQuantity > 0 ? 'BUY NOW' : 'OUT OF STOCK'}
-                      </button>
+                      {/* Quantity Selector */}
+                      {supp.stockQuantity > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+                          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Qty:</span>
+                          <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', overflow: 'hidden' }}>
+                            <button onClick={() => updateQuantity(supp.id, -1, supp.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '4px 10px', cursor: 'pointer' }}>-</button>
+                            <span style={{ fontSize: '0.9rem', width: '20px', textAlign: 'center' }}>{qty}</span>
+                            <button onClick={() => updateQuantity(supp.id, 1, supp.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '4px 10px', cursor: 'pointer' }}>+</button>
+                          </div>
+                          <span style={{ fontSize: '0.7rem', color: '#64748b' }}>({supp.stockQuantity} available)</span>
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px' }}>
+                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#ffc107' }}>₹{(supp.price * qty).toLocaleString()}</span>
+                        <button
+                          onClick={() => handleBuyProduct(supp, qty)}
+                          style={{
+                            background: '#ffc107', color: '#000', border: 'none',
+                            padding: '6px 12px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer',
+                            opacity: supp.stockQuantity <= 0 ? 0.5 : 1
+                          }}
+                          disabled={supp.stockQuantity <= 0}
+                        >
+                          {supp.stockQuantity > 0 ? 'BUY NOW' : 'OUT OF STOCK'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </SuppCard>
-              </div>
-            )})}
+                  </SuppCard>
+                </div>
+              )
+            })}
             {products.filter(p => p.category === 'SUPPLEMENT').length === 0 && (
               <div className="col-12 text-center text-secondary py-5">
                 No supplements available at the moment.
@@ -491,40 +497,41 @@ const Nutrition = () => {
             ].map((prod, i) => {
               const qty = quantities[prod.id] || 1;
               return (
-              <div className="col-lg-3 col-md-6" key={i}>
-                <ProductCard>
-                  {prod.stockQuantity < 10 && <div className="prod-badge" style={{ background: '#ef4444' }}>LOW STOCK</div>}
-                  <div className="prod-img">
-                    <img src={prod.imageUrl || '/scale.png'} alt={prod.name} />
-                  </div>
-                  <div className="prod-info">
-                    <h5 className="fw-bold">{prod.name}</h5>
-                    <div className="price">₹{(prod.price * qty).toLocaleString()}</div>
-                    
-                    {/* Quantity Selector */}
-                    {prod.stockQuantity > 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '10px 0' }}>
-                        <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Qty:</span>
-                        <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', overflow: 'hidden' }}>
-                          <button onClick={() => updateQuantity(prod.id, -1, prod.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '2px 8px', cursor: 'pointer' }}>-</button>
-                          <span style={{ fontSize: '0.85rem', width: '18px', textAlign: 'center' }}>{qty}</span>
-                          <button onClick={() => updateQuantity(prod.id, 1, prod.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '2px 8px', cursor: 'pointer' }}>+</button>
-                        </div>
-                      </div>
-                    )}
+                <div className="col-lg-3 col-md-6" key={i}>
+                  <ProductCard>
+                    {prod.stockQuantity < 10 && <div className="prod-badge" style={{ background: '#ef4444' }}>LOW STOCK</div>}
+                    <div className="prod-img">
+                      <img src={prod.imageUrl || '/scale.png'} alt={prod.name} />
+                    </div>
+                    <div className="prod-info">
+                      <h5 className="fw-bold">{prod.name}</h5>
+                      <div className="price">₹{(prod.price * qty).toLocaleString()}</div>
 
-                    <button 
-                      onClick={() => handleBuyProduct(prod, qty)} 
-                      className="buy-btn"
-                      disabled={prod.stockQuantity <= 0}
-                      style={{ opacity: prod.stockQuantity <= 0 ? 0.5 : 1, marginTop: '5px' }}
-                    >
-                      {prod.stockQuantity > 0 ? 'BUY NOW' : 'SOLD OUT'}
-                    </button>
-                  </div>
-                </ProductCard>
-              </div>
-            )})}
+                      {/* Quantity Selector */}
+                      {prod.stockQuantity > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '10px 0' }}>
+                          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Qty:</span>
+                          <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', overflow: 'hidden' }}>
+                            <button onClick={() => updateQuantity(prod.id, -1, prod.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '2px 8px', cursor: 'pointer' }}>-</button>
+                            <span style={{ fontSize: '0.85rem', width: '18px', textAlign: 'center' }}>{qty}</span>
+                            <button onClick={() => updateQuantity(prod.id, 1, prod.stockQuantity)} style={{ background: 'none', border: 'none', color: '#fff', padding: '2px 8px', cursor: 'pointer' }}>+</button>
+                          </div>
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => handleBuyProduct(prod, qty)}
+                        className="buy-btn"
+                        disabled={prod.stockQuantity <= 0}
+                        style={{ opacity: prod.stockQuantity <= 0 ? 0.5 : 1, marginTop: '5px' }}
+                      >
+                        {prod.stockQuantity > 0 ? 'BUY NOW' : 'SOLD OUT'}
+                      </button>
+                    </div>
+                  </ProductCard>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -537,7 +544,7 @@ const Nutrition = () => {
             <div className="row g-0">
               <div className="col-lg-5 form-image d-none d-lg-block">
                 <div className="form-img-overlay">
-                  <h2 className="display-4 fw-black">GET <br/> <span className="text-warning">PERSONAL</span></h2>
+                  <h2 className="display-4 fw-black">GET <br /> <span className="text-warning">PERSONAL</span></h2>
                   <p>Custom macros designed by pro-athletes.</p>
                 </div>
               </div>
