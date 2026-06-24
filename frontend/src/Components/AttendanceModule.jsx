@@ -75,8 +75,9 @@ const AttendanceModule = () => {
     });
   };
 
-  const getStatus = (log, dateStr, isSunday) => {
+  const getStatus = (person, log, dateStr, isSunday) => {
     if (dateStr > todayStr) return "-";
+    if (person && person.startDate && dateStr < person.startDate) return "-";
     if (log) {
        if (log.status === 'LEAVE') return 'L';
        if (log.status === 'PERMISSION') return 'PR';
@@ -148,7 +149,7 @@ const AttendanceModule = () => {
       const row = [person.fullName || person.name || "Unknown"];
       daysArray.forEach(d => {
         const currentLog = getLogForCell(person, d.fullDate);
-        const status = getStatus(currentLog, d.fullDate, d.isSunday);
+        const status = getStatus(person, currentLog, d.fullDate, d.isSunday);
         if (status === "P") totalP++;
         if (status === "A") totalA++;
         row.push(status);
@@ -225,7 +226,7 @@ const AttendanceModule = () => {
 
                 const rowCells = daysArray.map(d => {
                   const currentLog = getLogForCell(person, d.fullDate);
-                  const status = getStatus(currentLog, d.fullDate, d.isSunday);
+                  const status = getStatus(person, currentLog, d.fullDate, d.isSunday);
                   if (status === "P") totalP++;
                   if (status === "A") totalA++;
                   
