@@ -76,6 +76,7 @@ const AttendanceModule = () => {
   };
 
   const getStatus = (person, log, dateStr, isSunday) => {
+    if (isSunday) return "S";
     if (dateStr > todayStr) return "-";
     if (person && person.startDate) {
       const joinDateStr = person.startDate.split('T')[0];
@@ -85,10 +86,8 @@ const AttendanceModule = () => {
        if (log.status === 'LEAVE') return 'L';
        if (log.status === 'PERMISSION') return 'PR';
        if (log.status === 'ABSENT') return 'A';
-       if (log.status === 'SUNDAY') return 'S';
        return 'P';
     }
-    if (isSunday) return "S";
     return "A";
   };
 
