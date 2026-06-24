@@ -47,6 +47,8 @@ const userSchema = z.object({
 const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const [plans, setPlans] = useState([]);
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
   const generatedId = useRef(`MBR-${Math.floor(Math.random() * 90000) + 10000}`);
 
@@ -92,6 +94,35 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   const fullName = watch("fullName");
   const membershipPlan = watch("membershipPlan");
   const startDate = watch("startDate");
+
+  useEffect(() => {
+    if (isOpen) {
+      axiosInstance.get('/membership-plans')
+        .then(res => setPlans(res.data))
+        .catch(err => log.error("Failed to fetch plans", err));
+        
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => setRazorpayLoaded(true);
+      document.body.appendChild(script);
+      
+      return () => {
+        if (document.body.contains(script)) {
+          document.body.removeChild(script);
+        }
+      };
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (membershipPlan && plans.length > 0) {
+      const selectedPlan = plans.find(p => p.title === membershipPlan);
+      if (selectedPlan && selectedPlan.price && selectedPlan.price.toLowerCase() !== "custom") {
+        setValue("paymentAmount", selectedPlan.price.toString(), { shouldValidate: true });
+      }
+    }
+  }, [membershipPlan, plans, setValue]);
 
   useEffect(() => {
     if (dob) {
@@ -176,8 +207,40 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     
     console.log("Submitting completeData to backend:", completeData);
 
-    onAddUser(completeData);
-    onClose();
+    const onlineMethods = ["UPI", "Card", "Net Banking"];
+    if (onlineMethods.includes(data.paymentMode)) {
+      if (!razorpayLoaded) {
+        toast.error("Payment gateway is loading. Please try again.");
+        return;
+      }
+      
+      const options = {
+        key: "rzp_test_Mk659ISVbs7cZv",
+        amount: Number(data.paymentAmount) * 100, 
+        currency: "INR",
+        name: "B&Y Fitness Gym",
+        description: `Payment for ${data.membershipPlan} Plan`,
+        handler: function (response) {
+          completeData.transactionRef = response.razorpay_payment_id;
+          onAddUser(completeData);
+          onClose();
+        },
+        prefill: {
+          name: data.fullName,
+          email: data.email,
+          contact: data.phone,
+        },
+        theme: {
+          color: "#38bdf8",
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+    } else {
+      onAddUser(completeData);
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -289,10 +352,17 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               <div className="form-group">
                 <label>Membership Plan</label>
                 <select $hasError={!!errors.membershipPlan} {...register("membershipPlan")}>
-                  <option value="Monthly">Monthly</option>
-                  <option value="Quarterly">Quarterly</option>
-                  <option value="Half-Yearly">Half-Yearly</option>
-                  <option value="Annual">Annual</option>
+                  <option value="">Select a Plan</option>
+                  {plans.length > 0 ? plans.map(plan => (
+                    <option key={plan.id} value={plan.title}>{plan.title} (₹{plan.price})</option>
+                  )) : (
+                    <>
+                      <option value="Monthly">Monthly</option>
+                      <option value="Quarterly">Quarterly</option>
+                      <option value="Half-Yearly">Half-Yearly</option>
+                      <option value="Annual">Annual</option>
+                    </>
+                  )}
                 </select>
                 {errors.membershipPlan && <p className="error-text">⚠ {errors.membershipPlan.message}</p>}
               </div>
