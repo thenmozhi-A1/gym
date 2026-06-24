@@ -157,9 +157,28 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         
         const selectedPlan = plans.find(p => p.title === membershipPlan);
         
-        if (selectedPlan && selectedPlan.duration) {
+        let calculated = false;
+        const title = membershipPlan.toLowerCase();
+        
+        // 1. First prioritize keywords in the title (in case they misconfigured the database duration)
+        if (title.includes("quarterly") || title.includes("quaterly") || title === "3 months") {
+          expiry.setMonth(expiry.getMonth() + 3);
+          calculated = true;
+        } else if (title.includes("half-yearly") || title === "6 months") {
+          expiry.setMonth(expiry.getMonth() + 6);
+          calculated = true;
+        } else if (title.includes("annual") || title.includes("yearly") || title === "1 year") {
+          expiry.setFullYear(expiry.getFullYear() + 1);
+          calculated = true;
+        } else if (title.includes("monthly") || title === "1 month") {
+          expiry.setMonth(expiry.getMonth() + 1);
+          calculated = true;
+        }
+        
+        // 2. If the title didn't contain explicit keywords, rely on the dynamic database duration
+        if (!calculated && selectedPlan && selectedPlan.duration) {
           const durationStr = selectedPlan.duration.toLowerCase();
-          if (durationStr.includes("quarterly") || durationStr === "3 months") {
+          if (durationStr.includes("quarterly") || durationStr.includes("quaterly") || durationStr === "3 months") {
             expiry.setMonth(expiry.getMonth() + 3);
           } else if (durationStr.includes("half-yearly") || durationStr === "6 months") {
             expiry.setMonth(expiry.getMonth() + 6);
@@ -175,17 +194,6 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
           } else if (durationStr.includes("day")) {
             const numDays = parseInt(durationStr) || 1;
             expiry.setDate(expiry.getDate() + numDays);
-          }
-        } else {
-          const title = membershipPlan.toLowerCase();
-          if (title.includes("monthly") || title === "1 month") {
-            expiry.setMonth(expiry.getMonth() + 1);
-          } else if (title.includes("quarterly") || title === "3 months") {
-            expiry.setMonth(expiry.getMonth() + 3);
-          } else if (title.includes("half-yearly") || title === "6 months") {
-            expiry.setMonth(expiry.getMonth() + 6);
-          } else if (title.includes("annual") || title.includes("yearly") || title === "1 year") {
-            expiry.setFullYear(expiry.getFullYear() + 1);
           }
         }
         
