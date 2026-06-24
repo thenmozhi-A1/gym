@@ -164,7 +164,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         if (title.includes("quarterly") || title.includes("quaterly") || title === "3 months") {
           expiry.setMonth(expiry.getMonth() + 3);
           calculated = true;
-        } else if (title.includes("half-yearly") || title === "6 months") {
+        } else if (title.includes("half-yearly") || title.includes("half yearly") || title === "6 months") {
           expiry.setMonth(expiry.getMonth() + 6);
           calculated = true;
         } else if (title.includes("annual") || title.includes("yearly") || title === "1 year") {
@@ -180,7 +180,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
           const durationStr = selectedPlan.duration.toLowerCase();
           if (durationStr.includes("quarterly") || durationStr.includes("quaterly") || durationStr === "3 months") {
             expiry.setMonth(expiry.getMonth() + 3);
-          } else if (durationStr.includes("half-yearly") || durationStr === "6 months") {
+          } else if (durationStr.includes("half-yearly") || durationStr.includes("half yearly") || durationStr === "6 months") {
             expiry.setMonth(expiry.getMonth() + 6);
           } else if (durationStr.includes("month")) {
             const numMonths = parseInt(durationStr) || 1;

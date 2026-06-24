@@ -239,7 +239,7 @@ const MemberManagement = ({ onAddUser }) => {
                                 const planLower = newPlan.toLowerCase();
                                 if (planLower.includes("monthly") || planLower === "1 month") expiry.setMonth(expiry.getMonth() + 1);
                                 else if (planLower.includes("quarterly") || planLower.includes("quaterly") || planLower === "3 months") expiry.setMonth(expiry.getMonth() + 3);
-                                else if (planLower.includes("half-yearly") || planLower === "6 months") expiry.setMonth(expiry.getMonth() + 6);
+                                else if (planLower.includes("half-yearly") || planLower.includes("half yearly") || planLower === "6 months") expiry.setMonth(expiry.getMonth() + 6);
                                 else if (planLower.includes("annual") || planLower.includes("yearly") || planLower === "1 year") expiry.setFullYear(expiry.getFullYear() + 1);
                                 
                                 newExpiry = `${expiry.getFullYear()}-${String(expiry.getMonth() + 1).padStart(2, '0')}-${String(expiry.getDate()).padStart(2, '0')}`;
@@ -278,7 +278,7 @@ const MemberManagement = ({ onAddUser }) => {
                                 const planLower = plan.toLowerCase();
                                 if (planLower.includes("monthly") || planLower === "1 month") expiry.setMonth(expiry.getMonth() + 1);
                                 else if (planLower.includes("quarterly") || planLower.includes("quaterly") || planLower === "3 months") expiry.setMonth(expiry.getMonth() + 3);
-                                else if (planLower.includes("half-yearly") || planLower === "6 months") expiry.setMonth(expiry.getMonth() + 6);
+                                else if (planLower.includes("half-yearly") || planLower.includes("half yearly") || planLower === "6 months") expiry.setMonth(expiry.getMonth() + 6);
                                 else if (planLower.includes("annual") || planLower.includes("yearly") || planLower === "1 year") expiry.setFullYear(expiry.getFullYear() + 1);
                                 
                                 newExpiry = `${expiry.getFullYear()}-${String(expiry.getMonth() + 1).padStart(2, '0')}-${String(expiry.getDate()).padStart(2, '0')}`;
