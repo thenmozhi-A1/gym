@@ -236,14 +236,13 @@ const MemberManagement = ({ onAddUser }) => {
                               const start = new Date(editFormData.startDate);
                               if (!isNaN(start.getTime())) {
                                 const expiry = new Date(start);
-                                if (newPlan === "Monthly") expiry.setMonth(expiry.getMonth() + 1);
-                                else if (newPlan === "Quarterly") expiry.setMonth(expiry.getMonth() + 3);
-                                else if (newPlan === "Half-Yearly") expiry.setMonth(expiry.getMonth() + 6);
-                                else if (newPlan === "Annual") expiry.setFullYear(expiry.getFullYear() + 1);
+                                const planLower = newPlan.toLowerCase();
+                                if (planLower.includes("monthly") || planLower === "1 month") expiry.setMonth(expiry.getMonth() + 1);
+                                else if (planLower.includes("quarterly") || planLower.includes("quaterly") || planLower === "3 months") expiry.setMonth(expiry.getMonth() + 3);
+                                else if (planLower.includes("half-yearly") || planLower === "6 months") expiry.setMonth(expiry.getMonth() + 6);
+                                else if (planLower.includes("annual") || planLower.includes("yearly") || planLower === "1 year") expiry.setFullYear(expiry.getFullYear() + 1);
                                 
-                                if (["Monthly", "Quarterly", "Half-Yearly", "Annual"].includes(newPlan)) {
-                                  newExpiry = `${expiry.getFullYear()}-${String(expiry.getMonth() + 1).padStart(2, '0')}-${String(expiry.getDate()).padStart(2, '0')}`;
-                                }
+                                newExpiry = `${expiry.getFullYear()}-${String(expiry.getMonth() + 1).padStart(2, '0')}-${String(expiry.getDate()).padStart(2, '0')}`;
                               }
                             }
                             setEditFormData({...editFormData, membershipPlan: newPlan, ...(newExpiry ? {expiryDate: newExpiry} : {})});
@@ -276,14 +275,13 @@ const MemberManagement = ({ onAddUser }) => {
                               const start = new Date(newStart);
                               if (!isNaN(start.getTime())) {
                                 const expiry = new Date(start);
-                                if (plan === "Monthly") expiry.setMonth(expiry.getMonth() + 1);
-                                else if (plan === "Quarterly") expiry.setMonth(expiry.getMonth() + 3);
-                                else if (plan === "Half-Yearly") expiry.setMonth(expiry.getMonth() + 6);
-                                else if (plan === "Annual") expiry.setFullYear(expiry.getFullYear() + 1);
+                                const planLower = plan.toLowerCase();
+                                if (planLower.includes("monthly") || planLower === "1 month") expiry.setMonth(expiry.getMonth() + 1);
+                                else if (planLower.includes("quarterly") || planLower.includes("quaterly") || planLower === "3 months") expiry.setMonth(expiry.getMonth() + 3);
+                                else if (planLower.includes("half-yearly") || planLower === "6 months") expiry.setMonth(expiry.getMonth() + 6);
+                                else if (planLower.includes("annual") || planLower.includes("yearly") || planLower === "1 year") expiry.setFullYear(expiry.getFullYear() + 1);
                                 
-                                if (["Monthly", "Quarterly", "Half-Yearly", "Annual"].includes(plan)) {
-                                  newExpiry = `${expiry.getFullYear()}-${String(expiry.getMonth() + 1).padStart(2, '0')}-${String(expiry.getDate()).padStart(2, '0')}`;
-                                }
+                                newExpiry = `${expiry.getFullYear()}-${String(expiry.getMonth() + 1).padStart(2, '0')}-${String(expiry.getDate()).padStart(2, '0')}`;
                               }
                             }
                             setEditFormData({...editFormData, startDate: newStart, ...(newExpiry ? {expiryDate: newExpiry} : {})});
