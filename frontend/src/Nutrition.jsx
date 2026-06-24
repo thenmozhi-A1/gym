@@ -151,7 +151,11 @@ const Nutrition = () => {
       handler: function (response) {
         alert(`Payment Successful! ID: ${response.razorpay_payment_id}`);
       },
-      prefill: { name: "User", email: "user@example.com", contact: "9999999999" },
+      prefill: { 
+        name: useAuthStore.getState().user?.fullName || useAuthStore.getState().user?.name || "", 
+        email: useAuthStore.getState().user?.email || "", 
+        contact: useAuthStore.getState().user?.phone || "" 
+      },
       theme: { color: "#ffc107" },
     };
 
@@ -171,11 +175,7 @@ const Nutrition = () => {
       return;
     }
 
-    const address = window.prompt("Enter your shipping address for delivery:");
-    if (!address) {
-      alert("Address is required to place an order.");
-      return;
-    }
+    const address = user?.address || "N/A";
 
     const options = {
       key: "rzp_test_SoL1lxm6LzPqie",
@@ -201,7 +201,11 @@ const Nutrition = () => {
           alert("Payment succeeded but failed to place order: " + (err.response?.data?.message || err.response?.data?.error || err.message));
         }
       },
-      prefill: { name: "User", email: userEmail, contact: "9999999999" },
+      prefill: { 
+        name: user?.fullName || user?.name || "", 
+        email: userEmail, 
+        contact: user?.phone || "" 
+      },
       theme: { color: "#ffc107" },
     };
 
