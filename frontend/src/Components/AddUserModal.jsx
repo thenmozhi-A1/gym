@@ -159,7 +159,11 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         
         if (selectedPlan && selectedPlan.duration) {
           const durationStr = selectedPlan.duration.toLowerCase();
-          if (durationStr.includes("month")) {
+          if (durationStr.includes("quarterly") || durationStr === "3 months") {
+            expiry.setMonth(expiry.getMonth() + 3);
+          } else if (durationStr.includes("half-yearly") || durationStr === "6 months") {
+            expiry.setMonth(expiry.getMonth() + 6);
+          } else if (durationStr.includes("month")) {
             const numMonths = parseInt(durationStr) || 1;
             expiry.setMonth(expiry.getMonth() + numMonths);
           } else if (durationStr.includes("year") || durationStr.includes("annual")) {
