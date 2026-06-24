@@ -216,7 +216,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       }
       
       const options = {
-        key: "rzp_test_Mk659ISVbs7cZv",
+        key: "rzp_test_T5Ns6lwATHKyjp",
         amount: Number(data.paymentAmount) * 100, 
         currency: "INR",
         name: "B&Y Fitness Gym",
@@ -264,7 +264,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     }
     
     const options = {
-      key: "rzp_test_Mk659ISVbs7cZv",
+      key: "rzp_test_T5Ns6lwATHKyjp",
       amount: Number(data.paymentAmount) * 100, 
       currency: "INR",
       name: "B&Y Fitness Gym",

@@ -13,8 +13,8 @@ const Pay = () => {
     }
 
     const options = {
-      key: "rzp_test_Mk659ISVbs7cZv",
-      key_secret: "nrWBx585XROeY6668y4RZExa",
+      key: "rzp_test_T5Ns6lwATHKyjp",
+      key_secret: "q8BGjYdNIVDp9KMhb04DE6VD",
       amount: Number(amount) * 100, 
       currency: "INR",
       name: "Dinesh",

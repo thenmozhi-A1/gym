@@ -92,7 +92,7 @@ const PlanDetail = () => {
     }
 
     const options = {
-      key: "rzp_test_Mk659ISVbs7cZv",
+      key: "rzp_test_T5Ns6lwATHKyjp",
       amount: plan.price * 100,
       currency: "INR",
       name: "GymDash " + plan.title,

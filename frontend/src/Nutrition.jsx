@@ -143,7 +143,7 @@ const Nutrition = () => {
     }
 
     const options = {
-      key: "rzp_test_SoL1lxm6LzPqie",
+      key: "rzp_test_T5Ns6lwATHKyjp",
       amount: amount * 100,
       currency: "INR",
       name: "B&Y Fitness Shop",
@@ -178,7 +178,7 @@ const Nutrition = () => {
     }
 
     const options = {
-      key: "rzp_test_SoL1lxm6LzPqie",
+      key: "rzp_test_T5Ns6lwATHKyjp",
       amount: product.price * quantity * 100,
       currency: "INR",
       name: "B&Y Fitness Shop",
