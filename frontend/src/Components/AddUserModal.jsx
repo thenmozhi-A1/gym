@@ -102,17 +102,17 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         .then(res => setPlans(res.data))
         .catch(err => log.error("Failed to fetch plans", err));
         
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.async = true;
-      script.onload = () => setRazorpayLoaded(true);
-      document.body.appendChild(script);
-      
-      return () => {
-        if (document.body.contains(script)) {
-          document.body.removeChild(script);
-        }
-      };
+      let script = document.getElementById("razorpay-checkout-js");
+      if (!script) {
+        script = document.createElement("script");
+        script.id = "razorpay-checkout-js";
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        script.onload = () => setRazorpayLoaded(true);
+        document.body.appendChild(script);
+      } else {
+        setRazorpayLoaded(true);
+      }
     }
   }, [isOpen]);
 
