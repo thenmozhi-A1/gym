@@ -221,7 +221,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       if (data.phone) prefillData.contact = data.phone;
       
       const options = {
-        key: "rzp_test_T5Ns6lwATHKyjp",
+        key: "rzp_test_T5P2c2t4n8vCwb",
         amount: Math.round(Number(data.paymentAmount) * 100), 
         currency: "INR",
         name: "B&Y Fitness Gym",
@@ -273,7 +273,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
     if (data.phone) prefillData.contact = data.phone;
 
     const options = {
-      key: "rzp_test_T5Ns6lwATHKyjp",
+      key: "rzp_test_T5P2c2t4n8vCwb",
       amount: Math.round(Number(data.paymentAmount) * 100), 
       currency: "INR",
       name: "B&Y Fitness Gym",
