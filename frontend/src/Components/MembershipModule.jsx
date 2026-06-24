@@ -151,15 +151,43 @@ const MembershipModule = ({ onAddUser }) => {
                 if (!b.expiryDate) return -1;
                 return new Date(a.expiryDate) - new Date(b.expiryDate);
               })
-              .map(u => (
+              .map(u => {
+                let daysLeftText = "";
+                let statusColor = "var(--text-muted)";
+                if (u.expiryDate) {
+                  const today = new Date();
+                  today.setHours(0,0,0,0);
+                  const expDate = new Date(u.expiryDate);
+                  expDate.setHours(0,0,0,0);
+                  const diffTime = expDate - today;
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  if (diffDays > 0) {
+                    daysLeftText = `(${diffDays} days left)`;
+                    if (diffDays <= 7) statusColor = "#f59e0b"; // Warning for <= 7 days
+                  } else if (diffDays === 0) {
+                    daysLeftText = `(Expires today)`;
+                    statusColor = "#f59e0b";
+                  } else {
+                    daysLeftText = `(${Math.abs(diffDays)} days ago)`;
+                    statusColor = "#ef4444"; // Danger for already expired
+                  }
+                }
+                return (
                 <tr key={u.id || u.memberId}>
                   <td className="fw-bold">{u.fullName}</td>
                   <td>{u.membershipPlan || "Standard"}</td>
-                  <td className="text-danger fw-bold">{u.expiryDate ? u.expiryDate.split('T')[0] : "N/A"}</td>
+                  <td className="text-danger fw-bold">
+                    {u.expiryDate ? u.expiryDate.split('T')[0] : "N/A"}
+                    {daysLeftText && (
+                      <span style={{ fontSize: '0.8rem', color: statusColor, marginLeft: '8px', fontWeight: 'normal' }}>
+                        {daysLeftText}
+                      </span>
+                    )}
+                  </td>
                   <td className="sub-text">{u.phone || u.mobileNumber || "N/A"}</td>
                   <td><button className="btn-renew">Send Reminder</button></td>
                 </tr>
-              ))}
+              )})}
               {users.length === 0 && (
                 <tr><td colSpan="5" className="text-center py-4 text-muted">No members found with an active plan.</td></tr>
               )}
