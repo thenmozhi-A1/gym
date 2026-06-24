@@ -271,7 +271,10 @@ const Container = styled.div`
     .btn-outline { display: flex; align-items: center; gap: 8px; background: transparent; border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; &:hover { background: rgba(255,255,255,0.05); } }
   }
 
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; 
+    @media (max-width: 992px) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 768px) { grid-template-columns: 1fr; }
+  }
   .kpi-card {
     background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow);
     .kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
@@ -287,7 +290,9 @@ const Container = styled.div`
     .trend.negative { background: rgba(239,68,68,0.1);  color: #ef4444; }
   }
 
-  .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+  .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; 
+    @media (max-width: 992px) { grid-template-columns: 1fr; }
+  }
   .chart-card {
     background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 12px; padding: 24px; box-shadow: var(--shadow);
     .c-header { margin-bottom: 20px; h3 { margin: 0; font-size: 1.05rem; color: var(--text-color); } }

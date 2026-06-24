@@ -184,6 +184,7 @@ const Container = styled.div`
 
   .layout-grid {
     display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px;
+    @media (max-width: 768px) { grid-template-columns: 1fr; }
   }
 
   .plans-library {

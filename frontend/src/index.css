@@ -144,41 +144,20 @@ img, video {
     padding: 12px 10px 30px;
   }
 
-  /* Mobile Responsive Tables (Card Layout) */
-  table, thead, tbody, th, td, tr {
-    display: block !important;
+  /* Ensure form grids stack vertically */
+  .form-grid {
+    grid-template-columns: 1fr !important;
   }
-  
-  thead tr {
-    position: absolute !important;
-    top: -9999px;
-    left: -9999px;
-  }
-  
-  tr {
-    margin-bottom: 15px;
-    border: 1px solid rgba(100, 116, 139, 0.2);
-    border-radius: 12px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.02);
-  }
-  
-  td {
-    border: none !important;
-    border-bottom: 1px solid rgba(100, 116, 139, 0.1) !important;
-    position: relative;
-    padding: 10px 5px !important;
-    text-align: left !important;
-    min-height: 40px;
-    display: flex !important;
-    align-items: center;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  
-  td:last-child {
-    border-bottom: 0 !important;
+
+  /* Table horizontal scrolling instead of card layout */
+  .table-responsive {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #334155);
   }
 }
 

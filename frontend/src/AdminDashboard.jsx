@@ -1627,11 +1627,9 @@ const ContentContainer = styled.div`
   @media (max-width: 768px) { padding: 20px; }
 
   .charts-row {
-    display: flex;
-    gap: 30px;
-    @media (max-width: 1024px) {
-      flex-direction: column;
-    }
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 30px; 
+    @media (max-width: 1024px) { grid-template-columns: 1fr; gap: 15px; }
+    @media (max-width: 768px) { grid-template-columns: 1fr; }
   }
 `;
 
@@ -2031,7 +2029,8 @@ const PayrollContainer = styled.div`
   }
 
   .payroll-sidebar {
-    width: 320px; background: var(--sidebar-bg); border: 1px solid var(--border-color); backdrop-filter: var(--backdrop); border-radius: 24px; padding: 25px;
+    width: 100%; max-width: 350px; background: var(--sidebar-bg); border: 1px solid var(--border-color); backdrop-filter: var(--backdrop); border-radius: 24px; padding: 25px;
+    @media (max-width: 768px) { max-width: 100%; padding: 15px; }
     @media (max-width: 1200px) { width: 100%; }
     h5 { font-weight: 800; margin-bottom: 25px; color: var(--text-color); }
     .task-list {

@@ -183,6 +183,8 @@ const Container = styled.div`
 
   .funnel-metrics {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    @media (max-width: 992px) { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 768px) { grid-template-columns: 1fr; }
     .metric-card {
       background: var(--card-bg, #1e293b); border: 1px solid var(--border-color, #334155); border-radius: 12px; padding: 20px; text-align: center; box-shadow: var(--shadow);
       .label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
