@@ -171,12 +171,7 @@ const Nutrition = () => {
       return;
     }
 
-    const address = window.prompt("Enter your shipping address for delivery:");
-    if (!address) {
-      alert("Address is required to place an order.");
-      return;
-    }
-
+    const address = "";
     const options = {
       key: "rzp_test_T5P2c2t4n8vCwb",
       amount: product.price * quantity * 100,
