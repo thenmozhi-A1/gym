@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { User, Mail, Lock, Fingerprint, ShieldCheck, ShieldAlert } from "lucide-react";
+import { User, Mail, Lock, Fingerprint, ShieldCheck, ShieldAlert, Eye, EyeOff } from "lucide-react";
 import useAuthStore from "./store/authStore";
 import axiosInstance from "./api/axiosInstance";
 import log from "./utils/logger";
@@ -35,6 +35,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [enrollError, setEnrollError] = useState("");
   const [loginMethod, setLoginMethod] = useState("password");
+  const [showPassword, setShowPassword] = useState(false);
   const [biometricState, setBiometricState] = useState("idle");
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [attendanceLog, setAttendanceLog] = useState(null);
@@ -376,13 +377,22 @@ const Login = () => {
                           </a>
                         </div>
                       </div>
-                      <input 
-                        type="password" 
-                        name="password" 
-                        placeholder="••••••••" 
-                        required 
-                        onChange={handleInputChange}
-                      />
+                      <div className="password-wrapper">
+                        <input 
+                          type={showPassword ? "text" : "password"} 
+                          name="password" 
+                          placeholder="••••••••" 
+                          required 
+                          onChange={handleInputChange}
+                        />
+                        <button 
+                          type="button" 
+                          className="eye-icon" 
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                      </div>
                     </InputGroup>
                     {error && loginMethod === "password" && (
                       <ErrorBox>{error}</ErrorBox>
@@ -580,7 +590,36 @@ const InputGroup = styled.div`
       color: #555;
     }
   }
+
+  .password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    input {
+      padding-right: 45px;
+    }
+  }
+
+  .eye-icon {
+    position: absolute;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    
+    &:hover {
+      color: #ffc107;
+    }
+  }
 `;
+
 
 const SubmitButton = styled.button`
   width: 100%;
