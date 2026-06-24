@@ -155,21 +155,34 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       if (!isNaN(start.getTime())) {
         const expiry = new Date(start);
         
-        switch (membershipPlan) {
-          case "Monthly":
+        const selectedPlan = plans.find(p => p.title === membershipPlan);
+        
+        if (selectedPlan && selectedPlan.duration) {
+          const durationStr = selectedPlan.duration.toLowerCase();
+          if (durationStr.includes("month")) {
+            const numMonths = parseInt(durationStr) || 1;
+            expiry.setMonth(expiry.getMonth() + numMonths);
+          } else if (durationStr.includes("year") || durationStr.includes("annual")) {
+            const numYears = parseInt(durationStr) || 1;
+            expiry.setFullYear(expiry.getFullYear() + numYears);
+          } else if (durationStr.includes("week")) {
+            const numWeeks = parseInt(durationStr) || 1;
+            expiry.setDate(expiry.getDate() + (numWeeks * 7));
+          } else if (durationStr.includes("day")) {
+            const numDays = parseInt(durationStr) || 1;
+            expiry.setDate(expiry.getDate() + numDays);
+          }
+        } else {
+          const title = membershipPlan.toLowerCase();
+          if (title.includes("monthly") || title === "1 month") {
             expiry.setMonth(expiry.getMonth() + 1);
-            break;
-          case "Quarterly":
+          } else if (title.includes("quarterly") || title === "3 months") {
             expiry.setMonth(expiry.getMonth() + 3);
-            break;
-          case "Half-Yearly":
+          } else if (title.includes("half-yearly") || title === "6 months") {
             expiry.setMonth(expiry.getMonth() + 6);
-            break;
-          case "Annual":
+          } else if (title.includes("annual") || title.includes("yearly") || title === "1 year") {
             expiry.setFullYear(expiry.getFullYear() + 1);
-            break;
-          default:
-            break;
+          }
         }
         
         const yyyy = expiry.getFullYear();
@@ -180,7 +193,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         setValue("expiryDate", formattedExpiry, { shouldValidate: true });
       }
     }
-  }, [startDate, membershipPlan, setValue]);
+  }, [startDate, membershipPlan, plans, setValue]);
 
 
 
