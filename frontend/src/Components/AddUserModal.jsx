@@ -215,28 +215,32 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         return;
       }
       
+      const prefillData = {};
+      if (data.fullName) prefillData.name = data.fullName;
+      if (data.email) prefillData.email = data.email;
+      if (data.phone) prefillData.contact = data.phone;
+      
       const options = {
         key: "rzp_test_T5Ns6lwATHKyjp",
-        amount: Number(data.paymentAmount) * 100, 
+        amount: Math.round(Number(data.paymentAmount) * 100), 
         currency: "INR",
         name: "B&Y Fitness Gym",
-        description: `Payment for ${data.membershipPlan} Plan`,
+        description: `Payment for ${data.membershipPlan || 'Membership'}`,
         handler: function (response) {
           completeData.transactionRef = response.razorpay_payment_id;
           onAddUser(completeData);
           onClose();
         },
-        prefill: {
-          name: data.fullName,
-          email: data.email,
-          contact: data.phone,
-        },
+        prefill: prefillData,
         theme: {
           color: "#38bdf8",
         },
       };
 
       const paymentObject = new window.Razorpay(options);
+      paymentObject.on('payment.failed', function (response){
+          toast.error("Payment Failed: " + response.error.description);
+      });
       paymentObject.open();
     } else {
       onAddUser(completeData);
@@ -263,27 +267,31 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       return;
     }
     
+    const prefillData = {};
+    if (data.fullName) prefillData.name = data.fullName;
+    if (data.email) prefillData.email = data.email;
+    if (data.phone) prefillData.contact = data.phone;
+
     const options = {
       key: "rzp_test_T5Ns6lwATHKyjp",
-      amount: Number(data.paymentAmount) * 100, 
+      amount: Math.round(Number(data.paymentAmount) * 100), 
       currency: "INR",
       name: "B&Y Fitness Gym",
-      description: `Payment for ${data.membershipPlan} Plan`,
+      description: `Payment for ${data.membershipPlan || 'Membership'}`,
       handler: function (response) {
         setValue("transactionRef", response.razorpay_payment_id, { shouldValidate: true });
         toast.success("Payment successful! You can now complete the registration.");
       },
-      prefill: {
-        name: data.fullName,
-        email: data.email,
-        contact: data.phone,
-      },
+      prefill: prefillData,
       theme: {
         color: "#38bdf8",
       },
     };
 
     const paymentObject = new window.Razorpay(options);
+    paymentObject.on('payment.failed', function (response){
+        toast.error("Payment Failed: " + response.error.description);
+    });
     paymentObject.open();
   };
 
