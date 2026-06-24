@@ -228,6 +228,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         description: `Payment for ${data.membershipPlan || 'Membership'}`,
         handler: function (response) {
           completeData.transactionRef = response.razorpay_payment_id;
+          completeData.paymentMode = "Razorpay - " + data.paymentMode;
           onAddUser(completeData);
           onClose();
         },
@@ -280,6 +281,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       description: `Payment for ${data.membershipPlan || 'Membership'}`,
       handler: function (response) {
         setValue("transactionRef", response.razorpay_payment_id, { shouldValidate: true });
+        setValue("paymentMode", "Razorpay - " + data.paymentMode, { shouldValidate: true });
         toast.success("Payment successful! You can now complete the registration.");
       },
       prefill: prefillData,
