@@ -32,7 +32,7 @@ const MembershipModule = ({ onAddUser }) => {
       };
 
       await emailjs.send(
-        'service_608qbca', // Your Service ID
+        'service_uiq49df', // Your Service ID
         'template_hnfcdo9', // Your Template ID
         templateParams,
         'FgA_6_AkuJW7B2crn' // Your Public Key
