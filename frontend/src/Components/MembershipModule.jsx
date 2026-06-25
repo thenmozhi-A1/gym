@@ -8,6 +8,16 @@ const MembershipModule = ({ onAddUser }) => {
   const { users } = useAdminStore();
   const [plans, setPlans] = useState([]);
   
+  const handleSendReminder = async (user) => {
+    try {
+      await axiosInstance.post(`/users/${user.id || user.memberId}/send-reminder`);
+      alert(`Reminder sent to ${user.fullName}`);
+    } catch (err) {
+      console.error("Failed to send reminder", err);
+      alert("Failed to send reminder");
+    }
+  };
+  
   useEffect(() => {
     fetchPlans();
   }, []);
@@ -185,7 +195,7 @@ const MembershipModule = ({ onAddUser }) => {
                     )}
                   </td>
                   <td className="sub-text">{u.phone || u.mobileNumber || "N/A"}</td>
-                  <td><button className="btn-renew">Send Reminder</button></td>
+                  <td><button className="btn-renew" onClick={() => handleSendReminder(u)}>Send Reminder</button></td>
                 </tr>
               )})}
               {users.length === 0 && (
