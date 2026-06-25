@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { CheckCircle, Clock, AlertTriangle, Shield, Plus, Edit2, Trash2, X } from "lucide-react";
 import axiosInstance from "../api/axiosInstance";
 import { useAdminStore } from "../store/useAdminStore";
+import emailjs from '@emailjs/browser';
 
 const MembershipModule = ({ onAddUser }) => {
   const { users } = useAdminStore();
@@ -10,10 +11,36 @@ const MembershipModule = ({ onAddUser }) => {
   
   const handleSendReminder = async (user) => {
     try {
-      await axiosInstance.post(`/users/${user.id || user.memberId}/send-reminder`);
-      alert(`Reminder sent to ${user.fullName}`);
+      if (!user.email) {
+        alert("This user does not have an email address on file.");
+        return;
+      }
+      
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const expDate = user.expiryDate ? new Date(user.expiryDate) : new Date();
+      expDate.setHours(0,0,0,0);
+      const diffTime = expDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      const templateParams = {
+        to_email: user.email,
+        to_name: user.fullName || "Member",
+        plan_name: user.membershipPlan || "Gym Membership",
+        expiry_date: user.expiryDate ? user.expiryDate.split('T')[0] : "N/A",
+        days_left: diffDays >= 0 ? diffDays : 0,
+      };
+
+      await emailjs.send(
+        'service_608qbca', // Your Service ID
+        'template_hnfcdo9', // Your Template ID
+        templateParams,
+        'FgA_6_AkuJW7B2crn' // Your Public Key
+      );
+
+      alert(`Reminder sent to ${user.fullName} via EmailJS!`);
     } catch (err) {
-      console.error("Failed to send reminder", err);
+      console.error("Failed to send reminder via EmailJS", err);
       alert("Failed to send reminder");
     }
   };
