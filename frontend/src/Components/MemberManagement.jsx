@@ -220,10 +220,12 @@ const MemberManagement = ({ onAddUser }) => {
               Edit User Details <ChevronRight size={16} />
             </button>
           </div>
+        </>
+      )}
 
-          {/* Edit Modal */}
-          {isEditModalOpen && (
-            <div className="modal-overlay" style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+      {/* Edit Modal */}
+      {isEditModalOpen && (
+        <div className="modal-overlay" style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
               <div className="modal-content animate-in" style={{background: 'var(--card-bg, #1e293b)', padding: '24px', borderRadius: '16px', width: '450px', border: '1px solid var(--border-color)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)'}}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
                   <h3 style={{margin: 0, display: 'flex', alignItems: 'center', gap: '8px'}}><User size={20}/> Edit User Details</h3>
@@ -475,8 +477,6 @@ const MemberManagement = ({ onAddUser }) => {
               </div>
             </div>
           )}
-        </>
-      )}
     </Container>
   );
 };
