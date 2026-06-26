@@ -15,7 +15,16 @@ const userSchema = z.object({
     .min(2, "Name must be at least 2 characters")
     .regex(/^[a-zA-Z\s'-]+$/, "Name can only contain letters, spaces, hyphens and apostrophes"),
   gender: z.string().min(1, "Select a gender"),
-  dob: z.string().min(1, "Date of birth is required"),
+  dob: z.string().min(1, "Date of birth is required").refine((val) => {
+    const birthDate = new Date(val);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age > 12;
+  }, { message: "Unrestricted access: User age must be > 12" }),
   age: z.string().optional(),
   phone: z
     .string()
