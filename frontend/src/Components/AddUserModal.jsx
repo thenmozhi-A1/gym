@@ -50,6 +50,7 @@ const userSchema = z.object({
     .min(1, "Payment amount is required")
     .refine((v) => !isNaN(parseFloat(v)), "Must be a valid number"),
   paymentMode: z.string().min(1, "Select payment mode"),
+  cardType: z.string().optional(),
   transactionRef: z.string().optional(),
 });
 
@@ -106,6 +107,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   const membershipPlan = watch("membershipPlan");
   const customDays = watch("customDays");
   const startDate = watch("startDate");
+  const paymentMode = watch("paymentMode");
 
   useEffect(() => {
     if (isOpen) {
@@ -290,6 +292,26 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         },
       };
 
+      let rzpMethod = "";
+      if (data.paymentMode === "UPI") rzpMethod = "upi";
+      else if (data.paymentMode === "Card") rzpMethod = "card";
+      else if (data.paymentMode === "Net Banking") rzpMethod = "netbanking";
+
+      if (rzpMethod) {
+        options.config = {
+          display: {
+            blocks: {
+              custom: {
+                name: `Pay using ${data.paymentMode}`,
+                instruments: [{ method: rzpMethod }]
+              }
+            },
+            sequence: ['block.custom'],
+            preferences: { show_default_blocks: false }
+          }
+        };
+      }
+
       const paymentObject = new window.Razorpay(options);
       paymentObject.on('payment.failed', function (response){
           toast.error("Payment Failed: " + response.error.description);
@@ -341,6 +363,26 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         color: "#38bdf8",
       },
     };
+
+    let rzpMethod = "";
+    if (data.paymentMode === "UPI") rzpMethod = "upi";
+    else if (data.paymentMode === "Card") rzpMethod = "card";
+    else if (data.paymentMode === "Net Banking") rzpMethod = "netbanking";
+
+    if (rzpMethod) {
+      options.config = {
+        display: {
+          blocks: {
+            custom: {
+              name: `Pay using ${data.paymentMode}`,
+              instruments: [{ method: rzpMethod }]
+            }
+          },
+          sequence: ['block.custom'],
+          preferences: { show_default_blocks: false }
+        }
+      };
+    }
 
     const paymentObject = new window.Razorpay(options);
     paymentObject.on('payment.failed', function (response){
@@ -521,6 +563,17 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                 </select>
                 {errors.paymentMode && <p className="error-text">⚠ {errors.paymentMode.message}</p>}
               </div>
+
+              {paymentMode === "Card" && (
+                <div className="form-group">
+                  <label>Card Type</label>
+                  <select {...register("cardType")}>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="Credit Card">Credit Card</option>
+                  </select>
+                </div>
+              )}
+
               <div className="form-group full-width">
                 <label>Transaction Reference Number (If applicable)</label>
                 <input type="text" placeholder="TXN123456789" $hasError={!!errors.transactionRef} {...register("transactionRef")} />
@@ -530,9 +583,10 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               <div className="form-group full-width" style={{ marginTop: '10px' }}>
                 <button 
                   type="button" 
-                  className="btn-primary" 
+                  className={`btn-primary ${paymentMode === "Cash" ? "disabled" : ""}`}
                   onClick={handleManualPay}
-                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                  disabled={paymentMode === "Cash"}
+                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: paymentMode === "Cash" ? 0.5 : 1, cursor: paymentMode === "Cash" ? 'not-allowed' : 'pointer' }}
                 >
                   <CreditCard size={18} /> Pay with Razorpay
                 </button>
