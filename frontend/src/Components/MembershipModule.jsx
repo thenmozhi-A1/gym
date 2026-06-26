@@ -34,10 +34,10 @@ const MembershipModule = ({ onAddUser }) => {
           };
           
           await emailjs.send(
-            'service_aeb4578', // Replace with your actual Service ID
-            'template_6755m3u', // Replace with your actual Template ID
+            'service_uiq49df', // Service ID
+            'template_hnfcdo9', // Template ID
             templateParams,
-            'g3N4_X89yR5w-o0H6' // Replace with your actual Public Key
+            'FgA_6_AkuJW7B2crn' // Public Key
           );
           channels.push("📧 Email");
         } catch (emailErr) {
