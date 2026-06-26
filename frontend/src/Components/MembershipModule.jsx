@@ -1,47 +1,34 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { CheckCircle, Clock, AlertTriangle, Shield, Plus, Edit2, Trash2, X } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, Shield, Plus, Edit2, Trash2, X, Send, Loader } from "lucide-react";
 import axiosInstance from "../api/axiosInstance";
 import { useAdminStore } from "../store/useAdminStore";
-import emailjs from '@emailjs/browser';
 
 const MembershipModule = ({ onAddUser }) => {
   const { users } = useAdminStore();
   const [plans, setPlans] = useState([]);
-  
+  const [sendingReminderId, setSendingReminderId] = useState(null);
+
   const handleSendReminder = async (user) => {
+    if (!user.id) return;
+
+    if (!user.email && !user.phone) {
+      alert("This member has no email or phone number on file.");
+      return;
+    }
+
+    setSendingReminderId(user.id);
     try {
-      if (!user.email) {
-        alert("This user does not have an email address on file.");
-        return;
-      }
-      
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      const expDate = user.expiryDate ? new Date(user.expiryDate) : new Date();
-      expDate.setHours(0,0,0,0);
-      const diffTime = expDate - today;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      const templateParams = {
-        to_email: user.email,
-        to_name: user.fullName || "Member",
-        plan_name: user.membershipPlan || "Gym Membership",
-        expiry_date: user.expiryDate ? user.expiryDate.split('T')[0] : "N/A",
-        days_left: diffDays >= 0 ? diffDays : 0,
-      };
-
-      await emailjs.send(
-        'service_uiq49df', // Your Service ID
-        'template_hnfcdo9', // Your Template ID
-        templateParams,
-        'FgA_6_AkuJW7B2crn' // Your Public Key
-      );
-
-      alert(`Reminder sent to ${user.fullName} via EmailJS!`);
+      const res = await axiosInstance.post(`/users/${user.id}/send-reminder`);
+      const channels = [];
+      if (user.email) channels.push("📧 Email");
+      if (user.phone) channels.push("💬 WhatsApp");
+      alert(`✅ Reminder sent to ${user.fullName} via ${channels.join(" & ")}!`);
     } catch (err) {
-      console.error("Failed to send reminder via EmailJS", err);
-      alert("Failed to send reminder");
+      const errorMsg = err.response?.data?.error || err.message || "Unknown error";
+      alert(`❌ Failed to send reminder: ${errorMsg}`);
+    } finally {
+      setSendingReminderId(null);
     }
   };
   
@@ -222,7 +209,19 @@ const MembershipModule = ({ onAddUser }) => {
                     )}
                   </td>
                   <td className="sub-text">{u.phone || u.mobileNumber || "N/A"}</td>
-                  <td><button className="btn-renew" onClick={() => handleSendReminder(u)}>Send Reminder</button></td>
+                  <td>
+                    <button 
+                      className={`btn-renew ${sendingReminderId === u.id ? 'sending' : ''}`}
+                      onClick={() => handleSendReminder(u)}
+                      disabled={sendingReminderId === u.id}
+                    >
+                      {sendingReminderId === u.id ? (
+                        <><Loader size={12} className="spin" /> Sending...</>
+                      ) : (
+                        <><Send size={12} /> Send Reminder</>
+                      )}
+                    </button>
+                  </td>
                 </tr>
               )})}
               {users.length === 0 && (
@@ -399,8 +398,23 @@ const Container = styled.div`
       th { text-align: left; padding: 12px; font-size: 0.75rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
       td { padding: 12px; font-size: 0.9rem; border-bottom: 1px solid var(--border-color); }
       .text-danger { color: #ef4444; }
-      .btn-renew { background: rgba(56, 189, 248, 0.1); color: var(--accent-color, #38bdf8); border: 1px solid var(--accent-color, #38bdf8); padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+      .btn-renew { 
+        background: rgba(56, 189, 248, 0.1); color: var(--accent-color, #38bdf8); 
+        border: 1px solid var(--accent-color, #38bdf8); padding: 6px 14px; 
+        border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 500;
+        display: inline-flex; align-items: center; gap: 6px;
+        transition: all 0.2s ease;
+        &:hover:not(:disabled) { background: rgba(56, 189, 248, 0.2); transform: translateY(-1px); }
+        &:disabled { opacity: 0.7; cursor: not-allowed; }
+        &.sending { color: #f59e0b; border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+        .spin { animation: spin 1s linear infinite; }
+      }
     }
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 `;
 
