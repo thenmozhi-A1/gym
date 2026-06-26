@@ -20,12 +20,19 @@ const MembershipModule = ({ onAddUser }) => {
     setSendingReminderId(user.id);
     try {
       const res = await axiosInstance.post(`/users/${user.id}/send-reminder`);
+      const { emailSent, whatsappSent, errors } = res.data;
+      
       const channels = [];
-      if (user.email) channels.push("📧 Email");
-      if (user.phone) channels.push("💬 WhatsApp");
-      alert(`✅ Reminder sent to ${user.fullName} via ${channels.join(" & ")}!`);
+      if (emailSent) channels.push("📧 Email");
+      if (whatsappSent) channels.push("💬 WhatsApp");
+      
+      let msg = `✅ Reminder sent to ${user.fullName} via ${channels.join(" & ")}!`;
+      if (errors && errors.length > 0) {
+        msg += `\n\n⚠️ Partial issues:\n${errors.join("\n")}`;
+      }
+      alert(msg);
     } catch (err) {
-      const errorMsg = err.response?.data?.error || err.message || "Unknown error";
+      const errorMsg = err.response?.data?.error || err.response?.data?.errors?.join(", ") || err.message || "Unknown error";
       alert(`❌ Failed to send reminder: ${errorMsg}`);
     } finally {
       setSendingReminderId(null);
