@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { MoreVertical, Trash2, X, User, Heart, CreditCard, Calendar, Activity, ChevronRight, Save } from "lucide-react";
+import { MoreVertical, Trash2, X, User, Heart, CreditCard, Calendar, Activity, ChevronRight, Save, Eye, Edit2 } from "lucide-react";
 import { useAdminStore } from "../store/useAdminStore";
 
 const MemberManagement = ({ onAddUser }) => {
@@ -9,6 +9,13 @@ const MemberManagement = ({ onAddUser }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [openMenuRowId, setOpenMenuRowId] = useState(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = () => setOpenMenuRowId(null);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -71,12 +78,33 @@ const MemberManagement = ({ onAddUser }) => {
                 <td>{getStatusBadge(u.membershipStatus || u.status)}</td>
                 <td>{u.membershipPlan || u.membershipType || "Standard"}</td>
                 <td className="sub-text">{u.mobileNumber || u.phone || "N/A"}</td>
-                <td>
-                  <div className="d-flex gap-2" onClick={e => e.stopPropagation()}>
-                    <button className="btn-icon text-danger" onClick={() => deleteUser(u.id || u.memberId)} title="Delete User">
-                      <Trash2 size={16} />
+                <td style={{ position: 'relative' }}>
+                  <div onClick={e => e.stopPropagation()}>
+                    <button className="btn-icon" onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setOpenMenuRowId(openMenuRowId === (u.id || u.memberId) ? null : (u.id || u.memberId)); 
+                    }}>
+                      <MoreVertical size={16} />
                     </button>
-                    <button className="btn-icon" onClick={(e) => { e.stopPropagation(); setEditFormData(u); setIsEditModalOpen(true); }}><MoreVertical size={16} /></button>
+
+                    {openMenuRowId === (u.id || u.memberId) && (
+                      <div className="action-dropdown" style={{
+                        position: 'absolute', right: '40px', top: '10px',
+                        background: 'var(--card-bg, #1e293b)', border: '1px solid var(--border-color)',
+                        borderRadius: '8px', padding: '4px 0', zIndex: 100, minWidth: '120px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)', overflow: 'hidden'
+                      }}>
+                        <div className="dropdown-item" onClick={() => { setSelectedUser(u); setOpenMenuRowId(null); }}>
+                          <Eye size={14} style={{ marginRight: '8px' }} /> View
+                        </div>
+                        <div className="dropdown-item" onClick={() => { setEditFormData(u); setIsEditModalOpen(true); setOpenMenuRowId(null); }}>
+                          <Edit2 size={14} style={{ marginRight: '8px' }} /> Edit
+                        </div>
+                        <div className="dropdown-item text-danger" onClick={() => { deleteUser(u.id || u.memberId); setOpenMenuRowId(null); }}>
+                          <Trash2 size={14} style={{ marginRight: '8px' }} /> Delete
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -186,8 +214,8 @@ const MemberManagement = ({ onAddUser }) => {
               <div className="line-item"><span>Status</span> <span>{getStatusBadge(selectedUser.membershipStatus || selectedUser.status)}</span></div>
             </div>
 
-            <button className="btn-outline w-100 mt-3" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}} onClick={() => { setEditFormData(selectedUser); setIsEditModalOpen(true); }}>
-              Edit Plan Details <ChevronRight size={16} />
+            <button className="btn-outline w-100 mt-3" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}} onClick={() => { setEditFormData(selectedUser); setIsEditModalOpen(true); setSelectedUser(null); }}>
+              Edit User Details <ChevronRight size={16} />
             </button>
           </div>
 
@@ -196,7 +224,7 @@ const MemberManagement = ({ onAddUser }) => {
             <div className="modal-overlay" style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
               <div className="modal-content animate-in" style={{background: 'var(--card-bg, #1e293b)', padding: '24px', borderRadius: '16px', width: '450px', border: '1px solid var(--border-color)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)'}}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-                  <h3 style={{margin: 0, display: 'flex', alignItems: 'center', gap: '8px'}}><User size={20}/> Edit Plan Details</h3>
+                  <h3 style={{margin: 0, display: 'flex', alignItems: 'center', gap: '8px'}}><User size={20}/> Edit User Details</h3>
                   <button onClick={() => setIsEditModalOpen(false)} style={{background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer'}}><X size={20}/></button>
                 </div>
                 
@@ -225,6 +253,136 @@ const MemberManagement = ({ onAddUser }) => {
 
                     <div style={{display: 'flex', gap: '16px'}}>
                       <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>PHONE NUMBER</label>
+                        <input 
+                          type="tel" 
+                          value={editFormData.phone || editFormData.mobileNumber || ''} 
+                          onChange={e => setEditFormData({...editFormData, phone: e.target.value, mobileNumber: e.target.value})}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        />
+                      </div>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>CITY</label>
+                        <input 
+                          type="text" 
+                          value={editFormData.city || ''} 
+                          onChange={e => setEditFormData({...editFormData, city: e.target.value})}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{display: 'flex', gap: '16px'}}>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>GENDER</label>
+                        <select 
+                          value={editFormData.gender || ''} 
+                          onChange={e => setEditFormData({...editFormData, gender: e.target.value})}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>DATE OF BIRTH</label>
+                        <input 
+                          type="date" 
+                          value={editFormData.dob || ''} 
+                          onChange={e => {
+                            const newDob = e.target.value;
+                            let ageNum = 0;
+                            if (newDob) {
+                              const birthDate = new Date(newDob);
+                              const today = new Date();
+                              ageNum = today.getFullYear() - birthDate.getFullYear();
+                              const m = today.getMonth() - birthDate.getMonth();
+                              if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) ageNum--;
+                            }
+                            setEditFormData({...editFormData, dob: newDob, age: ageNum.toString()});
+                          }}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px', colorScheme: 'dark'}}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{display: 'flex', gap: '16px'}}>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>HEIGHT (cm)</label>
+                        <input 
+                          type="number" 
+                          value={editFormData.height || ''} 
+                          onChange={e => {
+                            const h = e.target.value;
+                            let newBmi = editFormData.bmi;
+                            if (h && editFormData.weight) {
+                              const hM = parseFloat(h) / 100;
+                              const wK = parseFloat(editFormData.weight);
+                              if (hM > 0 && wK > 0) newBmi = (wK / (hM * hM)).toFixed(1).toString();
+                            }
+                            setEditFormData({...editFormData, height: h, bmi: newBmi});
+                          }}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        />
+                      </div>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>WEIGHT (kg)</label>
+                        <input 
+                          type="number" 
+                          value={editFormData.weight || ''} 
+                          onChange={e => {
+                            const w = e.target.value;
+                            let newBmi = editFormData.bmi;
+                            if (editFormData.height && w) {
+                              const hM = parseFloat(editFormData.height) / 100;
+                              const wK = parseFloat(w);
+                              if (hM > 0 && wK > 0) newBmi = (wK / (hM * hM)).toFixed(1).toString();
+                            }
+                            setEditFormData({...editFormData, weight: w, bmi: newBmi});
+                          }}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{display: 'flex', gap: '16px'}}>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>BLOOD GROUP</label>
+                        <select 
+                          value={editFormData.bloodGroup || ''} 
+                          onChange={e => setEditFormData({...editFormData, bloodGroup: e.target.value})}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        >
+                          <option value="">Select</option>
+                          <option value="A+">A+</option>
+                          <option value="A-">A-</option>
+                          <option value="B+">B+</option>
+                          <option value="B-">B-</option>
+                          <option value="O+">O+</option>
+                          <option value="O-">O-</option>
+                          <option value="AB+">AB+</option>
+                          <option value="AB-">AB-</option>
+                        </select>
+                      </div>
+                      <div style={{flex: 1}}>
+                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>FITNESS GOAL</label>
+                        <select 
+                          value={editFormData.fitnessGoal || ''} 
+                          onChange={e => setEditFormData({...editFormData, fitnessGoal: e.target.value})}
+                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
+                        >
+                          <option value="Weight Loss">Weight Loss</option>
+                          <option value="Weight Gain">Weight Gain</option>
+                          <option value="Muscle Building">Muscle Building</option>
+                          <option value="General Fitness">General Fitness</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{display: 'flex', gap: '16px'}}>
+                      <div style={{flex: 1}}>
                         <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>PLAN NAME</label>
                         <input 
                           type="text" 
@@ -247,15 +405,6 @@ const MemberManagement = ({ onAddUser }) => {
                             }
                             setEditFormData({...editFormData, membershipPlan: newPlan, ...(newExpiry ? {expiryDate: newExpiry} : {})});
                           }}
-                          style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
-                        />
-                      </div>
-                      <div style={{flex: 1}}>
-                        <label style={{display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--text-muted)'}}>PHONE NUMBER</label>
-                        <input 
-                          type="tel" 
-                          value={editFormData.phone || editFormData.mobileNumber || ''} 
-                          onChange={e => setEditFormData({...editFormData, phone: e.target.value})}
                           style={{width: '100%', padding: '10px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'white', borderRadius: '8px'}}
                         />
                       </div>
@@ -378,6 +527,19 @@ const Container = styled.div`
     background: none; border: none; padding: 6px; border-radius: 6px; cursor: pointer; color: var(--text-muted); transition: all 0.2s;
     &:hover { background: rgba(255,255,255,0.05); color: var(--text-color); }
     &.text-danger:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+  }
+
+  .dropdown-item {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+    &:hover { background: rgba(255,255,255,0.05); }
+    &.text-danger { color: #ef4444; }
+    &.text-danger:hover { background: rgba(239, 68, 68, 0.1); }
   }
 
   /* Drawer Styles */
