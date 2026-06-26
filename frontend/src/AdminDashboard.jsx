@@ -831,60 +831,6 @@ const AdminDashboard = () => {
                               </div>
                             </TableCard>
 
-                            {selectedStaffForSlip && (
-                              <>
-                                <div className="drawer-overlay" onClick={() => setSelectedStaffForSlip(null)} />
-                                <div className="pay-slip-drawer animate-slide-left">
-                                  <div className="drawer-header"><h3>Employee Pay Slip</h3><button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button></div>
-                                  <div className="slip-profile"><div className="big-avatar">{(selectedStaffForSlip.fullName || selectedStaffForSlip.name || "S").charAt(0)}</div><div className="info"><h4>{selectedStaffForSlip.fullName || selectedStaffForSlip.name || "Staff Member"}</h4><p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000}</p></div></div>
-                                  <div className="slip-summary-cards">
-                                    <div className="s-card green"><label>EARNINGS</label><div className="val">{selectedStaffForSlip.salary}</div></div>
-                                    <div className="s-card red">
-                                      <label>TOTAL DEDUCTIONS</label>
-                                      <div className="val">
-                                        ₹{Math.floor(2450 + (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) + ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0))).toLocaleString()}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="slip-section">
-                                    <h5>EARNINGS BREAKDOWN</h5>
-                                    <div className="line-item"><span>Basic Salary</span> <span>{selectedStaffForSlip.salary}</span></div>
-                                    <div className="line-item"><span>HRA / Incentives</span> <span>₹0.00</span></div>
-                                  </div>
-                                  <div className="slip-section">
-                                    <h5>ATTENDANCE DEDUCTIONS</h5>
-                                    <div className="line-item">
-                                      <span>Leaves ({selectedStaffForSlip.leaves || 0} days)</span>
-                                      <span className="text-danger">-₹{Math.floor((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
-                                    </div>
-                                    <div className="line-item">
-                                      <span>Permissions ({selectedStaffForSlip.permissions || 0} hrs)</span>
-                                      <span className="text-danger">-₹{Math.floor(((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) / 8) * (selectedStaffForSlip.permissions || 0)).toLocaleString()}</span>
-                                    </div>
-                                  </div>
-                                  <div className="slip-section">
-                                    <h5>STATUTORY DEDUCTIONS</h5>
-                                    <div className="line-item"><span>Provident Fund (PF)</span> <span>₹1,800</span></div>
-                                    <div className="line-item"><span>Professional Tax / TDS</span> <span>₹650</span></div>
-                                  </div>
-                                  <div className="slip-total">
-                                    <div className="total-row">
-                                      <span>NET PAYABLE</span>
-                                      <span className="final-val">
-                                        ₹{Math.floor(
-                                          parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) -
-                                          (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) -
-                                          ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0)) -
-                                          2450
-                                        ).toLocaleString()}
-                                      </span>
-                                    </div>
-                                    <p>Payment via Bank Transfer • {selectedHistoricalRun ? selectedHistoricalRun.date : `${lastDayOfMonth} ${currentMonthName} ${currentYear}`}</p>
-                                  </div>
-                                  <button className="download-btn-full">DOWNLOAD SLIP (PDF)</button>
-                                </div>
-                              </>
-                            )}
                           </div>
                         )}
                       </>
@@ -1118,7 +1064,7 @@ const AdminDashboard = () => {
                                     borderRadius: '8px', padding: '4px 0', zIndex: 100, minWidth: '120px',
                                     boxShadow: '0 4px 12px rgba(0,0,0,0.5)', overflow: 'hidden'
                                   }}>
-                                    <div className="dropdown-item" onClick={() => { setSelectedStaffForSlip(s); setOpenMenuStaffId(null); setPayrollTab("overview"); setIsPayrollDetailOpen(true); }}>
+                                    <div className="dropdown-item" onClick={() => { setSelectedStaffForSlip(s); setOpenMenuStaffId(null); }}>
                                       <Eye size={14} style={{ marginRight: '8px' }} /> View
                                     </div>
                                     <div className="dropdown-item" onClick={() => { setEditStaffFormData(s); setIsEditStaffModalOpen(true); setOpenMenuStaffId(null); }}>
@@ -1142,6 +1088,62 @@ const AdminDashboard = () => {
           )}
         </ContentContainer>
       </MainArea>
+
+      {/* ── PAY SLIP / STAFF VIEW DRAWER ── */}
+      {selectedStaffForSlip && (
+        <>
+          <div className="drawer-overlay" onClick={() => setSelectedStaffForSlip(null)} style={{zIndex: 9998}} />
+          <div className="pay-slip-drawer animate-slide-left" style={{zIndex: 9999}}>
+            <div className="drawer-header"><h3>Employee Pay Slip</h3><button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button></div>
+            <div className="slip-profile"><div className="big-avatar">{(selectedStaffForSlip.fullName || selectedStaffForSlip.name || "S").charAt(0)}</div><div className="info"><h4>{selectedStaffForSlip.fullName || selectedStaffForSlip.name || "Staff Member"}</h4><p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000}</p></div></div>
+            <div className="slip-summary-cards">
+              <div className="s-card green"><label>EARNINGS</label><div className="val">{selectedStaffForSlip.salary}</div></div>
+              <div className="s-card red">
+                <label>TOTAL DEDUCTIONS</label>
+                <div className="val">
+                  ₹{Math.floor(2450 + (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) + ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0))).toLocaleString()}
+                </div>
+              </div>
+            </div>
+            <div className="slip-section">
+              <h5>EARNINGS BREAKDOWN</h5>
+              <div className="line-item"><span>Basic Salary</span> <span>{selectedStaffForSlip.salary}</span></div>
+              <div className="line-item"><span>HRA / Incentives</span> <span>₹0.00</span></div>
+            </div>
+            <div className="slip-section">
+              <h5>ATTENDANCE DEDUCTIONS</h5>
+              <div className="line-item">
+                <span>Leaves ({selectedStaffForSlip.leaves || 0} days)</span>
+                <span className="text-danger">-₹{Math.floor((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
+              </div>
+              <div className="line-item">
+                <span>Permissions ({selectedStaffForSlip.permissions || 0} hrs)</span>
+                <span className="text-danger">-₹{Math.floor(((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) / 8) * (selectedStaffForSlip.permissions || 0)).toLocaleString()}</span>
+              </div>
+            </div>
+            <div className="slip-section">
+              <h5>STATUTORY DEDUCTIONS</h5>
+              <div className="line-item"><span>Provident Fund (PF)</span> <span>₹1,800</span></div>
+              <div className="line-item"><span>Professional Tax / TDS</span> <span>₹650</span></div>
+            </div>
+            <div className="slip-total">
+              <div className="total-row">
+                <span>NET PAYABLE</span>
+                <span className="final-val">
+                  ₹{Math.floor(
+                    parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) -
+                    (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) -
+                    ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0)) -
+                    2450
+                  ).toLocaleString()}
+                </span>
+              </div>
+              <p>Payment via Bank Transfer • {selectedHistoricalRun ? selectedHistoricalRun.date : `${lastDayOfMonth} ${currentMonthName} ${currentYear}`}</p>
+            </div>
+            <button className="download-btn-full">DOWNLOAD SLIP (PDF)</button>
+          </div>
+        </>
+      )}
 
       {/* ── ADD STAFF MODAL ── */}
       {isAddStaffModalOpen && (
