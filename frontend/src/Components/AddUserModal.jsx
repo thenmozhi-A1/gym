@@ -32,6 +32,7 @@ const userSchema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   city: z.string().optional(),
+  customDays: z.string().optional(),
 
   height: z.string().optional(),
   weight: z.string().optional(),
@@ -103,6 +104,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   const email = watch("email");
   const fullName = watch("fullName");
   const membershipPlan = watch("membershipPlan");
+  const customDays = watch("customDays");
   const startDate = watch("startDate");
 
   useEffect(() => {
@@ -126,13 +128,20 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
   }, [isOpen]);
 
   useEffect(() => {
-    if (membershipPlan && plans.length > 0) {
+    if (membershipPlan === "Custom" && customDays) {
+      const days = parseInt(customDays, 10);
+      if (!isNaN(days) && days > 0) {
+        setValue("paymentAmount", (days * 50).toString(), { shouldValidate: true });
+      } else {
+        setValue("paymentAmount", "", { shouldValidate: true });
+      }
+    } else if (membershipPlan && plans.length > 0) {
       const selectedPlan = plans.find(p => p.title === membershipPlan);
       if (selectedPlan && selectedPlan.price && selectedPlan.price.toLowerCase() !== "custom") {
         setValue("paymentAmount", selectedPlan.price.toString(), { shouldValidate: true });
       }
     }
-  }, [membershipPlan, plans, setValue]);
+  }, [membershipPlan, customDays, plans, setValue]);
 
   useEffect(() => {
     if (dob) {
@@ -170,7 +179,16 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         const title = membershipPlan.toLowerCase();
         
         // 1. First prioritize keywords in the title (in case they misconfigured the database duration)
-        if (title.includes("quarterly") || title.includes("quaterly") || title === "3 months") {
+        if (title === "custom") {
+          const days = parseInt(customDays, 10);
+          if (!isNaN(days) && days > 0) {
+            expiry.setDate(expiry.getDate() + days);
+            calculated = true;
+          } else {
+            setValue("expiryDate", "", { shouldValidate: true });
+            return;
+          }
+        } else if (title.includes("quarterly") || title.includes("quaterly") || title === "3 months") {
           expiry.setMonth(expiry.getMonth() + 3);
           calculated = true;
         } else if (title.includes("half-yearly") || title.includes("half yearly") || title === "6 months") {
@@ -214,7 +232,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
         setValue("expiryDate", formattedExpiry, { shouldValidate: true });
       }
     }
-  }, [startDate, membershipPlan, plans, setValue]);
+  }, [startDate, membershipPlan, customDays, plans, setValue]);
 
 
 
@@ -451,9 +469,19 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
                       <option value="Annual">Annual</option>
                     </>
                   )}
+                  <option value="Custom">Custom</option>
                 </select>
                 {errors.membershipPlan && <p className="error-text">⚠ {errors.membershipPlan.message}</p>}
               </div>
+              
+              {membershipPlan === "Custom" && (
+                <div className="form-group">
+                  <label>Number of Days</label>
+                  <input type="number" placeholder="Enter days" $hasError={!!errors.customDays} {...register("customDays")} />
+                  {errors.customDays && <p className="error-text">⚠ {errors.customDays.message}</p>}
+                </div>
+              )}
+
               <div className="form-group">
                 <label>Start Date</label>
                 <input type="date" $hasError={!!errors.startDate} {...register("startDate")} />
