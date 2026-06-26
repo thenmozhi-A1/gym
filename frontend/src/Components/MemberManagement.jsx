@@ -122,7 +122,7 @@ const MemberManagement = ({ onAddUser }) => {
       {selectedUser && (
         <>
           <div className="drawer-overlay" onClick={() => setSelectedUser(null)} />
-          <div className="pay-slip-drawer animate-slide-left" style={{ width: '450px' }}>
+          <div className="pay-slip-drawer animate-in">
             <div className="drawer-header">
               <h3>Member Profile</h3>
               <button onClick={() => setSelectedUser(null)}><X size={20} /></button>
@@ -139,8 +139,9 @@ const MemberManagement = ({ onAddUser }) => {
               </div>
             </div>
 
-            <div className="slip-section">
-              <h5><User size={14} className="mr-2" style={{marginRight: '8px'}} /> PERSONAL DETAILS</h5>
+            <div className="profile-grid">
+              <div className="slip-section">
+                <h5><User size={14} className="mr-2" style={{marginRight: '8px'}} /> PERSONAL DETAILS</h5>
               <div className="line-item"><span>Email</span> <span>{selectedUser.email || "N/A"}</span></div>
               <div className="line-item"><span>Mobile</span> <span>{selectedUser.phone || selectedUser.mobileNumber || "N/A"}</span></div>
               <div className="line-item"><span>DOB / Age</span> <span>{selectedUser.dob || "-"} / {selectedUser.age || "-"} yrs</span></div>
@@ -212,6 +213,7 @@ const MemberManagement = ({ onAddUser }) => {
               <h5><Activity size={14} className="mr-2" style={{marginRight: '8px'}} /> RENEWAL DETAILS</h5>
               <div className="line-item"><span>Next Renewal Date</span> <span style={{color: '#f59e0b'}}>{selectedUser.expiryDate || "N/A"}</span></div>
               <div className="line-item"><span>Status</span> <span>{getStatusBadge(selectedUser.membershipStatus || selectedUser.status)}</span></div>
+            </div>
             </div>
 
             <button className="btn-outline w-100 mt-3" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}} onClick={() => { setEditFormData(selectedUser); setIsEditModalOpen(true); setSelectedUser(null); }}>
@@ -544,22 +546,31 @@ const Container = styled.div`
 
   /* Drawer Styles */
   .drawer-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 100;
   }
   .pay-slip-drawer {
-    position: fixed; top: 0; right: 0; bottom: 0; background: var(--card-bg, #1e293b); width: 400px; max-width: 100vw; z-index: 101;
-    box-shadow: -10px 0 30px rgba(0,0,0,0.5); border-left: 1px solid var(--border-color);
-    display: flex; flex-direction: column; overflow-y: auto; padding: 24px; color: var(--text-color);
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--card-bg, #1e293b); width: 90%; max-width: 900px; max-height: 90vh; z-index: 101;
+    border-radius: 16px; border: 1px solid var(--border-color);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; overflow-y: auto; padding: 32px; color: var(--text-color);
     
-    .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; h3 { margin: 0; } button { background: none; border: none; color: inherit; cursor: pointer; } }
-    .slip-profile { display: flex; gap: 16px; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px dashed var(--border-color); }
-    .big-avatar { background: var(--accent-glow); color: var(--accent-color); display: flex; align-items: center; justify-content: center; border-radius: 12px; font-weight: bold; }
-    .info h4 { margin: 0 0 4px 0; font-size: 1.2rem; } .info p { margin: 0; color: var(--text-muted); font-size: 0.85rem; }
+    .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; h3 { margin: 0; } button { background: none; border: none; color: inherit; cursor: pointer; } }
+    .slip-profile { display: flex; gap: 20px; align-items: center; margin-bottom: 30px; }
+    .big-avatar { background: var(--accent-glow); color: var(--accent-color); display: flex; align-items: center; justify-content: center; border-radius: 50%; width: 70px !important; height: 70px !important; font-size: 1.8rem !important; }
+    .info h4 { margin: 0 0 4px 0; font-size: 1.5rem; } .info p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
     
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
     .slip-section {
-      margin-bottom: 24px;
-      h5 { margin: 0 0 16px 0; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 1px; display: flex; align-items: center; }
+      background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0;
+      h5 { margin: 0 0 16px 0; font-size: 0.85rem; color: var(--accent-color); letter-spacing: 1px; display: flex; align-items: center; }
       .line-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem; span:first-child { color: var(--text-muted); } }
+      .line-item:last-child { margin-bottom: 0; }
     }
 
     .btn-outline {
