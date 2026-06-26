@@ -91,7 +91,7 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
       membershipPlan: "Monthly",
       startDate: new Date().toISOString().split('T')[0],
       expiryDate: "",
-      referralSource: "Walk-In",
+      referralSource: "direct",
       paymentAmount: "",
       paymentMode: "Cash",
       transactionRef: "",
@@ -495,11 +495,9 @@ const AddUserModal = ({ isOpen, onClose, onAddUser }) => {
               <div className="form-group">
                 <label>Referral Source</label>
                 <select $hasError={!!errors.referralSource} {...register("referralSource")}>
-                  <option value="Walk-In">Walk-In</option>
-                  <option value="Facebook">Facebook</option>
-                  <option value="Instagram">Instagram</option>
-                  <option value="Google Ads">Google Ads</option>
-                  <option value="Referral">Referral</option>
+                  <option value="direct">direct</option>
+                  <option value="social media">social media</option>
+                  <option value="referral">referral</option>
                 </select>
                 {errors.referralSource && <p className="error-text">⚠ {errors.referralSource.message}</p>}
               </div>
