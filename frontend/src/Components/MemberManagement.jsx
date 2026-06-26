@@ -546,11 +546,11 @@ const Container = styled.div`
 
   /* Drawer Styles */
   .drawer-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 100;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 9998;
   }
   .pay-slip-drawer {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    background: var(--card-bg, #1e293b); width: 90%; max-width: 900px; max-height: 90vh; z-index: 101;
+    background: var(--card-bg, #1e293b); width: 90%; max-width: 900px; max-height: 90vh; z-index: 9999;
     border-radius: 16px; border: 1px solid var(--border-color);
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     display: flex; flex-direction: column; overflow-y: auto; padding: 32px; color: var(--text-color);
