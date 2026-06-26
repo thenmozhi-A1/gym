@@ -15,20 +15,29 @@ export const useAdminStore = create((set, get) => ({
   diets: [],
   isLoading: false,
 
-  fetchData: async (activeTab) => {
+  fetchData: async (activeTab, forceRefresh = false) => {
+    const state = get();
+    
+    // OPTIMIZATION 1: Caching to prevent redundant network requests.
+    // If we already have the data and didn't explicitly request a refresh, skip fetching.
+    if (!forceRefresh) {
+        if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks" || activeTab === "payroll") {
+            if (state.users.length > 0 && state.staffs.length > 0 && state.payments.length > 0) {
+                return; // Data already cached, instant loading!
+            }
+        }
+    }
+
     set({ isLoading: true });
     try {
-
-
       let endpoints = [];
       if (activeTab === "dashboard" || activeTab === "users" || activeTab === "staffs" || activeTab === "feedbacks" || activeTab === "payroll") {
         endpoints = ["users", "payments", "attendance", "consultations", "staffs", "feedbacks", "leaves", "workouts", "diets"];
       } else {
-        // Map UI tabs to actual backend endpoints
         const endpointMap = {
           "trainers": "staffs",
           "memberships": "membership-plans",
-          "requests": "leaves", // Or whatever 'requests' is supposed to map to
+          "requests": "leaves",
           "payments": "payments",
           "attendance": "attendance"
         };
@@ -47,8 +56,19 @@ export const useAdminStore = create((set, get) => ({
         });
         const paymentsData = Array.isArray(results[1]) ? results[1] : [];
         
+        // OPTIMIZATION 2: O(1) Dictionary Lookups instead of O(N*M) nested loops
+        // Pre-group payments by user ID
+        const paymentsByUserId = {};
+        for (const p of paymentsData) {
+            const uid = p.user?.id || p.userId;
+            if (uid) {
+                if (!paymentsByUserId[uid]) paymentsByUserId[uid] = [];
+                paymentsByUserId[uid].push(p);
+            }
+        }
+
         const enhancedUsers = standardUsers.map(user => {
-            const userPayments = paymentsData.filter(p => p.user?.id === user.id || p.userId === user.id);
+            const userPayments = paymentsByUserId[user.id] || [];
             if (userPayments.length > 0) {
                 userPayments.sort((a, b) => new Date(a.paymentDate) - new Date(b.paymentDate));
                 const latestPayment = userPayments[userPayments.length - 1];
@@ -85,10 +105,19 @@ export const useAdminStore = create((set, get) => ({
         
         const allAttendances = Array.isArray(results[2]) ? results[2] : [];
         const rawStaffs = Array.isArray(results[4]) ? results[4] : [];
+        
+        // OPTIMIZATION 3: O(1) Dictionary Lookup for Attendance
+        const attendanceCountByStaffId = {};
+        for (const a of allAttendances) {
+            const sid = a.staff?.id || a.user?.id;
+            if (sid && (a.status === "PRESENT" || a.status === "Present" || !a.status)) {
+                attendanceCountByStaffId[sid] = (attendanceCountByStaffId[sid] || 0) + 1;
+            }
+        }
+
         const daysPassed = new Date().getDate();
         const enhancedStaffs = rawStaffs.map(s => {
-          const staffLogs = allAttendances.filter(a => (a.staff?.id === s.id || a.user?.id === s.id) && (a.status === "PRESENT" || a.status === "Present" || !a.status));
-          const daysWorked = staffLogs.length;
+          const daysWorked = attendanceCountByStaffId[s.id] || 0;
           return { ...s, leaves: Math.max(0, daysPassed - daysWorked) };
         });
 
