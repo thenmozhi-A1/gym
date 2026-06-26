@@ -39,7 +39,9 @@ import {
   CheckSquare,
   Briefcase,
   FileCheck,
-  Package
+  Package,
+  Eye,
+  Edit2
 } from "lucide-react";
 
 import AddUserModal from "./Components/AddUserModal";
@@ -102,6 +104,7 @@ const AdminDashboard = () => {
   const [attendanceType, setAttendanceType] = useState("users"); // "users" or "staff"
   const [isEditStaffModalOpen, setIsEditStaffModalOpen] = useState(false);
   const [editStaffFormData, setEditStaffFormData] = useState({});
+  const [openMenuStaffId, setOpenMenuStaffId] = useState(null);
 
   // Subscribe to real-time admin notifications via SSE
   useAdminNotifications((event) => {
@@ -1105,11 +1108,27 @@ const AdminDashboard = () => {
                             <td className="fw-bold text-secondary">{s.times}</td>
                             <td className="fw-black text-primary">{s.salary}</td>
                             <td>
-                              <div className="d-flex gap-2">
-                                <button className="btn-icon text-danger" onClick={() => handleDeleteStaff(s.id)} title="Remove Staff">
-                                  <Trash2 size={16} />
+                              <div style={{ position: 'relative' }}>
+                                <button className="btn-icon" onClick={(e) => { e.stopPropagation(); setOpenMenuStaffId(openMenuStaffId === s.id ? null : s.id); }}>
+                                  <MoreVertical size={16} />
                                 </button>
-                                <button className="btn-icon" onClick={() => { setEditStaffFormData(s); setIsEditStaffModalOpen(true); }}><MoreVertical size={16} /></button>
+                                {openMenuStaffId === s.id && (
+                                  <div style={{
+                                    position: 'absolute', right: '0', top: '30px', background: 'var(--card-bg, #1e293b)', border: '1px solid var(--border-color)',
+                                    borderRadius: '8px', padding: '4px 0', zIndex: 100, minWidth: '120px',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)', overflow: 'hidden'
+                                  }}>
+                                    <div className="dropdown-item" onClick={() => { setSelectedStaffForSlip(s); setOpenMenuStaffId(null); setPayrollTab("overview"); setIsPayrollDetailOpen(true); }}>
+                                      <Eye size={14} style={{ marginRight: '8px' }} /> View
+                                    </div>
+                                    <div className="dropdown-item" onClick={() => { setEditStaffFormData(s); setIsEditStaffModalOpen(true); setOpenMenuStaffId(null); }}>
+                                      <Edit2 size={14} style={{ marginRight: '8px' }} /> Edit
+                                    </div>
+                                    <div className="dropdown-item text-danger" onClick={() => { handleDeleteStaff(s.id); setOpenMenuStaffId(null); }}>
+                                      <Trash2 size={14} style={{ marginRight: '8px' }} /> Delete
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -2266,6 +2285,18 @@ const TableCard = styled.div`
   .bg-danger-light { background: rgba(220, 38, 38, 0.1); color: #dc2626; } 
   .bg-primary-light { background: var(--accent-glow); color: var(--accent-color); }
   .sync-badge { color: var(--accent-color); font-weight: 900; font-size: 0.7rem; }
+  .dropdown-item {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+    &:hover { background: rgba(255,255,255,0.05); }
+    &.text-danger { color: #ef4444; }
+    &.text-danger:hover { background: rgba(239, 68, 68, 0.1); }
+  }
 `;
 
 const LoaderArea = styled.div` display: flex; align-items: center; justify-content: center; height: 300px; .spinner { width: 40px; height: 40px; border: 4px solid var(--border-color); border-top: 4px solid var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } } `;
