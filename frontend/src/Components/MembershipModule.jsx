@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { CheckCircle, Clock, AlertTriangle, Shield, Plus, Edit2, Trash2, X, Send, Loader } from "lucide-react";
 import axiosInstance from "../api/axiosInstance";
 import { useAdminStore } from "../store/useAdminStore";
+import emailjs from '@emailjs/browser';
 
 const MembershipModule = ({ onAddUser }) => {
   const { users } = useAdminStore();
@@ -19,21 +20,55 @@ const MembershipModule = ({ onAddUser }) => {
 
     setSendingReminderId(user.id);
     try {
-      const res = await axiosInstance.post(`/users/${user.id}/send-reminder`);
-      const { emailSent, whatsappSent, errors } = res.data;
-      
       const channels = [];
-      if (emailSent) channels.push("📧 Email");
-      if (whatsappSent) channels.push("💬 WhatsApp");
+      const errors = [];
       
-      let msg = `✅ Reminder sent to ${user.fullName} via ${channels.join(" & ")}!`;
-      if (errors && errors.length > 0) {
-        msg += `\n\n⚠️ Partial issues:\n${errors.join("\n")}`;
+      // 1. Send Email via EmailJS
+      if (user.email) {
+        try {
+          const templateParams = {
+            to_name: user.fullName || "Member",
+            to_email: user.email,
+            plan_name: user.membershipPlan || "Gym Membership",
+            expiry_date: user.expiryDate ? new Date(user.expiryDate).toLocaleDateString() : "soon"
+          };
+          
+          await emailjs.send(
+            'service_aeb4578', // Replace with your actual Service ID
+            'template_6755m3u', // Replace with your actual Template ID
+            templateParams,
+            'g3N4_X89yR5w-o0H6' // Replace with your actual Public Key
+          );
+          channels.push("📧 Email");
+        } catch (emailErr) {
+          console.error("EmailJS Error:", emailErr);
+          errors.push(`Email failed: ${emailErr.text || "Unknown EmailJS error"}`);
+        }
       }
-      alert(msg);
-    } catch (err) {
-      const errorMsg = err.response?.data?.error || err.response?.data?.errors?.join(", ") || err.message || "Unknown error";
-      alert(`❌ Failed to send reminder: ${errorMsg}`);
+
+      // 2. Send WhatsApp via Backend API
+      if (user.phone) {
+        try {
+          const res = await axiosInstance.post(`/users/${user.id}/send-reminder`);
+          if (res.data.whatsappSent) {
+            channels.push("💬 WhatsApp");
+          }
+        } catch (waErr) {
+          console.error("WhatsApp Error:", waErr);
+          const errMsg = waErr.response?.data?.error || waErr.response?.data?.errors?.join(", ") || waErr.message || "Unknown error";
+          errors.push(`WhatsApp failed: ${errMsg}`);
+        }
+      }
+      
+      if (channels.length > 0) {
+        let msg = `✅ Reminder sent to ${user.fullName} via ${channels.join(" & ")}!`;
+        if (errors.length > 0) {
+          msg += `\n\n⚠️ Partial issues:\n${errors.join("\n")}`;
+        }
+        alert(msg);
+      } else {
+        alert(`❌ Failed to send reminder:\n${errors.join("\n")}`);
+      }
     } finally {
       setSendingReminderId(null);
     }
@@ -42,6 +77,7 @@ const MembershipModule = ({ onAddUser }) => {
   useEffect(() => {
     fetchPlans();
   }, []);
+
 
   const fetchPlans = async () => {
     try {
