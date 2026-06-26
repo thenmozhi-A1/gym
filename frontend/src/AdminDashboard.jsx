@@ -1094,53 +1094,72 @@ const AdminDashboard = () => {
         <>
           <div className="drawer-overlay" onClick={() => setSelectedStaffForSlip(null)} style={{zIndex: 9998}} />
           <div className="pay-slip-drawer animate-slide-left" style={{zIndex: 9999}}>
-            <div className="drawer-header"><h3>Employee Pay Slip</h3><button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button></div>
-            <div className="slip-profile"><div className="big-avatar">{(selectedStaffForSlip.fullName || selectedStaffForSlip.name || "S").charAt(0)}</div><div className="info"><h4>{selectedStaffForSlip.fullName || selectedStaffForSlip.name || "Staff Member"}</h4><p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000}</p></div></div>
-            <div className="slip-summary-cards">
-              <div className="s-card green"><label>EARNINGS</label><div className="val">{selectedStaffForSlip.salary}</div></div>
-              <div className="s-card red">
-                <label>TOTAL DEDUCTIONS</label>
-                <div className="val">
-                  ₹{Math.floor(2450 + (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) + ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0))).toLocaleString()}
+            <div className="drawer-header">
+              <h3>Staff Profile & Pay Slip</h3>
+              <button onClick={() => setSelectedStaffForSlip(null)}><X size={24} /></button>
+            </div>
+            <div className="slip-profile">
+              <div className="big-avatar">{(selectedStaffForSlip.fullName || selectedStaffForSlip.name || "S").charAt(0)}</div>
+              <div className="info">
+                <h4>{selectedStaffForSlip.fullName || selectedStaffForSlip.name || "Staff Member"}</h4>
+                <p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000} • {selectedStaffForSlip.specialty}</p>
+              </div>
+            </div>
+            
+            <div className="profile-grid">
+              <div>
+                <div className="slip-summary-cards">
+                  <div className="s-card green"><label>EARNINGS</label><div className="val">{selectedStaffForSlip.salary}</div></div>
+                  <div className="s-card red">
+                    <label>TOTAL DEDUCTIONS</label>
+                    <div className="val">
+                      ₹{Math.floor(2450 + (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) + ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0))).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="slip-total mt-4">
+                  <div className="total-row">
+                    <span>NET PAYABLE</span>
+                    <span className="final-val">
+                      ₹{Math.floor(
+                        parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) -
+                        (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) -
+                        ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0)) -
+                        2450
+                      ).toLocaleString()}
+                    </span>
+                  </div>
+                  <p>Payment via Bank Transfer • {selectedHistoricalRun ? selectedHistoricalRun.date : `${lastDayOfMonth} ${currentMonthName} ${currentYear}`}</p>
+                  <button className="download-btn-full mt-3">DOWNLOAD SLIP (PDF)</button>
+                </div>
+              </div>
+
+              <div>
+                <div className="slip-section mb-3">
+                  <h5>EARNINGS BREAKDOWN</h5>
+                  <div className="line-item"><span>Basic Salary</span> <span>{selectedStaffForSlip.salary}</span></div>
+                  <div className="line-item"><span>HRA / Incentives</span> <span>₹0.00</span></div>
+                </div>
+                <div className="slip-section mb-3">
+                  <h5>ATTENDANCE DEDUCTIONS</h5>
+                  <div className="line-item">
+                    <span>Leaves ({selectedStaffForSlip.leaves || 0} days)</span>
+                    <span className="text-danger">-₹{Math.floor((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
+                  </div>
+                  <div className="line-item">
+                    <span>Permissions ({selectedStaffForSlip.permissions || 0} hrs)</span>
+                    <span className="text-danger">-₹{Math.floor(((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) / 8) * (selectedStaffForSlip.permissions || 0)).toLocaleString()}</span>
+                  </div>
+                </div>
+                <div className="slip-section">
+                  <h5>STATUTORY DEDUCTIONS</h5>
+                  <div className="line-item"><span>Provident Fund (PF)</span> <span>₹1,800</span></div>
+                  <div className="line-item"><span>Professional Tax / TDS</span> <span>₹650</span></div>
                 </div>
               </div>
             </div>
-            <div className="slip-section">
-              <h5>EARNINGS BREAKDOWN</h5>
-              <div className="line-item"><span>Basic Salary</span> <span>{selectedStaffForSlip.salary}</span></div>
-              <div className="line-item"><span>HRA / Incentives</span> <span>₹0.00</span></div>
-            </div>
-            <div className="slip-section">
-              <h5>ATTENDANCE DEDUCTIONS</h5>
-              <div className="line-item">
-                <span>Leaves ({selectedStaffForSlip.leaves || 0} days)</span>
-                <span className="text-danger">-₹{Math.floor((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
-              </div>
-              <div className="line-item">
-                <span>Permissions ({selectedStaffForSlip.permissions || 0} hrs)</span>
-                <span className="text-danger">-₹{Math.floor(((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) / 8) * (selectedStaffForSlip.permissions || 0)).toLocaleString()}</span>
-              </div>
-            </div>
-            <div className="slip-section">
-              <h5>STATUTORY DEDUCTIONS</h5>
-              <div className="line-item"><span>Provident Fund (PF)</span> <span>₹1,800</span></div>
-              <div className="line-item"><span>Professional Tax / TDS</span> <span>₹650</span></div>
-            </div>
-            <div className="slip-total">
-              <div className="total-row">
-                <span>NET PAYABLE</span>
-                <span className="final-val">
-                  ₹{Math.floor(
-                    parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) -
-                    (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) -
-                    ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0)) -
-                    2450
-                  ).toLocaleString()}
-                </span>
-              </div>
-              <p>Payment via Bank Transfer • {selectedHistoricalRun ? selectedHistoricalRun.date : `${lastDayOfMonth} ${currentMonthName} ${currentYear}`}</p>
-            </div>
-            <button className="download-btn-full">DOWNLOAD SLIP (PDF)</button>
+            
           </div>
         </>
       )}
@@ -2402,55 +2421,54 @@ const ModalContent = styled.div`
       tr { cursor: pointer; transition: all 0.2s; &:hover { background: var(--accent-glow) !important; transform: scale(1.005); } }
     }
 
-    .drawer-overlay { position: fixed; inset: 0; background: rgba(6, 8, 20, 0.6); backdrop-filter: blur(8px); z-index: 1000; animation: fadeIn 0.3s ease; }
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 9998; animation: fadeIn 0.3s ease; }
     .pay-slip-drawer {
-      position: fixed; top: 0; right: 0; height: 100vh; width: 450px; background: var(--sidebar-bg); border-left: 1px solid var(--border-color); z-index: 1100; padding: 40px; box-shadow: var(--shadow);
-      display: flex; flex-direction: column; gap: 30px; color: var(--text-color);
-      @media (max-width: 500px) { width: 100%; }
-      &.animate-slide-left { animation: slideLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-      @keyframes slideLeft { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); height: auto; max-height: 90vh; width: 90%; max-width: 900px; 
+      background: var(--card-bg, #1e293b); border: 1px solid var(--border-color); z-index: 9999; padding: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      border-radius: 16px; display: flex; flex-direction: column; gap: 20px; color: var(--text-color); overflow-y: auto;
+      
+      &.animate-slide-left { animation: fadeIn 0.3s ease; }
+      
       .drawer-header {
-        display: flex; justify-content: space-between; align-items: center;
+        display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;
         h3 { margin: 0; font-weight: 900; letter-spacing: -0.5px; }
-        button { background: var(--card-bg); border: 1px solid var(--border-color); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); &:hover { background: var(--border-color); color: var(--text-color); } }
+        button { background: transparent; border: none; color: var(--text-muted); cursor: pointer; &:hover { color: var(--text-color); } }
       }
 
       .slip-profile {
-        display: flex; align-items: center; gap: 20px; background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px; border-radius: 24px;
-        .big-avatar { width: 64px; height: 64px; background: var(--accent-glow); color: var(--accent-color); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; }
-        h4 { margin: 0; font-weight: 800; font-size: 1.2rem; color: var(--text-color); }
-        p { margin: 5px 0 0; font-size: 0.8rem; color: #64748b; font-weight: 600; }
+        display: flex; align-items: center; gap: 20px; background: transparent; border: none; padding: 0;
+        .big-avatar { width: 70px !important; height: 70px !important; background: var(--accent-glow); color: var(--accent-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem !important; font-weight: 900; }
+        h4 { margin: 0; font-weight: 800; font-size: 1.5rem; color: var(--text-color); }
+        p { margin: 5px 0 0; font-size: 0.9rem; color: #64748b; font-weight: 600; }
       }
 
+      .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+
       .slip-summary-cards {
-        display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+        display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 0;
         .s-card {
-          padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0;
+          padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);
           label { display: block; font-size: 0.65rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 10px; opacity: 0.6; }
           .val { font-size: 1.3rem; font-weight: 900; }
-          &.green { background: #f0fdf4; border-color: #dcfce7; .val { color: #15803d; } }
-          &.red { background: #fef2f2; border-color: #fee2e2; .val { color: #b91c1c; } }
+          &.green { .val { color: #10b981; } }
+          &.red { .val { color: #ef4444; } }
         }
       }
 
       .slip-section {
-        border-bottom: 1px dashed #e2e8f0; padding-bottom: 20px;
-        h5 { font-size: 0.75rem; font-weight: 800; color: #94a3b8; letter-spacing: 1px; margin-bottom: 15px; }
-        .line-item { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; color: #1e293b; margin-bottom: 10px; span:last-child { font-weight: 800; } }
+        background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);
+        h5 { margin: 0 0 16px 0; font-size: 0.85rem; color: var(--accent-color); letter-spacing: 1px; display: flex; align-items: center; }
+        .line-item { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; color: var(--text-color); margin-bottom: 12px; span:first-child { color: var(--text-muted); font-weight: normal; } span:last-child { font-weight: 800; } }
+        .line-item:last-child { margin-bottom: 0; }
       }
 
       .slip-total {
-        margin-top: auto; background: #1e293b; color: #fff; padding: 30px; border-radius: 24px;
-        .total-row {
-          display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
-          span:first-child { font-size: 0.8rem; font-weight: 700; opacity: 0.7; }
-          .final-val { font-size: 1.8rem; font-weight: 900; }
-        }
-        p { margin: 0; font-size: 0.75rem; opacity: 0.6; font-weight: 500; }
+        background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);
+        .total-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 900; margin-bottom: 10px; .final-val { color: #10b981; font-size: 1.5rem; } }
+        p { margin: 0; font-size: 0.8rem; color: var(--text-muted); text-align: center; }
       }
 
-      .download-btn-full { width: 100%; padding: 20px; background: #007bff; color: #fff; border: none; border-radius: 16px; font-weight: 800; box-shadow: 0 10px 20px rgba(0, 123, 255, 0.2); &:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 123, 255, 0.3); } }
+      .download-btn-full { width: 100%; padding: 15px; background: var(--accent-color); color: #000; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 10px 20px rgba(0,0,0,0.2); &:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.3); } }
     }
   }
 `;
