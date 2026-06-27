@@ -2257,10 +2257,10 @@ const PayrollContainer = styled.div`
 
   .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 9998; animation: fadeIn 0.3s ease; }
   .pay-slip-drawer {
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); height: auto; max-height: 90vh; width: 90%; max-width: 900px; 
-    background: var(--card-bg, #1e293b); border: 1px solid var(--border-color); z-index: 9999; padding: 32px; 
-    border-radius: 16px; display: flex; flex-direction: column; overflow-y: auto; color: var(--text-color);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    position: fixed; top: 0; left: 0; transform: none; height: 100vh; max-height: 100vh; width: 100vw; max-width: 100vw; 
+    background: var(--bg-color, #0f172a); border: none; z-index: 9999; padding: 40px; 
+    border-radius: 0; display: flex; flex-direction: column; overflow-y: auto; color: var(--text-color);
+    box-shadow: none;
     
     &.animate-slide-left { animation: fadeIn 0.3s ease; }
     
