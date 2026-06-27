@@ -1100,7 +1100,7 @@ const AdminDashboard = () => {
           <div className="drawer-overlay" onClick={() => setSelectedStaffForSlip(null)} style={{zIndex: 9998}} />
           <div className="pay-slip-drawer animate-slide-left" style={{zIndex: 9999}}>
             <div className="drawer-header">
-              <h3>Staff Profile & Pay Slip</h3>
+              <h3>Staff Profile</h3>
               <button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button>
             </div>
             
@@ -1110,7 +1110,7 @@ const AdminDashboard = () => {
               </div>
               <div className="info">
                 <h4>{selectedStaffForSlip.fullName || selectedStaffForSlip.name || "Staff Member"}</h4>
-                <p>ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000} • {selectedStaffForSlip.specialty}</p>
+                <p>ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000}</p>
                 <div style={{marginTop: '5px'}}>
                   <span className={`badge ${selectedStaffForSlip.role === 'Trainer' ? 'bg-success-light' : 'bg-primary-light'}`}>{selectedStaffForSlip.role}</span>
                 </div>
@@ -1118,56 +1118,49 @@ const AdminDashboard = () => {
             </div>
             
             <div className="profile-grid">
-              <div>
-                <div className="slip-summary-cards">
-                  <div className="s-card green"><label>EARNINGS</label><div className="val">{selectedStaffForSlip.salary}</div></div>
-                  <div className="s-card red">
-                    <label>TOTAL DEDUCTIONS</label>
-                    <div className="val">
-                      ₹{Math.floor(2450 + (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) + ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0))).toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="slip-total mt-4">
-                  <div className="total-row">
-                    <span>NET PAYABLE</span>
-                    <span className="final-val">
-                      ₹{Math.floor(
-                        parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) -
-                        (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) -
-                        ((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 / 8) * (selectedStaffForSlip.permissions || 0)) -
-                        2450
-                      ).toLocaleString()}
-                    </span>
-                  </div>
-                  <p>Payment via Bank Transfer • {selectedHistoricalRun ? selectedHistoricalRun.date : `${lastDayOfMonth} ${currentMonthName} ${currentYear}`}</p>
-                  <button className="download-btn-full mt-3">DOWNLOAD SLIP (PDF)</button>
-                </div>
+              <div className="slip-section">
+                <h5><User size={14} className="mr-2" style={{marginRight: '8px'}} /> STAFF DETAILS</h5>
+                <div className="line-item"><span>Email</span> <span>{selectedStaffForSlip.email || "N/A"}</span></div>
+                <div className="line-item"><span>Phone</span> <span>{selectedStaffForSlip.phone || "N/A"}</span></div>
+                <div className="line-item"><span>Role</span> <span>{selectedStaffForSlip.role || "N/A"}</span></div>
+                <div className="line-item"><span>Specialty</span> <span>{selectedStaffForSlip.specialty || "-"}</span></div>
+                <div className="line-item"><span>Join Date</span> <span>{selectedStaffForSlip.joinDate || "-"}</span></div>
+              </div>
+              
+              <div className="slip-section">
+                <h5><Activity size={14} className="mr-2" style={{marginRight: '8px'}} /> ATTENDANCE & LEAVES</h5>
+                <div className="line-item"><span>Leaves Taken</span> <span>{selectedStaffForSlip.leaves || 0} days</span></div>
+                <div className="line-item"><span>Permissions</span> <span>{selectedStaffForSlip.permissions || 0} hrs</span></div>
+                <div className="line-item"><span>Status</span> <span className="text-success">Active</span></div>
               </div>
 
-              <div>
-                <div className="slip-section mb-3">
-                  <h5><TrendingUp size={14} className="mr-2" style={{marginRight: '8px'}} /> EARNINGS BREAKDOWN</h5>
-                  <div className="line-item"><span>Basic Salary</span> <span>{selectedStaffForSlip.salary}</span></div>
-                  <div className="line-item"><span>HRA / Incentives</span> <span>₹0.00</span></div>
+              <div className="slip-section">
+                <h5><TrendingUp size={14} className="mr-2" style={{marginRight: '8px'}} /> PAYROLL BREAKDOWN</h5>
+                <div className="line-item"><span>Basic Salary</span> <span>₹{parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')).toLocaleString()}</span></div>
+                <div className="line-item"><span>HRA / Incentives</span> <span>₹0</span></div>
+                <div className="line-item">
+                  <span>Leave Deductions</span> 
+                  <span className="text-danger">-₹{Math.floor((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
                 </div>
-                <div className="slip-section mb-3">
-                  <h5><Calendar size={14} className="mr-2" style={{marginRight: '8px'}} /> ATTENDANCE DEDUCTIONS</h5>
-                  <div className="line-item">
-                    <span>Leaves ({selectedStaffForSlip.leaves || 0} days)</span>
-                    <span className="text-danger">-₹{Math.floor((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
-                  </div>
-                  <div className="line-item">
-                    <span>Permissions ({selectedStaffForSlip.permissions || 0} hrs)</span>
-                    <span className="text-danger">-₹{Math.floor(((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) / 8) * (selectedStaffForSlip.permissions || 0)).toLocaleString()}</span>
-                  </div>
+                <div className="line-item">
+                  <span>Other Deductions</span> 
+                  <span className="text-danger">-₹2,450</span>
                 </div>
-                <div className="slip-section">
-                  <h5><FileText size={14} className="mr-2" style={{marginRight: '8px'}} /> STATUTORY DEDUCTIONS</h5>
-                  <div className="line-item"><span>Provident Fund (PF)</span> <span>₹1,800</span></div>
-                  <div className="line-item"><span>Professional Tax / TDS</span> <span>₹650</span></div>
+              </div>
+              
+              <div className="slip-section" style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                <h5><CreditCard size={14} className="mr-2" style={{marginRight: '8px'}} /> NET PAYABLE</h5>
+                <div className="total-row" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0'}}>
+                  <span style={{fontWeight: 700}}>Total Salary</span>
+                  <span className="final-val" style={{color: '#10b981', fontSize: '1.8rem', fontWeight: 900}}>
+                    ₹{Math.floor(
+                      parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) -
+                      (parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30 * (selectedStaffForSlip.leaves || 0)) -
+                      2450
+                    ).toLocaleString()}
+                  </span>
                 </div>
+                <button className="download-btn-full mt-2">DOWNLOAD SLIP (PDF)</button>
               </div>
             </div>
             
