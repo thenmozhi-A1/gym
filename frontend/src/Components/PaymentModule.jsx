@@ -7,25 +7,40 @@ import { useAdminStore } from "../store/useAdminStore";
 const PaymentModule = () => {
   const { payments, staffs } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("CURRENT");
 
-  const filteredPayments = payments.filter(p => 
-    ((p.user?.fullName || p.fullName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    String(p.id || "").toLowerCase().includes(searchTerm.toLowerCase())) &&
-    Number(p.amount) > 0
-  );
-
-  const userFirstPayments = {};
-  payments.forEach(p => {
-    const uid = p.user?.id || p.userId || p.fullName;
-    if (uid) {
-      if (!userFirstPayments[uid] || new Date(p.paymentDate) < new Date(userFirstPayments[uid].paymentDate)) {
-        userFirstPayments[uid] = p;
-      }
-    }
-  });
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
   
-  const originalIncome = Object.values(userFirstPayments).reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
-  const totalIncome = payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0); // Calculate total of all payments
+  const prevMonthDate = new Date(currentYear, currentMonth - 1, 1);
+  const prevMonth = prevMonthDate.getMonth();
+  const prevYear = prevMonthDate.getFullYear();
+
+  const filteredPayments = payments.filter(p => {
+    const matchesSearch = ((p.user?.fullName || p.fullName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(p.id || "").toLowerCase().includes(searchTerm.toLowerCase())) &&
+      Number(p.amount) > 0;
+      
+    if (!matchesSearch) return false;
+    if (selectedMonth === "ALL") return true;
+
+    let pDate;
+    if (Array.isArray(p.paymentDate)) {
+      pDate = new Date(p.paymentDate[0], p.paymentDate[1] - 1, p.paymentDate[2]);
+    } else {
+      pDate = new Date(p.paymentDate);
+    }
+
+    if (selectedMonth === "CURRENT") {
+      return pDate.getMonth() === currentMonth && pDate.getFullYear() === currentYear;
+    } else if (selectedMonth === "PREVIOUS") {
+      return pDate.getMonth() === prevMonth && pDate.getFullYear() === prevYear;
+    }
+    return true;
+  });
+
+  const totalIncome = filteredPayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
   const totalOutcome = staffs.reduce((acc, s) => {
     const salary = parseFloat(s.salary) || 0;
     return acc + salary;
@@ -43,6 +58,15 @@ const PaymentModule = () => {
             <Search size={16} />
             <input type="text" placeholder="Search invoices..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
+          <select 
+            className="month-select" 
+            value={selectedMonth} 
+            onChange={e => setSelectedMonth(e.target.value)}
+          >
+            <option value="ALL">All Time</option>
+            <option value="CURRENT">Current Month</option>
+            <option value="PREVIOUS">Previous Month</option>
+          </select>
           <button
             className="btn-primary"
             onClick={() => filteredPayments.forEach(p => generateInvoicePDF(p))}
@@ -184,6 +208,10 @@ const Container = styled.div`
       display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.1); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px; color: var(--text-muted);
       flex: 1; min-width: 200px;
       input { border: none; background: transparent; outline: none; color: var(--text-color); font-size: 0.9rem; width: 100%; }
+    }
+    .month-select {
+      background: rgba(0,0,0,0.1); border: 1px solid var(--border-color); border-radius: 8px; 
+      padding: 6px 12px; color: var(--text-color); outline: none; font-size: 0.9rem; cursor: pointer;
     }
     .btn-primary { background: var(--accent-color, #38bdf8); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   }
