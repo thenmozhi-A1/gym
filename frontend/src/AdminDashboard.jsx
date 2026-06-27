@@ -1096,9 +1096,8 @@ const AdminDashboard = () => {
 
       {/* ── PAY SLIP / STAFF VIEW DRAWER ── */}
       {selectedStaffForSlip && (
-        <>
-          <div className="drawer-overlay" onClick={() => setSelectedStaffForSlip(null)} style={{zIndex: 9998}} />
-          <div className="pay-slip-drawer animate-in" style={{zIndex: 9999}}>
+        <ModalOverlay onClick={() => setSelectedStaffForSlip(null)} style={{zIndex: 9998}}>
+          <ModalContent className="animate-in" style={{zIndex: 9999, padding: '32px', maxWidth: '900px'}} onClick={e => e.stopPropagation()}>
             <div className="drawer-header">
               <h3>Staff Profile</h3>
               <button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button>
@@ -1164,8 +1163,8 @@ const AdminDashboard = () => {
               </div>
             </div>
             
-          </div>
-        </>
+          </ModalContent>
+        </ModalOverlay>
       )}
 
       {/* ── ADD STAFF MODAL ── */}
