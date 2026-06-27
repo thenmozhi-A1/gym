@@ -1096,13 +1096,19 @@ const AdminDashboard = () => {
           <div className="pay-slip-drawer animate-slide-left" style={{zIndex: 9999}}>
             <div className="drawer-header">
               <h3>Staff Profile & Pay Slip</h3>
-              <button onClick={() => setSelectedStaffForSlip(null)}><X size={24} /></button>
+              <button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button>
             </div>
+            
             <div className="slip-profile">
-              <div className="big-avatar">{(selectedStaffForSlip.fullName || selectedStaffForSlip.name || "S").charAt(0)}</div>
+              <div className="big-avatar" style={{width: '60px', height: '60px', fontSize: '1.5rem'}}>
+                {(selectedStaffForSlip.fullName || selectedStaffForSlip.name || "S").charAt(0)}
+              </div>
               <div className="info">
                 <h4>{selectedStaffForSlip.fullName || selectedStaffForSlip.name || "Staff Member"}</h4>
-                <p>{selectedStaffForSlip.role} • ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000} • {selectedStaffForSlip.specialty}</p>
+                <p>ID: SF-2024-{Math.floor(Math.random() * 9000) + 1000} • {selectedStaffForSlip.specialty}</p>
+                <div style={{marginTop: '5px'}}>
+                  <span className={`badge ${selectedStaffForSlip.role === 'Trainer' ? 'bg-success-light' : 'bg-primary-light'}`}>{selectedStaffForSlip.role}</span>
+                </div>
               </div>
             </div>
             
@@ -1137,12 +1143,12 @@ const AdminDashboard = () => {
 
               <div>
                 <div className="slip-section mb-3">
-                  <h5>EARNINGS BREAKDOWN</h5>
+                  <h5><TrendingUp size={14} className="mr-2" style={{marginRight: '8px'}} /> EARNINGS BREAKDOWN</h5>
                   <div className="line-item"><span>Basic Salary</span> <span>{selectedStaffForSlip.salary}</span></div>
                   <div className="line-item"><span>HRA / Incentives</span> <span>₹0.00</span></div>
                 </div>
                 <div className="slip-section mb-3">
-                  <h5>ATTENDANCE DEDUCTIONS</h5>
+                  <h5><Calendar size={14} className="mr-2" style={{marginRight: '8px'}} /> ATTENDANCE DEDUCTIONS</h5>
                   <div className="line-item">
                     <span>Leaves ({selectedStaffForSlip.leaves || 0} days)</span>
                     <span className="text-danger">-₹{Math.floor((parseInt(String(selectedStaffForSlip.salary || '0').replace(/[^\d]/g, '')) / 30) * (selectedStaffForSlip.leaves || 0)).toLocaleString()}</span>
@@ -1153,7 +1159,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div className="slip-section">
-                  <h5>STATUTORY DEDUCTIONS</h5>
+                  <h5><FileText size={14} className="mr-2" style={{marginRight: '8px'}} /> STATUTORY DEDUCTIONS</h5>
                   <div className="line-item"><span>Provident Fund (PF)</span> <span>₹1,800</span></div>
                   <div className="line-item"><span>Professional Tax / TDS</span> <span>₹650</span></div>
                 </div>
@@ -2247,52 +2253,45 @@ const PayrollContainer = styled.div`
   .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 9998; animation: fadeIn 0.3s ease; }
   .pay-slip-drawer {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); height: auto; max-height: 90vh; width: 90%; max-width: 900px; 
-    background: var(--card-bg, #1e293b); border: 1px solid var(--border-color); z-index: 9999; padding: 40px; 
-    border-radius: 24px; display: flex; flex-direction: column; gap: 24px; color: var(--text-color); overflow-y: auto;
-    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+    background: var(--card-bg, #1e293b); border: 1px solid var(--border-color); z-index: 9999; padding: 32px; 
+    border-radius: 16px; display: flex; flex-direction: column; overflow-y: auto; color: var(--text-color);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     
     &.animate-slide-left { animation: fadeIn 0.3s ease; }
     
-    .drawer-header {
-      display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;
-      h3 { margin: 0; font-weight: 900; letter-spacing: -0.5px; font-size: 1.8rem; }
-      button { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; &:hover { background: var(--border-color); color: var(--text-color); transform: scale(1.1); } }
-    }
+    .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; h3 { margin: 0; font-weight: 700; font-size: 1.5rem; letter-spacing: -0.5px;} button { background: none; border: none; color: inherit; cursor: pointer; transition: all 0.2s; &:hover { color: var(--text-color); transform: scale(1.1); } } }
+    
+    .slip-profile { display: flex; gap: 20px; align-items: center; margin-bottom: 30px; }
+    .big-avatar { background: var(--accent-glow); color: var(--accent-color); display: flex; align-items: center; justify-content: center; border-radius: 50%; width: 70px !important; height: 70px !important; font-size: 1.8rem !important; font-weight: 800; }
+    .info h4 { margin: 0 0 4px 0; font-size: 1.5rem; font-weight: 700; } .info p { margin: 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 500; }
 
-    .slip-profile {
-      display: flex; align-items: center; gap: 25px; background: transparent; border: none; padding: 0;
-      .big-avatar { width: 80px !important; height: 80px !important; background: var(--accent-glow); color: var(--accent-color); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem !important; font-weight: 900; }
-      h4 { margin: 0; font-weight: 800; font-size: 2rem; color: var(--text-color); }
-      p { margin: 5px 0 0; font-size: 1rem; color: #64748b; font-weight: 600; }
-    }
-
-    .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-top: 10px; }
+    .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
 
     .slip-summary-cards {
       display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 0;
       .s-card {
-        padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);
+        padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);
         label { display: block; font-size: 0.75rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px; opacity: 0.6; }
-        .val { font-size: 1.6rem; font-weight: 900; }
+        .val { font-size: 1.5rem; font-weight: 800; }
         &.green { .val { color: #10b981; } }
         &.red { .val { color: #ef4444; } }
       }
     }
 
     .slip-section {
-      background: rgba(0,0,0,0.2); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);
-      h5 { margin: 0 0 16px 0; font-size: 0.9rem; color: var(--accent-color); letter-spacing: 1px; display: flex; align-items: center; }
-      .line-item { display: flex; justify-content: space-between; font-size: 1rem; font-weight: 600; color: var(--text-color); margin-bottom: 12px; span:first-child { color: var(--text-muted); font-weight: normal; } span:last-child { font-weight: 800; } }
+      background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0;
+      h5 { margin: 0 0 16px 0; font-size: 0.85rem; color: var(--accent-color); letter-spacing: 1px; display: flex; align-items: center; font-weight: 700; }
+      .line-item { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; color: var(--text-color); margin-bottom: 12px; span:first-child { color: var(--text-muted); font-weight: normal; } span:last-child { font-weight: 800; } }
       .line-item:last-child { margin-bottom: 0; }
     }
 
     .slip-total {
-      background: rgba(0,0,0,0.2); padding: 24px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);
-      .total-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.3rem; font-weight: 900; margin-bottom: 12px; .final-val { color: #10b981; font-size: 1.6rem; } }
-      p { margin: 0; font-size: 0.9rem; color: var(--text-muted); text-align: center; }
+      background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);
+      .total-row { display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; font-weight: 900; margin-bottom: 12px; .final-val { color: #10b981; font-size: 1.4rem; } }
+      p { margin: 0; font-size: 0.85rem; color: var(--text-muted); text-align: center; }
     }
 
-    .download-btn-full { width: 100%; padding: 16px; background: var(--accent-color); color: #000; border: none; border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 10px 20px rgba(0,0,0,0.2); &:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.3); } }
+    .download-btn-full { width: 100%; padding: 14px; background: var(--accent-color); color: #000; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.2); &:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); } }
   }
 `;
 
