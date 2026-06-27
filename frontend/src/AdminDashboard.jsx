@@ -41,7 +41,8 @@ import {
   FileCheck,
   Package,
   Eye,
-  Edit2
+  Edit2,
+  User
 } from "lucide-react";
 
 import AddUserModal from "./Components/AddUserModal";
