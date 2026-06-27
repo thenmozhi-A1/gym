@@ -108,7 +108,7 @@ const MembershipUserDetails = () => {
                     {u.membershipPlan || u.membershipType || "Standard"}
                   </td>
                   <td className="sub-text">
-                    {u.joiningDate ? u.joiningDate.split('T')[0] : "N/A"}
+                    {u.startDate ? u.startDate.split('T')[0] : "N/A"}
                   </td>
                   <td>
                     <div className="fw-bold" style={{ color: (u.membershipStatus || u.status)?.toLowerCase() === 'expired' ? '#ef4444' : 'inherit' }}>
