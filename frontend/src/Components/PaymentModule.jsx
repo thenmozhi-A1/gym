@@ -7,15 +7,23 @@ import { useAdminStore } from "../store/useAdminStore";
 const PaymentModule = () => {
   const { payments, staffs } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("CURRENT");
-
   const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
   
-  const prevMonthDate = new Date(currentYear, currentMonth - 1, 1);
-  const prevMonth = prevMonthDate.getMonth();
-  const prevYear = prevMonthDate.getFullYear();
+  const generateMonthOptions = () => {
+    const options = [];
+    options.push({ value: "ALL", label: "All Time" });
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
+      const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      options.push({ value, label });
+    }
+    return options;
+  };
+  const monthOptions = generateMonthOptions();
+  
+  const currentMonthValue = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthValue);
 
   const filteredPayments = payments.filter(p => {
     const matchesSearch = ((p.user?.fullName || p.fullName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -32,12 +40,8 @@ const PaymentModule = () => {
       pDate = new Date(p.paymentDate);
     }
 
-    if (selectedMonth === "CURRENT") {
-      return pDate.getMonth() === currentMonth && pDate.getFullYear() === currentYear;
-    } else if (selectedMonth === "PREVIOUS") {
-      return pDate.getMonth() === prevMonth && pDate.getFullYear() === prevYear;
-    }
-    return true;
+    const pMonthValue = `${pDate.getFullYear()}-${String(pDate.getMonth() + 1).padStart(2, '0')}`;
+    return pMonthValue === selectedMonth;
   });
 
   const totalIncome = filteredPayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
@@ -63,9 +67,9 @@ const PaymentModule = () => {
             value={selectedMonth} 
             onChange={e => setSelectedMonth(e.target.value)}
           >
-            <option value="ALL">All Time</option>
-            <option value="CURRENT">Current Month</option>
-            <option value="PREVIOUS">Previous Month</option>
+            {monthOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
           </select>
           <button
             className="btn-primary"
