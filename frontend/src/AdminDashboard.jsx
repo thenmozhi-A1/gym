@@ -1098,7 +1098,7 @@ const AdminDashboard = () => {
       {selectedStaffForSlip && (
         <>
           <div className="drawer-overlay" onClick={() => setSelectedStaffForSlip(null)} style={{zIndex: 9998}} />
-          <div className="pay-slip-drawer animate-slide-left" style={{zIndex: 9999}}>
+          <div className="pay-slip-drawer animate-in" style={{zIndex: 9999}}>
             <div className="drawer-header">
               <h3>Staff Profile</h3>
               <button onClick={() => setSelectedStaffForSlip(null)}><X size={20} /></button>
@@ -2255,7 +2255,7 @@ const PayrollContainer = styled.div`
     border-radius: 16px; display: flex; flex-direction: column; overflow-y: auto; color: var(--text-color);
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     
-    &.animate-slide-left { animation: fadeIn 0.3s ease; }
+    &.animate-in { animation: fadeIn 0.3s ease; }
     
     .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; h3 { margin: 0; font-weight: 700; font-size: 1.5rem; letter-spacing: -0.5px;} button { background: none; border: none; color: inherit; cursor: pointer; transition: all 0.2s; &:hover { color: var(--text-color); transform: scale(1.1); } } }
     
