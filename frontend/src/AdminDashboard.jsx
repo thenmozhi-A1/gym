@@ -47,6 +47,7 @@ import {
 import AddUserModal from "./Components/AddUserModal";
 import MemberManagement from "./Components/MemberManagement";
 import MembershipModule from "./Components/MembershipModule";
+import MembershipUserDetails from "./Components/MembershipUserDetails";
 import PaymentModule from "./Components/PaymentModule";
 import AttendanceModule from "./Components/AttendanceModule";
 import TrainerModule from "./Components/TrainerModule";
@@ -379,6 +380,7 @@ const AdminDashboard = () => {
             { id: "dashboard", icon: <Layout size={18} />, label: "Dashboard" },
             { id: "users", icon: <Users size={18} />, label: "Users" },
             { id: "memberships", icon: <Award size={18} />, label: "Memberships" },
+            { id: "membership_users", icon: <User size={18} />, label: "Membership User Details" },
             { id: "payments", icon: <CreditCard size={18} />, label: "Revenue" },
             { id: "attendance", icon: <Clock size={18} />, label: "Attendance" },
             { id: "staffs", icon: <Layers size={18} />, label: "Staffs" },
@@ -964,6 +966,8 @@ const AdminDashboard = () => {
                 <MemberManagement onAddUser={() => setIsAddUserModalOpen(true)} />
               ) : activeTab === "memberships" ? (
                 <MembershipModule onAddUser={() => setIsAddUserModalOpen(true)} />
+              ) : activeTab === "membership_users" ? (
+                <MembershipUserDetails />
               ) : activeTab === "payments" ? (
                 <PaymentModule />
               ) : activeTab === "attendance" ? (
