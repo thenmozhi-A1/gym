@@ -4,6 +4,7 @@ import styled, { keyframes } from 'styled-components';
 import { Mail, KeyRound, Lock, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
 import axiosInstance from '../api/axiosInstance';
 import PasswordStrength from '../Components/PasswordStrength';
+import emailjs from '@emailjs/browser';
 
 // ── Animations ────────────────────────────────────────────────────────────────
 const fadeIn = keyframes`
@@ -257,6 +258,24 @@ const ForgotPassword = () => {
     setMessage('');
     try {
       const res = await axiosInstance.post('/auth/forgot-password', { email });
+      
+      // CRITICAL SECURITY RISK: The backend is returning the OTP to the frontend
+      // so we can send it via EmailJS. This exposes the OTP to network interception.
+      const receivedOtp = res.data.otp;
+      
+      if (receivedOtp) {
+        const templateParams = {
+          email: email,
+          passcode: receivedOtp
+        };
+        await emailjs.send(
+          'service_uiq49df', 
+          'template_e2pxpww', 
+          templateParams, 
+          'FgA_6_AkuJW7B2crn'
+        );
+      }
+
       setMessage(res.data.message);
       setStep(2);
     } catch (err) {
